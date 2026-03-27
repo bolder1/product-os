@@ -1,0 +1,128 @@
+@import 'tailwindcss';
+
+/* ── Font Imports ── */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+/* ── CSS Custom Properties — Dark Futuristic Theme ── */
+:root {
+  /* Backgrounds — deep space navy */
+  --bg-primary: #060918;
+  --bg-secondary: #0C1024;
+  --bg-tertiary: #121733;
+  --bg-elevated: #181E3A;
+
+  /* Surfaces — glass morphism layers */
+  --surface-default: rgba(255, 255, 255, 0.03);
+  --surface-hover: rgba(255, 255, 255, 0.06);
+  --surface-active: rgba(255, 255, 255, 0.09);
+  --surface-overlay: rgba(6, 9, 24, 0.8);
+
+  /* Borders — subtle glow lines */
+  --border-default: rgba(255, 255, 255, 0.08);
+  --border-hover: rgba(255, 255, 255, 0.12);
+  --border-active: rgba(255, 255, 255, 0.18);
+  --border-focus: rgba(59, 130, 246, 0.5);
+
+  /* Accent colors */
+  --accent-blue: #3B82F6;
+  --accent-violet: #8B5CF6;
+  --accent-cyan: #06B6D4;
+  --accent-emerald: #10B981;
+  --accent-amber: #F59E0B;
+  --accent-rose: #F43F5E;
+  --accent-pink: #EC4899;
+  --accent-indigo: #6366F1;
+
+  /* Text */
+  --text-primary: #F1F5F9;
+  --text-secondary: #94A3B8;
+  --text-tertiary: #64748B;
+  --text-inverse: #0F172A;
+
+  /* Status */
+  --status-success: #10B981;
+  --status-warning: #F59E0B;
+  --status-error: #F43F5E;
+  --status-info: #06B6D4;
+
+  /* Glow effects */
+  --glow-blue: 0 0 20px rgba(59, 130, 246, 0.15);
+  --glow-violet: 0 0 20px rgba(139, 92, 246, 0.15);
+  --glow-cyan: 0 0 20px rgba(6, 182, 212, 0.15);
+  --glow-emerald: 0 0 20px rgba(16, 185, 129, 0.15);
+
+  /* Studio-specific accent colors */
+  --studio-planner: #3B82F6;
+  --studio-templates: #8B5CF6;
+  --studio-canvas: #6366F1;
+  --studio-brand: #EC4899;
+  --studio-components: #F59E0B;
+  --studio-design: #06B6D4;
+  --studio-workflow: #10B981;
+  --studio-pages: #3B82F6;
+  --studio-code: #64748B;
+  --studio-handoff: #94A3B8;
+  --studio-graphics: #EC4899;
+  --studio-analytics: #8B5CF6;
+  --studio-tasks: #F59E0B;
+  --studio-approvals: #10B981;
+  --studio-notifications: #F43F5E;
+  --studio-releases: #06B6D4;
+  --studio-testing: #F59E0B;
+  --studio-control-tower: #3B82F6;
+  --studio-graph-explorer: #6366F1;
+
+  /* Typography */
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+}
+
+/* ── Base Styles ── */
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── Scrollbar Styling ── */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+/* ── Glass Morphism Utility ── */
+.glass {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* ── Selection ── */
+::selection {
+  background: rgba(59, 130, 246, 0.3);
+  color: #F1F5F9;
+}

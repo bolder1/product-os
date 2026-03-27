@@ -1,0 +1,25 @@
+{
+  "name": "product-os",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Product OS — Unified Product Intelligence and Execution System",
+  "engines": {
+    "node": ">=22.0.0",
+    "pnpm": ">=10.0.0"
+  },
+  "packageManager": "pnpm@10.33.0",
+  "scripts": {
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "format": "biome format --write .",
+    "clean": "turbo clean && rm -rf node_modules",
+    "db:migrate": "turbo db:migrate --filter=@product-os/db",
+    "db:push": "turbo db:push --filter=@product-os/db",
+    "db:studio": "turbo db:studio --filter=@product-os/db",
+    "test": "turbo test",
+    "test:e2e": "turbo test:e2e",
+    "typecheck": "turbo typecheck"
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "id": "tpl_saas_starter",
+  "name": "SaaS Starter",
+  "description": "Complete SaaS product scaffold with auth, dashboard, settings, billing pages, user management workflows, and design tokens.",
+  "category": "saas",
+  "tags": ["saas", "dashboard", "auth", "billing", "settings"],
+  "version": "1.0.0",
+  "author": "Product OS",
+  "compatibility": "0.1.0",
+  "variables": [
+    { "key": "productName", "label": "Product Name", "type": "text", "default": "My SaaS App" },
+    { "key": "primaryColor", "label": "Primary Color", "type": "color", "default": "#3B82F6" },
+    { "key": "hasBilling", "label": "Include Billing", "type": "boolean", "default": true }
+  ],
+  "nodes": [
+    { "templateId": "mod_auth", "kind": "module", "label": "Authentication", "data": { "description": "User authentication and session management", "priority": "high" } },
+    { "templateId": "mod_dashboard", "kind": "module", "label": "Dashboard", "data": { "description": "Main user dashboard", "priority": "high" } },
+    { "templateId": "mod_settings", "kind": "module", "label": "Settings", "data": { "description": "User and account settings", "priority": "medium" } },
+    { "templateId": "mod_billing", "kind": "module", "label": "Billing", "data": { "description": "Subscription and payment management", "priority": "medium" } },
+    { "templateId": "feat_login", "kind": "feature", "label": "User Login", "data": { "description": "Email/password and OAuth login", "status": "planned" } },
+    { "templateId": "feat_register", "kind": "feature", "label": "User Registration", "data": { "description": "New user sign-up flow", "status": "planned" } },
+    { "templateId": "feat_dashboard_overview", "kind": "feature", "label": "Dashboard Overview", "data": { "description": "Main metrics and activity summary", "status": "planned" } },
+    { "templateId": "feat_profile", "kind": "feature", "label": "User Profile", "data": { "description": "Edit user profile information", "status": "planned" } },
+    { "templateId": "page_login", "kind": "page", "label": "Login Page", "data": { "publishState": "draft", "seoMetadata": { "title": "Login - {{productName}}" } } },
+    { "templateId": "page_register", "kind": "page", "label": "Register Page", "data": { "publishState": "draft", "seoMetadata": { "title": "Sign Up - {{productName}}" } } },
+    { "templateId": "page_dashboard", "kind": "page", "label": "Dashboard", "data": { "publishState": "draft", "seoMetadata": { "title": "Dashboard - {{productName}}" } } },
+    { "templateId": "page_settings", "kind": "page", "label": "Settings", "data": { "publishState": "draft", "seoMetadata": { "title": "Settings - {{productName}}" } } },
+    { "templateId": "page_billing", "kind": "page", "label": "Billing", "data": { "publishState": "draft", "seoMetadata": { "title": "Billing - {{productName}}" } } },
+    { "templateId": "entity_user", "kind": "entity", "label": "User", "data": { "displayField": "email", "fields": ["name", "email", "avatar", "role", "plan"] } },
+    { "templateId": "wf_auth", "kind": "workflow", "label": "Auth Flow", "data": { "states": ["unauthenticated", "authenticating", "authenticated", "locked"], "transitions": [{ "from": "unauthenticated", "to": "authenticating", "trigger": "login_submit" }, { "from": "authenticating", "to": "authenticated", "trigger": "login_success" }] } },
+    { "templateId": "token_primary", "kind": "token", "label": "Primary Color", "data": { "namespace": "color", "tokenType": "color", "value": "{{primaryColor}}", "semanticAlias": "brand-primary" } }
+  ],
+  "edges": [
+    { "sourceTemplateId": "mod_auth", "targetTemplateId": "feat_login", "kind": "contains" },
+    { "sourceTemplateId": "mod_auth", "targetTemplateId": "feat_register", "kind": "contains" },
+    { "sourceTemplateId": "mod_dashboard", "targetTemplateId": "feat_dashboard_overview", "kind": "contains" },
+    { "sourceTemplateId": "mod_settings", "targetTemplateId": "feat_profile", "kind": "contains" },
+    { "sourceTemplateId": "feat_login", "targetTemplateId": "page_login", "kind": "implements" },
+    { "sourceTemplateId": "feat_register", "targetTemplateId": "page_register", "kind": "implements" },
+    { "sourceTemplateId": "feat_dashboard_overview", "targetTemplateId": "page_dashboard", "kind": "implements" },
+    { "sourceTemplateId": "feat_profile", "targetTemplateId": "page_settings", "kind": "implements" },
+    { "sourceTemplateId": "page_login", "targetTemplateId": "wf_auth", "kind": "references" },
+    { "sourceTemplateId": "wf_auth", "targetTemplateId": "entity_user", "kind": "references" },
+    { "sourceTemplateId": "page_dashboard", "targetTemplateId": "token_primary", "kind": "uses_token" }
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "id": "tpl_landing_page",
+  "name": "Marketing Landing Page",
+  "description": "Marketing site with hero section, features grid, pricing table, testimonials, and call-to-action.",
+  "category": "marketing",
+  "tags": ["landing", "marketing", "website", "conversion", "pricing"],
+  "version": "1.0.0",
+  "author": "Product OS",
+  "compatibility": "0.1.0",
+  "variables": [
+    { "key": "productName", "label": "Product Name", "type": "text", "default": "My Product" },
+    { "key": "tagline", "label": "Tagline", "type": "text", "default": "The future of product development" },
+    { "key": "primaryColor", "label": "Primary Color", "type": "color", "default": "#8B5CF6" },
+    { "key": "hasPricing", "label": "Include Pricing", "type": "boolean", "default": true }
+  ],
+  "nodes": [
+    { "templateId": "mod_marketing", "kind": "module", "label": "Marketing Site", "data": { "description": "Public-facing marketing website", "priority": "high" } },
+    { "templateId": "feat_hero", "kind": "feature", "label": "Hero Section", "data": { "description": "Above-the-fold hero with headline, subhead, and CTA", "status": "planned" } },
+    { "templateId": "feat_features", "kind": "feature", "label": "Features Grid", "data": { "description": "Product features showcase", "status": "planned" } },
+    { "templateId": "feat_pricing", "kind": "feature", "label": "Pricing Table", "data": { "description": "Pricing plans comparison", "status": "planned" } },
+    { "templateId": "feat_testimonials", "kind": "feature", "label": "Testimonials", "data": { "description": "Customer testimonials and social proof", "status": "planned" } },
+    { "templateId": "page_home", "kind": "page", "label": "Home Page", "data": { "publishState": "draft", "seoMetadata": { "title": "{{productName}} — {{tagline}}" } } },
+    { "templateId": "page_pricing", "kind": "page", "label": "Pricing Page", "data": { "publishState": "draft", "seoMetadata": { "title": "Pricing — {{productName}}" } } },
+    { "templateId": "comp_hero", "kind": "component", "label": "Hero Component", "data": { "category": "section", "props": { "headline": "string", "subheadline": "string", "ctaText": "string", "ctaLink": "string" } } },
+    { "templateId": "comp_feature_card", "kind": "component", "label": "Feature Card", "data": { "category": "card", "props": { "icon": "string", "title": "string", "description": "string" } } },
+    { "templateId": "comp_pricing_card", "kind": "component", "label": "Pricing Card", "data": { "category": "card", "props": { "planName": "string", "price": "string", "features": "string[]", "isPopular": "boolean" } } },
+    { "templateId": "token_brand", "kind": "token", "label": "Brand Color", "data": { "namespace": "color", "tokenType": "color", "value": "{{primaryColor}}", "semanticAlias": "brand-primary" } }
+  ],
+  "edges": [
+    { "sourceTemplateId": "mod_marketing", "targetTemplateId": "feat_hero", "kind": "contains" },
+    { "sourceTemplateId": "mod_marketing", "targetTemplateId": "feat_features", "kind": "contains" },
+    { "sourceTemplateId": "mod_marketing", "targetTemplateId": "feat_pricing", "kind": "contains" },
+    { "sourceTemplateId": "mod_marketing", "targetTemplateId": "feat_testimonials", "kind": "contains" },
+    { "sourceTemplateId": "feat_hero", "targetTemplateId": "page_home", "kind": "implements" },
+    { "sourceTemplateId": "feat_pricing", "targetTemplateId": "page_pricing", "kind": "implements" },
+    { "sourceTemplateId": "page_home", "targetTemplateId": "comp_hero", "kind": "uses_component" },
+    { "sourceTemplateId": "page_home", "targetTemplateId": "comp_feature_card", "kind": "uses_component" },
+    { "sourceTemplateId": "page_pricing", "targetTemplateId": "comp_pricing_card", "kind": "uses_component" },
+    { "sourceTemplateId": "comp_hero", "targetTemplateId": "token_brand", "kind": "uses_token" }
+  ]
+}

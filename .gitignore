@@ -1,0 +1,39 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build outputs
+dist/
+.next/
+out/
+.turbo/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker volumes
+docker/data/
+
+# Testing
+coverage/
+playwright-report/
+test-results/
+
+# Misc
+*.log
+*.tsbuildinfo
+
+# Claude Code
+.claude/

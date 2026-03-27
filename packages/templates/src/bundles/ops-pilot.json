@@ -1,0 +1,46 @@
+{
+  "id": "tpl_ops_pilot",
+  "name": "OpsPilot — Internal Operations",
+  "description": "Internal operations SaaS for employee onboarding, access requests, asset provisioning, service requests, and policy acknowledgement.",
+  "category": "internal_ops",
+  "tags": ["ops", "internal", "onboarding", "hr", "service-desk", "approvals"],
+  "version": "1.0.0",
+  "author": "Product OS",
+  "compatibility": "0.1.0",
+  "variables": [
+    { "key": "productName", "label": "Product Name", "type": "text", "default": "OpsPilot" },
+    { "key": "primaryColor", "label": "Primary Color", "type": "color", "default": "#10B981" },
+    { "key": "companyName", "label": "Company Name", "type": "text", "default": "Acme Corp" }
+  ],
+  "nodes": [
+    { "templateId": "mod_onboarding", "kind": "module", "label": "Employee Onboarding", "data": { "description": "New hire onboarding workflow", "priority": "high" } },
+    { "templateId": "mod_access", "kind": "module", "label": "Access Requests", "data": { "description": "System access request and approval", "priority": "high" } },
+    { "templateId": "mod_assets", "kind": "module", "label": "Asset Provisioning", "data": { "description": "Hardware and software asset management", "priority": "medium" } },
+    { "templateId": "mod_service", "kind": "module", "label": "Service Requests", "data": { "description": "Internal IT service desk", "priority": "medium" } },
+    { "templateId": "mod_policy", "kind": "module", "label": "Policy Acknowledgement", "data": { "description": "Company policy distribution and sign-off", "priority": "low" } },
+    { "templateId": "feat_new_hire", "kind": "feature", "label": "New Hire Flow", "data": { "description": "Step-by-step onboarding for new employees", "status": "planned" } },
+    { "templateId": "feat_access_request", "kind": "feature", "label": "Submit Access Request", "data": { "description": "Request access to systems and tools", "status": "planned" } },
+    { "templateId": "feat_ops_dashboard", "kind": "feature", "label": "Ops Dashboard", "data": { "description": "Admin overview of all operational requests", "status": "planned" } },
+    { "templateId": "page_ops_dashboard", "kind": "page", "label": "Operations Dashboard", "data": { "publishState": "draft" } },
+    { "templateId": "page_onboarding", "kind": "page", "label": "Onboarding Portal", "data": { "publishState": "draft" } },
+    { "templateId": "page_access_form", "kind": "page", "label": "Access Request Form", "data": { "publishState": "draft" } },
+    { "templateId": "page_service_desk", "kind": "page", "label": "Service Desk", "data": { "publishState": "draft" } },
+    { "templateId": "entity_employee", "kind": "entity", "label": "Employee", "data": { "displayField": "name", "fields": ["name", "email", "department", "startDate", "manager", "status"] } },
+    { "templateId": "entity_access_request", "kind": "entity", "label": "Access Request", "data": { "displayField": "system", "fields": ["system", "requestedBy", "justification", "status", "approvedBy"] } },
+    { "templateId": "entity_asset", "kind": "entity", "label": "Asset", "data": { "displayField": "name", "fields": ["name", "type", "serialNumber", "assignedTo", "status"] } },
+    { "templateId": "wf_onboarding", "kind": "workflow", "label": "Onboarding Workflow", "data": { "states": ["pending", "documents", "it_setup", "training", "completed"], "transitions": [{ "from": "pending", "to": "documents", "trigger": "start_onboarding" }, { "from": "documents", "to": "it_setup", "trigger": "docs_complete" }, { "from": "it_setup", "to": "training", "trigger": "it_ready" }, { "from": "training", "to": "completed", "trigger": "training_done" }] } },
+    { "templateId": "wf_access_approval", "kind": "workflow", "label": "Access Approval", "data": { "states": ["submitted", "manager_review", "it_review", "approved", "rejected"], "transitions": [{ "from": "submitted", "to": "manager_review", "trigger": "submit" }, { "from": "manager_review", "to": "it_review", "trigger": "manager_approve" }, { "from": "it_review", "to": "approved", "trigger": "it_approve" }] } }
+  ],
+  "edges": [
+    { "sourceTemplateId": "mod_onboarding", "targetTemplateId": "feat_new_hire", "kind": "contains" },
+    { "sourceTemplateId": "mod_access", "targetTemplateId": "feat_access_request", "kind": "contains" },
+    { "sourceTemplateId": "mod_onboarding", "targetTemplateId": "feat_ops_dashboard", "kind": "contains" },
+    { "sourceTemplateId": "feat_new_hire", "targetTemplateId": "page_onboarding", "kind": "implements" },
+    { "sourceTemplateId": "feat_access_request", "targetTemplateId": "page_access_form", "kind": "implements" },
+    { "sourceTemplateId": "feat_ops_dashboard", "targetTemplateId": "page_ops_dashboard", "kind": "implements" },
+    { "sourceTemplateId": "page_onboarding", "targetTemplateId": "wf_onboarding", "kind": "references" },
+    { "sourceTemplateId": "page_access_form", "targetTemplateId": "wf_access_approval", "kind": "references" },
+    { "sourceTemplateId": "wf_onboarding", "targetTemplateId": "entity_employee", "kind": "references" },
+    { "sourceTemplateId": "wf_access_approval", "targetTemplateId": "entity_access_request", "kind": "references" }
+  ]
+}

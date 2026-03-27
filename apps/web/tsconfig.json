@@ -1,0 +1,13 @@
+{
+  "extends": "@product-os/config/tsconfig/nextjs.json",
+  "compilerOptions": {
+    "paths": {
+      "@/*": ["./app/*"],
+      "@/components/*": ["./app/components/*"],
+      "@/lib/*": ["./app/lib/*"],
+      "@/hooks/*": ["./app/hooks/*"]
+    }
+  },
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "exclude": ["node_modules"]
+}
