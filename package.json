@@ -21,5 +21,8 @@
     "test": "turbo test",
     "test:e2e": "turbo test:e2e",
     "typecheck": "turbo typecheck"
+  },
+  "devDependencies": {
+    "turbo": "^2.8.20"
   }
 }
