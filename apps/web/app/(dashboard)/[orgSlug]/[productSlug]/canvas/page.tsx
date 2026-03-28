@@ -1,0 +1,11 @@
+export default function CanvasPage() {
+  return (
+    <div className="flex flex-col items-center justify-center h-full gap-4">
+      <div className="w-12 h-12 rounded-xl bg-[#F59E0B]/10 flex items-center justify-center">
+        <span className="text-[#F59E0B] text-2xl">C</span>
+      </div>
+      <h1 className="text-xl font-semibold text-[#F1F5F9]">Canvas</h1>
+      <p className="text-[#94A3B8] text-sm">Strategic decisions and brainstorming</p>
+    </div>
+  )
+}
