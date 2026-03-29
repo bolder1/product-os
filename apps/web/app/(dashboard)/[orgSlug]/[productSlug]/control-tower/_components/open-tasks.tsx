@@ -1,9 +1,11 @@
 'use client'
 
+import { useMemo } from 'react'
 import { motion } from 'framer-motion'
 import { ListTodo, ArrowRight } from 'lucide-react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
+import { useTaskStore } from '../../../../../lib/task-store'
 
 type Priority = 'critical' | 'high' | 'medium' | 'low'
 type Status = 'todo' | 'in_progress' | 'review'
@@ -27,7 +29,7 @@ const statusLabels: Record<Status, string> = {
   review: 'Review',
 }
 
-const tasks = [
+const fallbackTasks = [
   { title: 'Implement OAuth2 flow', assignee: 'Alice', priority: 'critical' as Priority, status: 'in_progress' as Status, due: 'Mar 30' },
   { title: 'Design onboarding screens', assignee: 'Carol', priority: 'high' as Priority, status: 'todo' as Status, due: 'Apr 1' },
   { title: 'Add rate limiting to API', assignee: 'Dave', priority: 'high' as Priority, status: 'review' as Status, due: 'Mar 29' },
@@ -37,6 +39,25 @@ const tasks = [
 
 export function OpenTasks() {
   const params = useParams()
+  const productSlug = params.productSlug as string
+  const allTasks = useTaskStore((s) => s.tasks)
+  const storeTasks = useMemo(() => allTasks.filter((t) => t.productId === productSlug), [allTasks, productSlug])
+
+  const tasks = useMemo(() => {
+    const open = storeTasks.filter((t) => t.status !== 'done')
+    if (open.length > 0) {
+      return open.slice(0, 5).map((t) => ({
+        title: t.title,
+        assignee: t.assignee.name,
+        priority: t.priority as Priority,
+        status: (t.status === 'in_review' ? 'review' : t.status === 'blocked' ? 'todo' : t.status) as Status,
+        due: new Date(t.dueDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+      }))
+    }
+    return fallbackTasks
+  }, [storeTasks])
+
+  const totalOpen = storeTasks.filter((t) => t.status !== 'done').length || 12
 
   return (
     <motion.div
@@ -52,7 +73,7 @@ export function OpenTasks() {
             Open Tasks
           </span>
           <span className="text-xs bg-[#F59E0B]/10 text-[#F59E0B] px-2 py-0.5 rounded-full font-medium">
-            12
+            {totalOpen}
           </span>
         </div>
       </div>

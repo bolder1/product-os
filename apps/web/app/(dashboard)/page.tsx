@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { motion } from 'framer-motion'
 import {
   Plus,
@@ -34,8 +34,14 @@ import {
 } from 'lucide-react'
 import { useAuth } from '../lib/auth-context'
 import { roleConfigs, type OrgRole } from '../lib/role-config'
+import { useProductStore } from '../lib/product-store'
+import { useActivityStore, type ActivityType } from '../lib/activity-store'
+import { useTaskStore } from '../lib/task-store'
+import { useNotificationStore } from '../lib/notification-store'
+import { useCommandPaletteStore } from '../lib/command-palette-store'
 import RoleTaskSummary from './_components/role-task-summary'
 import StudioShortcuts from './_components/studio-shortcuts'
+import CreateProductModal from './_components/create-product-modal'
 
 /* ── Role icon map ── */
 const roleIconMap: Record<string, React.ElementType> = {
@@ -106,19 +112,7 @@ const roleStats: Record<OrgRole, Array<{ label: string; value: string; icon: Rea
   ],
 }
 
-/* ── Mock data ── */
-const recentProducts: Array<{
-  id: string
-  name: string
-  slug: string
-  orgSlug: string
-  status: 'active' | 'draft'
-  nodeCount: number
-  taskCount: number
-  lastEdited: string
-  icon: string
-  color: string
-}> = []
+// Products are now sourced from useProductStore
 
 const quickLinks = [
   {
@@ -159,13 +153,7 @@ const quickLinks = [
   },
 ]
 
-const recentActivity: Array<{
-  id: string
-  text: string
-  time: string
-  icon: typeof FileText
-  color: string
-}> = []
+// Recent activity is now sourced from useActivityStore
 
 /* ── Animations ── */
 const fadeUp = {
@@ -257,20 +245,56 @@ function EmptyStateIllustration() {
   )
 }
 
+/* ── Activity type icons/colors ── */
+const activityIconMap: Partial<Record<ActivityType, { icon: React.ElementType; color: string }>> = {
+  task_created: { icon: CheckCircle2, color: '#3B82F6' },
+  task_completed: { icon: CheckCircle2, color: '#10B981' },
+  product_created: { icon: Layers, color: '#8B5CF6' },
+  plan_created: { icon: Lightbulb, color: '#8B5CF6' },
+  brand_updated: { icon: Palette, color: '#EC4899' },
+  component_created: { icon: Component, color: '#06B6D4' },
+  page_published: { icon: FileText, color: '#10B981' },
+  release_created: { icon: Rocket, color: '#F59E0B' },
+  ai_skill_used: { icon: Sparkles, color: '#8B5CF6' },
+  comment_added: { icon: FileText, color: '#64748B' },
+  member_joined: { icon: Activity, color: '#3B82F6' },
+}
+
 export default function DashboardHome() {
   const [searchQuery, setSearchQuery] = useState('')
+  const [modalOpen, setModalOpen] = useState(false)
+  const openCommandPalette = useCommandPaletteStore((s) => s.open)
   const { user } = useAuth()
-  const hasProducts = recentProducts.length > 0
+  const orgSlug = user?.orgSlug || 'my-org'
+  const allProducts = useProductStore((s) => s.products)
+  const storeProducts = useMemo(() => allProducts.filter((p) => p.orgSlug === orgSlug), [allProducts, orgSlug])
+  const hasProducts = storeProducts.length > 0
+
+  // Real store data — use stable selectors that return primitives or stable references
+  const allActivities = useActivityStore((s) => s.activities)
+  const recentActivities = allActivities.slice(0, 10)
+  const allTasks = useTaskStore((s) => s.tasks)
+  const unreadCount = useNotificationStore((s) => s.unreadCount)
+  const openTasks = allTasks.filter((t) => t.status !== 'done').length
+  const pendingApprovals = allTasks.filter((t) => t.status === 'in_review').length
 
   const userRole: OrgRole = user?.role ?? 'viewer'
   const rc = roleConfigs[userRole]
   const RoleIcon = roleIconMap[rc.icon] || Eye
-  const stats = user ? roleStats[userRole] : [
+
+  // Override stats with real data when available
+  const baseStats = user ? roleStats[userRole] : [
     { label: 'Active Products', value: '0', icon: Layers, color: '#3B82F6' },
     { label: 'Open Tasks', value: '0', icon: CheckCircle2, color: '#10B981' },
     { label: 'Pending Approvals', value: '0', icon: AlertTriangle, color: '#F59E0B' },
     { label: 'AI Actions Today', value: '0', icon: Sparkles, color: '#8B5CF6' },
   ]
+  const stats = baseStats.map((s) => {
+    if (s.label === 'Active Products' && storeProducts.length > 0) return { ...s, value: String(storeProducts.length) }
+    if (s.label === 'Open Tasks' && openTasks > 0) return { ...s, value: String(openTasks) }
+    if (s.label === 'Pending Approvals' && pendingApprovals > 0) return { ...s, value: String(pendingApprovals) }
+    return s
+  })
 
   const visibleCategories = user ? roleCategoryAccess[userRole] : ['plan', 'build', 'ship', 'operate']
   const filteredQuickLinks = quickLinks.filter((l) => visibleCategories.includes(l.key))
@@ -305,15 +329,21 @@ export default function DashboardHome() {
                 placeholder="Search products, studios, templates..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-4 py-2 text-sm bg-white/[0.03] border border-white/[0.08] rounded-lg text-[#F1F5F9] placeholder:text-[#64748B] focus:border-[#3B82F6]/40 focus:outline-none focus:ring-1 focus:ring-[#3B82F6]/20 transition"
+                onFocus={(e) => { e.target.blur(); openCommandPalette(); }}
+                className="w-full pl-9 pr-4 py-2 text-sm bg-white/[0.03] border border-white/[0.08] rounded-lg text-[#F1F5F9] placeholder:text-[#64748B] focus:border-[#3B82F6]/40 focus:outline-none focus:ring-1 focus:ring-[#3B82F6]/20 transition cursor-pointer"
               />
             </div>
           </div>
 
           {/* Actions */}
           <div className="flex items-center gap-2">
-            <button className="p-2 rounded-lg text-[#64748B] hover:text-[#94A3B8] hover:bg-white/[0.04] transition">
+            <button className="p-2 rounded-lg text-[#64748B] hover:text-[#94A3B8] hover:bg-white/[0.04] transition relative">
               <Bell className="w-4 h-4" />
+              {unreadCount > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-[#F43F5E] text-white text-[9px] font-bold flex items-center justify-center">
+                  {unreadCount > 9 ? '9+' : unreadCount}
+                </span>
+              )}
             </button>
             <button className="p-2 rounded-lg text-[#64748B] hover:text-[#94A3B8] hover:bg-white/[0.04] transition">
               <Settings className="w-4 h-4" />
@@ -371,7 +401,10 @@ export default function DashboardHome() {
                 Admin Panel
               </a>
             )}
-            <button className="flex items-center gap-2 px-4 py-2.5 bg-[#3B82F6] hover:bg-[#3B82F6]/90 text-white text-sm font-medium rounded-lg transition-all hover:shadow-[0_0_20px_rgba(59,130,246,0.3)]">
+            <button
+              onClick={() => setModalOpen(true)}
+              className="flex items-center gap-2 px-4 py-2.5 bg-[#3B82F6] hover:bg-[#3B82F6]/90 text-white text-sm font-medium rounded-lg transition-all hover:shadow-[0_0_20px_rgba(59,130,246,0.3)]"
+            >
               <Plus className="w-4 h-4" />
               New Product
             </button>
@@ -429,10 +462,10 @@ export default function DashboardHome() {
 
           {hasProducts ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {recentProducts.map((product) => (
+              {storeProducts.map((product) => (
                 <a
                   key={product.id}
-                  href={`/${product.orgSlug}/${product.slug}/control-tower`}
+                  href={`/${product.orgSlug}/${product.slug}/planner`}
                   className="group p-5 rounded-xl border border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.04] hover:border-white/[0.12] transition-all"
                 >
                   <div className="flex items-start justify-between mb-3">
@@ -451,19 +484,21 @@ export default function DashboardHome() {
                     </span>
                   </div>
                   <h3 className="font-medium text-[#F1F5F9] group-hover:text-white transition">{product.name}</h3>
-                  <div className="flex items-center gap-3 mt-2 text-xs text-[#64748B]">
-                    <span className="flex items-center gap-1"><GitBranch className="w-3 h-3" />{product.nodeCount} nodes</span>
-                    <span className="flex items-center gap-1"><CheckCircle2 className="w-3 h-3" />{product.taskCount} tasks</span>
-                  </div>
+                  {product.description && (
+                    <p className="text-xs text-[#64748B] mt-1 line-clamp-2">{product.description}</p>
+                  )}
                   <div className="flex items-center gap-1 mt-3 text-xs text-[#4A5568]">
                     <Clock className="w-3 h-3" />
-                    {product.lastEdited}
+                    {new Date(product.createdAt).toLocaleDateString()}
                   </div>
                 </a>
               ))}
 
               {/* New product card */}
-              <button className="p-5 rounded-xl border border-dashed border-white/[0.08] bg-transparent hover:bg-white/[0.02] hover:border-white/[0.15] transition-all flex flex-col items-center justify-center gap-2 min-h-[160px]">
+              <button
+                onClick={() => setModalOpen(true)}
+                className="p-5 rounded-xl border border-dashed border-white/[0.08] bg-transparent hover:bg-white/[0.02] hover:border-white/[0.15] transition-all flex flex-col items-center justify-center gap-2 min-h-[160px]"
+              >
                 <div className="w-10 h-10 rounded-lg bg-white/[0.04] border border-white/[0.08] flex items-center justify-center">
                   <Plus className="w-5 h-5 text-[#64748B]" />
                 </div>
@@ -484,7 +519,10 @@ export default function DashboardHome() {
                 <p className="text-sm text-[#64748B] text-center max-w-sm">
                   Create your first product to start building with the unified product graph.
                 </p>
-                <button className="mt-2 flex items-center gap-2 px-5 py-2.5 bg-[#3B82F6] hover:bg-[#3B82F6]/90 text-white text-sm font-medium rounded-lg transition-all hover:shadow-[0_0_20px_rgba(59,130,246,0.3)]">
+                <button
+                  onClick={() => setModalOpen(true)}
+                  className="mt-2 flex items-center gap-2 px-5 py-2.5 bg-[#3B82F6] hover:bg-[#3B82F6]/90 text-white text-sm font-medium rounded-lg transition-all hover:shadow-[0_0_20px_rgba(59,130,246,0.3)]"
+                >
                   <Plus className="w-4 h-4" />
                   Create Product
                 </button>
@@ -561,18 +599,28 @@ export default function DashboardHome() {
                 <h2 className="text-xs font-medium text-[#64748B] uppercase tracking-wider">Recent Activity</h2>
                 <Clock className="w-3.5 h-3.5 text-[#4A5568]" />
               </div>
-              {recentActivity.length > 0 ? (
+              {recentActivities.length > 0 ? (
                 <div className="flex flex-col gap-3">
-                  {recentActivity.map((item) => {
-                    const Icon = item.icon
+                  {recentActivities.map((item) => {
+                    const meta = activityIconMap[item.type] || { icon: Activity, color: '#64748B' }
+                    const Icon = meta.icon
+                    const timeAgo = (() => {
+                      const diff = Date.now() - new Date(item.timestamp).getTime()
+                      const mins = Math.floor(diff / 60000)
+                      if (mins < 1) return 'Just now'
+                      if (mins < 60) return `${mins}m ago`
+                      const hrs = Math.floor(mins / 60)
+                      if (hrs < 24) return `${hrs}h ago`
+                      return `${Math.floor(hrs / 24)}d ago`
+                    })()
                     return (
                       <div key={item.id} className="flex items-start gap-3">
-                        <div className="w-7 h-7 rounded-md flex items-center justify-center flex-shrink-0" style={{ backgroundColor: `${item.color}10` }}>
-                          <Icon className="w-3.5 h-3.5" style={{ color: item.color }} />
+                        <div className="w-7 h-7 rounded-md flex items-center justify-center flex-shrink-0" style={{ backgroundColor: `${meta.color}10` }}>
+                          <Icon className="w-3.5 h-3.5" style={{ color: meta.color }} />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm text-[#94A3B8] truncate">{item.text}</p>
-                          <p className="text-xs text-[#4A5568] mt-0.5">{item.time}</p>
+                          <p className="text-sm text-[#94A3B8] truncate">{item.title}</p>
+                          <p className="text-xs text-[#4A5568] mt-0.5">{timeAgo}</p>
                         </div>
                       </div>
                     )
@@ -627,6 +675,9 @@ export default function DashboardHome() {
           </div>
         </motion.section>
       </motion.main>
+
+      {/* Create Product Modal */}
+      <CreateProductModal open={modalOpen} onClose={() => setModalOpen(false)} />
     </div>
   )
 }

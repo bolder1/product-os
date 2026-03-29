@@ -14,6 +14,8 @@ import {
   User,
 } from 'lucide-react'
 import { type PanelTask, panelTasks } from './tasks-panel-data'
+import { useTaskStore, type Task } from '../../lib/task-store'
+import { useParams } from 'next/navigation'
 
 type FilterTab = 'all' | 'mine' | 'overdue' | 'by_studio'
 type StatusGroup = 'in_progress' | 'todo' | 'in_review'
@@ -56,9 +58,34 @@ const CURRENT_USER = 'Alice Chen'
 export function TasksPanel() {
   const [isOpen, setIsOpen] = useState(false)
   const [activeFilter, setActiveFilter] = useState<FilterTab>('all')
-  const [tasks, setTasks] = useState<PanelTask[]>(panelTasks)
   const [expandedTaskId, setExpandedTaskId] = useState<string | null>(null)
   const [mounted, setMounted] = useState(false)
+
+  const params = useParams()
+  const productId = params?.orgSlug && params?.productSlug
+    ? `${params.orgSlug}-${params.productSlug}`
+    : null
+  const { tasks: storeTasks, moveTask } = useTaskStore()
+
+  // Merge store tasks with fallback mock tasks
+  const tasks: PanelTask[] = useMemo(() => {
+    const realTasks: PanelTask[] = storeTasks
+      .filter((t) => !productId || t.productId === productId)
+      .map((t) => ({
+        id: t.id,
+        title: t.title,
+        status: t.status === 'blocked' ? 'todo' as const : t.status,
+        priority: t.priority,
+        assignee: { name: t.assignee.name, initials: t.assignee.initials },
+        dueDate: t.dueDate,
+        studio: t.studio,
+        feature: t.feature,
+        description: t.description,
+        role: t.role,
+      }))
+    // Show store tasks if available, otherwise fall back to mock data
+    return realTasks.length > 0 ? realTasks : panelTasks
+  }, [storeTasks, productId])
 
   // Hydrate from localStorage after mount
   useEffect(() => {
@@ -111,9 +138,8 @@ export function TasksPanel() {
   }, [filteredTasks])
 
   const markDone = (id: string) => {
-    setTasks((prev) =>
-      prev.map((t) => (t.id === id ? { ...t, status: 'done' as const } : t))
-    )
+    // Try store first, then fall back to local state
+    moveTask(id, 'done')
     if (expandedTaskId === id) setExpandedTaskId(null)
   }
 

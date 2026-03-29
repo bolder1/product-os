@@ -27,7 +27,7 @@ export const roleConfigs: Record<OrgRole, RoleConfig> = {
       'planner', 'templates', 'canvas',
       'brand', 'components', 'design', 'workflow', 'pages', 'graphics',
       'code', 'handoff', 'releases', 'testing',
-      'tasks', 'approvals', 'notifications', 'analytics',
+      'tasks', 'approvals', 'decisions', 'notifications', 'analytics',
       'control-tower', 'graph-explorer',
       'admin',
     ],
@@ -38,7 +38,7 @@ export const roleConfigs: Record<OrgRole, RoleConfig> = {
     description: 'Oversee planning, templates, tasks, approvals, and releases',
     icon: 'Briefcase',
     color: '#3B82F6',
-    studios: ['planner', 'templates', 'control-tower', 'tasks', 'approvals', 'analytics', 'releases'],
+    studios: ['planner', 'templates', 'control-tower', 'tasks', 'approvals', 'decisions', 'analytics', 'releases'],
     dashboardWidgets: ['overview', 'analytics', 'tasks', 'approvals', 'releases'],
   },
   business_analyst: {
@@ -46,7 +46,7 @@ export const roleConfigs: Record<OrgRole, RoleConfig> = {
     description: 'Analyze requirements, build canvases, and review templates',
     icon: 'BarChart3',
     color: '#8B5CF6',
-    studios: ['planner', 'templates', 'canvas', 'analytics', 'tasks', 'approvals'],
+    studios: ['planner', 'templates', 'canvas', 'analytics', 'tasks', 'approvals', 'decisions'],
     dashboardWidgets: ['overview', 'analytics', 'tasks', 'approvals'],
   },
   qa: {

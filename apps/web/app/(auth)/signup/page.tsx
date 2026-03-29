@@ -43,15 +43,19 @@ export default function SignupPage() {
     ev.preventDefault()
     if (!validate()) return
     setIsSubmitting(true)
+    setErrors((p) => { const n = { ...p }; delete n.form; return n })
     try {
       await signup(name, email, password)
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Signup failed. Please try again.'
+      setErrors((p) => ({ ...p, form: message }))
     } finally {
       setIsSubmitting(false)
     }
   }
 
   function clearError(key: string) {
-    setErrors((p) => { const n = { ...p }; delete n[key]; return n })
+    setErrors((p) => { const n = { ...p }; delete n[key]; delete n.form; return n })
   }
 
   const inputClass = (field: string) =>
@@ -87,6 +91,17 @@ export default function SignupPage() {
           <h1 className="text-2xl font-semibold text-[#F1F5F9]">Create your account</h1>
           <p className="text-sm text-[#94A3B8]">Get started with Product OS</p>
         </div>
+
+        {/* Form-level error */}
+        {errors.form && (
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/20"
+          >
+            <p className="text-sm text-red-400">{errors.form}</p>
+          </motion.div>
+        )}
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">

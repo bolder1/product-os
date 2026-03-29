@@ -1,11 +1,13 @@
 'use client'
 
 import { useState, useMemo, useCallback } from 'react'
+import { useParams } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { Bell, CheckCheck } from 'lucide-react'
 import { type Notification, mockNotifications } from './_data/mock-notifications'
 import { NotificationItem } from './_components/notification-item'
 import { NotificationFilters, type FilterKey } from './_components/notification-filters'
+import { useNotificationStore } from '../../../../lib/notification-store'
 
 function getDateGroup(ts: string): string {
   const date = new Date(ts)
@@ -22,7 +24,42 @@ function getDateGroup(ts: string): string {
 const groupOrder = ['Today', 'Yesterday', 'This Week', 'Earlier']
 
 export default function NotificationsPage() {
-  const [notifications, setNotifications] = useState<Notification[]>(mockNotifications)
+  const params = useParams<{ productSlug: string }>()
+  const allNotifs = useNotificationStore((s) => s.notifications)
+  const storeNotifs = useMemo(() => allNotifs.filter((n) => n.productId === params.productSlug), [allNotifs, params.productSlug])
+  const storeMarkRead = useNotificationStore((s) => s.markRead)
+  const storeMarkAllRead = useNotificationStore((s) => s.markAllRead)
+  const storeDelete = useNotificationStore((s) => s.deleteNotification)
+
+  // Convert store notifications to the local Notification format
+  const storeAsLocal: Notification[] = useMemo(
+    () =>
+      storeNotifs.map((n) => ({
+        id: n.id,
+        type: (n.type === 'task_assigned' || n.type === 'task_completed'
+          ? 'task'
+          : n.type === 'approval_requested' || n.type === 'approval_decided'
+          ? 'approval'
+          : n.type === 'mention'
+          ? 'mention'
+          : n.type === 'comment_added'
+          ? 'comment'
+          : 'system') as Notification['type'],
+        actor: { name: 'System', avatar: 'SY' },
+        action: '',
+        target: n.title,
+        timestamp: n.createdAt,
+        read: n.read,
+        message: n.message ?? '',
+      })),
+    [storeNotifs]
+  )
+
+  // Merge: store notifications first, then mock fallback
+  const [notifications, setNotifications] = useState<Notification[]>(() => {
+    if (storeAsLocal.length > 0) return [...storeAsLocal, ...mockNotifications]
+    return mockNotifications
+  })
   const [activeFilter, setActiveFilter] = useState<FilterKey>('all')
 
   const counts = useMemo(() => {
@@ -57,18 +94,21 @@ export default function NotificationsPage() {
   }, [filtered])
 
   const handleMarkRead = useCallback((id: string) => {
+    storeMarkRead(id) // sync to store (no-op if it's a mock notification)
     setNotifications((prev) =>
       prev.map((n) => (n.id === id ? { ...n, read: true } : n))
     )
-  }, [])
+  }, [storeMarkRead])
 
   const handleDismiss = useCallback((id: string) => {
+    storeDelete(id) // sync to store
     setNotifications((prev) => prev.filter((n) => n.id !== id))
-  }, [])
+  }, [storeDelete])
 
   const handleMarkAllRead = useCallback(() => {
+    storeMarkAllRead() // sync to store
     setNotifications((prev) => prev.map((n) => ({ ...n, read: true })))
-  }, [])
+  }, [storeMarkAllRead])
 
   const unreadCount = counts.unread
 

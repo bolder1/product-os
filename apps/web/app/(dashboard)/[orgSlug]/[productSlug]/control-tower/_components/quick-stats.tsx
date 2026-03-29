@@ -1,33 +1,42 @@
 'use client'
 
+import { useMemo } from 'react'
 import { motion } from 'framer-motion'
-import { Boxes, ListTodo, ShieldCheck, TrendingUp, TrendingDown } from 'lucide-react'
+import { Boxes, ListTodo, ShieldCheck, TrendingUp, TrendingDown, AlertTriangle } from 'lucide-react'
+import { useParams } from 'next/navigation'
+import { useGraphStore } from '../../../../../lib/graph-store'
+import { useTaskStore } from '../../../../../lib/task-store'
+import { useValidation } from '../../../../../lib/validation-engine'
 
-const stats = [
-  {
-    label: 'Total Nodes',
-    value: 47,
-    trend: +5,
-    icon: Boxes,
-    color: '#3B82F6',
-  },
-  {
-    label: 'Open Tasks',
-    value: 12,
-    trend: -2,
-    icon: ListTodo,
-    color: '#F59E0B',
-  },
-  {
-    label: 'Pending Approvals',
-    value: 3,
-    trend: +1,
-    icon: ShieldCheck,
-    color: '#8B5CF6',
-  },
-]
+function useLiveStats() {
+  const params = useParams()
+  const productId = params?.orgSlug && params?.productSlug
+    ? `${params.orgSlug}-${params.productSlug}`
+    : ''
+
+  const graphNodes = useGraphStore((s) => s.nodes).filter((n) => n.productId === productId)
+  const allTasks = useTaskStore((s) => s.tasks).filter((t) => t.productId === productId)
+  const openTasks = allTasks.filter((t) => t.status !== 'done')
+  const inReview = allTasks.filter((t) => t.status === 'in_review')
+  const { warningCount } = useValidation(productId)
+
+  const hasRealData = graphNodes.length > 0 || allTasks.length > 0
+
+  return hasRealData
+    ? [
+        { label: 'Graph Nodes', value: graphNodes.length, trend: graphNodes.length > 0 ? +graphNodes.length : 0, icon: Boxes, color: '#3B82F6' },
+        { label: 'Open Tasks', value: openTasks.length, trend: openTasks.length > 0 ? -openTasks.length : 0, icon: ListTodo, color: '#F59E0B' },
+        { label: 'Pending Reviews', value: inReview.length, trend: inReview.length, icon: ShieldCheck, color: '#8B5CF6' },
+      ]
+    : [
+        { label: 'Total Nodes', value: 47, trend: +5, icon: Boxes, color: '#3B82F6' },
+        { label: 'Open Tasks', value: 12, trend: -2, icon: ListTodo, color: '#F59E0B' },
+        { label: 'Pending Approvals', value: 3, trend: +1, icon: ShieldCheck, color: '#8B5CF6' },
+      ]
+}
 
 export function QuickStats() {
+  const stats = useLiveStats()
   return (
     <div className="grid grid-cols-3 gap-4 h-full">
       {stats.map((stat, i) => {

@@ -1,7 +1,10 @@
 'use client'
 
+import { useMemo } from 'react'
+import { useParams } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { Clock } from 'lucide-react'
+import { useActivityStore } from '../../../../../lib/activity-store'
 
 const studioBadgeColors: Record<string, string> = {
   Features: '#8B5CF6',
@@ -12,9 +15,18 @@ const studioBadgeColors: Record<string, string> = {
   Tasks: '#F59E0B',
   AI: '#8B5CF6',
   Releases: '#F43F5E',
+  planner: '#8B5CF6',
+  brand: '#EC4899',
+  components: '#06B6D4',
+  design: '#3B82F6',
+  workflow: '#F59E0B',
+  pages: '#06B6D4',
+  tasks: '#F59E0B',
+  approvals: '#10B981',
+  templates: '#8B5CF6',
 }
 
-const activities = [
+const fallbackActivities = [
   { actor: 'Alice', action: 'created Feature: User Auth', time: '2m ago', studio: 'Features' },
   { actor: 'Bob', action: 'approved Component: Button', time: '8m ago', studio: 'Components' },
   { actor: 'AI', action: 'suggested 3 improvements for Dashboard Page', time: '15m ago', studio: 'AI' },
@@ -23,9 +35,17 @@ const activities = [
   { actor: 'Eve', action: 'published Page: Landing Page v2', time: '1h ago', studio: 'Pages' },
   { actor: 'Frank', action: 'added 12 test cases for Auth module', time: '1.5h ago', studio: 'Testing' },
   { actor: 'Alice', action: 'tagged Release: v0.3.0-beta', time: '2h ago', studio: 'Releases' },
-  { actor: 'Bob', action: 'linked Feature: Notifications to Page: Settings', time: '3h ago', studio: 'Features' },
-  { actor: 'AI', action: 'generated API schema for Payments module', time: '4h ago', studio: 'AI' },
 ]
+
+function timeAgo(dateStr: string): string {
+  const seconds = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000)
+  if (seconds < 60) return 'just now'
+  const minutes = Math.floor(seconds / 60)
+  if (minutes < 60) return `${minutes}m ago`
+  const hours = Math.floor(minutes / 60)
+  if (hours < 24) return `${hours}h ago`
+  return `${Math.floor(hours / 24)}d ago`
+}
 
 function getInitials(name: string) {
   return name.charAt(0).toUpperCase()
@@ -39,6 +59,22 @@ function getAvatarColor(name: string) {
 }
 
 export function ActivityFeed() {
+  const params = useParams<{ productSlug: string }>()
+  const allActivities = useActivityStore((s) => s.activities)
+  const storeActivities = useMemo(() => allActivities.filter((a) => a.productId === params.productSlug), [allActivities, params.productSlug])
+
+  const activities = useMemo(() => {
+    if (storeActivities.length > 0) {
+      return storeActivities.slice(0, 10).map((a) => ({
+        actor: a.userName,
+        action: a.title,
+        time: timeAgo(a.timestamp),
+        studio: a.studio.charAt(0).toUpperCase() + a.studio.slice(1),
+      }))
+    }
+    return fallbackActivities
+  }, [storeActivities])
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}

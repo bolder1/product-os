@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useCallback, useMemo } from 'react'
+import { useParams } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { Plus, LayoutGrid, List, Sparkles } from 'lucide-react'
 import { type Task, mockTasks } from './_data/mock-tasks'
@@ -8,11 +9,49 @@ import { TaskBoard } from './_components/task-board'
 import { TaskList } from './_components/task-list'
 import { TaskFiltersBar, type TaskFilters } from './_components/task-filters'
 import { TaskCreateModal } from './_components/task-create-modal'
+import { useTaskStore } from '../../../../lib/task-store'
+import { useActivityStore } from '../../../../lib/activity-store'
 
 type ViewMode = 'board' | 'list'
 
+/** Convert a Zustand store task to the local Task format used by board/list components */
+function storeTaskToLocal(t: ReturnType<typeof useTaskStore.getState>['tasks'][number]): Task {
+  return {
+    id: t.id,
+    title: t.title,
+    description: t.description ?? '',
+    status: t.status === 'blocked' ? 'todo' : t.status,
+    priority: t.priority,
+    assignee: { name: t.assignee.name, initials: t.assignee.initials, color: '#6366F1' },
+    dueDate: t.dueDate,
+    linkedNode: t.feature ? { kind: 'Feature', label: t.feature } : undefined,
+    createdAt: t.createdAt.slice(0, 10),
+  }
+}
+
 export default function TasksPage() {
-  const [tasks, setTasks] = useState<Task[]>(mockTasks)
+  const params = useParams<{ productSlug: string }>()
+  const productId = params.productSlug
+
+  // Read tasks from Zustand store for this product
+  const rawTasks = useTaskStore((s) => s.tasks)
+  const storeTasks = useMemo(() => rawTasks.filter((t) => t.productId === productId), [rawTasks, productId])
+  const storeAddTask = useTaskStore((s) => s.addTask)
+  const storeMoveTask = useTaskStore((s) => s.moveTask)
+  const storeUpdateTask = useTaskStore((s) => s.updateTask)
+  const addActivity = useActivityStore((s) => s.addActivity)
+
+  // Merge store tasks with mock fallback — store tasks take priority
+  const allTasks = useMemo(() => {
+    const converted = storeTasks.map(storeTaskToLocal)
+    if (converted.length > 0) return converted
+    return mockTasks // Fallback to mock data when no store tasks exist
+  }, [storeTasks])
+
+  const [localUpdates, setLocalUpdates] = useState<Record<string, Partial<Task>>>({})
+  const tasks = useMemo(() => {
+    return allTasks.map((t) => (localUpdates[t.id] ? { ...t, ...localUpdates[t.id] } : t))
+  }, [allTasks, localUpdates])
   const [view, setView] = useState<ViewMode>('board')
   const [modalOpen, setModalOpen] = useState(false)
   const [filters, setFilters] = useState<TaskFilters>({
@@ -44,20 +83,39 @@ export default function TasksPage() {
 
   // Update a task (used by drag-and-drop)
   const handleUpdateTask = useCallback((taskId: string, updates: Partial<Task>) => {
-    setTasks((prev) =>
-      prev.map((t) => (t.id === taskId ? { ...t, ...updates } : t))
-    )
-  }, [])
+    // Sync status changes to store
+    if (updates.status) {
+      const storeStatus = updates.status === 'blocked' ? 'todo' : updates.status
+      storeMoveTask(taskId, storeStatus as any)
+    }
+    if (Object.keys(updates).some((k) => k !== 'status')) {
+      storeUpdateTask(taskId, updates as any)
+    }
+    setLocalUpdates((prev) => ({ ...prev, [taskId]: { ...prev[taskId], ...updates } }))
+  }, [storeMoveTask, storeUpdateTask])
 
   // Create a new task
   const handleCreateTask = useCallback((data: Omit<Task, 'id' | 'createdAt'>) => {
-    const newTask: Task = {
-      ...data,
-      id: `task-${String(Date.now()).slice(-6)}`,
-      createdAt: new Date().toISOString().slice(0, 10),
-    }
-    setTasks((prev) => [newTask, ...prev])
-  }, [])
+    const created = storeAddTask({
+      title: data.title,
+      description: data.description,
+      status: data.status,
+      priority: data.priority,
+      assignee: { id: 'user-1', name: data.assignee.name, initials: data.assignee.initials, role: 'member' },
+      dueDate: data.dueDate,
+      studio: 'tasks',
+      productId,
+    })
+    addActivity({
+      type: 'task_created',
+      title: `Created task: ${data.title}`,
+      description: `New ${data.priority} priority task`,
+      studio: 'tasks',
+      productId,
+      userId: 'user-1',
+      userName: 'You',
+    })
+  }, [storeAddTask, addActivity, productId])
 
   return (
     <div className="flex flex-col h-full gap-5">

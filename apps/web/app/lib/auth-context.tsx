@@ -9,18 +9,11 @@ import {
   type ReactNode,
 } from 'react'
 import { useRouter } from 'next/navigation'
+import { useAuthStore, type AuthUser } from './auth-store'
 import type { OrgRole } from './role-config'
 
-export interface User {
-  id: string
-  name: string
-  email: string
-  role: OrgRole
-  avatar?: string
-  orgId: string
-  orgName: string
-  orgSlug: string
-}
+// Re-export the User type so existing imports keep working
+export type User = AuthUser
 
 export interface AuthContextType {
   user: User | null
@@ -31,92 +24,68 @@ export interface AuthContextType {
   updateUser: (partial: Partial<User>) => void
 }
 
-const AUTH_STORAGE_KEY = 'product-os-auth-user'
-
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
   const router = useRouter()
+  const user = useAuthStore((s) => s.user)
+  const isLoading = useAuthStore((s) => s.isLoading)
+  const storeLogin = useAuthStore((s) => s.login)
+  const storeSignup = useAuthStore((s) => s.signup)
+  const storeLogout = useAuthStore((s) => s.logout)
+  const storeUpdateProfile = useAuthStore((s) => s.updateProfile)
+  const [mounted, setMounted] = useState(false)
 
-  // Hydrate from localStorage on mount
+  // Prevent hydration mismatch: render children only after client mount
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem(AUTH_STORAGE_KEY)
-      if (stored) {
-        setUser(JSON.parse(stored))
-      }
-    } catch {
-      // ignore parse errors
-    } finally {
-      setIsLoading(false)
-    }
-  }, [])
-
-  const persistUser = useCallback((u: User | null) => {
-    setUser(u)
-    if (u) {
-      localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(u))
-    } else {
-      localStorage.removeItem(AUTH_STORAGE_KEY)
-    }
+    setMounted(true)
   }, [])
 
   const login = useCallback(
-    async (email: string, _password: string) => {
-      // Mock login — in production this calls an API
-      const mockUser: User = {
-        id: crypto.randomUUID(),
-        name: email.split('@')[0],
-        email,
-        role: 'manager',
-        orgId: 'org_default',
-        orgName: 'My Organization',
-        orgSlug: 'my-org',
+    async (email: string, password: string) => {
+      await storeLogin(email, password)
+      // Check if user needs onboarding
+      const currentUser = useAuthStore.getState().user
+      if (currentUser && !currentUser.onboarded) {
+        router.push('/onboarding')
+      } else {
+        router.push('/')
       }
-      persistUser(mockUser)
-      router.push('/')
     },
-    [persistUser, router],
+    [storeLogin, router],
   )
 
   const signup = useCallback(
-    async (name: string, email: string, _password: string) => {
-      const mockUser: User = {
-        id: crypto.randomUUID(),
-        name,
-        email,
-        role: 'manager',
-        orgId: '',
-        orgName: '',
-        orgSlug: '',
-      }
-      persistUser(mockUser)
+    async (name: string, email: string, password: string) => {
+      await storeSignup({ name, email, password })
       router.push('/onboarding')
     },
-    [persistUser, router],
+    [storeSignup, router],
   )
 
   const logout = useCallback(() => {
-    persistUser(null)
+    storeLogout()
     router.push('/login')
-  }, [persistUser, router])
+  }, [storeLogout, router])
 
   const updateUser = useCallback(
     (partial: Partial<User>) => {
-      setUser((prev) => {
-        if (!prev) return prev
-        const updated = { ...prev, ...partial }
-        localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(updated))
-        return updated
-      })
+      storeUpdateProfile(partial)
     },
-    [],
+    [storeUpdateProfile],
   )
 
+  const value: AuthContextType = {
+    user,
+    login,
+    signup,
+    logout,
+    isLoading: !mounted || isLoading,
+    updateUser,
+  }
+
   return (
-    <AuthContext.Provider value={{ user, login, signup, logout, isLoading, updateUser }}>
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   )

@@ -1,27 +1,47 @@
 'use client'
 
+import { useMemo } from 'react'
+import { useParams } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { ShieldCheck } from 'lucide-react'
+import { useApprovalStore } from '../../../../../lib/approval-store'
 
-const approvals = [
-  {
-    object: 'Component: DataTable',
-    requester: 'Alice',
-    timeAgo: '25m ago',
-  },
-  {
-    object: 'Page: Checkout Flow',
-    requester: 'Bob',
-    timeAgo: '1h ago',
-  },
-  {
-    object: 'Feature: Notifications',
-    requester: 'Carol',
-    timeAgo: '3h ago',
-  },
+function timeAgo(dateStr: string): string {
+  const seconds = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000)
+  if (seconds < 60) return 'just now'
+  const minutes = Math.floor(seconds / 60)
+  if (minutes < 60) return `${minutes}m ago`
+  const hours = Math.floor(minutes / 60)
+  if (hours < 24) return `${hours}h ago`
+  return `${Math.floor(hours / 24)}d ago`
+}
+
+const fallbackApprovals = [
+  { object: 'Component: DataTable', requester: 'Alice', timeAgo: '25m ago' },
+  { object: 'Page: Checkout Flow', requester: 'Bob', timeAgo: '1h ago' },
+  { object: 'Feature: Notifications', requester: 'Carol', timeAgo: '3h ago' },
 ]
 
 export function PendingApprovals() {
+  const params = useParams<{ productSlug: string }>()
+  const allRequests = useApprovalStore((s) => s.requests)
+  const storeRequests = useMemo(() => allRequests.filter((r) => r.productId === params.productSlug), [allRequests, params.productSlug])
+
+  const approvals = useMemo(() => {
+    const pending = storeRequests.filter((r) => r.status === 'pending')
+    if (pending.length > 0) {
+      return pending.slice(0, 5).map((r) => ({
+        object: r.title,
+        requester: r.requestedBy.name,
+        timeAgo: timeAgo(r.createdAt),
+        id: r.id,
+        stepId: r.steps[r.currentStepIndex]?.id,
+      }))
+    }
+    return fallbackApprovals.map((a) => ({ ...a, id: '', stepId: '' }))
+  }, [storeRequests])
+
+  const decideStep = useApprovalStore((s) => s.decideStep)
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -35,7 +55,7 @@ export function PendingApprovals() {
           Pending Approvals
         </span>
         <span className="text-xs bg-[#8B5CF6]/10 text-[#8B5CF6] px-2 py-0.5 rounded-full font-medium">
-          3
+          {approvals.length}
         </span>
       </div>
 
@@ -58,7 +78,10 @@ export function PendingApprovals() {
               </div>
             </div>
             <div className="flex gap-2 mt-2.5 ml-4">
-              <button className="text-[11px] px-3 py-1 rounded-md bg-[#10B981]/10 text-[#10B981] hover:bg-[#10B981]/20 transition-colors font-medium">
+              <button
+                onClick={() => item.id && item.stepId && decideStep(item.id, item.stepId, 'approved', undefined, 'You')}
+                className="text-[11px] px-3 py-1 rounded-md bg-[#10B981]/10 text-[#10B981] hover:bg-[#10B981]/20 transition-colors font-medium"
+              >
                 Approve
               </button>
               <button className="text-[11px] px-3 py-1 rounded-md bg-white/[0.05] text-[#94A3B8] hover:bg-white/[0.08] transition-colors font-medium">

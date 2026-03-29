@@ -1,17 +1,38 @@
 'use client'
 
 import { motion, useMotionValue, useTransform, animate } from 'framer-motion'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { Heart } from 'lucide-react'
+import { useParams } from 'next/navigation'
+import { calculateReadinessScore } from '../../../../../lib/validation-engine'
 
-const mockData = {
-  score: 78,
-  breakdown: [
-    { label: 'Completeness', value: 85 },
-    { label: 'Quality', value: 72 },
-    { label: 'Velocity', value: 80 },
-    { label: 'Risk', value: 75 },
-  ],
+function useLiveHealthData() {
+  const params = useParams()
+  const productId = params?.orgSlug && params?.productSlug
+    ? `${params.orgSlug}-${params.productSlug}`
+    : ''
+  const readiness = useMemo(() => calculateReadinessScore(productId), [productId])
+  const hasRealData = readiness.overall > 0
+
+  return hasRealData
+    ? {
+        score: readiness.overall,
+        breakdown: [
+          { label: 'Plan', value: readiness.plan },
+          { label: 'Brand', value: readiness.brand },
+          { label: 'Components', value: readiness.components },
+          { label: 'Design', value: readiness.design },
+        ],
+      }
+    : {
+        score: 78,
+        breakdown: [
+          { label: 'Completeness', value: 85 },
+          { label: 'Quality', value: 72 },
+          { label: 'Velocity', value: 80 },
+          { label: 'Risk', value: 75 },
+        ],
+      }
 }
 
 function getScoreColor(score: number) {
@@ -21,6 +42,7 @@ function getScoreColor(score: number) {
 }
 
 export function HealthScore() {
+  const healthData = useLiveHealthData()
   const [displayScore, setDisplayScore] = useState(0)
   const motionScore = useMotionValue(0)
   const radius = 70
@@ -28,19 +50,19 @@ export function HealthScore() {
   const strokeDashoffset = useTransform(
     motionScore,
     [0, 100],
-    [circumference, circumference * (1 - mockData.score / 100)]
+    [circumference, circumference * (1 - healthData.score / 100)]
   )
 
   useEffect(() => {
-    const controls = animate(motionScore, mockData.score, {
+    const controls = animate(motionScore, healthData.score, {
       duration: 1.5,
       ease: 'easeOut',
       onUpdate: (v) => setDisplayScore(Math.round(v)),
     })
     return controls.stop
-  }, [motionScore])
+  }, [motionScore, healthData.score])
 
-  const color = getScoreColor(mockData.score)
+  const color = getScoreColor(healthData.score)
 
   return (
     <motion.div
@@ -86,7 +108,7 @@ export function HealthScore() {
       </div>
 
       <div className="w-full grid grid-cols-2 gap-3">
-        {mockData.breakdown.map((item, i) => (
+        {healthData.breakdown.map((item, i) => (
           <motion.div
             key={item.label}
             initial={{ opacity: 0, x: -10 }}

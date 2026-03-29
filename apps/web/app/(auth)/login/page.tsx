@@ -1,17 +1,28 @@
 'use client'
 
-import { useState, type FormEvent } from 'react'
+import { useState, Suspense, type FormEvent } from 'react'
 import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { Mail, Lock, Eye, EyeOff } from 'lucide-react'
+import { Mail, Lock, Eye, EyeOff, Zap } from 'lucide-react'
 import { useAuth } from '../../lib/auth-context'
 
 export default function LoginPage() {
+  return (
+    <Suspense>
+      <LoginForm />
+    </Suspense>
+  )
+}
+
+function LoginForm() {
   const { login } = useAuth()
+  const searchParams = useSearchParams()
+
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
-  const [errors, setErrors] = useState<{ email?: string; password?: string }>({})
+  const [errors, setErrors] = useState<{ email?: string; password?: string; form?: string }>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   function validate() {
@@ -34,8 +45,25 @@ export default function LoginPage() {
     ev.preventDefault()
     if (!validate()) return
     setIsSubmitting(true)
+    setErrors((p) => ({ ...p, form: undefined }))
     try {
       await login(email, password)
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Login failed. Please try again.'
+      setErrors((p) => ({ ...p, form: message }))
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  async function handleDemoLogin() {
+    setIsSubmitting(true)
+    setErrors({})
+    try {
+      await login('admin@productOS.dev', 'admin123')
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Demo login failed.'
+      setErrors({ form: message })
     } finally {
       setIsSubmitting(false)
     }
@@ -68,6 +96,17 @@ export default function LoginPage() {
           <p className="text-sm text-[#94A3B8]">Enter your credentials to continue</p>
         </div>
 
+        {/* Form-level error */}
+        {errors.form && (
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/20"
+          >
+            <p className="text-sm text-red-400">{errors.form}</p>
+          </motion.div>
+        )}
+
         {/* Form */}
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           {/* Email */}
@@ -78,7 +117,7 @@ export default function LoginPage() {
                 type="email"
                 placeholder="Email address"
                 value={email}
-                onChange={(e) => { setEmail(e.target.value); setErrors((p) => ({ ...p, email: undefined })) }}
+                onChange={(e) => { setEmail(e.target.value); setErrors((p) => ({ ...p, email: undefined, form: undefined })) }}
                 className={`w-full pl-10 pr-4 py-2.5 rounded-lg bg-white/[0.03] border text-[#F1F5F9] placeholder:text-[#64748B] focus:outline-none focus:ring-1 transition ${
                   errors.email
                     ? 'border-red-500/60 focus:border-red-500/60 focus:ring-red-500/30'
@@ -101,7 +140,7 @@ export default function LoginPage() {
                 type={showPassword ? 'text' : 'password'}
                 placeholder="Password"
                 value={password}
-                onChange={(e) => { setPassword(e.target.value); setErrors((p) => ({ ...p, password: undefined })) }}
+                onChange={(e) => { setPassword(e.target.value); setErrors((p) => ({ ...p, password: undefined, form: undefined })) }}
                 className={`w-full pl-10 pr-10 py-2.5 rounded-lg bg-white/[0.03] border text-[#F1F5F9] placeholder:text-[#64748B] focus:outline-none focus:ring-1 transition ${
                   errors.password
                     ? 'border-red-500/60 focus:border-red-500/60 focus:ring-red-500/30'
@@ -148,6 +187,19 @@ export default function LoginPage() {
           <span className="text-xs text-[#64748B]">or</span>
           <div className="flex-1 h-px bg-white/[0.08]" />
         </div>
+
+        {/* Demo Login */}
+        <motion.button
+          type="button"
+          onClick={handleDemoLogin}
+          disabled={isSubmitting}
+          whileHover={{ scale: 1.01 }}
+          whileTap={{ scale: 0.99 }}
+          className="w-full flex items-center justify-center gap-2.5 py-2.5 rounded-lg border border-[#8B5CF6]/30 bg-[#8B5CF6]/10 text-[#C4B5FD] font-medium hover:bg-[#8B5CF6]/20 disabled:opacity-60 disabled:cursor-not-allowed transition-colors mb-2.5"
+        >
+          <Zap size={16} />
+          Demo Login (Admin)
+        </motion.button>
 
         {/* OAuth buttons */}
         <div className="flex flex-col gap-2.5">

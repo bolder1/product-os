@@ -15,6 +15,9 @@ import { StudioIcon, getStudioColor } from './studio-icon'
 import { AnimatedLogo } from './animated-logo'
 import { useAuth } from '../../lib/auth-context'
 import { hasStudioAccess, getRoleLabel, roleConfigs } from '../../lib/role-config'
+import { useNotificationStore } from '../../lib/notification-store'
+import { useApprovalStore } from '../../lib/approval-store'
+import { useTaskStore } from '../../lib/task-store'
 
 interface NavItem {
   key: string
@@ -61,6 +64,7 @@ const navSections: NavSection[] = [
     items: [
       { key: 'tasks', label: 'Tasks', href: 'tasks' },
       { key: 'approvals', label: 'Approvals', href: 'approvals' },
+      { key: 'decisions', label: 'Decisions', href: 'decisions' },
       { key: 'notifications', label: 'Notifications', href: 'notifications' },
       { key: 'analytics', label: 'Analytics', href: 'analytics' },
     ],
@@ -97,6 +101,17 @@ export function Sidebar() {
 
   const roleLabel = user ? getRoleLabel(user.role) : ''
   const roleColor = user ? roleConfigs[user.role].color : '#3B82F6'
+
+  // Badge counts — use stable scalar selectors to avoid infinite re-renders
+  const unreadNotifs = useNotificationStore((s) => s.notifications.filter((n) => !n.read).length)
+  const pendingApprovals = useApprovalStore((s) => s.requests.filter((r) => r.status === 'pending').length)
+  const openTasks = useTaskStore((s) => s.tasks.filter((t) => t.status !== 'done').length)
+
+  const badgeCounts: Record<string, number> = useMemo(() => ({
+    notifications: unreadNotifs,
+    approvals: pendingApprovals,
+    tasks: openTasks > 0 ? openTasks : 0,
+  }), [unreadNotifs, pendingApprovals, openTasks])
 
   const userInitials = useMemo(() => {
     if (!user?.name) return '?'
@@ -187,12 +202,18 @@ export function Sidebar() {
                             initial={{ opacity: 0, width: 0 }}
                             animate={{ opacity: 1, width: 'auto' }}
                             exit={{ opacity: 0, width: 0 }}
-                            className="whitespace-nowrap overflow-hidden"
+                            className="whitespace-nowrap overflow-hidden flex-1"
                           >
                             {item.label}
                           </motion.span>
                         )}
                       </AnimatePresence>
+                      {/* Badge count */}
+                      {badgeCounts[item.key] > 0 && (
+                        <span className="ml-auto text-[0.5625rem] font-bold min-w-[1.125rem] h-[1.125rem] rounded-full flex items-center justify-center shrink-0 bg-[#F43F5E]/15 text-[#F43F5E]">
+                          {badgeCounts[item.key] > 99 ? '99+' : badgeCounts[item.key]}
+                        </span>
+                      )}
                     </Link>
                   </li>
                 )

@@ -180,6 +180,7 @@ export default function OnboardingPage() {
       orgId,
       orgName: orgMode === 'create' ? orgName : 'Joined Org',
       orgSlug: orgMode === 'create' ? orgSlug : 'joined-org',
+      onboarded: true,
     })
 
     // Store extra onboarding data
@@ -201,7 +202,7 @@ export default function OnboardingPage() {
   }
 
   function handleSkip() {
-    updateUser({ role: selectedRole ?? 'manager' })
+    updateUser({ role: selectedRole ?? 'manager', onboarded: true })
     router.push('/')
   }
 

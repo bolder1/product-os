@@ -3,7 +3,11 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, ChevronRight, ChevronLeft, Check, Circle, Loader2 } from 'lucide-react'
+import { useParams } from 'next/navigation'
 import type { Template } from '../_data/templates'
+import { useGraphStore, type NodeKind } from '../../../../../lib/graph-store'
+import { useActivityStore } from '../../../../../lib/activity-store'
+import { useNotificationStore } from '../../../../../lib/notification-store'
 
 const kindColors: Record<string, string> = {
   module: '#3B82F6',
@@ -43,15 +47,78 @@ export function TemplateApplyWizard({ template, onClose }: TemplateApplyWizardPr
   const [applying, setApplying] = useState(false)
   const [done, setDone] = useState(false)
 
+  const params = useParams()
+  const productId = `${params.orgSlug}-${params.productSlug}`
+  const { bulkAddNodes, addEdge } = useGraphStore()
+  const { addActivity } = useActivityStore()
+  const { addNotification } = useNotificationStore()
+
   if (!template) return null
 
   const handleApply = () => {
     setApplying(true)
-    // Simulate apply
+
+    // Create graph nodes from template
+    const validKinds = new Set([
+      'product', 'plan', 'template_bundle', 'module', 'feature', 'journey',
+      'page', 'route', 'screen', 'workflow', 'entity', 'field',
+      'component', 'variant', 'token', 'asset', 'task', 'approval',
+      'insight', 'release', 'connector_binding', 'mcp_binding',
+      'skill_action', 'computer_action',
+    ])
+
+    const nodesData = template.nodes.map((n) => ({
+      kind: (validKinds.has(n.kind) ? n.kind : 'module') as NodeKind,
+      label: n.label.replace(/\{\{(\w+)\}\}/g, (_, key) => values[key] || key),
+      productId,
+      data: { templateId: template.id, templateNode: n.kind },
+    }))
+
+    const createdNodes = bulkAddNodes(nodesData)
+
+    // Create edges between nodes
+    template.edges.forEach((e) => {
+      const sourceNode = createdNodes[e.sourceIndex]
+      const targetNode = createdNodes[e.targetIndex]
+      if (sourceNode && targetNode) {
+        const validEdgeKinds = new Set([
+          'contains', 'depends_on', 'references', 'implements',
+          'inherits', 'triggers', 'routes_to', 'uses_token',
+          'uses_component', 'assigned_to', 'approves', 'blocks',
+        ])
+        addEdge({
+          kind: (validEdgeKinds.has(e.kind) ? e.kind : 'contains') as any,
+          sourceId: sourceNode.id,
+          targetId: targetNode.id,
+          productId,
+        })
+      }
+    })
+
+    // Log activity
+    addActivity({
+      type: 'template_applied',
+      title: `Applied template "${template.name}"`,
+      description: `${template.nodes.length} nodes created from ${template.category} template`,
+      actor: { id: 'current-user', name: 'You', initials: 'YO' },
+      productId,
+      studio: 'templates',
+    })
+
+    // Notification
+    addNotification({
+      type: 'system',
+      title: 'Template Applied',
+      body: `"${template.name}" template has been applied. ${template.nodes.length} graph nodes created.`,
+      priority: 'normal',
+      productId,
+      studio: 'templates',
+    })
+
     setTimeout(() => {
       setApplying(false)
       setDone(true)
-    }, 2000)
+    }, 1500)
   }
 
   const groupedNodes = (() => {

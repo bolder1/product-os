@@ -8,6 +8,11 @@ import StepArchitecture from './_components/steps/step-architecture'
 import StepReviewLaunch from './_components/steps/step-review-launch'
 import TemplateStartModal from './_components/template-start-modal'
 import { generateTasksFromPlan, type GeneratedTask } from './_lib/task-generator'
+import { useTaskStore } from '../../../../lib/task-store'
+import { useGraphStore } from '../../../../lib/graph-store'
+import { useActivityStore } from '../../../../lib/activity-store'
+import { useNotificationStore } from '../../../../lib/notification-store'
+import { useParams, useRouter } from 'next/navigation'
 
 export interface PlanData {
   problem: string
@@ -36,6 +41,14 @@ export default function ProductPlannerPage() {
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set())
   const [templateModalOpen, setTemplateModalOpen] = useState(false)
   const [generatedTasks, setGeneratedTasks] = useState<GeneratedTask[]>([])
+
+  const params = useParams()
+  const router = useRouter()
+  const { bulkAddTasks } = useTaskStore()
+  const { scaffoldProduct, bulkAddNodes, addEdge, addNode } = useGraphStore()
+  const { addActivity } = useActivityStore()
+  const { addNotification } = useNotificationStore()
+  const productId = `${params.orgSlug}-${params.productSlug}`
 
   const markStepCompleted = useCallback((step: number) => {
     setCompletedSteps((prev) => {
@@ -85,10 +98,90 @@ export default function ProductPlannerPage() {
   }, [])
 
   const handleLaunch = useCallback(() => {
-    alert(
-      'Product launched! (This is a placeholder — the product creation flow will be implemented in the next phase.)',
+    const productName = String(params.productSlug).replace(/-/g, ' ')
+    const orgSlug = String(params.orgSlug)
+
+    // 1. Scaffold the product graph
+    scaffoldProduct(productId, productName)
+
+    // 2. Add features as graph nodes
+    const featureNodes = bulkAddNodes(
+      planData.features.map((f) => ({
+        kind: 'feature' as const,
+        label: f.name,
+        productId,
+        data: { description: f.description, priority: f.priority },
+      }))
     )
-  }, [])
+
+    // 3. Add entities as graph nodes
+    bulkAddNodes(
+      planData.entities.map((e) => ({
+        kind: 'entity' as const,
+        label: e.name,
+        productId,
+        data: { fields: e.fields },
+      }))
+    )
+
+    // 4. Add plan node with vision data
+    addNode({
+      kind: 'plan',
+      label: `${productName} Plan`,
+      productId,
+      data: {
+        problem: planData.problem,
+        goals: planData.goals,
+        personas: planData.personas,
+        activeStudios: planData.activeStudios,
+      },
+    })
+
+    // 5. Convert generated tasks into real task store entries
+    const taskEntries = generatedTasks.map((gt) => ({
+      title: gt.title,
+      description: gt.description || '',
+      status: 'todo' as const,
+      priority: gt.priority,
+      assignee: {
+        id: gt.role.toLowerCase().replace(/\s+/g, '-'),
+        name: `Unassigned (${gt.role})`,
+        initials: gt.role.split(' ').map((w) => w[0]).join('').slice(0, 2),
+        role: gt.role,
+      },
+      dueDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      studio: gt.studio,
+      feature: gt.feature,
+      productId,
+      role: gt.role,
+      tags: [gt.effort],
+    }))
+    bulkAddTasks(taskEntries)
+
+    // 6. Log activity
+    addActivity({
+      type: 'plan_created',
+      title: `Product plan launched for "${productName}"`,
+      description: `${planData.features.length} features, ${generatedTasks.length} tasks generated across ${planData.activeStudios.length} studios`,
+      actor: { id: 'current-user', name: 'You', initials: 'YO' },
+      productId,
+      studio: 'planner',
+    })
+
+    // 7. Send notification
+    addNotification({
+      type: 'plan_ready',
+      title: 'Product Plan Launched',
+      body: `"${productName}" plan is ready with ${generatedTasks.length} tasks distributed across your team.`,
+      priority: 'high',
+      productId,
+      studio: 'planner',
+      actionUrl: `/${orgSlug}/${params.productSlug}/tasks`,
+    })
+
+    // 8. Navigate to the control tower
+    router.push(`/${orgSlug}/${params.productSlug}/control-tower`)
+  }, [params, planData, generatedTasks, productId, scaffoldProduct, bulkAddNodes, addNode, bulkAddTasks, addActivity, addNotification, router])
 
   const updatePlanData = useCallback(<K extends keyof PlanData>(key: K, value: PlanData[K]) => {
     setPlanData((prev) => ({ ...prev, [key]: value }))
