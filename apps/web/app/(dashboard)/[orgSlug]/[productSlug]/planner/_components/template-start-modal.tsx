@@ -21,7 +21,8 @@ const templates: Array<{
     tags: ['B2B', 'Auth', 'Billing', 'Dashboard'],
     icon: <Rocket className="w-6 h-6" />,
     data: {
-      problem: 'Building a modern SaaS platform that enables businesses to manage their operations efficiently. Current solutions are fragmented, expensive, and lack the flexibility needed for growing teams. Teams waste hours switching between tools and manually syncing data.',
+      problem:
+        'Building a modern SaaS platform that enables businesses to manage their operations efficiently. Current solutions are fragmented, expensive, and lack the flexibility needed for growing teams. Teams waste hours switching between tools and manually syncing data.',
       goals: [
         { id: '1', text: 'Acquire 1,000 paying customers in first year', category: 'Growth' },
         { id: '2', text: 'Achieve 95% monthly retention rate', category: 'Engagement' },
@@ -29,8 +30,8 @@ const templates: Array<{
         { id: '4', text: 'Reduce customer onboarding time to under 5 minutes', category: 'Efficiency' },
       ],
       personas: [
-        { id: '1', name: 'Startup Steve', role: 'Founder / CEO', painPoints: ['Too many tools', 'Manual data entry', 'Limited budget'], needs: ['All-in-one platform', 'Affordable pricing', 'Quick setup'] },
-        { id: '2', name: 'Manager Maria', role: 'Operations Manager', painPoints: ['No visibility into team work', 'Slow reporting', 'Data silos'], needs: ['Real-time dashboards', 'Automated reports', 'Team collaboration'] },
+        { id: '1', name: 'Startup Steve', role: 'Founder / CEO', painPoint: 'Too many tools, limited budget' },
+        { id: '2', name: 'Manager Maria', role: 'Operations Manager', painPoint: 'No visibility into team work' },
       ],
       features: [
         { id: '1', name: 'User Authentication', description: 'Email/password + OAuth sign-in with MFA support', priority: 'must-have' },
@@ -41,9 +42,9 @@ const templates: Array<{
         { id: '6', name: 'Notifications', description: 'In-app, email, and Slack notifications', priority: 'should-have' },
       ],
       entities: [
-        { id: '1', name: 'Organization', description: 'Top-level tenant', fields: [{ name: 'name', type: 'text' }, { name: 'slug', type: 'text' }, { name: 'plan', type: 'enum' }] },
-        { id: '2', name: 'User', description: 'Application user', fields: [{ name: 'email', type: 'text' }, { name: 'name', type: 'text' }, { name: 'role', type: 'enum' }] },
-        { id: '3', name: 'Subscription', description: 'Billing subscription', fields: [{ name: 'plan', type: 'enum' }, { name: 'status', type: 'enum' }, { name: 'expiresAt', type: 'date' }] },
+        { id: '1', name: 'Organization', fields: [{ name: 'name', type: 'text' }, { name: 'slug', type: 'text' }, { name: 'plan', type: 'enum' }] },
+        { id: '2', name: 'User', fields: [{ name: 'email', type: 'text' }, { name: 'name', type: 'text' }, { name: 'role', type: 'enum' }] },
+        { id: '3', name: 'Subscription', fields: [{ name: 'plan', type: 'enum' }, { name: 'status', type: 'enum' }, { name: 'expiresAt', type: 'date' }] },
       ],
       activeStudios: ['planner', 'canvas', 'pages', 'components', 'workflows', 'analytics', 'templates', 'releases'],
     },
@@ -56,7 +57,8 @@ const templates: Array<{
     tags: ['Internal', 'AI', 'Workflows', 'Ops'],
     icon: <Boxes className="w-6 h-6" />,
     data: {
-      problem: 'Operations teams struggle with disconnected tools and manual processes. Status updates are scattered across Slack, email, and spreadsheets. No single source of truth for operational health and no way to automate repetitive tasks.',
+      problem:
+        'Operations teams struggle with disconnected tools and manual processes. Status updates are scattered across Slack, email, and spreadsheets. No single source of truth for operational health and no way to automate repetitive tasks.',
       goals: [
         { id: '1', text: 'Reduce operational overhead by 40%', category: 'Efficiency' },
         { id: '2', text: 'Centralize all ops data in one dashboard', category: 'Efficiency' },
@@ -64,7 +66,7 @@ const templates: Array<{
         { id: '4', text: 'Improve cross-team visibility', category: 'Engagement' },
       ],
       personas: [
-        { id: '1', name: 'Ops Oscar', role: 'Operations Lead', painPoints: ['Manual status tracking', 'Too many meetings', 'No automation'], needs: ['Automated workflows', 'Real-time dashboards', 'AI assistant'] },
+        { id: '1', name: 'Ops Oscar', role: 'Operations Lead', painPoint: 'Manual status tracking, no automation' },
       ],
       features: [
         { id: '1', name: 'Task Automation', description: 'Visual workflow builder for automating operational tasks', priority: 'must-have' },
@@ -73,8 +75,8 @@ const templates: Array<{
         { id: '4', name: 'Integrations', description: 'Connect Slack, Jira, GitHub, and more', priority: 'must-have' },
       ],
       entities: [
-        { id: '1', name: 'Task', description: 'Operational task', fields: [{ name: 'title', type: 'text' }, { name: 'status', type: 'enum' }, { name: 'assignee', type: 'relation' }, { name: 'dueDate', type: 'date' }] },
-        { id: '2', name: 'Workflow', description: 'Automated workflow', fields: [{ name: 'name', type: 'text' }, { name: 'trigger', type: 'enum' }, { name: 'steps', type: 'json' }] },
+        { id: '1', name: 'Task', fields: [{ name: 'title', type: 'text' }, { name: 'status', type: 'enum' }, { name: 'assignee', type: 'relation' }, { name: 'dueDate', type: 'date' }] },
+        { id: '2', name: 'Workflow', fields: [{ name: 'name', type: 'text' }, { name: 'trigger', type: 'enum' }, { name: 'steps', type: 'json' }] },
       ],
       activeStudios: ['planner', 'workflows', 'tasks', 'analytics', 'notifications', 'control-tower'],
     },
@@ -87,14 +89,15 @@ const templates: Array<{
     tags: ['Marketing', 'CMS', 'A/B Testing'],
     icon: <Globe className="w-6 h-6" />,
     data: {
-      problem: 'Marketing teams need to ship landing pages fast but are blocked by engineering. Design-to-code handoff is slow, and there\'s no way to run A/B tests without developer involvement. Analytics are an afterthought.',
+      problem:
+        "Marketing teams need to ship landing pages fast but are blocked by engineering. Design-to-code handoff is slow, and there's no way to run A/B tests without developer involvement. Analytics are an afterthought.",
       goals: [
         { id: '1', text: 'Ship landing pages in under 1 hour', category: 'Efficiency' },
         { id: '2', text: 'Achieve 5% conversion rate on primary CTA', category: 'Growth' },
         { id: '3', text: 'Enable non-technical team to manage content', category: 'Efficiency' },
       ],
       personas: [
-        { id: '1', name: 'Marketer Maya', role: 'Growth Marketer', painPoints: ['Slow page creation', 'No A/B testing', 'Depends on devs'], needs: ['Visual editor', 'Quick publishing', 'Built-in analytics'] },
+        { id: '1', name: 'Marketer Maya', role: 'Growth Marketer', painPoint: 'Slow page creation, depends on devs' },
       ],
       features: [
         { id: '1', name: 'Visual Page Builder', description: 'Drag-and-drop page construction with components', priority: 'must-have' },
@@ -103,8 +106,8 @@ const templates: Array<{
         { id: '4', name: 'Analytics', description: 'Track page views, clicks, and conversions', priority: 'must-have' },
       ],
       entities: [
-        { id: '1', name: 'Page', description: 'Landing page', fields: [{ name: 'title', type: 'text' }, { name: 'slug', type: 'text' }, { name: 'content', type: 'json' }, { name: 'published', type: 'boolean' }] },
-        { id: '2', name: 'Experiment', description: 'A/B test', fields: [{ name: 'name', type: 'text' }, { name: 'variants', type: 'json' }, { name: 'status', type: 'enum' }] },
+        { id: '1', name: 'Page', fields: [{ name: 'title', type: 'text' }, { name: 'slug', type: 'text' }, { name: 'content', type: 'json' }, { name: 'published', type: 'boolean' }] },
+        { id: '2', name: 'Experiment', fields: [{ name: 'name', type: 'text' }, { name: 'variants', type: 'json' }, { name: 'status', type: 'enum' }] },
       ],
       activeStudios: ['planner', 'pages', 'design', 'brand', 'graphics', 'analytics', 'templates'],
     },

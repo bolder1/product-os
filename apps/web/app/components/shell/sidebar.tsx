@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -9,9 +9,12 @@ import {
   ChevronRight,
   Settings,
   User,
+  LogOut,
 } from 'lucide-react'
 import { StudioIcon, getStudioColor } from './studio-icon'
 import { AnimatedLogo } from './animated-logo'
+import { useAuth } from '../../lib/auth-context'
+import { hasStudioAccess, getRoleLabel, roleConfigs } from '../../lib/role-config'
 
 interface NavItem {
   key: string
@@ -74,11 +77,34 @@ const navSections: NavSection[] = [
 export function Sidebar() {
   const [expanded, setExpanded] = useState(true)
   const pathname = usePathname()
+  const { user, logout } = useAuth()
 
   // Extract the base product path from the URL
   const segments = pathname.split('/')
   const productBasePath = segments.length >= 3 ? `/${segments[1]}/${segments[2]}` : ''
   const activeStudio = segments[3] ?? ''
+
+  // Filter sections based on user role
+  const filteredSections = useMemo(() => {
+    if (!user) return navSections // show all if not logged in (shouldn't happen in practice)
+    return navSections
+      .map((section) => ({
+        ...section,
+        items: section.items.filter((item) => hasStudioAccess(user.role, item.key)),
+      }))
+      .filter((section) => section.items.length > 0)
+  }, [user])
+
+  const roleLabel = user ? getRoleLabel(user.role) : ''
+  const roleColor = user ? roleConfigs[user.role].color : '#3B82F6'
+
+  const userInitials = useMemo(() => {
+    if (!user?.name) return '?'
+    const parts = user.name.trim().split(/\s+/)
+    return parts.length >= 2
+      ? `${parts[0][0]}${parts[1][0]}`.toUpperCase()
+      : parts[0][0].toUpperCase()
+  }, [user?.name])
 
   return (
     <motion.aside
@@ -113,7 +139,7 @@ export function Sidebar() {
 
       {/* Nav sections */}
       <nav className="flex-1 overflow-y-auto py-3 px-2 space-y-4">
-        {navSections.map((section) => (
+        {filteredSections.map((section) => (
           <div key={section.title}>
             <AnimatePresence>
               {expanded && (
@@ -198,22 +224,49 @@ export function Sidebar() {
           </AnimatePresence>
         </Link>
 
-        <div className="flex items-center gap-2.5 px-2 py-1.5 rounded-md text-[0.8125rem] text-[#94A3B8] hover:bg-white/[0.06] cursor-pointer transition-colors">
-          <div className="w-[18px] h-[18px] rounded-full bg-gradient-to-br from-[#3B82F6] to-[#8B5CF6] flex items-center justify-center">
-            <User size={11} className="text-white" />
+        {/* User row with role badge */}
+        <div className="flex items-center gap-2.5 px-2 py-1.5 rounded-md text-[0.8125rem] text-[#94A3B8] hover:bg-white/[0.06] transition-colors group">
+          <div className="w-[18px] h-[18px] rounded-full bg-gradient-to-br from-[#3B82F6] to-[#8B5CF6] flex items-center justify-center shrink-0">
+            {user ? (
+              <span className="text-[8px] font-bold text-white leading-none">{userInitials}</span>
+            ) : (
+              <User size={11} className="text-white" />
+            )}
           </div>
           <AnimatePresence>
             {expanded && (
-              <motion.span
+              <motion.div
                 initial={{ opacity: 0, width: 0 }}
                 animate={{ opacity: 1, width: 'auto' }}
                 exit={{ opacity: 0, width: 0 }}
-                className="whitespace-nowrap overflow-hidden"
+                className="flex items-center gap-2 overflow-hidden whitespace-nowrap min-w-0 flex-1"
               >
-                Account
-              </motion.span>
+                <span className="truncate">{user?.name ?? 'Account'}</span>
+                {user && (
+                  <span
+                    className="text-[0.625rem] font-medium px-1.5 py-0.5 rounded-full shrink-0"
+                    style={{
+                      backgroundColor: `${roleColor}20`,
+                      color: roleColor,
+                    }}
+                  >
+                    {roleLabel}
+                  </span>
+                )}
+              </motion.div>
             )}
           </AnimatePresence>
+
+          {/* Logout button */}
+          {user && expanded && (
+            <button
+              onClick={logout}
+              className="opacity-0 group-hover:opacity-100 p-0.5 rounded hover:bg-white/[0.06] transition-all shrink-0"
+              title="Sign out"
+            >
+              <LogOut size={13} className="text-[#64748B] hover:text-[#F1F5F9]" />
+            </button>
+          )}
         </div>
       </div>
     </motion.aside>

@@ -4,7 +4,6 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { ChevronLeft, ChevronRight, SkipForward } from 'lucide-react'
 import StepProgress from './step-progress'
 import AISuggestPanel from './ai-suggest-panel'
-import type { PlanData } from '../page'
 
 interface WizardShellProps {
   currentStep: number
@@ -128,19 +127,17 @@ export default function WizardShell({
               </motion.button>
             )}
 
-            <motion.button
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.97 }}
-              onClick={onNext}
-              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium transition-all ${
-                isLastStep
-                  ? 'bg-gradient-to-r from-[#8B5CF6] to-[#7C3AED] text-white shadow-lg shadow-[#8B5CF6]/20'
-                  : 'bg-[#8B5CF6] text-white hover:bg-[#8B5CF6]/90'
-              }`}
-            >
-              {isLastStep ? 'Finish' : 'Next'}
-              {!isLastStep && <ChevronRight className="w-4 h-4" />}
-            </motion.button>
+            {!isLastStep && (
+              <motion.button
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
+                onClick={onNext}
+                className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium bg-[#8B5CF6] text-white hover:bg-[#8B5CF6]/90 transition-all"
+              >
+                Next
+                <ChevronRight className="w-4 h-4" />
+              </motion.button>
+            )}
           </div>
         </div>
       </div>

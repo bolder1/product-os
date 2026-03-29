@@ -1,5 +1,6 @@
 import { Sidebar } from '../../../components/shell/sidebar'
 import { TopBar } from '../../../components/shell/topbar'
+import { TasksPanel } from '../../../components/shell/tasks-panel'
 
 export default function ProductLayout({
   children,
@@ -17,6 +18,7 @@ export default function ProductLayout({
           {children}
         </main>
       </div>
+      <TasksPanel />
     </div>
   )
 }

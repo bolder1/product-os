@@ -3,19 +3,23 @@
 import { useState, type FormEvent } from 'react'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
-import { Mail, Lock, Eye, EyeOff } from 'lucide-react'
+import { Mail, Lock, Eye, EyeOff, UserIcon } from 'lucide-react'
 import { useAuth } from '../../lib/auth-context'
 
-export default function LoginPage() {
-  const { login } = useAuth()
+export default function SignupPage() {
+  const { signup } = useAuth()
+  const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
-  const [errors, setErrors] = useState<{ email?: string; password?: string }>({})
+  const [showConfirm, setShowConfirm] = useState(false)
+  const [errors, setErrors] = useState<Record<string, string>>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   function validate() {
-    const e: typeof errors = {}
+    const e: Record<string, string> = {}
+    if (!name.trim()) e.name = 'Full name is required'
     if (!email) {
       e.email = 'Email is required'
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
@@ -26,6 +30,11 @@ export default function LoginPage() {
     } else if (password.length < 6) {
       e.password = 'Password must be at least 6 characters'
     }
+    if (!confirmPassword) {
+      e.confirmPassword = 'Please confirm your password'
+    } else if (password !== confirmPassword) {
+      e.confirmPassword = 'Passwords do not match'
+    }
     setErrors(e)
     return Object.keys(e).length === 0
   }
@@ -35,11 +44,22 @@ export default function LoginPage() {
     if (!validate()) return
     setIsSubmitting(true)
     try {
-      await login(email, password)
+      await signup(name, email, password)
     } finally {
       setIsSubmitting(false)
     }
   }
+
+  function clearError(key: string) {
+    setErrors((p) => { const n = { ...p }; delete n[key]; return n })
+  }
+
+  const inputClass = (field: string) =>
+    `w-full pl-10 pr-4 py-2.5 rounded-lg bg-white/[0.03] border text-[#F1F5F9] placeholder:text-[#64748B] focus:outline-none focus:ring-1 transition ${
+      errors[field]
+        ? 'border-red-500/60 focus:border-red-500/60 focus:ring-red-500/30'
+        : 'border-white/[0.08] focus:border-[#3B82F6]/50 focus:ring-[#3B82F6]/30'
+    }`
 
   return (
     <motion.div
@@ -64,12 +84,29 @@ export default function LoginPage() {
               <line x1="11" y1="22" x2="21" y2="22" stroke="rgba(6,182,212,0.4)" strokeWidth="1.5" />
             </svg>
           </div>
-          <h1 className="text-2xl font-semibold text-[#F1F5F9]">Sign in to Product OS</h1>
-          <p className="text-sm text-[#94A3B8]">Enter your credentials to continue</p>
+          <h1 className="text-2xl font-semibold text-[#F1F5F9]">Create your account</h1>
+          <p className="text-sm text-[#94A3B8]">Get started with Product OS</p>
         </div>
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          {/* Full Name */}
+          <div>
+            <div className="relative">
+              <UserIcon size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#64748B]" />
+              <input
+                type="text"
+                placeholder="Full name"
+                value={name}
+                onChange={(e) => { setName(e.target.value); clearError('name') }}
+                className={inputClass('name')}
+              />
+            </div>
+            {errors.name && (
+              <motion.p initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} className="text-xs text-red-400 mt-1.5 ml-1">{errors.name}</motion.p>
+            )}
+          </div>
+
           {/* Email */}
           <div>
             <div className="relative">
@@ -78,18 +115,12 @@ export default function LoginPage() {
                 type="email"
                 placeholder="Email address"
                 value={email}
-                onChange={(e) => { setEmail(e.target.value); setErrors((p) => ({ ...p, email: undefined })) }}
-                className={`w-full pl-10 pr-4 py-2.5 rounded-lg bg-white/[0.03] border text-[#F1F5F9] placeholder:text-[#64748B] focus:outline-none focus:ring-1 transition ${
-                  errors.email
-                    ? 'border-red-500/60 focus:border-red-500/60 focus:ring-red-500/30'
-                    : 'border-white/[0.08] focus:border-[#3B82F6]/50 focus:ring-[#3B82F6]/30'
-                }`}
+                onChange={(e) => { setEmail(e.target.value); clearError('email') }}
+                className={inputClass('email')}
               />
             </div>
             {errors.email && (
-              <motion.p initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} className="text-xs text-red-400 mt-1.5 ml-1">
-                {errors.email}
-              </motion.p>
+              <motion.p initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} className="text-xs text-red-400 mt-1.5 ml-1">{errors.email}</motion.p>
             )}
           </div>
 
@@ -101,12 +132,8 @@ export default function LoginPage() {
                 type={showPassword ? 'text' : 'password'}
                 placeholder="Password"
                 value={password}
-                onChange={(e) => { setPassword(e.target.value); setErrors((p) => ({ ...p, password: undefined })) }}
-                className={`w-full pl-10 pr-10 py-2.5 rounded-lg bg-white/[0.03] border text-[#F1F5F9] placeholder:text-[#64748B] focus:outline-none focus:ring-1 transition ${
-                  errors.password
-                    ? 'border-red-500/60 focus:border-red-500/60 focus:ring-red-500/30'
-                    : 'border-white/[0.08] focus:border-[#3B82F6]/50 focus:ring-[#3B82F6]/30'
-                }`}
+                onChange={(e) => { setPassword(e.target.value); clearError('password') }}
+                className={`${inputClass('password')} !pr-10`}
               />
               <button
                 type="button"
@@ -117,17 +144,32 @@ export default function LoginPage() {
               </button>
             </div>
             {errors.password && (
-              <motion.p initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} className="text-xs text-red-400 mt-1.5 ml-1">
-                {errors.password}
-              </motion.p>
+              <motion.p initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} className="text-xs text-red-400 mt-1.5 ml-1">{errors.password}</motion.p>
             )}
           </div>
 
-          {/* Forgot password */}
-          <div className="flex justify-end">
-            <Link href="/login" className="text-xs text-[#3B82F6] hover:text-[#60A5FA] transition-colors">
-              Forgot password?
-            </Link>
+          {/* Confirm Password */}
+          <div>
+            <div className="relative">
+              <Lock size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#64748B]" />
+              <input
+                type={showConfirm ? 'text' : 'password'}
+                placeholder="Confirm password"
+                value={confirmPassword}
+                onChange={(e) => { setConfirmPassword(e.target.value); clearError('confirmPassword') }}
+                className={`${inputClass('confirmPassword')} !pr-10`}
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirm(!showConfirm)}
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#64748B] hover:text-[#94A3B8] transition-colors"
+              >
+                {showConfirm ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
+            </div>
+            {errors.confirmPassword && (
+              <motion.p initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} className="text-xs text-red-400 mt-1.5 ml-1">{errors.confirmPassword}</motion.p>
+            )}
           </div>
 
           {/* Submit */}
@@ -136,9 +178,9 @@ export default function LoginPage() {
             disabled={isSubmitting}
             whileHover={{ scale: 1.01 }}
             whileTap={{ scale: 0.99 }}
-            className="w-full py-2.5 rounded-lg bg-[#3B82F6] text-white font-medium hover:bg-[#2563EB] disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
+            className="w-full py-2.5 rounded-lg bg-[#3B82F6] text-white font-medium hover:bg-[#2563EB] disabled:opacity-60 disabled:cursor-not-allowed transition-colors mt-1"
           >
-            {isSubmitting ? 'Signing in...' : 'Sign In'}
+            {isSubmitting ? 'Creating account...' : 'Create Account'}
           </motion.button>
         </form>
 
@@ -168,11 +210,11 @@ export default function LoginPage() {
           </button>
         </div>
 
-        {/* Sign up link */}
+        {/* Sign in link */}
         <p className="text-center text-sm text-[#94A3B8] mt-6">
-          Don&apos;t have an account?{' '}
-          <Link href="/signup" className="text-[#3B82F6] hover:text-[#60A5FA] font-medium transition-colors">
-            Sign up
+          Already have an account?{' '}
+          <Link href="/login" className="text-[#3B82F6] hover:text-[#60A5FA] font-medium transition-colors">
+            Sign in
           </Link>
         </p>
       </div>

@@ -22,7 +22,89 @@ import {
   CheckCircle2,
   AlertTriangle,
   TrendingUp,
+  Shield,
+  Code2,
+  Palette,
+  Bug,
+  BarChart3,
+  Briefcase,
+  Server,
+  Eye,
+  Component,
 } from 'lucide-react'
+import { useAuth } from '../lib/auth-context'
+import { roleConfigs, type OrgRole } from '../lib/role-config'
+import RoleTaskSummary from './_components/role-task-summary'
+import StudioShortcuts from './_components/studio-shortcuts'
+
+/* ── Role icon map ── */
+const roleIconMap: Record<string, React.ElementType> = {
+  Shield, Briefcase, BarChart3, Bug, Palette, Code2, Server, Eye,
+}
+
+/* ── Role-specific quick link categories ── */
+const roleCategoryAccess: Record<OrgRole, string[]> = {
+  admin: ['plan', 'build', 'ship', 'operate'],
+  manager: ['plan', 'build', 'ship', 'operate'],
+  business_analyst: ['plan', 'operate'],
+  product_designer: ['build', 'operate'],
+  frontend_dev: ['build', 'ship', 'operate'],
+  backend_dev: ['build', 'ship', 'operate'],
+  qa: ['ship', 'operate'],
+  viewer: ['operate'],
+}
+
+/* ── Role-specific overview stats ── */
+const roleStats: Record<OrgRole, Array<{ label: string; value: string; icon: React.ElementType; color: string }>> = {
+  admin: [
+    { label: 'Total Members', value: '24', icon: Layers, color: '#3B82F6' },
+    { label: 'Active Products', value: '7', icon: CheckCircle2, color: '#10B981' },
+    { label: 'Pending Requests', value: '4', icon: AlertTriangle, color: '#F59E0B' },
+    { label: 'AI Actions Today', value: '18', icon: Sparkles, color: '#8B5CF6' },
+  ],
+  manager: [
+    { label: 'Active Products', value: '7', icon: Layers, color: '#3B82F6' },
+    { label: 'Open Tasks', value: '12', icon: CheckCircle2, color: '#10B981' },
+    { label: 'Pending Approvals', value: '5', icon: AlertTriangle, color: '#F59E0B' },
+    { label: 'Sprint Progress', value: '68%', icon: TrendingUp, color: '#8B5CF6' },
+  ],
+  business_analyst: [
+    { label: 'Canvases', value: '6', icon: Layers, color: '#8B5CF6' },
+    { label: 'Requirements', value: '34', icon: FileText, color: '#3B82F6' },
+    { label: 'Pending Reviews', value: '3', icon: AlertTriangle, color: '#F59E0B' },
+    { label: 'Analytics Reports', value: '8', icon: BarChart3, color: '#10B981' },
+  ],
+  product_designer: [
+    { label: 'Components', value: '24', icon: Component, color: '#06B6D4' },
+    { label: 'Screens', value: '8', icon: Layers, color: '#EC4899' },
+    { label: 'Brand Assets', value: '42', icon: Palette, color: '#F43F5E' },
+    { label: 'Design Tokens', value: '156', icon: Sparkles, color: '#8B5CF6' },
+  ],
+  frontend_dev: [
+    { label: 'Open PRs', value: '3', icon: GitBranch, color: '#06B6D4' },
+    { label: 'Build Status', value: 'Passing', icon: CheckCircle2, color: '#10B981' },
+    { label: 'Components', value: '18', icon: Component, color: '#3B82F6' },
+    { label: 'Handoff Items', value: '5', icon: FileText, color: '#8B5CF6' },
+  ],
+  backend_dev: [
+    { label: 'Open PRs', value: '2', icon: GitBranch, color: '#10B981' },
+    { label: 'Build Status', value: 'Passing', icon: CheckCircle2, color: '#10B981' },
+    { label: 'Workflows', value: '9', icon: Activity, color: '#3B82F6' },
+    { label: 'API Endpoints', value: '24', icon: Server, color: '#8B5CF6' },
+  ],
+  qa: [
+    { label: 'Test Suites', value: '12', icon: Bug, color: '#F59E0B' },
+    { label: 'Pass Rate', value: '94%', icon: CheckCircle2, color: '#10B981' },
+    { label: 'Open Bugs', value: '7', icon: AlertTriangle, color: '#F43F5E' },
+    { label: 'Next Release', value: 'v2.1', icon: Rocket, color: '#3B82F6' },
+  ],
+  viewer: [
+    { label: 'Active Products', value: '7', icon: Layers, color: '#3B82F6' },
+    { label: 'Recent Updates', value: '14', icon: Activity, color: '#10B981' },
+    { label: 'Reports', value: '5', icon: BarChart3, color: '#8B5CF6' },
+    { label: 'Announcements', value: '2', icon: Bell, color: '#F59E0B' },
+  ],
+}
 
 /* ── Mock data ── */
 const recentProducts: Array<{
@@ -75,13 +157,6 @@ const quickLinks = [
     studios: ['Tasks', 'Approvals', 'Notifications', 'Analytics'],
     href: 'tasks',
   },
-]
-
-const overviewStats = [
-  { label: 'Active Products', value: '0', icon: Layers, color: '#3B82F6' },
-  { label: 'Open Tasks', value: '0', icon: CheckCircle2, color: '#10B981' },
-  { label: 'Pending Approvals', value: '0', icon: AlertTriangle, color: '#F59E0B' },
-  { label: 'AI Actions Today', value: '0', icon: Sparkles, color: '#8B5CF6' },
 ]
 
 const recentActivity: Array<{
@@ -184,7 +259,21 @@ function EmptyStateIllustration() {
 
 export default function DashboardHome() {
   const [searchQuery, setSearchQuery] = useState('')
+  const { user } = useAuth()
   const hasProducts = recentProducts.length > 0
+
+  const userRole: OrgRole = user?.role ?? 'viewer'
+  const rc = roleConfigs[userRole]
+  const RoleIcon = roleIconMap[rc.icon] || Eye
+  const stats = user ? roleStats[userRole] : [
+    { label: 'Active Products', value: '0', icon: Layers, color: '#3B82F6' },
+    { label: 'Open Tasks', value: '0', icon: CheckCircle2, color: '#10B981' },
+    { label: 'Pending Approvals', value: '0', icon: AlertTriangle, color: '#F59E0B' },
+    { label: 'AI Actions Today', value: '0', icon: Sparkles, color: '#8B5CF6' },
+  ]
+
+  const visibleCategories = user ? roleCategoryAccess[userRole] : ['plan', 'build', 'ship', 'operate']
+  const filteredQuickLinks = quickLinks.filter((l) => visibleCategories.includes(l.key))
 
   return (
     <div className="min-h-screen bg-[#060918]">
@@ -229,8 +318,15 @@ export default function DashboardHome() {
             <button className="p-2 rounded-lg text-[#64748B] hover:text-[#94A3B8] hover:bg-white/[0.04] transition">
               <Settings className="w-4 h-4" />
             </button>
-            <div className="w-7 h-7 rounded-full bg-gradient-to-br from-[#3B82F6] to-[#8B5CF6] flex items-center justify-center text-xs font-medium text-white ml-1">
-              S
+            <div
+              className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-medium text-white ml-1"
+              style={{
+                background: user
+                  ? `linear-gradient(135deg, ${rc.color}, ${rc.color}99)`
+                  : 'linear-gradient(135deg, #3B82F6, #8B5CF6)',
+              }}
+            >
+              {user?.name?.charAt(0)?.toUpperCase() || 'S'}
             </div>
           </div>
         </div>
@@ -246,20 +342,47 @@ export default function DashboardHome() {
         {/* Welcome + Create */}
         <motion.div className="flex items-start justify-between mb-10" variants={fadeUp} custom={0}>
           <div>
-            <h1 className="text-2xl font-semibold text-[#F1F5F9]">Welcome back</h1>
-            <p className="text-[#94A3B8] mt-1">Your unified product workspace</p>
+            <div className="flex items-center gap-3">
+              <h1 className="text-2xl font-semibold text-[#F1F5F9]">
+                {user ? `Welcome back, ${user.name}` : 'Welcome back'}
+              </h1>
+              {user && (
+                <span
+                  className="text-xs px-2.5 py-1 rounded-full font-medium flex items-center gap-1.5"
+                  style={{ backgroundColor: `${rc.color}15`, color: rc.color }}
+                >
+                  <RoleIcon className="w-3 h-3" />
+                  {rc.label}
+                </span>
+              )}
+            </div>
+            <p className="text-[#94A3B8] mt-1">
+              {user ? `${user.orgName || 'Your'} unified product workspace` : 'Your unified product workspace'}
+            </p>
           </div>
-          <button className="flex items-center gap-2 px-4 py-2.5 bg-[#3B82F6] hover:bg-[#3B82F6]/90 text-white text-sm font-medium rounded-lg transition-all hover:shadow-[0_0_20px_rgba(59,130,246,0.3)]">
-            <Plus className="w-4 h-4" />
-            New Product
-          </button>
+          <div className="flex items-center gap-2">
+            {/* Admin panel link for admin role */}
+            {user && (userRole === 'admin' || userRole === 'manager') && (
+              <a
+                href="/admin"
+                className="flex items-center gap-2 px-4 py-2.5 bg-[#F43F5E]/10 border border-[#F43F5E]/20 text-[#F43F5E] text-sm font-medium rounded-lg transition-all hover:bg-[#F43F5E]/20 hover:shadow-[0_0_20px_rgba(244,63,94,0.15)]"
+              >
+                <Shield className="w-4 h-4" />
+                Admin Panel
+              </a>
+            )}
+            <button className="flex items-center gap-2 px-4 py-2.5 bg-[#3B82F6] hover:bg-[#3B82F6]/90 text-white text-sm font-medium rounded-lg transition-all hover:shadow-[0_0_20px_rgba(59,130,246,0.3)]">
+              <Plus className="w-4 h-4" />
+              New Product
+            </button>
+          </div>
         </motion.div>
 
-        {/* Overview Stats */}
+        {/* Overview Stats — role-specific */}
         <motion.section className="mb-10" variants={fadeUp} custom={1}>
           <h2 className="text-xs font-medium text-[#64748B] uppercase tracking-wider mb-4">Overview</h2>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-            {overviewStats.map((stat, i) => {
+            {stats.map((stat, i) => {
               const Icon = stat.icon
               return (
                 <motion.div
@@ -286,8 +409,15 @@ export default function DashboardHome() {
           </div>
         </motion.section>
 
+        {/* My Tasks — role-specific (only when logged in) */}
+        {user && (
+          <motion.section className="mb-10" variants={fadeUp} custom={3}>
+            <RoleTaskSummary role={userRole} />
+          </motion.section>
+        )}
+
         {/* Products / Empty State */}
-        <motion.section className="mb-10" variants={fadeUp} custom={3}>
+        <motion.section className="mb-10" variants={fadeUp} custom={4}>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xs font-medium text-[#64748B] uppercase tracking-wider">Your Products</h2>
             {hasProducts && (
@@ -363,18 +493,18 @@ export default function DashboardHome() {
           )}
         </motion.section>
 
-        {/* Quick Links — Plan / Build / Ship / Operate */}
-        <motion.section className="mb-10" variants={fadeUp} custom={4}>
+        {/* Quick Links — filtered by role */}
+        <motion.section className="mb-10" variants={fadeUp} custom={5}>
           <h2 className="text-xs font-medium text-[#64748B] uppercase tracking-wider mb-4">Quick Links</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {quickLinks.map((link, i) => {
+          <div className={`grid grid-cols-1 sm:grid-cols-2 ${filteredQuickLinks.length >= 4 ? 'lg:grid-cols-4' : filteredQuickLinks.length === 3 ? 'lg:grid-cols-3' : 'lg:grid-cols-2'} gap-4`}>
+            {filteredQuickLinks.map((link, i) => {
               const Icon = link.icon
               return (
                 <motion.div
                   key={link.key}
                   className="group relative p-5 rounded-xl border border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.04] hover:border-white/[0.12] transition-all cursor-pointer overflow-hidden"
                   variants={fadeUp}
-                  custom={i + 5}
+                  custom={i + 6}
                   whileHover={{ y: -2 }}
                 >
                   {/* Subtle glow */}
@@ -411,8 +541,19 @@ export default function DashboardHome() {
           </div>
         </motion.section>
 
+        {/* Studio Shortcuts — role-filtered (only when logged in) */}
+        {user && (
+          <motion.section className="mb-10" variants={fadeUp} custom={7}>
+            <StudioShortcuts
+              role={userRole}
+              orgSlug={user.orgSlug || 'my-org'}
+              productSlug="my-product"
+            />
+          </motion.section>
+        )}
+
         {/* Recent Activity + Tips */}
-        <motion.section variants={fadeUp} custom={6}>
+        <motion.section variants={fadeUp} custom={8}>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {/* Recent Activity */}
             <div className="p-5 rounded-xl border border-white/[0.06] bg-white/[0.02]">

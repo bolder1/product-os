@@ -1,16 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import {
-  AlertCircle,
-  Target,
-  Users,
-  Layers,
-  Database,
-  LayoutGrid,
-  CheckCircle2,
-  Check,
-} from 'lucide-react'
+import { Lightbulb, Users, GitBranch, Rocket, Check } from 'lucide-react'
 
 export interface StepInfo {
   number: number
@@ -20,13 +11,10 @@ export interface StepInfo {
 }
 
 const steps: StepInfo[] = [
-  { number: 1, title: 'Problem', description: 'What problem are you solving?', icon: <AlertCircle className="w-4 h-4" /> },
-  { number: 2, title: 'Goals', description: 'What are your goals?', icon: <Target className="w-4 h-4" /> },
-  { number: 3, title: 'Audience', description: 'Who are your users?', icon: <Users className="w-4 h-4" /> },
-  { number: 4, title: 'Features', description: 'What features do you need?', icon: <Layers className="w-4 h-4" /> },
-  { number: 5, title: 'Entities', description: 'What data entities exist?', icon: <Database className="w-4 h-4" /> },
-  { number: 6, title: 'Studios', description: 'Which studios to activate?', icon: <LayoutGrid className="w-4 h-4" /> },
-  { number: 7, title: 'Review', description: 'Review & launch', icon: <CheckCircle2 className="w-4 h-4" /> },
+  { number: 1, title: 'Vision', description: 'Define your product vision', icon: <Lightbulb className="w-4 h-4" /> },
+  { number: 2, title: 'Users & Features', description: 'Who and what', icon: <Users className="w-4 h-4" /> },
+  { number: 3, title: 'Architecture', description: 'Data & studio setup', icon: <GitBranch className="w-4 h-4" /> },
+  { number: 4, title: 'Review & Launch', description: 'Review and launch', icon: <Rocket className="w-4 h-4" /> },
 ]
 
 interface StepProgressProps {
@@ -38,12 +26,13 @@ interface StepProgressProps {
 export default function StepProgress({ currentStep, completedSteps, onStepClick }: StepProgressProps) {
   return (
     <div className="w-full px-4 py-4">
-      <div className="flex items-center justify-between relative">
-        {/* Connecting line */}
+      <div className="flex items-center justify-between relative max-w-xl mx-auto">
+        {/* Connecting line (background) */}
         <div className="absolute top-5 left-[2.5rem] right-[2.5rem] h-px bg-white/[0.08]" />
+        {/* Connecting line (progress) */}
         <div
           className="absolute top-5 left-[2.5rem] h-px bg-[#8B5CF6]/40 transition-all duration-500"
-          style={{ width: `${((Math.min(currentStep, 7) - 1) / 6) * (100 - (5 / 6) * 100 / 7)}%` }}
+          style={{ width: `${((Math.min(currentStep, 4) - 1) / 3) * 100}%` }}
         />
 
         {steps.map((step) => {
@@ -62,26 +51,29 @@ export default function StepProgress({ currentStep, completedSteps, onStepClick 
                 className={`
                   w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium
                   transition-colors duration-300 border
-                  ${isActive
-                    ? 'bg-[#8B5CF6]/20 border-[#8B5CF6] text-[#8B5CF6]'
-                    : isCompleted || isPast
-                      ? 'bg-[#10B981]/20 border-[#10B981] text-[#10B981]'
-                      : 'bg-white/[0.03] border-white/[0.08] text-[#64748B]'
+                  ${
+                    isActive
+                      ? 'bg-[#8B5CF6]/20 border-[#8B5CF6] text-[#8B5CF6]'
+                      : isCompleted || isPast
+                        ? 'bg-[#10B981]/20 border-[#10B981] text-[#10B981]'
+                        : 'bg-white/[0.03] border-white/[0.08] text-[#64748B]'
                   }
                 `}
-                animate={isActive ? { boxShadow: '0 0 20px rgba(139, 92, 246, 0.3)' } : { boxShadow: '0 0 0px transparent' }}
+                animate={
+                  isActive
+                    ? { boxShadow: '0 0 20px rgba(139, 92, 246, 0.3)' }
+                    : { boxShadow: '0 0 0px transparent' }
+                }
               >
-                {isCompleted || isPast ? (
-                  <Check className="w-4 h-4" />
-                ) : (
-                  <span>{step.number}</span>
-                )}
+                {isCompleted || isPast ? <Check className="w-4 h-4" /> : step.icon}
               </motion.div>
 
               {/* Title */}
-              <span className={`text-xs font-medium transition-colors ${
-                isActive ? 'text-[#F1F5F9]' : isPast || isCompleted ? 'text-[#94A3B8]' : 'text-[#64748B]'
-              }`}>
+              <span
+                className={`text-xs font-medium transition-colors ${
+                  isActive ? 'text-[#F1F5F9]' : isPast || isCompleted ? 'text-[#94A3B8]' : 'text-[#64748B]'
+                }`}
+              >
                 {step.title}
               </span>
 

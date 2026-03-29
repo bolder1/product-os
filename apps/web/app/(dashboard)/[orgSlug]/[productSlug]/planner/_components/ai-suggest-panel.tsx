@@ -8,37 +8,22 @@ const mockSuggestions: Record<number, Array<{ text: string; confidence: number }
   1: [
     { text: 'Consider defining the core job-to-be-done for your users', confidence: 95 },
     { text: 'Add metrics for how you\'ll measure the problem is solved', confidence: 88 },
-    { text: 'Think about what happens if this problem isn\'t solved', confidence: 82 },
-  ],
-  2: [
-    { text: 'Add a user retention goal — it\'s often overlooked', confidence: 92 },
-    { text: 'Consider adding NPS or satisfaction tracking', confidence: 85 },
     { text: 'Set a measurable timeline for each goal', confidence: 90 },
   ],
-  3: [
+  2: [
     { text: 'Consider a power-user persona vs. a casual user', confidence: 88 },
     { text: 'Add decision-maker persona for B2B products', confidence: 84 },
-    { text: 'Define what "success" looks like for each persona', confidence: 80 },
-  ],
-  4: [
     { text: 'Consider authentication and user management first', confidence: 95 },
-    { text: 'Add search functionality for better discoverability', confidence: 87 },
-    { text: 'Consider offline support for mobile users', confidence: 72 },
   ],
-  5: [
+  3: [
     { text: 'Add a "User" entity with roles and permissions', confidence: 93 },
     { text: 'Consider audit trail fields (createdAt, updatedAt)', confidence: 90 },
-    { text: 'Add soft-delete support with a "deletedAt" field', confidence: 78 },
-  ],
-  6: [
     { text: 'Analytics Studio pairs well with your growth goals', confidence: 91 },
-    { text: 'Enable Workflow Studio for automation potential', confidence: 86 },
-    { text: 'Templates Studio can speed up content creation', confidence: 83 },
   ],
-  7: [
+  4: [
     { text: 'Your plan looks solid! Consider adding success metrics', confidence: 90 },
     { text: 'Review entity relationships before launching', confidence: 85 },
-    { text: 'Consider starting with a template to save time', confidence: 88 },
+    { text: 'Consider assigning task owners before launch', confidence: 88 },
   ],
 }
 
@@ -134,11 +119,11 @@ export default function AISuggestPanel({ currentStep, onApplySuggestion }: AISug
                   transition={{ delay: index * 0.1 }}
                   className="bg-white/[0.03] border border-white/[0.08] rounded-xl p-3 group hover:border-[#8B5CF6]/30 transition-all"
                 >
-                  <p className="text-sm text-[#94A3B8] leading-relaxed mb-2">
-                    {suggestion.text}
-                  </p>
+                  <p className="text-sm text-[#94A3B8] leading-relaxed mb-2">{suggestion.text}</p>
                   <div className="flex items-center justify-between">
-                    <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${confidenceColor(suggestion.confidence)}`}>
+                    <span
+                      className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${confidenceColor(suggestion.confidence)}`}
+                    >
                       {suggestion.confidence}% match
                     </span>
                     <button
