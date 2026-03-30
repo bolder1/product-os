@@ -1,19 +1,56 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useMemo, useEffect } from 'react'
+import { useParams } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Plus, Eye, Sparkles, FileText } from 'lucide-react'
 import { mockPages, type PageDef, type SectionDef } from './_data/mock-pages'
+import { useGraphStore } from '../../../../lib/graph-store'
 import { PageTree } from './_components/page-tree'
 import { SectionEditor } from './_components/section-editor'
 import { SectionProperties } from './_components/section-properties'
 import { PagePreview } from './_components/page-preview'
 
 export default function PageBuilderPage() {
-  const [pages, setPages] = useState<PageDef[]>(mockPages)
-  const [selectedPageId, setSelectedPageId] = useState<string | null>(
-    'page-home'
+  const params = useParams<{ productSlug: string }>()
+  const productId = params.productSlug
+
+  // Graph store for persistence
+  const allNodes = useGraphStore((s) => s.nodes)
+  const addNode = useGraphStore((s) => s.addNode)
+  const updateNode = useGraphStore((s) => s.updateNode)
+
+  const pageNodes = useMemo(
+    () => allNodes.filter((n) => n.productId === productId && n.kind === 'page'),
+    [allNodes, productId]
   )
+
+  const hasStorePages = pageNodes.length > 0
+
+  const [pages, setPages] = useState<PageDef[]>(() => {
+    if (!hasStorePages) return mockPages
+    try {
+      return pageNodes.map((n) => JSON.parse(String(n.data.payload)) as PageDef)
+    } catch { return mockPages }
+  })
+  const [selectedPageId, setSelectedPageId] = useState<string | null>(
+    pages[0]?.id ?? 'page-home'
+  )
+
+  // Sync pages to graph store
+  useEffect(() => {
+    for (const page of pages) {
+      const existing = pageNodes.find((n) => (n.data as Record<string, unknown>).pageLocalId === page.id)
+      const payload = JSON.stringify(page)
+      if (existing) {
+        if (String(existing.data.payload) !== payload) {
+          updateNode(existing.id, { label: page.name, data: { pageLocalId: page.id, payload } })
+        }
+      } else {
+        addNode({ kind: 'page', label: page.name, productId, data: { pageLocalId: page.id, payload } })
+      }
+    }
+  }, [pages]) // eslint-disable-line react-hooks/exhaustive-deps
   const [selectedSectionId, setSelectedSectionId] = useState<string | null>(
     null
   )

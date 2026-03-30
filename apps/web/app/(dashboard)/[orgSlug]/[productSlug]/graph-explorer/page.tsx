@@ -1,13 +1,17 @@
 'use client'
 
 import { useState, useCallback, useMemo } from 'react'
+import { useParams } from 'next/navigation'
 import { AnimatePresence } from 'framer-motion'
 import { Sparkles, Share2 } from 'lucide-react'
 import {
   mockGraphData,
   type NodeKind,
   type EdgeKind,
+  type GraphNode as LocalGraphNode,
+  type GraphEdge as LocalGraphEdge,
 } from './_data/mock-graph'
+import { useGraphStore } from '../../../../lib/graph-store'
 import { GraphCanvas } from './_components/graph-canvas'
 import { GraphFilters } from './_components/graph-filters'
 import { NodeDetailPanel } from './_components/node-detail-panel'
@@ -31,15 +35,118 @@ const ALL_EDGE_KINDS: EdgeKind[] = [
   'routes_to',
 ]
 
-function buildInitialPositions() {
-  const positions: Record<string, { x: number; y: number }> = {}
-  for (const node of mockGraphData.nodes) {
-    positions[node.id] = { x: node.x, y: node.y }
+// ---------------------------------------------------------------------------
+// Layout helper: arrange nodes in kind-based clusters around a center point
+// ---------------------------------------------------------------------------
+const CENTER_X = 550
+const CENTER_Y = 400
+const GROUP_RADIUS = 280
+const NODE_SPACING = 70
+
+function computeLayout(nodes: { id: string; kind: string }[]): Record<string, { x: number; y: number }> {
+  const groups: Record<string, string[]> = {}
+  for (const n of nodes) {
+    ;(groups[n.kind] ??= []).push(n.id)
   }
+
+  const kindKeys = Object.keys(groups)
+  const positions: Record<string, { x: number; y: number }> = {}
+
+  kindKeys.forEach((kind, groupIdx) => {
+    const groupAngle = (2 * Math.PI * groupIdx) / kindKeys.length
+    const groupCenterX = CENTER_X + GROUP_RADIUS * Math.cos(groupAngle)
+    const groupCenterY = CENTER_Y + GROUP_RADIUS * Math.sin(groupAngle)
+    const ids = groups[kind]
+
+    ids.forEach((id, i) => {
+      const nodeAngle = (2 * Math.PI * i) / ids.length
+      const nodeRadius = ids.length === 1 ? 0 : NODE_SPACING
+      positions[id] = {
+        x: Math.round(groupCenterX + nodeRadius * Math.cos(nodeAngle)),
+        y: Math.round(groupCenterY + nodeRadius * Math.sin(nodeAngle)),
+      }
+    })
+  })
+
   return positions
 }
 
+// ---------------------------------------------------------------------------
+// Convert store nodes/edges → local component format
+// ---------------------------------------------------------------------------
+function storeNodesToLocal(
+  storeNodes: { id: string; kind: string; label: string; data: Record<string, unknown> }[],
+  layout: Record<string, { x: number; y: number }>
+): LocalGraphNode[] {
+  return storeNodes.map((n) => ({
+    id: n.id,
+    kind: n.kind as NodeKind,
+    label: n.label,
+    x: layout[n.id]?.x ?? CENTER_X,
+    y: layout[n.id]?.y ?? CENTER_Y,
+    data: Object.fromEntries(
+      Object.entries(n.data).map(([k, v]) => [k, String(v)])
+    ),
+  }))
+}
+
+function storeEdgesToLocal(
+  storeEdges: { id: string; kind: string; sourceId: string; targetId: string }[]
+): LocalGraphEdge[] {
+  return storeEdges.map((e) => ({
+    id: e.id,
+    kind: e.kind as EdgeKind,
+    source: e.sourceId,
+    target: e.targetId,
+  }))
+}
+
 export default function GraphExplorerPage() {
+  const params = useParams()
+  const productId = params.productSlug as string
+
+  // Read flat arrays from the store (never call methods in selectors)
+  const allStoreNodes = useGraphStore((s) => s.nodes)
+  const allStoreEdges = useGraphStore((s) => s.edges)
+
+  // Filter to current product
+  const productStoreNodes = useMemo(
+    () => allStoreNodes.filter((n) => n.productId === productId),
+    [allStoreNodes, productId]
+  )
+  const productStoreEdges = useMemo(
+    () => allStoreEdges.filter((e) => e.productId === productId),
+    [allStoreEdges, productId]
+  )
+
+  // Determine if we have real data or should fall back to mock
+  const hasStoreData = productStoreNodes.length > 0
+
+  // Compute layout for store nodes
+  const storeLayout = useMemo(
+    () => (hasStoreData ? computeLayout(productStoreNodes) : {}),
+    [hasStoreData, productStoreNodes]
+  )
+
+  // Build the final nodes/edges for the child components
+  const graphNodes: LocalGraphNode[] = useMemo(
+    () => (hasStoreData ? storeNodesToLocal(productStoreNodes, storeLayout) : mockGraphData.nodes),
+    [hasStoreData, productStoreNodes, storeLayout]
+  )
+  const graphEdges: LocalGraphEdge[] = useMemo(
+    () => (hasStoreData ? storeEdgesToLocal(productStoreEdges) : mockGraphData.edges),
+    [hasStoreData, productStoreEdges]
+  )
+
+  // Build initial positions from whichever data source we're using
+  const buildInitialPositions = useCallback(() => {
+    const positions: Record<string, { x: number; y: number }> = {}
+    for (const node of graphNodes) {
+      positions[node.id] = { x: node.x, y: node.y }
+    }
+    return positions
+  }, [graphNodes])
+
   const [activeNodeKinds, setActiveNodeKinds] = useState<Set<NodeKind>>(
     new Set(ALL_NODE_KINDS)
   )
@@ -49,7 +156,31 @@ export default function GraphExplorerPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [showLabels, setShowLabels] = useState(true)
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null)
-  const [nodePositions, setNodePositions] = useState(buildInitialPositions)
+  const [nodePositions, setNodePositions] = useState(() => {
+    const positions: Record<string, { x: number; y: number }> = {}
+    for (const node of mockGraphData.nodes) {
+      positions[node.id] = { x: node.x, y: node.y }
+    }
+    return positions
+  })
+
+  // Sync positions when graph data source changes
+  const positionsRef = useMemo(() => {
+    const positions: Record<string, { x: number; y: number }> = {}
+    for (const node of graphNodes) {
+      positions[node.id] = { x: node.x, y: node.y }
+    }
+    return positions
+  }, [graphNodes])
+
+  // Merge: keep user-dragged positions, fill in defaults for new nodes
+  const mergedPositions = useMemo(() => {
+    const merged: Record<string, { x: number; y: number }> = {}
+    for (const node of graphNodes) {
+      merged[node.id] = nodePositions[node.id] ?? positionsRef[node.id]
+    }
+    return merged
+  }, [graphNodes, nodePositions, positionsRef])
 
   const toggleNodeKind = useCallback((kind: NodeKind) => {
     setActiveNodeKinds((prev) => {
@@ -88,11 +219,11 @@ export default function GraphExplorerPage() {
     setActiveEdgeKinds(new Set(ALL_EDGE_KINDS))
     setSearchQuery('')
     setSelectedNodeId(null)
-  }, [])
+  }, [buildInitialPositions])
 
   const selectedNode = useMemo(
-    () => (selectedNodeId ? mockGraphData.nodes.find((n) => n.id === selectedNodeId) ?? null : null),
-    [selectedNodeId]
+    () => (selectedNodeId ? graphNodes.find((n) => n.id === selectedNodeId) ?? null : null),
+    [selectedNodeId, graphNodes]
   )
 
   return (
@@ -106,7 +237,8 @@ export default function GraphExplorerPage() {
           <div>
             <h1 className="text-xl font-semibold text-[#F1F5F9]">Graph Explorer</h1>
             <p className="text-xs text-[#64748B]">
-              {mockGraphData.nodes.length} nodes, {mockGraphData.edges.length} edges
+              {graphNodes.length} nodes, {graphEdges.length} edges
+              {!hasStoreData && ' (demo data)'}
             </p>
           </div>
         </div>
@@ -132,15 +264,15 @@ export default function GraphExplorerPage() {
 
       {/* Canvas */}
       <GraphCanvas
-        nodes={mockGraphData.nodes}
-        edges={mockGraphData.edges}
+        nodes={graphNodes}
+        edges={graphEdges}
         activeNodeKinds={activeNodeKinds}
         activeEdgeKinds={activeEdgeKinds}
         searchQuery={searchQuery}
         showLabels={showLabels}
         selectedNodeId={selectedNodeId}
         onSelectNode={setSelectedNodeId}
-        nodePositions={nodePositions}
+        nodePositions={mergedPositions}
         onUpdateNodePosition={handleUpdateNodePosition}
       />
 
@@ -149,8 +281,8 @@ export default function GraphExplorerPage() {
         {selectedNode && (
           <NodeDetailPanel
             node={selectedNode}
-            edges={mockGraphData.edges}
-            allNodes={mockGraphData.nodes}
+            edges={graphEdges}
+            allNodes={graphNodes}
             onSelectNode={setSelectedNodeId}
             onClose={() => setSelectedNodeId(null)}
           />

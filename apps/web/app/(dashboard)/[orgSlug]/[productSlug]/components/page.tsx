@@ -1,37 +1,95 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useMemo } from 'react'
+import { useParams } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { Box, Plus, Sparkles } from 'lucide-react'
 import { type ComponentDef, mockComponents } from './_data/mock-components'
+import { useGraphStore } from '../../../../lib/graph-store'
 import { ComponentList } from './_components/component-list'
 import { ComponentDetail } from './_components/component-detail'
 import { ComponentCreateModal } from './_components/component-create-modal'
 
+// Convert graph node → local ComponentDef
+function nodeToComponent(n: { id: string; label: string; data: Record<string, unknown> }): ComponentDef {
+  try {
+    return {
+      id: n.id,
+      name: n.label,
+      category: (String(n.data.category || 'Layout')) as ComponentDef['category'],
+      description: String(n.data.description || ''),
+      props: n.data.props ? JSON.parse(String(n.data.props)) : [],
+      variants: n.data.variants ? JSON.parse(String(n.data.variants)) : [],
+      usageCount: Number(n.data.usageCount || 0),
+    }
+  } catch {
+    return { id: n.id, name: n.label, category: 'Layout', description: '', props: [], variants: [], usageCount: 0 }
+  }
+}
+
 export default function ComponentBuilderPage() {
-  const [components, setComponents] = useState<ComponentDef[]>(mockComponents)
-  const [selectedId, setSelectedId] = useState<string | null>(mockComponents[0]?.id ?? null)
+  const params = useParams<{ productSlug: string }>()
+  const productId = params.productSlug
+
+  // Graph store
+  const allNodes = useGraphStore((s) => s.nodes)
+  const addNode = useGraphStore((s) => s.addNode)
+  const updateNode = useGraphStore((s) => s.updateNode)
+  const deleteNode = useGraphStore((s) => s.deleteNode)
+
+  const componentNodes = useMemo(
+    () => allNodes.filter((n) => n.productId === productId && n.kind === 'component'),
+    [allNodes, productId]
+  )
+
+  const hasStoreData = componentNodes.length > 0
+
+  // Derive component list from graph store or fall back to mock
+  const components = useMemo(
+    () => hasStoreData ? componentNodes.map(nodeToComponent) : mockComponents,
+    [hasStoreData, componentNodes]
+  )
+
+  const [selectedId, setSelectedId] = useState<string | null>(components[0]?.id ?? null)
   const [modalOpen, setModalOpen] = useState(false)
 
   const selectedComponent = components.find((c) => c.id === selectedId) ?? null
 
   const handleUpdateComponent = useCallback((id: string, updates: Partial<ComponentDef>) => {
-    setComponents((prev) =>
-      prev.map((c) => (c.id === id ? { ...c, ...updates } : c))
-    )
-  }, [])
+    // If this is a graph node, persist
+    const existing = componentNodes.find((n) => n.id === id)
+    if (existing) {
+      const merged = { ...nodeToComponent(existing), ...updates }
+      updateNode(id, {
+        label: merged.name,
+        data: {
+          category: merged.category,
+          description: merged.description,
+          props: JSON.stringify(merged.props),
+          variants: JSON.stringify(merged.variants),
+          usageCount: String(merged.usageCount),
+        },
+      })
+    }
+  }, [componentNodes, updateNode])
 
   const handleCreateComponent = useCallback(
     (data: Omit<ComponentDef, 'id' | 'usageCount'>) => {
-      const newComp: ComponentDef = {
-        ...data,
-        id: `comp-${String(Date.now()).slice(-6)}`,
-        usageCount: 0,
-      }
-      setComponents((prev) => [newComp, ...prev])
-      setSelectedId(newComp.id)
+      const node = addNode({
+        kind: 'component',
+        label: data.name,
+        productId,
+        data: {
+          category: data.category,
+          description: data.description,
+          props: JSON.stringify(data.props),
+          variants: JSON.stringify(data.variants),
+          usageCount: '0',
+        },
+      })
+      setSelectedId(node.id)
     },
-    []
+    [addNode, productId]
   )
 
   return (

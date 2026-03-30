@@ -1,10 +1,12 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useMemo, useEffect } from 'react'
+import { useParams } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Palette, Sparkles, Save, Paintbrush, Type, Ruler, Layers, Eye } from 'lucide-react'
 import { defaultBrandConfig } from './_data/default-brand'
 import type { BrandConfig, ColorGroup, TypographyConfig, SpacingConfig, EffectsConfig } from './_data/default-brand'
+import { useGraphStore } from '../../../../lib/graph-store'
 import ColorPalette from './_components/color-palette'
 import TypographySystem from './_components/typography-system'
 import SpacingSystem from './_components/spacing-system'
@@ -33,9 +35,69 @@ const tabVariants = {
 }
 
 export default function BrandBuilderPage() {
-  const [brandData, setBrandData] = useState<BrandConfig>(defaultBrandConfig)
+  const params = useParams<{ productSlug: string }>()
+  const productId = params.productSlug
+
+  // Graph store — persist brand tokens as graph nodes
+  const allNodes = useGraphStore((s) => s.nodes)
+  const addNode = useGraphStore((s) => s.addNode)
+  const updateNode = useGraphStore((s) => s.updateNode)
+
+  const tokenNodes = useMemo(
+    () => allNodes.filter((n) => n.productId === productId && n.kind === 'token'),
+    [allNodes, productId]
+  )
+
+  // Hydrate from graph store on first render
+  const [brandData, setBrandData] = useState<BrandConfig>(() => {
+    const colorsNode = tokenNodes.find((n) => (n.data as Record<string, unknown>).tokenType === 'brand-colors')
+    const typographyNode = tokenNodes.find((n) => (n.data as Record<string, unknown>).tokenType === 'brand-typography')
+    const spacingNode = tokenNodes.find((n) => (n.data as Record<string, unknown>).tokenType === 'brand-spacing')
+    const effectsNode = tokenNodes.find((n) => (n.data as Record<string, unknown>).tokenType === 'brand-effects')
+
+    if (!colorsNode) return defaultBrandConfig
+
+    try {
+      return {
+        colorGroups: colorsNode ? JSON.parse(String(colorsNode.data.payload)) : defaultBrandConfig.colorGroups,
+        typography: typographyNode ? JSON.parse(String(typographyNode.data.payload)) : defaultBrandConfig.typography,
+        spacing: spacingNode ? JSON.parse(String(spacingNode.data.payload)) : defaultBrandConfig.spacing,
+        effects: effectsNode ? JSON.parse(String(effectsNode.data.payload)) : defaultBrandConfig.effects,
+      }
+    } catch {
+      return defaultBrandConfig
+    }
+  })
+
   const [activeTab, setActiveTab] = useState<TabId>('colors')
   const [aiPanelOpen, setAiPanelOpen] = useState(false)
+
+  // Persist brand data to graph store when Save is clicked
+  const handleSaveBrand = useCallback(() => {
+    const sections: { tokenType: string; label: string; payload: unknown }[] = [
+      { tokenType: 'brand-colors', label: 'Brand Colors', payload: brandData.colorGroups },
+      { tokenType: 'brand-typography', label: 'Brand Typography', payload: brandData.typography },
+      { tokenType: 'brand-spacing', label: 'Brand Spacing', payload: brandData.spacing },
+      { tokenType: 'brand-effects', label: 'Brand Effects', payload: brandData.effects },
+    ]
+
+    for (const section of sections) {
+      const existing = tokenNodes.find((n) => (n.data as Record<string, unknown>).tokenType === section.tokenType)
+      if (existing) {
+        updateNode(existing.id, {
+          label: section.label,
+          data: { tokenType: section.tokenType, payload: JSON.stringify(section.payload) },
+        })
+      } else {
+        addNode({
+          kind: 'token',
+          label: section.label,
+          productId,
+          data: { tokenType: section.tokenType, payload: JSON.stringify(section.payload) },
+        })
+      }
+    }
+  }, [brandData, tokenNodes, productId, addNode, updateNode])
 
   // ── Handlers ──
 
@@ -151,10 +213,11 @@ export default function BrandBuilderPage() {
             <motion.button
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.97 }}
+              onClick={handleSaveBrand}
               className="flex items-center gap-2 px-4 py-2 rounded-xl border border-white/[0.08] bg-white/[0.03] text-[#F1F5F9] text-sm font-medium hover:bg-white/[0.06] transition-colors"
             >
               <Save className="w-4 h-4" />
-              Save as Template
+              Save Brand
             </motion.button>
           </div>
         </div>

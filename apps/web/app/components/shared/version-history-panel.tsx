@@ -20,6 +20,7 @@ import {
   type Branch,
 } from '../../lib/version-store'
 import { VersionDiffModal } from './version-diff-modal'
+import { BranchGraph, MergePreview } from './branch-graph'
 
 // ---------------------------------------------------------------------------
 // Sub-components
@@ -278,27 +279,36 @@ interface VersionHistoryPanelProps {
 }
 
 export function VersionHistoryPanel({ productId }: VersionHistoryPanelProps) {
-  const {
-    isPanelOpen,
-    closePanel,
-    getVersionHistory,
-    getBranches,
-    getActiveBranch,
-    setActiveBranch,
-    createVersion,
-    createBranch,
-    mergeBranch,
-    restoreVersion,
-  } = useVersionStore()
+  // Stable selectors — never destructure entire store
+  const isPanelOpen = useVersionStore((s) => s.isPanelOpen)
+  const closePanel = useVersionStore((s) => s.closePanel)
+  const storeSetActiveBranch = useVersionStore((s) => s.setActiveBranch)
+  const storeCreateVersion = useVersionStore((s) => s.createVersion)
+  const storeCreateBranch = useVersionStore((s) => s.createBranch)
+  const storeMergeBranch = useVersionStore((s) => s.mergeBranch)
+  const storeRestoreVersion = useVersionStore((s) => s.restoreVersion)
+  const allVersions = useVersionStore((s) => s.versions)
+  const allBranches = useVersionStore((s) => s.branches)
+  const activeBranchMap = useVersionStore((s) => s.activeBranches)
 
-  const versions = getVersionHistory(productId)
-  const branches = getBranches(productId)
-  const activeBranch = getActiveBranch(productId)
+  const versions = useMemo(
+    () => allVersions
+      .filter((v) => v.productId === productId)
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()),
+    [allVersions, productId]
+  )
+  const branches = useMemo(
+    () => allBranches.filter((b) => b.productId === productId),
+    [allBranches, productId]
+  )
+  const activeBranch = activeBranchMap[productId] || 'main'
 
   const [showCreateVersion, setShowCreateVersion] = useState(false)
   const [showCreateBranch, setShowCreateBranch] = useState(false)
   const [branchSourceVersion, setBranchSourceVersion] = useState<Version | null>(null)
   const [showBranchSelector, setShowBranchSelector] = useState(false)
+  const [viewMode, setViewMode] = useState<'timeline' | 'graph'>('timeline')
+  const [mergingBranch, setMergingBranch] = useState<Branch | null>(null)
 
   // Diff modal state
   const [diffModalOpen, setDiffModalOpen] = useState(false)
@@ -317,14 +327,14 @@ export function VersionHistoryPanel({ productId }: VersionHistoryPanelProps) {
   const filteredVersions = versions.filter((v) => v.branchName === activeBranch)
 
   function handleCreateVersion(label: string, description: string) {
-    createVersion(productId, label, description)
+    storeCreateVersion(productId, label, description)
     setShowCreateVersion(false)
   }
 
   function handleCreateBranch(name: string) {
     const sourceVersion = branchSourceVersion ?? filteredVersions[0]
     if (sourceVersion) {
-      createBranch(name, sourceVersion.id)
+      storeCreateBranch(name, sourceVersion.id)
     }
     setShowCreateBranch(false)
     setBranchSourceVersion(null)
@@ -336,7 +346,7 @@ export function VersionHistoryPanel({ productId }: VersionHistoryPanelProps) {
   }
 
   function handleRestore(version: Version) {
-    restoreVersion(version.id)
+    storeRestoreVersion(version.id)
   }
 
   function handleBranchFromVersion(version: Version) {
@@ -345,13 +355,18 @@ export function VersionHistoryPanel({ productId }: VersionHistoryPanelProps) {
   }
 
   function handleMergeBranch(branch: Branch) {
-    // Merge into the latest version on the main (target) branch
+    setMergingBranch(branch)
+  }
+
+  function confirmMerge() {
+    if (!mergingBranch) return
     const mainVersions = versions
       .filter((v) => v.branchName === 'main')
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
     if (mainVersions.length > 0) {
-      mergeBranch(branch.id, mainVersions[0].id)
+      storeMergeBranch(mergingBranch.id, mainVersions[0].id)
     }
+    setMergingBranch(null)
   }
 
   return (
@@ -407,7 +422,7 @@ export function VersionHistoryPanel({ productId }: VersionHistoryPanelProps) {
                           {/* Always show main */}
                           <button
                             onClick={() => {
-                              setActiveBranch(productId, 'main')
+                              storeSetActiveBranch(productId, 'main')
                               setShowBranchSelector(false)
                             }}
                             className={`w-full flex items-center gap-2 px-3 py-1.5 rounded-md text-xs transition-colors ${
@@ -423,7 +438,7 @@ export function VersionHistoryPanel({ productId }: VersionHistoryPanelProps) {
                             <div key={branch.id} className="flex items-center">
                               <button
                                 onClick={() => {
-                                  setActiveBranch(productId, branch.name)
+                                  storeSetActiveBranch(productId, branch.name)
                                   setShowBranchSelector(false)
                                 }}
                                 className={`flex-1 flex items-center gap-2 px-3 py-1.5 rounded-md text-xs transition-colors ${
@@ -514,9 +529,57 @@ export function VersionHistoryPanel({ productId }: VersionHistoryPanelProps) {
               )}
             </AnimatePresence>
 
-            {/* Timeline */}
+            {/* View mode toggle */}
+            <div className="flex items-center gap-1 px-4 py-2 border-b border-white/[0.06]">
+              <button
+                onClick={() => setViewMode('timeline')}
+                className={`flex items-center gap-1 px-2.5 py-1 rounded-md text-[0.6875rem] transition-colors ${
+                  viewMode === 'timeline'
+                    ? 'bg-[#8B5CF6]/10 text-[#8B5CF6] font-medium'
+                    : 'text-[#64748B] hover:bg-white/[0.06]'
+                }`}
+              >
+                <Clock size={12} />
+                Timeline
+              </button>
+              <button
+                onClick={() => setViewMode('graph')}
+                className={`flex items-center gap-1 px-2.5 py-1 rounded-md text-[0.6875rem] transition-colors ${
+                  viewMode === 'graph'
+                    ? 'bg-[#8B5CF6]/10 text-[#8B5CF6] font-medium'
+                    : 'text-[#64748B] hover:bg-white/[0.06]'
+                }`}
+              >
+                <GitBranch size={12} />
+                Graph
+              </button>
+            </div>
+
+            {/* Merge preview overlay */}
+            {mergingBranch && (
+              <div className="px-4 py-3">
+                <MergePreview
+                  sourceBranch={mergingBranch}
+                  versions={versions}
+                  onConfirmMerge={confirmMerge}
+                  onCancel={() => setMergingBranch(null)}
+                />
+              </div>
+            )}
+
+            {/* Timeline / Graph */}
             <div className="flex-1 overflow-auto px-4 py-4">
-              {filteredVersions.length === 0 ? (
+              {viewMode === 'graph' ? (
+                <BranchGraph
+                  versions={versions}
+                  branches={branches}
+                  activeBranch={activeBranch}
+                  onSelectVersion={(v) => {
+                    setDiffVersion(v)
+                    setDiffModalOpen(true)
+                  }}
+                />
+              ) : filteredVersions.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full text-center">
                   <div className="p-3 rounded-xl bg-white/[0.03] mb-3">
                     <History size={24} className="text-[#475569]" />

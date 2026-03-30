@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
+import { useParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Database, GitBranch, Plus, Sparkles } from "lucide-react";
 import {
@@ -10,6 +11,7 @@ import {
   type Entity,
   type Workflow,
 } from "./_data/mock-data";
+import { useGraphStore } from "../../../../lib/graph-store";
 import EntityList from "./_components/entity-list";
 import EntityEditor from "./_components/entity-editor";
 import WorkflowList from "./_components/workflow-list";
@@ -22,10 +24,72 @@ type Selection =
   | null;
 
 export default function WorkflowBuilderPage() {
+  const params = useParams<{ productSlug: string }>();
+  const productId = params.productSlug;
+
+  // Graph store for persistence
+  const allNodes = useGraphStore((s) => s.nodes);
+  const addNode = useGraphStore((s) => s.addNode);
+  const updateNode = useGraphStore((s) => s.updateNode);
+  const deleteNodeFromStore = useGraphStore((s) => s.deleteNode);
+
+  const entityNodes = useMemo(
+    () => allNodes.filter((n) => n.productId === productId && n.kind === "entity"),
+    [allNodes, productId]
+  );
+  const workflowNodes = useMemo(
+    () => allNodes.filter((n) => n.productId === productId && n.kind === "workflow"),
+    [allNodes, productId]
+  );
+
+  // Hydrate from store or fall back to mock
+  const hasStoreEntities = entityNodes.length > 0;
+  const hasStoreWorkflows = workflowNodes.length > 0;
+
   const [tab, setTab] = useState<Tab>("entities");
-  const [entities, setEntities] = useState<Entity[]>(INITIAL_ENTITIES);
-  const [workflows, setWorkflows] = useState<Workflow[]>(INITIAL_WORKFLOWS);
+  const [entities, setEntities] = useState<Entity[]>(() => {
+    if (!hasStoreEntities) return INITIAL_ENTITIES;
+    try {
+      return entityNodes.map((n) => JSON.parse(String(n.data.payload)) as Entity);
+    } catch { return INITIAL_ENTITIES; }
+  });
+  const [workflows, setWorkflows] = useState<Workflow[]>(() => {
+    if (!hasStoreWorkflows) return INITIAL_WORKFLOWS;
+    try {
+      return workflowNodes.map((n) => JSON.parse(String(n.data.payload)) as Workflow);
+    } catch { return INITIAL_WORKFLOWS; }
+  });
   const [selection, setSelection] = useState<Selection>(null);
+
+  // Sync entities to graph store
+  useEffect(() => {
+    for (const entity of entities) {
+      const existing = entityNodes.find((n) => (n.data as Record<string, unknown>).entityLocalId === entity.id);
+      const payload = JSON.stringify(entity);
+      if (existing) {
+        if (String(existing.data.payload) !== payload) {
+          updateNode(existing.id, { label: entity.name, data: { entityLocalId: entity.id, payload } });
+        }
+      } else {
+        addNode({ kind: "entity", label: entity.name, productId, data: { entityLocalId: entity.id, payload } });
+      }
+    }
+  }, [entities]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Sync workflows to graph store
+  useEffect(() => {
+    for (const wf of workflows) {
+      const existing = workflowNodes.find((n) => (n.data as Record<string, unknown>).wfLocalId === wf.id);
+      const payload = JSON.stringify(wf);
+      if (existing) {
+        if (String(existing.data.payload) !== payload) {
+          updateNode(existing.id, { label: wf.name, data: { wfLocalId: wf.id, payload } });
+        }
+      } else {
+        addNode({ kind: "workflow", label: wf.name, productId, data: { wfLocalId: wf.id, payload } });
+      }
+    }
+  }, [workflows]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Entity CRUD ────────────────────────────────────────────────────────
   const selectEntity = useCallback((id: string) => {
