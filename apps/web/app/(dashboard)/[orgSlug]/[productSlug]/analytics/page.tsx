@@ -1,20 +1,36 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo, useEffect, useCallback } from 'react'
+import { useParams } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { Download, Sparkles, BarChart3 } from 'lucide-react'
+import { Download, Sparkles, BarChart3, Zap } from 'lucide-react'
 import { mockAnalyticsData } from './_data/mock-analytics'
 import { MetricCards } from './_components/metric-cards'
 import { TrafficChart } from './_components/traffic-chart'
 import { FunnelChart } from './_components/funnel-chart'
 import { TopPages } from './_components/top-pages'
-import { AIInsightsPanel } from './_components/ai-insights-panel'
+import { InsightToTaskPanel } from './_components/insight-to-task-panel'
+import { ExperimentTracker } from './_components/experiment-tracker'
+import { AIRecommendations } from '../../../../components/shared/ai-recommendations'
+import { GraphImpactAnalysis } from '../../../../components/shared/graph-impact-analysis'
+import { useInsightStore } from '../../../../lib/insight-store'
+import { StudioHealthBadge } from '../../../../components/shared/studio-health-badge'
 
 type DateRange = '7d' | '30d' | '90d'
 
 export default function AnalyticsPage() {
+  const params = useParams<{ productSlug: string }>()
+  const productId = params.productSlug
+
   const [dateRange, setDateRange] = useState<DateRange>('7d')
-  const { metrics, dailyTraffic, funnel, topPages, insights } = mockAnalyticsData
+  const [impactOpen, setImpactOpen] = useState(false)
+  const { metrics, dailyTraffic, funnel, topPages } = mockAnalyticsData
+
+  // Seed insights on first load
+  const seedInsights = useInsightStore((s) => s.seedInsights)
+  useEffect(() => {
+    seedInsights(productId)
+  }, [productId, seedInsights])
 
   const ranges: { key: DateRange; label: string }[] = [
     { key: '7d', label: '7 days' },
@@ -31,8 +47,11 @@ export default function AnalyticsPage() {
             <BarChart3 className="w-5 h-5 text-[#10B981]" />
           </div>
           <div>
-            <h1 className="text-xl font-semibold text-[#F1F5F9]">Analytics</h1>
-            <p className="text-xs text-[#64748B]">Track product metrics &amp; performance</p>
+            <div className="flex items-center gap-2">
+              <h1 className="text-xl font-semibold text-[#F1F5F9]">Analytics</h1>
+              <StudioHealthBadge productId={productId} studio="analytics" />
+            </div>
+            <p className="text-xs text-[#64748B]">Track product metrics, insights &amp; experiments</p>
           </div>
         </div>
 
@@ -54,6 +73,14 @@ export default function AnalyticsPage() {
             ))}
           </div>
 
+          <button
+            onClick={() => setImpactOpen(true)}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium text-amber-400 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/20 transition-colors"
+          >
+            <Zap className="w-3.5 h-3.5" />
+            Impact Analysis
+          </button>
+
           <button className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium text-[#94A3B8] bg-white/[0.03] border border-white/[0.08] hover:bg-white/[0.06] transition-colors">
             <Download className="w-3.5 h-3.5" />
             Export
@@ -71,18 +98,32 @@ export default function AnalyticsPage() {
         {/* Metric cards */}
         <MetricCards metrics={metrics} />
 
-        {/* Main chart + AI panel */}
-        <div className="grid grid-cols-1 xl:grid-cols-[1fr_280px] gap-4">
+        {/* Main chart + insights panel */}
+        <div className="grid grid-cols-1 xl:grid-cols-[1fr_320px] gap-4">
           <div className="flex flex-col gap-4">
             <TrafficChart data={dailyTraffic} />
             <FunnelChart steps={funnel} />
           </div>
-          <AIInsightsPanel insights={insights} />
+          {/* Right sidebar: Insights → Tasks + Experiments */}
+          <div className="flex flex-col gap-4">
+            <InsightToTaskPanel productId={productId} />
+            <ExperimentTracker productId={productId} />
+          </div>
         </div>
+
+        {/* AI Recommendations */}
+        <AIRecommendations productId={productId} />
 
         {/* Top pages table */}
         <TopPages pages={topPages} />
       </div>
+
+      {/* Impact Analysis modal */}
+      <GraphImpactAnalysis
+        productId={productId}
+        isOpen={impactOpen}
+        onClose={() => setImpactOpen(false)}
+      />
     </div>
   )
 }

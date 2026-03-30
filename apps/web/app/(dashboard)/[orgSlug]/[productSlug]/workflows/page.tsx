@@ -16,6 +16,7 @@ import EntityList from "./_components/entity-list";
 import EntityEditor from "./_components/entity-editor";
 import WorkflowList from "./_components/workflow-list";
 import WorkflowEditor from "./_components/workflow-editor";
+import { StudioHealthBadge } from "../../../../components/shared/studio-health-badge";
 
 type Tab = "entities" | "workflows";
 type Selection =
@@ -202,7 +203,10 @@ export default function WorkflowBuilderPage() {
           <div className="w-9 h-9 rounded-lg bg-emerald-500/10 flex items-center justify-center">
             <GitBranch className="w-4.5 h-4.5 text-emerald-400" />
           </div>
-          <h1 className="text-lg font-semibold text-[#F1F5F9]">Workflow Builder</h1>
+          <div className="flex items-center gap-2">
+            <h1 className="text-lg font-semibold text-[#F1F5F9]">Workflow Builder</h1>
+            <StudioHealthBadge productId={productId} studio="workflows" />
+          </div>
         </div>
         <div className="flex items-center gap-2">
           <button

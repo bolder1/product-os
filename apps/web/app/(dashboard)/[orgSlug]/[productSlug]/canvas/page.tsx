@@ -1,14 +1,18 @@
 'use client'
 
 import { useState, useCallback, useMemo } from 'react'
+import { useParams } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { Lightbulb } from 'lucide-react'
+import { AnalyticsOverlay } from '../../../../components/shared/analytics-overlay'
 import { type CanvasItem, mockCanvasItems } from './_data/mock-canvas'
 import { CanvasToolbar, type ToolType } from './_components/canvas-toolbar'
 import { CanvasBoard } from './_components/canvas-board'
 import { CanvasProperties } from './_components/canvas-properties'
 
 export default function CanvasPage() {
+  const params = useParams<{ productSlug: string }>()
+  const productId = params.productSlug
   const [items, setItems] = useState<CanvasItem[]>(mockCanvasItems)
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [activeTool, setActiveTool] = useState<ToolType>('select')
@@ -80,6 +84,9 @@ export default function CanvasPage() {
           zoom={zoom}
         />
       </motion.div>
+
+      {/* Analytics Overlay */}
+      <AnalyticsOverlay productId={productId} context="canvas" />
 
       {/* Canvas + Properties */}
       <div className="flex flex-1 min-h-0 rounded-xl border border-white/[0.08] overflow-hidden relative">

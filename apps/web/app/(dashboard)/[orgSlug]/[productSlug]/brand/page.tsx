@@ -13,6 +13,7 @@ import SpacingSystem from './_components/spacing-system'
 import EffectsSystem from './_components/effects-system'
 import BrandPreview from './_components/brand-preview'
 import AIBrandPanel from './_components/ai-brand-panel'
+import { StudioHealthBadge } from '../../../../components/shared/studio-health-badge'
 
 // ── Tab definitions ──
 
@@ -195,7 +196,10 @@ export default function BrandBuilderPage() {
               <Palette className="w-5 h-5 text-[#EC4899]" />
             </div>
             <div>
-              <h1 className="text-lg font-semibold text-[#F1F5F9]">Brand Builder</h1>
+              <div className="flex items-center gap-2">
+                <h1 className="text-lg font-semibold text-[#F1F5F9]">Brand Builder</h1>
+                <StudioHealthBadge productId={productId} studio="brand" />
+              </div>
               <p className="text-xs text-[#64748B]">Define your product identity</p>
             </div>
           </div>

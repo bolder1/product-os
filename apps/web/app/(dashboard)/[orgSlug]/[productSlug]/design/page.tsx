@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useCallback } from 'react'
+import { useParams } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Sparkles, Plus, ScanSearch, PenTool } from 'lucide-react'
 import { mockScreens, type ScreenDef, type ElementDef } from './_data/mock-screens'
@@ -8,11 +9,16 @@ import ScreenList from './_components/screen-list'
 import DesignCanvas from './_components/design-canvas'
 import PropertiesPanel from './_components/properties-panel'
 import InspectPanel from './_components/inspect-panel'
+import { StudioHealthBadge } from '../../../../components/shared/studio-health-badge'
+import { AnalyticsOverlay } from '../../../../components/shared/analytics-overlay'
 
 let nextScreenId = 100
 let nextElementId = 1000
 
 export default function DesignStudioPage() {
+  const params = useParams<{ productSlug: string }>()
+  const productId = params.productSlug
+
   const [screens, setScreens] = useState<ScreenDef[]>(mockScreens)
   const [selectedScreenId, setSelectedScreenId] = useState<string | null>(mockScreens[0]?.id ?? null)
   const [selectedElementId, setSelectedElementId] = useState<string | null>(null)
@@ -112,7 +118,10 @@ export default function DesignStudioPage() {
             <PenTool className="w-5 h-5 text-[#8B5CF6]" />
           </div>
           <div>
-            <h1 className="text-lg font-semibold text-[#F1F5F9]">Design Studio</h1>
+            <div className="flex items-center gap-2">
+              <h1 className="text-lg font-semibold text-[#F1F5F9]">Design Studio</h1>
+              <StudioHealthBadge productId={productId} studio="design" />
+            </div>
             <p className="text-xs text-[#64748B]">Design screens and interfaces</p>
           </div>
         </div>
@@ -152,6 +161,11 @@ export default function DesignStudioPage() {
             AI Generate
           </motion.button>
         </div>
+      </div>
+
+      {/* Analytics Overlay */}
+      <div className="px-4 pb-2">
+        <AnalyticsOverlay productId={productId} context="design" />
       </div>
 
       {/* Body: three-panel layout */}

@@ -10,6 +10,8 @@ import { PageTree } from './_components/page-tree'
 import { SectionEditor } from './_components/section-editor'
 import { SectionProperties } from './_components/section-properties'
 import { PagePreview } from './_components/page-preview'
+import { StudioHealthBadge } from '../../../../components/shared/studio-health-badge'
+import { AnalyticsOverlay } from '../../../../components/shared/analytics-overlay'
 
 export default function PageBuilderPage() {
   const params = useParams<{ productSlug: string }>()
@@ -187,9 +189,12 @@ export default function PageBuilderPage() {
             <FileText className="w-4.5 h-4.5 text-[#3B82F6]" />
           </div>
           <div>
-            <h1 className="text-xl font-semibold text-[#F1F5F9]">
-              Page Builder
-            </h1>
+            <div className="flex items-center gap-2">
+              <h1 className="text-xl font-semibold text-[#F1F5F9]">
+                Page Builder
+              </h1>
+              <StudioHealthBadge productId={productId} studio="pages" />
+            </div>
             <p className="text-xs text-[#64748B]">
               {pages.length} pages
               {selectedPage ? ` \u00B7 Editing: ${selectedPage.name}` : ''}
@@ -223,6 +228,11 @@ export default function PageBuilderPage() {
             New Page
           </button>
         </div>
+      </div>
+
+      {/* Analytics Overlay */}
+      <div className="px-1 pb-2">
+        <AnalyticsOverlay productId={productId} context="pages" />
       </div>
 
       {/* Three-panel layout */}

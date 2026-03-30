@@ -9,6 +9,7 @@ import { useGraphStore } from '../../../../lib/graph-store'
 import { ComponentList } from './_components/component-list'
 import { ComponentDetail } from './_components/component-detail'
 import { ComponentCreateModal } from './_components/component-create-modal'
+import { StudioHealthBadge } from '../../../../components/shared/studio-health-badge'
 
 // Convert graph node → local ComponentDef
 function nodeToComponent(n: { id: string; label: string; data: Record<string, unknown> }): ComponentDef {
@@ -101,7 +102,10 @@ export default function ComponentBuilderPage() {
             <Box className="w-5 h-5 text-[#06B6D4]" />
           </div>
           <div>
-            <h1 className="text-xl font-semibold text-[#F1F5F9]">Component Builder</h1>
+            <div className="flex items-center gap-2">
+              <h1 className="text-xl font-semibold text-[#F1F5F9]">Component Builder</h1>
+              <StudioHealthBadge productId={productId} studio="components" />
+            </div>
             <p className="text-xs text-[#64748B]">
               {components.length} component{components.length !== 1 ? 's' : ''}
             </p>
