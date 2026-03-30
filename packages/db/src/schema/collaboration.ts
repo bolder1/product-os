@@ -1,7 +1,7 @@
 import { pgTable, uuid, text, timestamp, jsonb, boolean, pgEnum } from 'drizzle-orm/pg-core'
-import { products } from './products.js'
-import { graphNodes } from './graph.js'
-import { users } from './users.js'
+import { products } from './products'
+import { graphNodes } from './graph'
+import { users } from './users'
 
 // --- Comments ---
 export const comments = pgTable('comments', {

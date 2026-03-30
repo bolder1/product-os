@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { eq, and } from 'drizzle-orm'
 import { tasks } from '@product-os/db'
-import { router, protectedProcedure } from '../trpc.js'
+import { router, protectedProcedure } from '../trpc'
 
 const taskStatusValues = ['todo', 'in_progress', 'review', 'done', 'cancelled'] as const
 const taskPriorityValues = ['low', 'medium', 'high', 'urgent'] as const

@@ -1,8 +1,8 @@
 import { generateText } from 'ai'
 import { z } from 'zod'
-import { getModel } from '../provider.js'
-import { buildSystemPrompt, type AIContext } from '../context.js'
-import type { SkillDefinition, SkillResult } from './types.js'
+import { getModel } from '../provider'
+import { buildSystemPrompt, type AIContext } from '../context'
+import type { SkillDefinition, SkillResult } from './types'
 
 const suggestInputSchema = z.object({
   prompt: z.string(),

@@ -1,3 +1,3 @@
-export * from './schema/index.js'
-export * from './edges/index.js'
-export * from './compiler/index.js'
+export * from './schema/index'
+export * from './edges/index'
+export * from './compiler/index'

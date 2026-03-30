@@ -152,7 +152,7 @@ export default function OnboardingPage() {
   const initials = useMemo(() => {
     const parts = displayName.trim().split(/\s+/)
     return parts.length >= 2
-      ? `${parts[0][0]}${parts[1][0]}`.toUpperCase()
+      ? `${parts[0]?.[0] ?? ''}${parts[1]?.[0] ?? ''}`.toUpperCase()
       : (parts[0]?.[0] ?? '?').toUpperCase()
   }, [displayName])
 

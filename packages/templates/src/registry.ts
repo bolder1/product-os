@@ -1,5 +1,5 @@
-import type { TemplateBundle } from './types.js'
-import { loadBundle } from './loader.js'
+import type { TemplateBundle } from './types'
+import { loadBundle } from './loader'
 import saasStarter from './bundles/saas-starter.json' with { type: 'json' }
 import opsPilot from './bundles/ops-pilot.json' with { type: 'json' }
 import landingPage from './bundles/landing-page.json' with { type: 'json' }

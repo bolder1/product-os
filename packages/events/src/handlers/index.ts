@@ -1,4 +1,4 @@
-import type { ProductOSEvent, EventHandler } from '../types.js';
+import type { ProductOSEvent, EventHandler } from '../types';
 
 // ---------------------------------------------------------------------------
 // graphSyncHandler

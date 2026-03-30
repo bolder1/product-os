@@ -1,7 +1,7 @@
 import { pgTable, uuid, text, timestamp, jsonb, pgEnum } from 'drizzle-orm/pg-core'
-import { organizations } from './organizations.js'
-import { products } from './products.js'
-import { graphNodes } from './graph.js'
+import { organizations } from './organizations'
+import { products } from './products'
+import { graphNodes } from './graph'
 
 export const connectorTypeEnum = pgEnum('connector_type', [
   'figma',

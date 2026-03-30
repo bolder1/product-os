@@ -1,4 +1,4 @@
-import type { TemplateBundle } from './types.js'
+import type { TemplateBundle } from './types'
 
 export interface ApplyResult {
   nodeIdMap: Map<string, string> // templateId -> real graph node ID

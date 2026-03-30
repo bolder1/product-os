@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import type { AIContext } from '../context.js'
+import type { AIContext } from '../context'
 
 export const skillActionEnum = z.enum([
   'suggest',

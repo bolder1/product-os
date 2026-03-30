@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { eq, and, or, isNull } from 'drizzle-orm'
 import { graphNodes, graphEdges } from '@product-os/db'
-import { router, protectedProcedure } from '../trpc.js'
+import { router, protectedProcedure } from '../trpc'
 
 const nodeKindValues = [
   'product', 'plan', 'template_bundle', 'module', 'feature', 'journey',

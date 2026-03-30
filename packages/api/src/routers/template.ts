@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { eq, and, or, ilike } from 'drizzle-orm'
 import { templateBundles } from '@product-os/db'
-import { router, protectedProcedure } from '../trpc.js'
+import { router, protectedProcedure } from '../trpc'
 
 export const templateRouter = router({
   listBuiltIn: protectedProcedure.query(async ({ ctx }) => {
@@ -53,7 +53,7 @@ export const templateRouter = router({
       return template
     }),
 
-  apply: protectedProcedure
+  applyTemplate: protectedProcedure
     .input(
       z.object({
         templateId: z.string().uuid(),

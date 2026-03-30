@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { eq } from 'drizzle-orm'
 import { approvals, approvalDecisions } from '@product-os/db'
-import { router, protectedProcedure } from '../trpc.js'
+import { router, protectedProcedure } from '../trpc'
 
 const approvalStatusValues = ['pending', 'approved', 'rejected', 'changes_requested'] as const
 

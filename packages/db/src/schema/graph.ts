@@ -1,6 +1,6 @@
 import { pgTable, uuid, text, timestamp, jsonb, integer, index, pgEnum } from 'drizzle-orm/pg-core'
-import { products } from './products.js'
-import { users } from './users.js'
+import { products } from './products'
+import { users } from './users'
 
 export const graphNodeKindEnum = pgEnum('graph_node_kind', [
   'product',

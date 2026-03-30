@@ -1,6 +1,6 @@
 import { pgTable, uuid, text, timestamp, pgEnum } from 'drizzle-orm/pg-core'
-import { products } from './products.js'
-import { users } from './users.js'
+import { products } from './products'
+import { users } from './users'
 
 export const branchStatusEnum = pgEnum('branch_status', ['active', 'merged', 'archived'])
 

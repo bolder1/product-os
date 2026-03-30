@@ -38,8 +38,8 @@ export function ApprovalTimeline({ events }: ApprovalTimelineProps) {
 
       <div className="flex flex-col gap-4">
         {events.map((event, index) => {
-          const config = actionConfig[event.action] ?? actionConfig.commented
-          const Icon = config.icon
+          const config = actionConfig[event.action] ?? actionConfig.commented!
+          const Icon = config!.icon
 
           return (
             <motion.div
