@@ -2,8 +2,7 @@
 
 import { useState, useRef, useEffect, useMemo } from 'react'
 import { usePathname } from 'next/navigation'
-import { Search, Sparkles, Bell, User, ChevronRight, GitBranch, Check, X } from 'lucide-react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { Search, Bell, ChevronRight, GitBranch, Sparkles, Command } from 'lucide-react'
 import { useCommandPaletteStore } from '../../lib/command-palette-store'
 import { useVersionStore } from '../../lib/version-store'
 import { useNotificationStore } from '../../lib/notification-store'
@@ -31,7 +30,6 @@ export function TopBar() {
   const [showNotifs, setShowNotifs] = useState(false)
   const notifRef = useRef<HTMLDivElement>(null)
 
-  // Close dropdown on outside click
   useEffect(() => {
     function handleClick(e: MouseEvent) {
       if (notifRef.current && !notifRef.current.contains(e.target as Node)) {
@@ -41,9 +39,8 @@ export function TopBar() {
     if (showNotifs) document.addEventListener('mousedown', handleClick)
     return () => document.removeEventListener('mousedown', handleClick)
   }, [showNotifs])
-  const segments = pathname.split('/').filter(Boolean)
 
-  // Build breadcrumb from URL segments
+  const segments = pathname.split('/').filter(Boolean)
   const orgSlug = segments[0] ?? ''
   const productSlug = segments[1] ?? ''
   const studioSlug = segments[2] ?? ''
@@ -54,144 +51,113 @@ export function TopBar() {
     .join(' ')
 
   return (
-    <header className="glass sticky top-0 z-30 h-12 flex items-center justify-between px-4 border-b border-white/[0.08]">
+    <header className="h-[var(--topbar-h)] flex items-center justify-between px-3 bg-[var(--bg-surface)] border-b border-[var(--border-default)] z-30 flex-shrink-0 select-none">
       {/* Breadcrumb */}
-      <nav className="flex items-center gap-1 text-[0.8125rem]">
+      <nav className="flex items-center gap-1.5 text-[11px] min-w-0">
         {orgSlug && (
-          <span className="text-[#64748B] hover:text-[#94A3B8] transition-colors cursor-pointer">
-            {orgSlug}
-          </span>
+          <span className="text-[var(--text-tertiary)] truncate max-w-[90px] hover:text-[var(--text-secondary)] cursor-default transition-colors">{orgSlug}</span>
         )}
         {productSlug && (
           <>
-            <ChevronRight size={14} className="text-[#64748B]" />
-            <span className="text-[#94A3B8] hover:text-[#F1F5F9] transition-colors cursor-pointer">
-              {productSlug}
-            </span>
+            <ChevronRight size={10} className="text-[var(--text-tertiary)] opacity-50 shrink-0" />
+            <span className="text-[var(--text-secondary)] truncate max-w-[110px] hover:text-[var(--text-primary)] cursor-default transition-colors">{productSlug}</span>
           </>
         )}
         {studioLabel && (
           <>
-            <ChevronRight size={14} className="text-[#64748B]" />
-            <span className="text-[#F1F5F9] font-medium">
-              {studioLabel}
-            </span>
+            <ChevronRight size={10} className="text-[var(--text-tertiary)] opacity-50 shrink-0" />
+            <span className="text-[var(--text-primary)] font-medium">{studioLabel}</span>
           </>
         )}
       </nav>
 
-      {/* Actions */}
-      <div className="flex items-center gap-1">
-        {/* Search / command palette */}
-        <button
-          onClick={openPalette}
-          className="flex items-center gap-2 px-2.5 py-1.5 rounded-md text-[0.8125rem] text-[#64748B] hover:bg-white/[0.06] hover:text-[#94A3B8] transition-colors"
-          title="Search (Ctrl+K)"
-        >
-          <Search size={16} />
-          <span className="hidden sm:inline">Search</span>
-          <kbd className="hidden sm:inline text-[0.625rem] px-1.5 py-0.5 rounded bg-white/[0.06] border border-white/[0.08] text-[#64748B]">
-            Ctrl K
-          </kbd>
-        </button>
+      {/* Center: Search */}
+      <button
+        onClick={openPalette}
+        className="flex items-center gap-2 h-[26px] px-3 rounded-md bg-[var(--bg-inset)] border border-[var(--border-default)] text-[11px] text-[var(--text-tertiary)] hover:border-[var(--border-strong)] hover:text-[var(--text-secondary)] transition-all cursor-pointer min-w-[200px] max-w-[320px]"
+      >
+        <Search size={12} className="shrink-0 opacity-60" />
+        <span className="flex-1 text-left">Search or jump to...</span>
+        <div className="flex items-center gap-0.5">
+          <kbd className="tool-kbd text-[9px]">&#8984;</kbd>
+          <kbd className="tool-kbd text-[9px]">K</kbd>
+        </div>
+      </button>
 
-        {/* Version History */}
+      {/* Actions */}
+      <div className="flex items-center gap-0.5">
+        {/* Version */}
         <button
           onClick={openVersionPanel}
-          className="p-1.5 rounded-md hover:bg-white/[0.06] transition-colors text-[#94A3B8] hover:text-[#8B5CF6]"
+          className="tool-btn-ghost tool-btn-icon"
           title="Version History"
         >
-          <GitBranch size={18} />
+          <GitBranch size={14} />
         </button>
 
-        {/* AI Assistant */}
+        {/* AI */}
         <button
-          className="p-1.5 rounded-md hover:bg-white/[0.06] transition-colors text-[#8B5CF6]"
+          className="tool-btn-ghost tool-btn-icon hover:text-[var(--accent-text)]"
           title="AI Assistant"
         >
-          <Sparkles size={18} />
+          <Sparkles size={14} />
         </button>
 
         {/* Notifications */}
         <div className="relative" ref={notifRef}>
           <button
             onClick={() => setShowNotifs(!showNotifs)}
-            className="relative p-1.5 rounded-md hover:bg-white/[0.06] transition-colors text-[#94A3B8]"
+            className="tool-btn-ghost tool-btn-icon relative"
             title="Notifications"
           >
-            <Bell size={18} />
+            <Bell size={14} />
             {unreadNotifs.length > 0 && (
-              <span className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-[#F43F5E] text-[0.5rem] font-bold text-white flex items-center justify-center">
-                {unreadNotifs.length > 9 ? '9+' : unreadNotifs.length}
-              </span>
+              <span className="absolute top-1 right-1 w-[6px] h-[6px] rounded-full bg-[var(--accent)] ring-2 ring-[var(--bg-surface)]" />
             )}
           </button>
 
-          <AnimatePresence>
-            {showNotifs && (
-              <motion.div
-                initial={{ opacity: 0, y: 4, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: 4, scale: 0.95 }}
-                transition={{ duration: 0.15 }}
-                className="absolute right-0 top-full mt-2 w-80 bg-[#0A0F1E] border border-white/[0.08] rounded-xl shadow-2xl overflow-hidden z-50"
-              >
-                <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.06]">
-                  <span className="text-sm font-medium text-[#F1F5F9]">Notifications</span>
-                  {unreadNotifs.length > 0 && (
-                    <button
-                      onClick={() => markAllRead()}
-                      className="text-[10px] text-[#6366F1] hover:text-[#818CF8] transition-colors"
+          {showNotifs && (
+            <div className="tool-dropdown absolute right-0 top-full mt-1.5 w-[300px]">
+              <div className="flex items-center justify-between px-3 py-2 border-b border-[var(--border-default)]">
+                <span className="text-[11px] font-semibold text-[var(--text-primary)]">Notifications</span>
+                {unreadNotifs.length > 0 && (
+                  <button
+                    onClick={() => markAllRead()}
+                    className="text-[10px] text-[var(--accent-text)] hover:text-[var(--accent-hover)] transition-colors"
+                  >
+                    Mark all read
+                  </button>
+                )}
+              </div>
+              <div className="max-h-[320px] overflow-y-auto">
+                {notifications.slice(0, 12).length === 0 ? (
+                  <div className="tool-empty py-8">
+                    <p className="text-[11px]">No notifications</p>
+                  </div>
+                ) : (
+                  notifications.slice(0, 12).map((n) => (
+                    <div
+                      key={n.id}
+                      className={`tool-dropdown-item py-2.5 px-3 border-b border-[var(--border-subtle)] ${
+                        !n.read ? 'bg-[var(--accent-subtle)]' : ''
+                      }`}
+                      onClick={() => { if (!n.read) markRead(n.id) }}
                     >
-                      Mark all read
-                    </button>
-                  )}
-                </div>
-                <div className="max-h-80 overflow-y-auto">
-                  {notifications.slice(0, 10).length === 0 ? (
-                    <div className="py-8 text-center">
-                      <Bell size={20} className="mx-auto text-[#64748B] mb-2" />
-                      <p className="text-xs text-[#64748B]">No notifications</p>
-                    </div>
-                  ) : (
-                    notifications.slice(0, 10).map((n) => (
-                      <div
-                        key={n.id}
-                        className={`flex items-start gap-3 px-4 py-3 border-b border-white/[0.04] hover:bg-white/[0.03] transition-colors cursor-pointer ${
-                          !n.read ? 'bg-[#6366F1]/[0.04]' : ''
-                        }`}
-                        onClick={() => { if (!n.read) markRead(n.id) }}
-                      >
-                        <div className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${n.read ? 'bg-transparent' : 'bg-[#6366F1]'}`} />
-                        <div className="flex-1 min-w-0">
-                          <p className="text-xs text-[#F1F5F9] line-clamp-2">{n.title}</p>
-                          {n.message && (
-                            <p className="text-[10px] text-[#64748B] mt-0.5 line-clamp-1">{n.message}</p>
-                          )}
-                          <p className="text-[10px] text-[#475569] mt-1">{timeAgo(n.createdAt)}</p>
-                        </div>
+                      <div className={`w-[5px] h-[5px] rounded-full shrink-0 ${n.read ? 'bg-transparent' : 'bg-[var(--accent)]'}`} />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[11px] text-[var(--text-primary)] line-clamp-1">{n.title}</p>
+                        {n.message && (
+                          <p className="text-[10px] text-[var(--text-tertiary)] mt-0.5 line-clamp-1">{n.message}</p>
+                        )}
+                        <p className="text-[9px] text-[var(--text-tertiary)] opacity-60 mt-0.5">{timeAgo(n.createdAt)}</p>
                       </div>
-                    ))
-                  )}
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-
-        {/* User avatar */}
-        <button
-          className="ml-1 w-7 h-7 rounded-full bg-gradient-to-br from-[#3B82F6] to-[#8B5CF6] flex items-center justify-center hover:opacity-90 transition-opacity"
-          title={user?.name ?? 'Account'}
-        >
-          {user ? (
-            <span className="text-[0.5625rem] font-bold text-white leading-none">
-              {user.name.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase()}
-            </span>
-          ) : (
-            <User size={14} className="text-white" />
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
           )}
-        </button>
+        </div>
       </div>
     </header>
   )

@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useRef, useCallback, useMemo } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
 import {
   MessageSquare,
   AtSign,
@@ -38,10 +37,10 @@ function timeAgo(dateStr: string): string {
 function RichBody({ body }: { body: string }) {
   const parts = body.split(/(@\w+)/g)
   return (
-    <p className="text-sm text-[#CBD5E1] leading-relaxed">
+    <p className="text-[12px] text-[var(--text-primary)] leading-relaxed">
       {parts.map((part, i) =>
         part.startsWith('@') ? (
-          <span key={i} className="text-[#8B5CF6] font-medium">
+          <span key={i} className="text-[var(--accent-text)] font-medium">
             {part}
           </span>
         ) : (
@@ -71,17 +70,11 @@ function CommentRow({ comment, isReply, onReply, onResolve }: CommentRowProps) {
   )
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -8 }}
-      transition={{ duration: 0.2 }}
-      className={isReply ? 'ml-8 pl-3 border-l-2 border-[#6366F1]/30' : ''}
-    >
-      <div className="group flex gap-3 py-2.5">
+    <div className={isReply ? 'ml-8 pl-3 border-l-2 border-[var(--accent)]/30' : ''}>
+      <div className="group flex gap-3 py-2">
         {/* Avatar */}
-        <div className="w-7 h-7 rounded-full bg-gradient-to-br from-[#6366F1] to-[#8B5CF6] flex items-center justify-center shrink-0 mt-0.5">
-          <span className="text-[10px] font-bold text-white leading-none">
+        <div className="w-6 h-6 rounded-[var(--radius-sm)] bg-[var(--accent)]/20 flex items-center justify-center shrink-0 mt-0.5">
+          <span className="text-[10px] font-bold text-[var(--accent-text)] leading-none">
             {comment.authorInitials}
           </span>
         </div>
@@ -89,14 +82,14 @@ function CommentRow({ comment, isReply, onReply, onResolve }: CommentRowProps) {
         <div className="flex-1 min-w-0">
           {/* Meta row */}
           <div className="flex items-center gap-2 mb-0.5">
-            <span className="text-xs font-medium text-[#F1F5F9]">
+            <span className="text-[11px] font-medium text-[var(--text-primary)]">
               {comment.authorName}
             </span>
-            <span className="text-[10px] text-[#64748B]">
+            <span className="text-[10px] text-[var(--text-tertiary)]">
               {timeAgo(comment.createdAt)}
             </span>
             {comment.resolved && (
-              <span className="flex items-center gap-0.5 text-[10px] text-[#10B981] font-medium">
+              <span className="flex items-center gap-0.5 text-[10px] text-emerald-400 font-medium">
                 <CheckCircle size={10} />
                 Resolved
               </span>
@@ -111,7 +104,7 @@ function CommentRow({ comment, isReply, onReply, onResolve }: CommentRowProps) {
             {!isReply && (
               <button
                 onClick={() => onReply(comment.id)}
-                className="flex items-center gap-1 text-[10px] text-[#64748B] hover:text-[#94A3B8] transition-colors"
+                className="flex items-center gap-1 text-[10px] text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] transition-colors"
               >
                 <Reply size={11} />
                 Reply
@@ -120,7 +113,7 @@ function CommentRow({ comment, isReply, onReply, onResolve }: CommentRowProps) {
             {!comment.resolved && !comment.parentId && (
               <button
                 onClick={() => onResolve(comment.id)}
-                className="flex items-center gap-1 text-[10px] text-[#64748B] hover:text-[#10B981] transition-colors"
+                className="flex items-center gap-1 text-[10px] text-[var(--text-tertiary)] hover:text-emerald-400 transition-colors"
               >
                 <CheckCircle size={11} />
                 Resolve
@@ -144,7 +137,7 @@ function CommentRow({ comment, isReply, onReply, onResolve }: CommentRowProps) {
           ))}
         </div>
       )}
-    </motion.div>
+    </div>
   )
 }
 
@@ -168,23 +161,20 @@ function MentionPopup({
   if (filtered.length === 0) return null
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 4 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: 4 }}
-      className="absolute bottom-full left-0 mb-1 bg-[#0A0F1E] border border-white/[0.08] rounded-lg shadow-xl overflow-hidden z-50"
+    <div
+      className="absolute bottom-full left-0 mb-1 bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-[var(--radius-md)] shadow-xl overflow-hidden z-50"
     >
       {filtered.map((user) => (
         <button
           key={user}
           onClick={() => onSelect(user)}
-          className="flex items-center gap-2 w-full px-3 py-1.5 text-xs text-[#CBD5E1] hover:bg-white/[0.06] transition-colors"
+          className="flex items-center gap-2 w-full px-3 py-1.5 text-[12px] text-[var(--text-primary)] hover:bg-[var(--surface-hover)] transition-colors"
         >
-          <AtSign size={12} className="text-[#8B5CF6]" />
+          <AtSign size={12} className="text-[var(--accent-text)]" />
           {user}
         </button>
       ))}
-    </motion.div>
+    </div>
   )
 }
 
@@ -259,7 +249,6 @@ export function CommentThread({
       const val = e.target.value
       setBody(val)
 
-      // Detect @mention in progress
       const cursorPos = e.target.selectionStart
       const textUpToCursor = val.slice(0, cursorPos)
       const mentionMatch = textUpToCursor.match(/@(\w*)$/)
@@ -299,11 +288,11 @@ export function CommentThread({
     <div className="flex flex-col gap-1">
       {/* Header */}
       <div className="flex items-center gap-2 mb-2">
-        <MessageSquare size={14} className="text-[#6366F1]" />
-        <span className="text-xs font-medium text-[#94A3B8]">
+        <MessageSquare size={13} className="text-[var(--accent-text)]" />
+        <span className="text-[11px] font-medium text-[var(--text-secondary)]">
           Comments
           {sortedComments.length > 0 && (
-            <span className="ml-1 text-[#64748B]">({sortedComments.length})</span>
+            <span className="ml-1 text-[var(--text-tertiary)]">({sortedComments.length})</span>
           )}
         </span>
       </div>
@@ -311,69 +300,50 @@ export function CommentThread({
       {/* Comment list */}
       {sortedComments.length === 0 ? (
         <div className="flex flex-col items-center py-6 text-center">
-          <div className="w-10 h-10 rounded-xl bg-[#6366F1]/10 flex items-center justify-center mb-2">
-            <MessageSquare size={18} className="text-[#6366F1]" />
-          </div>
-          <p className="text-xs text-[#64748B]">No comments yet</p>
-          <p className="text-[10px] text-[#475569] mt-0.5">
+          <MessageSquare size={16} className="text-[var(--text-tertiary)] mb-2" />
+          <p className="text-[11px] text-[var(--text-tertiary)]">No comments yet</p>
+          <p className="text-[10px] text-[var(--text-tertiary)] mt-0.5">
             Start the conversation
           </p>
         </div>
       ) : (
         <div className="space-y-0.5 mb-2 max-h-80 overflow-y-auto pr-1">
-          <AnimatePresence initial={false}>
-            {sortedComments.map((comment, i) => (
-              <motion.div
-                key={comment.id}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.2, delay: i * 0.04 }}
-              >
-                <CommentRow
-                  comment={comment}
-                  onReply={(id) => setReplyingTo(id)}
-                  onResolve={(id) => resolveComment(id, authorId)}
-                />
-              </motion.div>
-            ))}
-          </AnimatePresence>
+          {sortedComments.map((comment) => (
+            <CommentRow
+              key={comment.id}
+              comment={comment}
+              onReply={(id) => setReplyingTo(id)}
+              onResolve={(id) => resolveComment(id, authorId)}
+            />
+          ))}
         </div>
       )}
 
       {/* Reply indicator */}
-      <AnimatePresence>
-        {replyingTo && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            className="flex items-center gap-1.5 text-[10px] text-[#6366F1] mb-1"
+      {replyingTo && (
+        <div className="flex items-center gap-1.5 text-[10px] text-[var(--accent-text)] mb-1">
+          <CornerDownRight size={10} />
+          <span>Replying to thread</span>
+          <button
+            onClick={() => setReplyingTo(null)}
+            className="ml-1 p-0.5 rounded-[var(--radius-sm)] hover:bg-[var(--surface-hover)]"
           >
-            <CornerDownRight size={10} />
-            <span>Replying to thread</span>
-            <button
-              onClick={() => setReplyingTo(null)}
-              className="ml-1 p-0.5 rounded hover:bg-white/[0.06]"
-            >
-              <X size={10} />
-            </button>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            <X size={10} />
+          </button>
+        </div>
+      )}
 
       {/* Compose */}
       <div className="relative">
-        <AnimatePresence>
-          {mentionQuery !== null && (
-            <MentionPopup
-              query={mentionQuery}
-              onSelect={handleMentionSelect}
-              onClose={() => setMentionQuery(null)}
-            />
-          )}
-        </AnimatePresence>
+        {mentionQuery !== null && (
+          <MentionPopup
+            query={mentionQuery}
+            onSelect={handleMentionSelect}
+            onClose={() => setMentionQuery(null)}
+          />
+        )}
 
-        <div className="flex items-end gap-2 bg-white/[0.03] border border-white/[0.08] rounded-lg px-3 py-2">
+        <div className="flex items-end gap-2 bg-[var(--bg-inset)] border border-[var(--border-default)] rounded-[var(--radius-md)] px-3 py-2">
           <textarea
             ref={inputRef}
             value={body}
@@ -381,14 +351,14 @@ export function CommentThread({
             onKeyDown={handleKeyDown}
             placeholder="Add a comment... Use @ to mention"
             rows={1}
-            className="flex-1 bg-transparent text-sm text-[#F1F5F9] placeholder-[#475569] resize-none outline-none min-h-[1.5rem] max-h-24"
+            className="flex-1 bg-transparent text-[12px] text-[var(--text-primary)] placeholder-[var(--text-tertiary)] resize-none outline-none min-h-[1.5rem] max-h-24"
           />
           <button
             onClick={handleSubmit}
             disabled={!body.trim()}
-            className="p-1.5 rounded-md bg-[#6366F1] text-white hover:bg-[#5558E6] disabled:opacity-30 disabled:cursor-not-allowed transition-colors shrink-0"
+            className="tool-btn-primary p-1.5 disabled:opacity-30 disabled:cursor-not-allowed shrink-0"
           >
-            <Send size={13} />
+            <Send size={12} />
           </button>
         </div>
       </div>

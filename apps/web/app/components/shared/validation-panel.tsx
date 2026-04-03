@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
 import {
   X,
   ShieldCheck,
@@ -49,13 +48,13 @@ const AREA_CONFIG: {
 ]
 
 function scoreColor(score: number): string {
-  if (score < 40) return '#EF4444'
-  if (score <= 70) return '#EAB308'
-  return '#22C55E'
+  if (score < 40) return 'var(--color-error)'
+  if (score <= 70) return 'var(--color-warning)'
+  return 'var(--color-success)'
 }
 
 // ---------------------------------------------------------------------------
-// Circular Progress Ring
+// Readiness Ring (pure CSS, no framer-motion)
 // ---------------------------------------------------------------------------
 
 function ReadinessRing({ score }: { score: number }) {
@@ -68,17 +67,15 @@ function ReadinessRing({ score }: { score: number }) {
   return (
     <div className="relative flex items-center justify-center w-[140px] h-[140px]">
       <svg width={140} height={140} className="-rotate-90">
-        {/* Background ring */}
         <circle
           cx={70}
           cy={70}
           r={radius}
           fill="none"
-          stroke="rgba(255,255,255,0.06)"
+          stroke="var(--border-subtle)"
           strokeWidth={stroke}
         />
-        {/* Progress ring */}
-        <motion.circle
+        <circle
           cx={70}
           cy={70}
           r={radius}
@@ -87,22 +84,18 @@ function ReadinessRing({ score }: { score: number }) {
           strokeWidth={stroke}
           strokeLinecap="round"
           strokeDasharray={circumference}
-          initial={{ strokeDashoffset: circumference }}
-          animate={{ strokeDashoffset: offset }}
-          transition={{ duration: 1, ease: 'easeOut' }}
+          strokeDashoffset={offset}
+          className="transition-all duration-700"
         />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <motion.span
-          className="text-3xl font-bold"
+        <span
+          className="text-2xl font-bold"
           style={{ color }}
-          initial={{ opacity: 0, scale: 0.5 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.3, type: 'spring', damping: 20 }}
         >
           {score}%
-        </motion.span>
-        <span className="text-[0.625rem] text-[#64748B] mt-0.5">Overall Readiness</span>
+        </span>
+        <span className="text-[10px] text-[var(--text-tertiary)] mt-0.5">Overall Readiness</span>
       </div>
     </div>
   )
@@ -116,34 +109,29 @@ function ReadinessBar({
   label,
   score,
   icon: Icon,
-  delay,
 }: {
   label: string
   score: number
   icon: typeof MapPin
-  delay: number
 }) {
   const color = scoreColor(score)
 
   return (
     <div className="flex items-center gap-3 group">
-      <div className="p-1 rounded bg-white/[0.03]">
-        <Icon size={13} className="text-[#64748B] group-hover:text-[#94A3B8] transition-colors" />
+      <div className="p-1 rounded-sm bg-[var(--bg-inset)]">
+        <Icon size={12} className="text-[var(--text-tertiary)] group-hover:text-[var(--text-secondary)] transition-colors" />
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between mb-1">
-          <span className="text-[0.6875rem] text-[#94A3B8]">{label}</span>
-          <span className="text-[0.625rem] font-medium" style={{ color }}>
+          <span className="text-[11px] text-[var(--text-secondary)]">{label}</span>
+          <span className="text-[10px] font-medium" style={{ color }}>
             {score}%
           </span>
         </div>
-        <div className="h-1.5 rounded-full bg-white/[0.06] overflow-hidden">
-          <motion.div
-            className="h-full rounded-full"
-            style={{ backgroundColor: color }}
-            initial={{ width: 0 }}
-            animate={{ width: `${score}%` }}
-            transition={{ duration: 0.8, delay, ease: 'easeOut' }}
+        <div className="h-1 rounded-sm bg-[var(--bg-inset)] overflow-hidden">
+          <div
+            className="h-full rounded-sm transition-all duration-500"
+            style={{ backgroundColor: color, width: `${score}%` }}
           />
         </div>
       </div>
@@ -162,43 +150,38 @@ function IssueItem({ issue }: { issue: ValidationIssue }) {
   > = {
     error: { icon: AlertTriangle, color: 'text-red-400', bgClass: 'bg-red-500/10' },
     warning: { icon: AlertCircle, color: 'text-yellow-400', bgClass: 'bg-yellow-500/10' },
-    info: { icon: Info, color: 'text-blue-400', bgClass: 'bg-blue-500/10' },
+    info: { icon: Info, color: 'text-[var(--accent-text)]', bgClass: 'bg-[var(--accent)]/10' },
   }
 
   const config = severityConfig[issue.severity]
   const SeverityIcon = config.icon
 
   return (
-    <motion.div
-      className="flex items-start gap-2.5 px-3 py-2.5 rounded-lg bg-white/[0.02] hover:bg-white/[0.04] transition-colors group"
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-    >
-      <div className={`p-1 rounded ${config.bgClass} mt-0.5`}>
-        <SeverityIcon size={12} className={config.color} />
+    <div className="flex items-start gap-2.5 px-3 py-2 rounded-sm bg-[var(--bg-inset)] hover:bg-[var(--surface-hover)] transition-colors group">
+      <div className={`p-1 rounded-sm ${config.bgClass} mt-0.5`}>
+        <SeverityIcon size={11} className={config.color} />
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-xs text-[#F1F5F9] leading-relaxed">{issue.title}</p>
+        <p className="text-[12px] text-[var(--text-primary)] leading-relaxed">{issue.title}</p>
         {issue.description && (
-          <p className="text-[0.625rem] text-[#64748B] mt-0.5 line-clamp-2">
+          <p className="text-[10px] text-[var(--text-tertiary)] mt-0.5 line-clamp-2">
             {issue.description}
           </p>
         )}
         <div className="flex items-center gap-2 mt-1.5">
-          <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[0.5625rem] font-medium bg-[#6366F1]/10 text-[#6366F1] border border-[#6366F1]/20">
+          <span className="tool-badge text-[10px] bg-[var(--accent)]/10 text-[var(--accent-text)] border-[var(--accent)]/20">
             {issue.studio}
           </span>
           {issue.suggestion && (
-            <span className="text-[0.5625rem] text-[#475569] truncate">{issue.suggestion}</span>
+            <span className="text-[10px] text-[var(--text-tertiary)] truncate">{issue.suggestion}</span>
           )}
         </div>
       </div>
-      <button className="flex items-center gap-1 px-2 py-1 rounded text-[0.625rem] text-[#94A3B8] hover:bg-white/[0.06] transition-colors opacity-0 group-hover:opacity-100 shrink-0">
+      <button className="tool-btn flex items-center gap-1 text-[10px] opacity-0 group-hover:opacity-100 shrink-0">
         <Wrench size={10} />
         Fix
       </button>
-    </motion.div>
+    </div>
   )
 }
 
@@ -226,7 +209,7 @@ function IssueSection({
   const colors: Record<ValidationSeverity, string> = {
     error: 'text-red-400',
     warning: 'text-yellow-400',
-    info: 'text-blue-400',
+    info: 'text-[var(--accent-text)]',
   }
 
   if (issues.length === 0) return null
@@ -235,31 +218,24 @@ function IssueSection({
     <div>
       <button
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-2 w-full px-1 py-1.5 text-left hover:bg-white/[0.03] rounded transition-colors"
+        className="flex items-center gap-2 w-full px-1 py-1.5 text-left hover:bg-[var(--surface-hover)] rounded-sm transition-colors"
       >
-        <motion.div animate={{ rotate: open ? 90 : 0 }} transition={{ duration: 0.15 }}>
-          <ChevronRight size={12} className="text-[#64748B]" />
-        </motion.div>
-        <span className={`text-[0.6875rem] font-medium ${colors[severity]}`}>
+        <ChevronRight
+          size={12}
+          className={`text-[var(--text-tertiary)] transition-transform duration-150 ${open ? 'rotate-90' : ''}`}
+        />
+        <span className={`text-[11px] font-medium ${colors[severity]}`}>
           {labels[severity]}
         </span>
-        <span className="ml-auto text-[0.625rem] text-[#475569]">{issues.length}</span>
+        <span className="ml-auto text-[10px] text-[var(--text-tertiary)]">{issues.length}</span>
       </button>
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            className="space-y-1.5 mt-1"
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.2 }}
-          >
-            {issues.map((issue) => (
-              <IssueItem key={issue.id} issue={issue} />
-            ))}
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {open && (
+        <div className="space-y-1 mt-1">
+          {issues.map((issue) => (
+            <IssueItem key={issue.id} issue={issue} />
+          ))}
+        </div>
+      )}
     </div>
   )
 }
@@ -288,73 +264,60 @@ export function ValidationPanel({ productId }: ValidationPanelProps) {
 // Trigger Button (exported standalone)
 // ---------------------------------------------------------------------------
 
-export function ValidationTrigger({ productId }: { productId: string }) {
+export function ValidationTrigger({ productId, compact }: { productId: string; compact?: boolean }) {
   const [isOpen, setIsOpen] = useState(false)
   const { readiness, errorCount, warningCount } = useValidation(productId)
 
   return (
     <>
-      <ValidationTriggerButton
-        score={readiness.overall}
-        errorCount={errorCount}
-        warningCount={warningCount}
-        onClick={() => setIsOpen(true)}
-      />
+      {compact ? (
+        <button
+          onClick={() => setIsOpen(true)}
+          className="inline-flex items-center gap-1 text-[10px] leading-none text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
+        >
+          <span style={{ color: scoreColor(readiness.overall) }} className="font-medium">
+            {readiness.overall}%
+          </span>
+          {errorCount > 0 && (
+            <span className="text-red-400">{errorCount}E</span>
+          )}
+          {warningCount > 0 && (
+            <span className="text-yellow-400">{warningCount}W</span>
+          )}
+        </button>
+      ) : (
+        <button
+          onClick={() => setIsOpen(true)}
+          className="tool-btn flex items-center gap-2 px-2.5 py-1.5"
+        >
+          <ShieldCheck size={13} style={{ color: scoreColor(readiness.overall) }} />
+          <span className="text-[11px] font-medium" style={{ color: scoreColor(readiness.overall) }}>
+            {readiness.overall}%
+          </span>
+          {(errorCount > 0 || warningCount > 0) && (
+            <span className="flex items-center gap-1 ml-1">
+              {errorCount > 0 && (
+                <span className="flex items-center gap-0.5 text-[10px] text-red-400">
+                  <AlertTriangle size={10} />
+                  {errorCount}
+                </span>
+              )}
+              {warningCount > 0 && (
+                <span className="flex items-center gap-0.5 text-[10px] text-yellow-400">
+                  <AlertCircle size={10} />
+                  {warningCount}
+                </span>
+              )}
+            </span>
+          )}
+        </button>
+      )}
       <ValidationPanelInner
         productId={productId}
         isOpen={isOpen}
         onClose={() => setIsOpen(false)}
       />
     </>
-  )
-}
-
-// ---------------------------------------------------------------------------
-// Trigger Button (visual)
-// ---------------------------------------------------------------------------
-
-function ValidationTriggerButton({
-  score,
-  errorCount,
-  warningCount,
-  onClick,
-}: {
-  score: number
-  errorCount: number
-  warningCount: number
-  onClick: () => void
-}) {
-  const color = scoreColor(score)
-  const hasIssues = errorCount + warningCount > 0
-
-  return (
-    <motion.button
-      onClick={onClick}
-      className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-white/[0.03] border border-white/[0.08] hover:bg-white/[0.06] transition-colors"
-      whileHover={{ scale: 1.02 }}
-      whileTap={{ scale: 0.98 }}
-    >
-      <ShieldCheck size={14} style={{ color }} />
-      <span className="text-xs font-medium" style={{ color }}>
-        {score}%
-      </span>
-      {hasIssues && (
-        <span className="flex items-center gap-1 ml-1">
-          {errorCount > 0 && (
-            <span className="flex items-center gap-0.5 text-[0.625rem] text-red-400">
-              <AlertTriangle size={10} />
-              {errorCount}
-            </span>
-          )}
-          {warningCount > 0 && (
-            <span className="flex items-center gap-0.5 text-[0.625rem] text-yellow-400">
-              <AlertCircle size={10} />
-              {warningCount}
-            </span>
-          )}
-        </span>
-      )}
-    </motion.button>
   )
 }
 
@@ -380,124 +343,112 @@ function ValidationPanelInner({
   const totalChecks = 10
   const passRate = Math.round(((totalChecks - issues.length) / totalChecks) * 100)
 
+  if (!isOpen) return null
+
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <>
-          {/* Backdrop */}
-          <motion.div
-            className="fixed inset-0 z-40 bg-black/30 backdrop-blur-sm"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+    <>
+      {/* Backdrop */}
+      <div
+        className="fixed inset-0 z-40 bg-black/50"
+        onClick={onClose}
+      />
+
+      {/* Panel */}
+      <aside
+        className="fixed right-0 top-0 bottom-0 z-50 w-[400px] flex flex-col border-l border-[var(--border-default)] bg-[var(--bg-surface)]"
+      >
+        {/* Header */}
+        <div className="h-[var(--topbar-h)] flex items-center justify-between px-3 border-b border-[var(--border-default)]">
+          <div className="flex items-center gap-2">
+            <ShieldCheck size={13} className="text-[var(--accent-text)]" />
+            <h2 className="text-[13px] font-medium text-[var(--text-primary)]">Product Readiness</h2>
+          </div>
+          <button
             onClick={onClose}
-          />
-
-          {/* Panel */}
-          <motion.aside
-            className="fixed right-0 top-0 bottom-0 z-50 w-[400px] flex flex-col border-l border-white/[0.08] bg-[#060918] shadow-2xl"
-            initial={{ x: 400 }}
-            animate={{ x: 0 }}
-            exit={{ x: 400 }}
-            transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+            className="tool-btn p-1"
           >
-            {/* Header */}
-            <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.08]">
-              <div className="flex items-center gap-2">
-                <div className="p-1.5 rounded-lg bg-[#6366F1]/10">
-                  <ShieldCheck size={16} className="text-[#6366F1]" />
+            <X size={13} className="text-[var(--text-tertiary)]" />
+          </button>
+        </div>
+
+        {/* Scrollable content */}
+        <div className="flex-1 overflow-auto">
+          {/* Overall readiness ring */}
+          <div className="flex justify-center py-6 border-b border-[var(--border-default)]">
+            <ReadinessRing score={readiness.overall} />
+          </div>
+
+          {/* Readiness breakdown */}
+          <div className="px-3 py-4 border-b border-[var(--border-default)]">
+            <h3 className="text-[10px] uppercase tracking-wider text-[var(--text-tertiary)] font-medium mb-3">
+              Readiness Breakdown
+            </h3>
+            <div className="space-y-3">
+              {AREA_CONFIG.map((area) => (
+                <ReadinessBar
+                  key={area.key}
+                  label={area.label}
+                  score={readiness[area.key]}
+                  icon={area.icon}
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* Issues list */}
+          <div className="px-3 py-4">
+            <h3 className="text-[10px] uppercase tracking-wider text-[var(--text-tertiary)] font-medium mb-3">
+              Validation Issues
+            </h3>
+            {issues.length === 0 ? (
+              <div className="flex flex-col items-center py-8 text-center">
+                <div className="p-2.5 rounded-[var(--radius-md)] bg-emerald-500/10 mb-3">
+                  <CheckCircle2 size={20} className="text-emerald-400" />
                 </div>
-                <h2 className="text-sm font-semibold text-[#F1F5F9]">Product Readiness</h2>
+                <p className="text-[12px] text-[var(--text-secondary)]">All checks passed</p>
+                <p className="text-[11px] text-[var(--text-tertiary)] mt-1">
+                  Your product graph has no validation issues.
+                </p>
               </div>
-              <button
-                onClick={onClose}
-                className="p-1.5 rounded-md hover:bg-white/[0.06] transition-colors text-[#64748B] hover:text-[#94A3B8]"
+            ) : (
+              <div className="space-y-2">
+                <IssueSection severity="error" issues={errors} defaultOpen={true} />
+                <IssueSection severity="warning" issues={warnings} defaultOpen={true} />
+                <IssueSection severity="info" issues={infos} defaultOpen={false} />
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Footer stats */}
+        <div className="px-3 py-2 border-t border-[var(--border-default)] bg-[var(--bg-inset)]">
+          <div className="flex items-center justify-between text-[10px] text-[var(--text-tertiary)]">
+            <div className="flex items-center gap-3">
+              <span className="flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-red-500" />
+                {errorCount} error{errorCount !== 1 ? 's' : ''}
+              </span>
+              <span className="flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-yellow-500" />
+                {warningCount} warning{warningCount !== 1 ? 's' : ''}
+              </span>
+              <span className="flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)]" />
+                {infoCount} info
+              </span>
+            </div>
+            <span>
+              Pass rate:{' '}
+              <span
+                className="font-medium"
+                style={{ color: scoreColor(Math.max(0, passRate)) }}
               >
-                <X size={16} />
-              </button>
-            </div>
-
-            {/* Scrollable content */}
-            <div className="flex-1 overflow-auto">
-              {/* Overall readiness ring */}
-              <div className="flex justify-center py-6 border-b border-white/[0.08]">
-                <ReadinessRing score={readiness.overall} />
-              </div>
-
-              {/* Readiness breakdown */}
-              <div className="px-4 py-4 border-b border-white/[0.08]">
-                <h3 className="text-[0.6875rem] uppercase tracking-wider text-[#475569] font-medium mb-3">
-                  Readiness Breakdown
-                </h3>
-                <div className="space-y-3">
-                  {AREA_CONFIG.map((area, idx) => (
-                    <ReadinessBar
-                      key={area.key}
-                      label={area.label}
-                      score={readiness[area.key]}
-                      icon={area.icon}
-                      delay={idx * 0.05}
-                    />
-                  ))}
-                </div>
-              </div>
-
-              {/* Issues list */}
-              <div className="px-4 py-4">
-                <h3 className="text-[0.6875rem] uppercase tracking-wider text-[#475569] font-medium mb-3">
-                  Validation Issues
-                </h3>
-                {issues.length === 0 ? (
-                  <div className="flex flex-col items-center py-8 text-center">
-                    <div className="p-3 rounded-xl bg-emerald-500/10 mb-3">
-                      <CheckCircle2 size={24} className="text-emerald-400" />
-                    </div>
-                    <p className="text-sm text-[#94A3B8]">All checks passed</p>
-                    <p className="text-xs text-[#475569] mt-1">
-                      Your product graph has no validation issues.
-                    </p>
-                  </div>
-                ) : (
-                  <div className="space-y-2">
-                    <IssueSection severity="error" issues={errors} defaultOpen={true} />
-                    <IssueSection severity="warning" issues={warnings} defaultOpen={true} />
-                    <IssueSection severity="info" issues={infos} defaultOpen={false} />
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Footer stats */}
-            <div className="px-4 py-2.5 border-t border-white/[0.08] bg-white/[0.01]">
-              <div className="flex items-center justify-between text-[0.625rem] text-[#475569]">
-                <div className="flex items-center gap-3">
-                  <span className="flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-red-500" />
-                    {errorCount} error{errorCount !== 1 ? 's' : ''}
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-yellow-500" />
-                    {warningCount} warning{warningCount !== 1 ? 's' : ''}
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
-                    {infoCount} info
-                  </span>
-                </div>
-                <span>
-                  Pass rate:{' '}
-                  <span
-                    className="font-medium"
-                    style={{ color: scoreColor(Math.max(0, passRate)) }}
-                  >
-                    {Math.max(0, passRate)}%
-                  </span>
-                </span>
-              </div>
-            </div>
-          </motion.aside>
-        </>
-      )}
-    </AnimatePresence>
+                {Math.max(0, passRate)}%
+              </span>
+            </span>
+          </div>
+        </div>
+      </aside>
+    </>
   )
 }

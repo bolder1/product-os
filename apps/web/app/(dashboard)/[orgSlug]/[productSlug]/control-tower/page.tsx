@@ -2,8 +2,7 @@
 
 import { useState } from 'react'
 import { useParams } from 'next/navigation'
-import { motion } from 'framer-motion'
-import { Radar, Wand2, Shield, GitCompare, Store, Brain, Plug } from 'lucide-react'
+import { Wand2, Shield, GitCompare, Store, Brain, Plug } from 'lucide-react'
 import { HealthScore } from './_components/health-score'
 import { QuickStats } from './_components/quick-stats'
 import { ActivityFeed } from './_components/activity-feed'
@@ -19,17 +18,21 @@ import { TemplateMarketplace } from '../../../../components/shared/template-mark
 import { ConnectorsPanel } from '../../../../components/shared/connectors-panel'
 import { AISkillsPanel } from '../../../../components/shared/ai-skills-panel'
 
+const toolButtons = [
+  { key: 'remix', label: 'AI Remix', icon: Wand2 },
+  { key: 'conflict', label: 'Conflicts', icon: Shield },
+  { key: 'compliance', label: 'Compliance', icon: Shield },
+  { key: 'drift', label: 'Drift', icon: GitCompare },
+  { key: 'marketplace', label: 'Marketplace', icon: Store },
+  { key: 'connectors', label: 'Connectors', icon: Plug },
+  { key: 'skills', label: 'AI Skills', icon: Brain },
+] as const
+
 export default function ControlTowerPage() {
   const params = useParams<{ productSlug: string }>()
   const productId = params.productSlug
 
-  const [remixOpen, setRemixOpen] = useState(false)
-  const [conflictOpen, setConflictOpen] = useState(false)
-  const [complianceOpen, setComplianceOpen] = useState(false)
-  const [driftOpen, setDriftOpen] = useState(false)
-  const [marketplaceOpen, setMarketplaceOpen] = useState(false)
-  const [connectorsOpen, setConnectorsOpen] = useState(false)
-  const [skillsOpen, setSkillsOpen] = useState(false)
+  const [openModal, setOpenModal] = useState<string | null>(null)
 
   const remixRequest: RemixRequest = {
     target: 'component',
@@ -38,140 +41,62 @@ export default function ControlTowerPage() {
   }
 
   return (
-    <div className="flex flex-col gap-6 p-6 min-h-full">
-      {/* Page Header */}
-      <motion.div
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
-        className="flex items-center gap-3"
-      >
-        <div className="w-10 h-10 rounded-xl bg-[#3B82F6]/10 flex items-center justify-center">
-          <Radar className="w-5 h-5 text-[#3B82F6]" />
-        </div>
-        <div>
-          <h1 className="text-xl font-semibold text-[#F1F5F9]">Control Tower</h1>
-          <p className="text-xs text-[#64748B]">Real-time product health and activity overview</p>
-        </div>
-      </motion.div>
-
-      {/* Top Row: Health Score (large) + Quick Stats (3 small) */}
-      <div className="grid grid-cols-12 gap-4">
-        <div className="col-span-4">
-          <HealthScore />
-        </div>
-        <div className="col-span-8">
-          <QuickStats />
-        </div>
+    <div className="flex flex-col h-full">
+      {/* Toolbar */}
+      <div className="flex items-center gap-1 px-3 h-[var(--toolbar-h)] border-b border-[var(--border-default)] bg-[var(--bg-surface)] flex-shrink-0">
+        <span className="text-[10px] font-medium text-[var(--text-tertiary)] uppercase tracking-wider mr-2">Tools</span>
+        {toolButtons.map((t) => (
+          <button
+            key={t.key}
+            onClick={() => setOpenModal(t.key)}
+            className="tool-btn text-[10px] h-[22px] px-2 py-0 gap-1"
+          >
+            <t.icon size={11} />
+            {t.label}
+          </button>
+        ))}
       </div>
 
-      {/* Middle Row: Activity Feed (~60%) + Dependency Graph (~40%) */}
-      <div className="grid grid-cols-12 gap-4">
-        <div className="col-span-7">
-          <ActivityFeed />
-        </div>
-        <div className="col-span-5">
-          <DependencyGraphMini />
+      {/* Content grid */}
+      <div className="flex-1 overflow-auto p-3">
+        <div className="grid grid-cols-12 gap-3 auto-rows-min">
+          {/* Health + Stats */}
+          <div className="col-span-3">
+            <HealthScore />
+          </div>
+          <div className="col-span-9">
+            <QuickStats />
+          </div>
+
+          {/* Activity + Graph */}
+          <div className="col-span-7">
+            <ActivityFeed />
+          </div>
+          <div className="col-span-5">
+            <DependencyGraphMini />
+          </div>
+
+          {/* Tasks + Approvals + Insights */}
+          <div className="col-span-4">
+            <OpenTasks />
+          </div>
+          <div className="col-span-4">
+            <PendingApprovals />
+          </div>
+          <div className="col-span-4">
+            <AiInsights />
+          </div>
         </div>
       </div>
-
-      {/* Bottom Row: Open Tasks + Pending Approvals + AI Insights */}
-      <div className="grid grid-cols-3 gap-4">
-        <OpenTasks />
-        <PendingApprovals />
-        <AiInsights />
-      </div>
-
-      {/* Phase 5 Intelligence Tools */}
-      <motion.div
-        initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.3 }}
-      >
-        <p className="text-[0.625rem] uppercase tracking-wider text-[#475569] mb-3">
-          Intelligence Tools
-        </p>
-        <div className="grid grid-cols-7 gap-3">
-          <button
-            onClick={() => setRemixOpen(true)}
-            className="flex flex-col items-center gap-2 p-4 rounded-xl border border-white/[0.06] bg-white/[0.02] hover:border-[#6366F1]/30 hover:bg-[#6366F1]/5 transition-all group"
-          >
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#6366F1]/10 to-[#EC4899]/10 flex items-center justify-center group-hover:from-[#6366F1]/20 group-hover:to-[#EC4899]/20 transition-colors">
-              <Wand2 className="w-4 h-4 text-[#818CF8]" />
-            </div>
-            <span className="text-[0.6875rem] text-[#94A3B8] font-medium">AI Remix</span>
-          </button>
-
-          <button
-            onClick={() => setConflictOpen(true)}
-            className="flex flex-col items-center gap-2 p-4 rounded-xl border border-white/[0.06] bg-white/[0.02] hover:border-amber-500/30 hover:bg-amber-500/5 transition-all group"
-          >
-            <div className="w-9 h-9 rounded-xl bg-amber-500/10 flex items-center justify-center group-hover:bg-amber-500/20 transition-colors">
-              <Shield className="w-4 h-4 text-amber-400" />
-            </div>
-            <span className="text-[0.6875rem] text-[#94A3B8] font-medium">Conflicts</span>
-          </button>
-
-          <button
-            onClick={() => setComplianceOpen(true)}
-            className="flex flex-col items-center gap-2 p-4 rounded-xl border border-white/[0.06] bg-white/[0.02] hover:border-[#6366F1]/30 hover:bg-[#6366F1]/5 transition-all group"
-          >
-            <div className="w-9 h-9 rounded-xl bg-[#6366F1]/10 flex items-center justify-center group-hover:bg-[#6366F1]/20 transition-colors">
-              <Shield className="w-4 h-4 text-[#6366F1]" />
-            </div>
-            <span className="text-[0.6875rem] text-[#94A3B8] font-medium">Compliance</span>
-          </button>
-
-          <button
-            onClick={() => setDriftOpen(true)}
-            className="flex flex-col items-center gap-2 p-4 rounded-xl border border-white/[0.06] bg-white/[0.02] hover:border-orange-500/30 hover:bg-orange-500/5 transition-all group"
-          >
-            <div className="w-9 h-9 rounded-xl bg-orange-500/10 flex items-center justify-center group-hover:bg-orange-500/20 transition-colors">
-              <GitCompare className="w-4 h-4 text-orange-400" />
-            </div>
-            <span className="text-[0.6875rem] text-[#94A3B8] font-medium">Drift</span>
-          </button>
-
-          <button
-            onClick={() => setMarketplaceOpen(true)}
-            className="flex flex-col items-center gap-2 p-4 rounded-xl border border-white/[0.06] bg-white/[0.02] hover:border-emerald-500/30 hover:bg-emerald-500/5 transition-all group"
-          >
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#6366F1]/10 to-[#10B981]/10 flex items-center justify-center group-hover:from-[#6366F1]/20 group-hover:to-[#10B981]/20 transition-colors">
-              <Store className="w-4 h-4 text-emerald-400" />
-            </div>
-            <span className="text-[0.6875rem] text-[#94A3B8] font-medium">Marketplace</span>
-          </button>
-
-          <button
-            onClick={() => setConnectorsOpen(true)}
-            className="flex flex-col items-center gap-2 p-4 rounded-xl border border-white/[0.06] bg-white/[0.02] hover:border-cyan-500/30 hover:bg-cyan-500/5 transition-all group"
-          >
-            <div className="w-9 h-9 rounded-xl bg-cyan-500/10 flex items-center justify-center group-hover:bg-cyan-500/20 transition-colors">
-              <Plug className="w-4 h-4 text-cyan-400" />
-            </div>
-            <span className="text-[0.6875rem] text-[#94A3B8] font-medium">Connectors</span>
-          </button>
-
-          <button
-            onClick={() => setSkillsOpen(true)}
-            className="flex flex-col items-center gap-2 p-4 rounded-xl border border-white/[0.06] bg-white/[0.02] hover:border-pink-500/30 hover:bg-pink-500/5 transition-all group"
-          >
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#6366F1]/10 to-[#EC4899]/10 flex items-center justify-center group-hover:from-[#6366F1]/20 group-hover:to-[#EC4899]/20 transition-colors">
-              <Brain className="w-4 h-4 text-[#EC4899]" />
-            </div>
-            <span className="text-[0.6875rem] text-[#94A3B8] font-medium">AI Skills</span>
-          </button>
-        </div>
-      </motion.div>
 
       {/* Modals */}
-      <AIRemixEngine open={remixOpen} onClose={() => setRemixOpen(false)} request={remixRequest} />
-      <GraphConflictResolver productId={productId} open={conflictOpen} onClose={() => setConflictOpen(false)} />
-      <BrandComplianceChecker productId={productId} open={complianceOpen} onClose={() => setComplianceOpen(false)} />
-      <DriftDetector productId={productId} open={driftOpen} onClose={() => setDriftOpen(false)} />
-      <TemplateMarketplace open={marketplaceOpen} onClose={() => setMarketplaceOpen(false)} />
-      <ConnectorsPanel productId={productId} open={connectorsOpen} onClose={() => setConnectorsOpen(false)} />
-      <AISkillsPanel productId={productId} open={skillsOpen} onClose={() => setSkillsOpen(false)} />
+      <AIRemixEngine open={openModal === 'remix'} onClose={() => setOpenModal(null)} request={remixRequest} />
+      <GraphConflictResolver productId={productId} open={openModal === 'conflict'} onClose={() => setOpenModal(null)} />
+      <BrandComplianceChecker productId={productId} open={openModal === 'compliance'} onClose={() => setOpenModal(null)} />
+      <DriftDetector productId={productId} open={openModal === 'drift'} onClose={() => setOpenModal(null)} />
+      <TemplateMarketplace open={openModal === 'marketplace'} onClose={() => setOpenModal(null)} />
+      <ConnectorsPanel productId={productId} open={openModal === 'connectors'} onClose={() => setOpenModal(null)} />
+      <AISkillsPanel productId={productId} open={openModal === 'skills'} onClose={() => setOpenModal(null)} />
     </div>
   )
 }

@@ -1,7 +1,6 @@
 'use client'
 
-import { use, useMemo } from 'react'
-import { useState } from 'react'
+import { use, useMemo, useState } from 'react'
 import { Sidebar } from '../../../components/shell/sidebar'
 import { TopBar } from '../../../components/shell/topbar'
 import { TasksPanel } from '../../../components/shell/tasks-panel'
@@ -14,10 +13,8 @@ import { useVersionStore } from '../../../lib/version-store'
 import { useCommentStore } from '../../../lib/comment-store'
 import { createContext, useContext } from 'react'
 import { usePathname } from 'next/navigation'
-import { GitBranch, MessageSquare } from 'lucide-react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { GitBranch, MessageSquare, X, CircleDot } from 'lucide-react'
 
-/* ── Product context ── */
 export const ProductContext = createContext<Product | null>(null)
 
 export function useProduct() {
@@ -44,7 +41,6 @@ export default function ProductLayout({
     return allComments.filter((c) => c.entityId === entityId && !c.resolved && !c.parentId).length
   }, [allComments, orgSlug, productSlug, pathname])
 
-  // Derive current studio from pathname
   const segments = pathname.split('/')
   const currentStudio = segments[3] || 'planner'
   const productId = `${orgSlug}-${productSlug}`
@@ -53,81 +49,78 @@ export default function ProductLayout({
 
   return (
     <ProductContext.Provider value={product}>
-      <div className="flex h-screen overflow-hidden">
+      <div className="flex h-screen overflow-hidden bg-[var(--bg-base)]">
         <Sidebar />
-        <div className="flex-1 flex flex-col overflow-hidden">
+        <div className="flex-1 flex flex-col overflow-hidden min-w-0">
           <TopBar />
-          <main className="flex-1 overflow-auto p-6">
+
+          <main className="flex-1 overflow-auto bg-[var(--bg-workspace)]">
             {children}
           </main>
+
+          {/* ── Status Bar ── */}
+          <div className="h-[var(--statusbar-h)] flex items-center justify-between px-3 bg-[var(--bg-surface)] border-t border-[var(--border-default)] flex-shrink-0 text-[10px] select-none">
+            <div className="flex items-center gap-4">
+              <button
+                onClick={openVersionPanel}
+                className="flex items-center gap-1.5 text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] transition-colors"
+              >
+                <GitBranch size={11} strokeWidth={1.75} />
+                <span className="font-medium">{activeBranch}</span>
+              </button>
+
+              <ValidationTrigger productId={productId} compact />
+
+              <button
+                onClick={() => setCommentsOpen(!commentsOpen)}
+                className="flex items-center gap-1.5 text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] transition-colors"
+              >
+                <MessageSquare size={11} strokeWidth={1.75} />
+                <span>{unresolvedCount > 0 ? `${unresolvedCount} open` : 'Comments'}</span>
+              </button>
+            </div>
+
+            <div className="flex items-center gap-4 text-[var(--text-tertiary)]">
+              <div className="flex items-center gap-1.5">
+                <CircleDot size={9} className="text-[var(--color-success)]" />
+                <span>Ready</span>
+              </div>
+              <span className="opacity-50">{currentStudio}</span>
+            </div>
+          </div>
         </div>
 
-        {/* Floating action pills */}
-        <div className="fixed bottom-4 right-4 z-40 flex items-center gap-2">
-          {/* Comments pill */}
-          <button
-            onClick={() => setCommentsOpen(!commentsOpen)}
-            className="relative flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#0A0E23] border border-white/[0.08] text-xs font-medium text-[#94A3B8] hover:border-[#6366F1]/40 hover:text-[#F1F5F9] transition-all shadow-lg"
-            title="Comments"
+        {/* ── Comments Panel ── */}
+        {commentsOpen && (
+          <div
+            className="fixed top-0 right-0 bottom-0 w-[320px] z-50 bg-[var(--bg-surface)] border-l border-[var(--border-default)] flex flex-col"
+            style={{ animation: 'slideInRight 200ms cubic-bezier(0.16, 1, 0.3, 1)', boxShadow: 'var(--shadow-panel)' }}
           >
-            <MessageSquare size={13} className="text-[#6366F1]" />
-            Comments
-            {unresolvedCount > 0 && (
-              <span className="w-4 h-4 rounded-full bg-[#F43F5E] text-[0.5rem] font-bold text-white flex items-center justify-center">
-                {unresolvedCount}
-              </span>
-            )}
-          </button>
-
-          {/* Validation trigger */}
-          <ValidationTrigger productId={productId} />
-
-          {/* Version branch pill */}
-          <button
-            onClick={openVersionPanel}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#0A0E23] border border-white/[0.08] text-xs font-medium text-[#94A3B8] hover:border-[#8B5CF6]/40 hover:text-[#F1F5F9] transition-all shadow-lg"
-            title="Version History"
-          >
-            <GitBranch size={13} className="text-[#8B5CF6]" />
-            {activeBranch}
-          </button>
-        </div>
-
-        {/* Comments slide-in panel */}
-        <AnimatePresence>
-          {commentsOpen && (
-            <motion.div
-              initial={{ x: 340, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              exit={{ x: 340, opacity: 0 }}
-              transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-              className="fixed top-0 right-0 bottom-0 w-[340px] z-50 bg-[#0A0F1E] border-l border-white/[0.08] shadow-2xl flex flex-col"
-            >
-              <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.06]">
-                <div className="flex items-center gap-2">
-                  <MessageSquare size={16} className="text-[#6366F1]" />
-                  <span className="text-sm font-medium text-[#F1F5F9]">
-                    {currentStudio.charAt(0).toUpperCase() + currentStudio.slice(1)} Comments
-                  </span>
-                </div>
-                <button
-                  onClick={() => setCommentsOpen(false)}
-                  className="p-1 rounded-md hover:bg-white/[0.06] text-[#64748B]"
-                >
-                  ✕
-                </button>
+            <div className="h-[var(--topbar-h)] flex items-center justify-between px-3 border-b border-[var(--border-default)]">
+              <div className="flex items-center gap-2">
+                <MessageSquare size={13} className="text-[var(--accent)]" />
+                <span className="text-[11px] font-semibold text-[var(--text-primary)]">Comments</span>
+                {unresolvedCount > 0 && (
+                  <span className="tool-badge-accent text-[9px]">{unresolvedCount}</span>
+                )}
               </div>
-              <div className="flex-1 overflow-y-auto p-4">
-                <CommentThread
-                  entityId={commentEntityId}
-                  entityType="studio"
-                  productId={productId}
-                  studio={currentStudio}
-                />
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+              <button
+                onClick={() => setCommentsOpen(false)}
+                className="tool-btn-ghost tool-btn-icon"
+              >
+                <X size={14} />
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto p-3">
+              <CommentThread
+                entityId={commentEntityId}
+                entityType="studio"
+                productId={productId}
+                studio={currentStudio}
+              />
+            </div>
+          </div>
+        )}
 
         <ValidationPanel productId={productId} />
         <VersionHistoryPanel productId={productId} />

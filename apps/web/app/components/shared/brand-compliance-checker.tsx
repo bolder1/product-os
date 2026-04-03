@@ -1,7 +1,6 @@
 'use client'
 
 import { useMemo, useState, useCallback } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
 import {
   Shield,
   CheckCircle2,
@@ -117,11 +116,9 @@ const complianceRules: ComplianceRule[] = [
     check: (tokens, targets) => {
       const components = targets.filter((n) => n.kind === 'component')
       if (tokens.length === 0 || components.length === 0) return []
-      // Check if any component has hardcoded colors in data
       const violations: ComplianceViolation[] = []
       for (const comp of components) {
         const payload = String(comp.data?.payload ?? '')
-        // Look for hex colors in payload that aren't standard black/white
         const hexMatch = payload.match(/#[0-9a-fA-F]{6}/g)
         if (hexMatch && hexMatch.some((h) => h !== '#000000' && h !== '#ffffff' && h !== '#FFFFFF')) {
           violations.push({
@@ -193,17 +190,17 @@ const complianceRules: ComplianceRule[] = [
 // ---------------------------------------------------------------------------
 
 const categoryIcons: Record<ComplianceCategory, React.ReactNode> = {
-  color: <Palette className="w-3.5 h-3.5" />,
-  typography: <Type className="w-3.5 h-3.5" />,
-  spacing: <Layout className="w-3.5 h-3.5" />,
-  imagery: <Image className="w-3.5 h-3.5" />,
-  layout: <Layout className="w-3.5 h-3.5" />,
+  color: <Palette className="w-3 h-3" />,
+  typography: <Type className="w-3 h-3" />,
+  spacing: <Layout className="w-3 h-3" />,
+  imagery: <Image className="w-3 h-3" />,
+  layout: <Layout className="w-3 h-3" />,
 }
 
-const statusColors: Record<ComplianceStatus, { bg: string; text: string; icon: React.ReactNode }> = {
-  pass: { bg: 'bg-emerald-500/10', text: 'text-emerald-400', icon: <CheckCircle2 className="w-4 h-4 text-emerald-400" /> },
-  warning: { bg: 'bg-amber-500/10', text: 'text-amber-400', icon: <AlertTriangle className="w-4 h-4 text-amber-400" /> },
-  fail: { bg: 'bg-rose-500/10', text: 'text-rose-400', icon: <XCircle className="w-4 h-4 text-rose-400" /> },
+const statusIcons: Record<ComplianceStatus, React.ReactNode> = {
+  pass: <CheckCircle2 className="w-3.5 h-3.5 text-[var(--color-success)]" />,
+  warning: <AlertTriangle className="w-3.5 h-3.5 text-[var(--color-warning)]" />,
+  fail: <XCircle className="w-3.5 h-3.5 text-[var(--color-error)]" />,
 }
 
 interface BrandComplianceCheckerProps {
@@ -240,7 +237,6 @@ export function BrandComplianceChecker({ productId, open, onClose }: BrandCompli
     [violations, activeCategory]
   )
 
-  // Rules that pass (no violations)
   const passingRules = useMemo(() => {
     const failingRuleIds = new Set(violations.map((v) => v.ruleId))
     return complianceRules.filter((r) => !failingRuleIds.has(r.id))
@@ -262,161 +258,133 @@ export function BrandComplianceChecker({ productId, open, onClose }: BrandCompli
   if (!open) return null
 
   return (
-    <AnimatePresence>
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
-        onClick={onClose}
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+      onClick={onClose}
+    >
+      <div
+        className="w-[640px] max-h-[78vh] rounded-[var(--radius-md)] border border-[var(--border-strong)] bg-[var(--bg-elevated)] shadow-xl overflow-hidden flex flex-col"
+        onClick={(e) => e.stopPropagation()}
       >
-        <motion.div
-          initial={{ scale: 0.95, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          exit={{ scale: 0.95, opacity: 0 }}
-          className="w-[660px] max-h-[78vh] rounded-2xl border border-white/[0.1] bg-[#0A0F1E] shadow-2xl overflow-hidden flex flex-col"
-          onClick={(e) => e.stopPropagation()}
-        >
-          {/* Header */}
-          <div className="flex items-center justify-between px-6 py-4 border-b border-white/[0.06]">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-[#6366F1]/10 flex items-center justify-center">
-                <Shield className="w-4.5 h-4.5 text-[#6366F1]" />
-              </div>
-              <div>
-                <h2 className="text-sm font-semibold text-[#F1F5F9]">Brand Compliance</h2>
-                <p className="text-[0.6875rem] text-[#64748B]">
-                  {overallScore}% compliant &middot; {violations.length} issue{violations.length !== 1 ? 's' : ''} found
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              {/* Score badge */}
-              <div className={`px-2.5 py-1 rounded-lg text-xs font-bold ${
-                overallScore >= 80 ? 'bg-emerald-500/10 text-emerald-400' :
-                overallScore >= 50 ? 'bg-amber-500/10 text-amber-400' :
-                'bg-rose-500/10 text-rose-400'
-              }`}>
-                {overallScore}%
-              </div>
-              <button
-                onClick={handleRescan}
-                className="p-1.5 rounded-lg hover:bg-white/[0.05] text-[#64748B]"
-              >
-                <RefreshCw className={`w-4 h-4 ${scanning ? 'animate-spin' : ''}`} />
-              </button>
-              <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-white/[0.05] text-[#64748B]">
-                <X className="w-4 h-4" />
-              </button>
-            </div>
+        {/* Header */}
+        <div className="h-[var(--topbar-h)] flex items-center justify-between px-3 border-b border-[var(--border-default)] shrink-0">
+          <div className="flex items-center gap-2">
+            <Shield className="w-3.5 h-3.5 text-[var(--accent-text)]" />
+            <span className="text-[13px] font-medium text-[var(--text-primary)]">Brand Compliance</span>
+            <span className="text-[10px] text-[var(--text-secondary)]">
+              {overallScore}% compliant &middot; {violations.length} issue{violations.length !== 1 ? 's' : ''}
+            </span>
           </div>
-
-          {/* Category filter */}
-          <div className="flex items-center gap-1 px-6 py-2.5 border-b border-white/[0.04]">
-            {categories.map((cat) => (
-              <button
-                key={cat}
-                onClick={() => setActiveCategory(cat)}
-                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[0.6875rem] transition-colors ${
-                  activeCategory === cat
-                    ? 'bg-[#6366F1]/10 text-[#818CF8]'
-                    : 'text-[#475569] hover:bg-white/[0.04] hover:text-[#94A3B8]'
-                }`}
-              >
-                {cat !== 'all' && categoryIcons[cat]}
-                {cat === 'all' ? 'All' : cat.charAt(0).toUpperCase() + cat.slice(1)}
-                {cat !== 'all' && (
-                  <span className="text-[0.5625rem] opacity-60">
-                    ({violations.filter((v) => v.category === cat).length})
-                  </span>
-                )}
-              </button>
-            ))}
+          <div className="flex items-center gap-1">
+            {/* Score badge */}
+            <span className={`tool-badge font-bold ${
+              overallScore >= 80 ? 'text-[var(--color-success)]' :
+              overallScore >= 50 ? 'text-[var(--color-warning)]' :
+              'text-[var(--color-error)]'
+            }`}>
+              {overallScore}%
+            </span>
+            <button onClick={handleRescan} className="tool-btn p-1">
+              <RefreshCw className={`w-3 h-3 ${scanning ? 'animate-spin' : ''}`} />
+            </button>
+            <button onClick={onClose} className="tool-btn p-1">
+              <X className="w-3.5 h-3.5" />
+            </button>
           </div>
+        </div>
 
-          {/* Body */}
-          <div className="flex-1 overflow-auto p-4 space-y-2">
-            {scanning ? (
-              <div className="flex items-center justify-center py-16 gap-3">
-                <RefreshCw className="w-6 h-6 text-[#6366F1] animate-spin" />
-                <p className="text-sm text-[#94A3B8]">Scanning for compliance issues...</p>
-              </div>
-            ) : (
-              <>
-                {/* Passing rules */}
-                {activeCategory === 'all' && passingRules.length > 0 && (
-                  <div className="mb-3">
-                    <p className="text-[0.625rem] uppercase tracking-wider text-[#475569] mb-2 px-1">
-                      Passing ({passingRules.length})
-                    </p>
-                    {passingRules.map((rule) => (
-                      <div
-                        key={rule.id}
-                        className="flex items-center gap-2.5 px-3 py-2 rounded-lg bg-emerald-500/5 border border-emerald-500/10 mb-1"
-                      >
-                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                        <span className="text-xs text-[#94A3B8]">{rule.title}</span>
-                      </div>
-                    ))}
-                  </div>
-                )}
+        {/* Category filter */}
+        <div className="tool-tabs px-3">
+          {categories.map((cat) => (
+            <button
+              key={cat}
+              onClick={() => setActiveCategory(cat)}
+              className={`tool-tab flex items-center gap-1 ${activeCategory === cat ? 'active' : ''}`}
+            >
+              {cat !== 'all' && categoryIcons[cat]}
+              {cat === 'all' ? 'All' : cat.charAt(0).toUpperCase() + cat.slice(1)}
+              {cat !== 'all' && (
+                <span className="text-[10px] opacity-60">
+                  ({violations.filter((v) => v.category === cat).length})
+                </span>
+              )}
+            </button>
+          ))}
+        </div>
 
-                {/* Violations */}
-                {filteredViolations.length > 0 && (
-                  <div>
-                    <p className="text-[0.625rem] uppercase tracking-wider text-[#475569] mb-2 px-1">
-                      Issues ({filteredViolations.length})
-                    </p>
-                    {filteredViolations.map((v, i) => (
-                      <motion.div
-                        key={`${v.ruleId}-${v.nodeId ?? i}`}
-                        initial={{ opacity: 0, y: 4 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: i * 0.03 }}
-                        className={`rounded-xl border p-3.5 mb-2 ${statusColors[v.status].bg} border-white/[0.06]`}
-                      >
-                        <div className="flex items-start gap-2.5">
-                          <span className="mt-0.5 shrink-0">{statusColors[v.status].icon}</span>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2">
-                              <p className="text-xs font-medium text-[#F1F5F9]">{v.title}</p>
-                              <span className="text-[0.5625rem] px-1.5 py-0.5 rounded bg-white/[0.04] text-[#475569]">
-                                {v.category}
+        {/* Body */}
+        <div className="flex-1 overflow-auto p-3 space-y-1.5">
+          {scanning ? (
+            <div className="flex items-center justify-center py-16 gap-2">
+              <RefreshCw className="w-4 h-4 text-[var(--accent-text)] animate-spin" />
+              <p className="text-[12px] text-[var(--text-secondary)]">Scanning for compliance issues...</p>
+            </div>
+          ) : (
+            <>
+              {/* Passing rules */}
+              {activeCategory === 'all' && passingRules.length > 0 && (
+                <div className="mb-2">
+                  <p className="tool-section-label">Passing ({passingRules.length})</p>
+                  {passingRules.map((rule) => (
+                    <div
+                      key={rule.id}
+                      className="flex items-center gap-2 px-2 py-1.5 rounded-[var(--radius-md)] border border-[var(--border-default)] bg-[var(--bg-inset)] mb-1"
+                    >
+                      <CheckCircle2 className="w-3 h-3 text-[var(--color-success)] shrink-0" />
+                      <span className="text-[11px] text-[var(--text-secondary)]">{rule.title}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Violations */}
+              {filteredViolations.length > 0 && (
+                <div>
+                  <p className="tool-section-label">Issues ({filteredViolations.length})</p>
+                  {filteredViolations.map((v, i) => (
+                    <div
+                      key={`${v.ruleId}-${v.nodeId ?? i}`}
+                      className="rounded-[var(--radius-md)] border border-[var(--border-default)] bg-[var(--bg-inset)] p-3 mb-1.5"
+                    >
+                      <div className="flex items-start gap-2">
+                        <span className="mt-0.5 shrink-0">{statusIcons[v.status]}</span>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <p className="text-[12px] font-medium text-[var(--text-primary)]">{v.title}</p>
+                            <span className="tool-badge">{v.category}</span>
+                          </div>
+                          <p className="text-[11px] text-[var(--text-secondary)] mt-1 leading-relaxed">
+                            {v.description}
+                          </p>
+                          <div className="flex items-center gap-1.5 mt-1.5">
+                            <ChevronRight className="w-3 h-3 text-[var(--accent-text)]" />
+                            <p className="text-[10px] text-[var(--accent-text)]">{v.suggestion}</p>
+                          </div>
+                          {v.nodeLabel && (
+                            <div className="flex items-center gap-1 mt-1">
+                              <Eye className="w-3 h-3 text-[var(--text-tertiary)]" />
+                              <span className="text-[10px] text-[var(--text-tertiary)]">
+                                Affects: {v.nodeLabel}
                               </span>
                             </div>
-                            <p className="text-[0.6875rem] text-[#64748B] mt-1 leading-relaxed">
-                              {v.description}
-                            </p>
-                            <div className="flex items-center gap-1.5 mt-2">
-                              <ChevronRight className="w-3 h-3 text-[#6366F1]" />
-                              <p className="text-[0.625rem] text-[#818CF8]">{v.suggestion}</p>
-                            </div>
-                            {v.nodeLabel && (
-                              <div className="flex items-center gap-1 mt-1.5">
-                                <Eye className="w-3 h-3 text-[#475569]" />
-                                <span className="text-[0.5625rem] text-[#475569]">
-                                  Affects: {v.nodeLabel}
-                                </span>
-                              </div>
-                            )}
-                          </div>
+                          )}
                         </div>
-                      </motion.div>
-                    ))}
-                  </div>
-                )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
 
-                {filteredViolations.length === 0 && passingRules.length === 0 && (
-                  <div className="flex flex-col items-center justify-center py-16 gap-3">
-                    <CheckCircle2 className="w-10 h-10 text-emerald-400" />
-                    <p className="text-sm text-[#94A3B8]">Full brand compliance</p>
-                  </div>
-                )}
-              </>
-            )}
-          </div>
-        </motion.div>
-      </motion.div>
-    </AnimatePresence>
+              {filteredViolations.length === 0 && passingRules.length === 0 && (
+                <div className="flex flex-col items-center justify-center py-16 gap-2">
+                  <CheckCircle2 className="w-6 h-6 text-[var(--color-success)]" />
+                  <p className="text-[12px] text-[var(--text-secondary)]">Full brand compliance</p>
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      </div>
+    </div>
   )
 }

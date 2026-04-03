@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { motion } from 'framer-motion'
 import { Rocket, Plus, Filter } from 'lucide-react'
 import { mockReleases, type ReleaseStatus } from './_data/mock-releases'
 import { ReleaseTimeline } from './_components/release-timeline'
@@ -35,87 +34,70 @@ export default function ReleasesPage() {
   ]
 
   return (
-    <div className="flex flex-col h-full gap-5">
-      {/* Header */}
-      <div className="flex items-center justify-between flex-wrap gap-3">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-[#10B981]/10 flex items-center justify-center">
-            <Rocket className="w-5 h-5 text-[#10B981]" />
-          </div>
-          <div>
-            <h1 className="text-xl font-semibold text-[#F1F5F9]">Releases</h1>
-            <p className="text-xs text-[#64748B]">
-              {filteredReleases.length} release{filteredReleases.length !== 1 ? 's' : ''} / Latest: {latestVersion}
-            </p>
-          </div>
+    <div className="flex flex-col h-full bg-[var(--bg-workspace)]">
+      {/* Toolbar */}
+      <div className="flex items-center justify-between px-3 shrink-0 h-[var(--toolbar-h)] border-b border-[var(--border-default)] bg-[var(--bg-surface)]">
+        <div className="flex items-center gap-2">
+          <Rocket size={14} className="text-[var(--text-secondary)]" />
+          <span className="text-[13px] font-semibold text-[var(--text-primary)]">
+            Releases
+          </span>
+          <span className="text-[11px] text-[var(--text-tertiary)]">
+            {filteredReleases.length} release{filteredReleases.length !== 1 ? 's' : ''} / Latest: {latestVersion}
+          </span>
         </div>
 
         <div className="flex items-center gap-2">
-          {/* Status filter */}
-          <div className="flex items-center gap-2">
-            <Filter className="w-3.5 h-3.5 text-[#64748B]" />
-            <div className="flex items-center rounded-lg border border-white/[0.08] bg-white/[0.03] p-0.5">
-              {filters.map((f) => (
-                <button
-                  key={f.key}
-                  onClick={() => setStatusFilter(f.key)}
-                  className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
-                    statusFilter === f.key
-                      ? 'bg-[#10B981]/15 text-[#10B981]'
-                      : 'text-[#64748B] hover:text-[#94A3B8]'
-                  }`}
-                >
-                  {f.label}
-                </button>
-              ))}
-            </div>
+          {/* Status filter pills */}
+          <Filter size={12} className="text-[var(--text-tertiary)]" />
+          <div className="tool-tabs" style={{ borderBottom: 'none' }}>
+            {filters.map((f) => (
+              <button
+                key={f.key}
+                onClick={() => setStatusFilter(f.key)}
+                className={`tool-tab ${statusFilter === f.key ? 'active' : ''}`}
+                style={{ borderBottom: 'none' }}
+              >
+                {f.label}
+              </button>
+            ))}
           </div>
 
           <button
             onClick={() => setModalOpen(true)}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium text-white bg-[#10B981] hover:bg-[#059669] transition-colors"
+            className="tool-btn tool-btn-primary"
           >
-            <Plus className="w-4 h-4" />
+            <Plus size={12} />
             New Release
           </button>
         </div>
       </div>
 
-      {/* Main content */}
-      <div className="flex-1 flex gap-5 min-h-0">
-        {/* Left: Timeline */}
-        <motion.div
-          initial={{ opacity: 0, x: -12 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.3 }}
-          className="w-[320px] flex-shrink-0 overflow-auto rounded-2xl bg-white/[0.02] border border-white/[0.08] p-3"
-        >
+      {/* Two-panel layout */}
+      <div className="flex-1 flex min-h-0">
+        {/* Left: Timeline list */}
+        <div className="flex-shrink-0 overflow-y-auto w-[300px] border-r border-[var(--border-default)] bg-[var(--bg-surface)]">
           <ReleaseTimeline
             releases={filteredReleases}
             selectedId={selectedId}
             onSelect={setSelectedId}
             onNewRelease={() => setModalOpen(true)}
           />
-        </motion.div>
+        </div>
 
         {/* Right: Detail */}
-        <motion.div
-          initial={{ opacity: 0, x: 12 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.3, delay: 0.1 }}
-          className="flex-1 min-w-0 overflow-auto rounded-2xl bg-white/[0.02] border border-white/[0.08] p-5"
-        >
+        <div className="flex-1 min-w-0 overflow-y-auto bg-[var(--bg-workspace)]">
           {selectedRelease ? (
             <ReleaseDetail release={selectedRelease} />
           ) : (
             <div className="flex items-center justify-center h-full">
               <div className="text-center">
-                <Rocket className="w-10 h-10 text-[#10B981]/30 mx-auto mb-3" />
-                <p className="text-sm text-[#64748B]">Select a release to view details</p>
+                <Rocket size={18} className="text-[var(--text-tertiary)] mx-auto mb-2" />
+                <p className="text-[12px] text-[var(--text-secondary)]">Select a release to view details</p>
               </div>
             </div>
           )}
-        </motion.div>
+        </div>
       </div>
 
       {/* Create modal */}

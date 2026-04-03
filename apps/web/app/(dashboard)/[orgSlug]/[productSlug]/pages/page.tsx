@@ -2,7 +2,6 @@
 
 import { useState, useCallback, useMemo, useEffect } from 'react'
 import { useParams } from 'next/navigation'
-import { motion, AnimatePresence } from 'framer-motion'
 import { Plus, Eye, Sparkles, FileText } from 'lucide-react'
 import { mockPages, type PageDef, type SectionDef } from './_data/mock-pages'
 import { useGraphStore } from '../../../../lib/graph-store'
@@ -181,64 +180,57 @@ export default function PageBuilderPage() {
   )
 
   return (
-    <div className="flex flex-col h-full -m-6">
-      {/* Header */}
-      <div className="flex items-center justify-between px-6 py-4 border-b border-white/[0.06] bg-[#060918]/50 backdrop-blur-sm">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-[#3B82F6]/10 flex items-center justify-center">
-            <FileText className="w-4.5 h-4.5 text-[#3B82F6]" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-xl font-semibold text-[#F1F5F9]">
-                Page Builder
-              </h1>
-              <StudioHealthBadge productId={productId} studio="pages" />
-            </div>
-            <p className="text-xs text-[#64748B]">
-              {pages.length} pages
-              {selectedPage ? ` \u00B7 Editing: ${selectedPage.name}` : ''}
-            </p>
-          </div>
+    <div className="flex flex-col h-full" style={{ margin: 0 }}>
+      {/* Top toolbar — 32px, dense */}
+      <div className="flex items-center justify-between h-[var(--toolbar-h)] min-h-[32px] px-2 bg-[var(--bg-surface)] border-b border-[var(--border-default)]">
+        <div className="flex items-center gap-2">
+          <FileText className="w-3.5 h-3.5 text-[var(--text-tertiary)]" />
+          <span className="text-[13px] font-medium text-[var(--text-primary)] leading-none">
+            Page Builder
+          </span>
+          <StudioHealthBadge productId={productId} studio="pages" />
+          <span className="text-[10px] text-[var(--text-tertiary)] leading-none ml-1">
+            {pages.length} pages
+            {selectedPage ? ` / ${selectedPage.name}` : ''}
+          </span>
         </div>
 
-        <div className="flex items-center gap-2">
-          {/* AI Generate */}
-          <button className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium text-[#8B5CF6] bg-[#8B5CF6]/10 hover:bg-[#8B5CF6]/20 transition-colors">
-            <Sparkles className="w-3.5 h-3.5" />
+        <div className="flex items-center gap-0.5">
+          <button
+            className="tool-btn flex items-center gap-1 h-[24px] px-2 text-[10px] font-medium text-[var(--accent-text)] bg-transparent hover:bg-[var(--accent)]/10 border border-transparent hover:border-[var(--accent)]/20"
+          >
+            <Sparkles className="w-3 h-3" />
             AI Generate
           </button>
 
-          {/* Preview */}
           <button
             onClick={() => selectedPage && setPreviewOpen(true)}
             disabled={!selectedPage}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium text-[#94A3B8] bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            className="tool-btn flex items-center gap-1 h-[24px] px-2 text-[10px] font-medium text-[var(--text-secondary)] bg-transparent hover:bg-[var(--border-subtle)] border border-transparent hover:border-[var(--border-default)] disabled:opacity-30 disabled:cursor-not-allowed"
           >
-            <Eye className="w-3.5 h-3.5" />
+            <Eye className="w-3 h-3" />
             Preview
           </button>
 
-          {/* New Page */}
           <button
             onClick={handleAddPage}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium text-white bg-[#3B82F6] hover:bg-[#2563EB] transition-colors"
+            className="tool-btn flex items-center gap-1 h-[24px] px-2 text-[10px] font-medium text-[var(--bg-workspace)] bg-[var(--accent)] hover:opacity-90"
           >
-            <Plus className="w-4 h-4" />
+            <Plus className="w-3 h-3" />
             New Page
           </button>
         </div>
       </div>
 
-      {/* Analytics Overlay */}
-      <div className="px-1 pb-2">
+      {/* Analytics Overlay — compact */}
+      <div className="px-0 border-b border-[var(--border-default)] bg-[var(--bg-workspace)]">
         <AnalyticsOverlay productId={productId} context="pages" />
       </div>
 
       {/* Three-panel layout */}
-      <div className="flex flex-1 min-h-0">
-        {/* Left panel: Page tree (~20%) */}
-        <div className="w-[20%] min-w-[200px] flex-shrink-0">
+      <div className="flex flex-1 min-h-0 bg-[var(--bg-workspace)]">
+        {/* Left panel: Page tree */}
+        <div className="tool-panel-left w-[200px] min-w-[200px] flex-shrink-0 border-r border-[var(--border-default)] bg-[var(--bg-surface)] overflow-y-auto">
           <PageTree
             pages={pages}
             selectedPageId={selectedPageId}
@@ -250,8 +242,8 @@ export default function PageBuilderPage() {
           />
         </div>
 
-        {/* Center panel: Section editor (~55%) */}
-        <div className="flex-1 min-w-0 overflow-y-auto p-5 border-r border-white/[0.06]">
+        {/* Center panel: Section editor */}
+        <div className="flex-1 min-w-0 overflow-y-auto p-2 bg-[var(--bg-workspace)]">
           {selectedPage ? (
             <SectionEditor
               page={selectedPage}
@@ -262,49 +254,37 @@ export default function PageBuilderPage() {
             />
           ) : (
             <div className="flex flex-col items-center justify-center h-full text-center">
-              <div className="w-14 h-14 rounded-xl bg-white/[0.04] flex items-center justify-center mb-4">
-                <FileText className="w-7 h-7 text-[#64748B]" />
-              </div>
-              <p className="text-sm text-[#94A3B8] mb-1">No page selected</p>
-              <p className="text-xs text-[#64748B]">
+              <FileText className="w-5 h-5 text-[var(--text-tertiary)] mb-2" />
+              <p className="text-[12px] text-[var(--text-secondary)] mb-0.5">No page selected</p>
+              <p className="text-[10px] text-[var(--text-tertiary)]">
                 Select a page from the tree or create a new one
               </p>
             </div>
           )}
         </div>
 
-        {/* Right panel: Properties (~25%) */}
-        <div className="w-[25%] min-w-[260px] flex-shrink-0 overflow-y-auto p-4">
-          <AnimatePresence mode="wait">
-            {selectedSection && selectedPage ? (
-              <SectionProperties
-                key={selectedSection.id}
-                section={selectedSection}
-                page={selectedPage}
-                onUpdateSection={handleUpdateSection}
-                onUpdateSeo={handleUpdateSeo}
-                onClose={() => setSelectedSectionId(null)}
-              />
-            ) : (
-              <motion.div
-                key="empty"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="flex flex-col items-center justify-center h-full text-center"
-              >
-                <div className="w-12 h-12 rounded-xl bg-white/[0.04] flex items-center justify-center mb-3">
-                  <FileText className="w-6 h-6 text-[#64748B]" />
-                </div>
-                <p className="text-sm text-[#94A3B8] mb-1">
-                  No section selected
-                </p>
-                <p className="text-xs text-[#64748B]">
-                  Click a section to edit its properties
-                </p>
-              </motion.div>
-            )}
-          </AnimatePresence>
+        {/* Right panel: Properties */}
+        <div className="tool-panel-right w-[220px] min-w-[220px] flex-shrink-0 border-l border-[var(--border-default)] bg-[var(--bg-surface)] overflow-y-auto">
+          {selectedSection && selectedPage ? (
+            <SectionProperties
+              key={selectedSection.id}
+              section={selectedSection}
+              page={selectedPage}
+              onUpdateSection={handleUpdateSection}
+              onUpdateSeo={handleUpdateSeo}
+              onClose={() => setSelectedSectionId(null)}
+            />
+          ) : (
+            <div className="flex flex-col items-center justify-center h-full text-center px-2">
+              <FileText className="w-4 h-4 text-[var(--text-tertiary)] mb-2" />
+              <p className="text-[11px] text-[var(--text-secondary)] mb-0.5">
+                No section selected
+              </p>
+              <p className="text-[10px] text-[var(--text-tertiary)]">
+                Click a section to edit its properties
+              </p>
+            </div>
+          )}
         </div>
       </div>
 

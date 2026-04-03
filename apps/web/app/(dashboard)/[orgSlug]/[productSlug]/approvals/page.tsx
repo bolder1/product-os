@@ -2,7 +2,6 @@
 
 import { useState, useMemo, useCallback } from 'react'
 import { useParams } from 'next/navigation'
-import { motion, AnimatePresence } from 'framer-motion'
 import {
   Shield,
   Plus,
@@ -12,7 +11,6 @@ import {
   ChevronDown,
   ChevronUp,
   Clock,
-  AlertCircle,
   ArrowRight,
   Trash2,
   Filter,
@@ -68,19 +66,19 @@ const DEFAULT_CHAINS: Record<string, { label: string; approverRole: string }[]> 
 }
 
 const PRIORITY_COLORS: Record<string, string> = {
-  low: 'bg-[#64748B]/20 text-[#94A3B8]',
-  normal: 'bg-[#3B82F6]/20 text-[#60A5FA]',
-  high: 'bg-[#F59E0B]/20 text-[#FBBF24]',
-  urgent: 'bg-[#EF4444]/20 text-[#F87171]',
+  low: 'bg-[var(--text-secondary)]/10 text-[var(--text-secondary)]',
+  normal: 'bg-[var(--accent-muted)] text-[var(--accent-text)]',
+  high: 'bg-[var(--color-warning-muted)] text-[var(--color-warning)]',
+  urgent: 'bg-[var(--color-error-muted)] text-[var(--color-error)]',
 }
 
 const TYPE_COLORS: Record<string, string> = {
-  release: 'bg-[#8B5CF6]/20 text-[#A78BFA]',
-  design: 'bg-[#EC4899]/20 text-[#F472B6]',
-  workflow: 'bg-[#6366F1]/20 text-[#818CF8]',
-  page: 'bg-[#14B8A6]/20 text-[#2DD4BF]',
-  component: 'bg-[#F97316]/20 text-[#FB923C]',
-  general: 'bg-[#64748B]/20 text-[#94A3B8]',
+  release: 'bg-[#a78bfa]/10 text-[#a78bfa]',
+  design: 'bg-[#f472b6]/10 text-[#f472b6]',
+  workflow: 'bg-[#818cf8]/10 text-[#818cf8]',
+  page: 'bg-[var(--color-success-muted)] text-[var(--color-success)]',
+  component: 'bg-[#fb923c]/10 text-[#fb923c]',
+  general: 'bg-[var(--text-secondary)]/10 text-[var(--text-secondary)]',
 }
 
 // ---------------------------------------------------------------------------
@@ -105,45 +103,45 @@ function generateStepId() {
 }
 
 // ---------------------------------------------------------------------------
-// Step Visualizer
+// Step Chain
 // ---------------------------------------------------------------------------
 
 function StepChain({ steps, currentIndex, status }: { steps: ApprovalStep[]; currentIndex: number; status: ApprovalStatus }) {
   const sorted = [...steps].sort((a, b) => a.order - b.order)
 
   return (
-    <div className="flex items-center gap-1 overflow-x-auto py-2">
+    <div className="flex items-center gap-1 overflow-x-auto py-1">
       {sorted.map((step, idx) => {
         const isCurrent = idx === currentIndex && status === 'pending'
         const isApproved = step.status === 'approved'
         const isRejected = step.status === 'rejected'
 
-        let dotClass = 'bg-white/[0.12] border-white/[0.08]'
-        let icon = <span className="w-1.5 h-1.5 rounded-full bg-[#64748B]" />
+        let dotBg = 'bg-[var(--bg-elevated)] border-[var(--border-default)]'
+        let icon = <span className="w-1.5 h-1.5 rounded-full bg-[var(--text-tertiary)]" />
 
         if (isApproved) {
-          dotClass = 'bg-[#10B981]/20 border-[#10B981]/40'
-          icon = <Check className="w-3 h-3 text-[#10B981]" />
+          dotBg = 'bg-[var(--color-success-muted)] border-[var(--color-success)]/30'
+          icon = <Check className="w-2.5 h-2.5 text-[var(--color-success)]" />
         } else if (isRejected) {
-          dotClass = 'bg-[#EF4444]/20 border-[#EF4444]/40'
-          icon = <X className="w-3 h-3 text-[#EF4444]" />
+          dotBg = 'bg-[var(--color-error-muted)] border-[var(--color-error)]/30'
+          icon = <X className="w-2.5 h-2.5 text-[var(--color-error)]" />
         } else if (isCurrent) {
-          dotClass = 'bg-[#F59E0B]/20 border-[#F59E0B]/40 ring-2 ring-[#F59E0B]/30'
-          icon = <span className="w-2 h-2 rounded-full bg-[#F59E0B] animate-pulse" />
+          dotBg = 'bg-[var(--color-warning-muted)] border-[var(--color-warning)]/30'
+          icon = <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-warning)]" />
         }
 
         return (
           <div key={step.id} className="flex items-center gap-1 shrink-0">
-            <div className="flex flex-col items-center gap-1">
-              <div className={`w-6 h-6 rounded-full border flex items-center justify-center ${dotClass}`}>
+            <div className="flex flex-col items-center gap-0.5">
+              <div className={`w-5 h-5 rounded-full border flex items-center justify-center ${dotBg}`}>
                 {icon}
               </div>
-              <span className={`text-[9px] leading-tight text-center max-w-[60px] truncate ${isCurrent ? 'text-[#F59E0B] font-medium' : 'text-[#64748B]'}`}>
+              <span className={`text-[9px] leading-tight text-center max-w-[56px] truncate ${isCurrent ? 'text-[var(--color-warning)] font-medium' : 'text-[var(--text-tertiary)]'}`}>
                 {step.approverRole}
               </span>
             </div>
             {idx < sorted.length - 1 && (
-              <ArrowRight className="w-3 h-3 text-white/[0.12] shrink-0 -mt-3" />
+              <ArrowRight className="w-2.5 h-2.5 text-[var(--text-tertiary)]/50 shrink-0 -mt-3" />
             )}
           </div>
         )
@@ -158,12 +156,10 @@ function StepChain({ steps, currentIndex, status }: { steps: ApprovalStep[]; cur
 
 function ApprovalCard({
   request,
-  index,
   onApprove,
   onReject,
 }: {
   request: ApprovalRequest
-  index: number
   onApprove: (req: ApprovalRequest) => void
   onReject: (req: ApprovalRequest) => void
 }) {
@@ -171,50 +167,44 @@ function ApprovalCard({
   const currentStep = request.steps[request.currentStepIndex]
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -8 }}
-      transition={{ duration: 0.25, delay: index * 0.04 }}
-      className="rounded-xl border border-white/[0.08] bg-white/[0.03] hover:bg-white/[0.05] transition-colors"
-    >
-      <div className="p-4 space-y-3">
+    <div className="border border-[var(--border-default)] bg-[var(--bg-surface)] hover:bg-[var(--bg-elevated)] transition-colors">
+      <div className="p-3 space-y-2">
         {/* Top row: badges + time */}
         <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-1.5 flex-wrap">
-            <span className={`px-2 py-0.5 rounded-md text-[10px] font-medium capitalize ${TYPE_COLORS[request.type] ?? TYPE_COLORS.general}`}>
+          <div className="flex items-center gap-1 flex-wrap">
+            <span className={`px-1.5 py-px text-[10px] font-medium capitalize ${TYPE_COLORS[request.type] ?? TYPE_COLORS.general}`}>
               {request.type}
             </span>
-            <span className={`px-2 py-0.5 rounded-md text-[10px] font-medium capitalize ${PRIORITY_COLORS[request.priority]}`}>
+            <span className={`px-1.5 py-px text-[10px] font-medium capitalize ${PRIORITY_COLORS[request.priority]}`}>
               {request.priority}
             </span>
             {request.status !== 'pending' && (
-              <span className={`px-2 py-0.5 rounded-md text-[10px] font-medium capitalize ${
-                request.status === 'approved' ? 'bg-[#10B981]/20 text-[#10B981]' :
-                request.status === 'rejected' ? 'bg-[#EF4444]/20 text-[#EF4444]' :
-                'bg-white/[0.06] text-[#64748B]'
+              <span className={`px-1.5 py-px text-[10px] font-medium capitalize ${
+                request.status === 'approved' ? 'bg-[var(--color-success-muted)] text-[var(--color-success)]' :
+                request.status === 'rejected' ? 'bg-[var(--color-error-muted)] text-[var(--color-error)]' :
+                'bg-[var(--border-subtle)] text-[var(--text-tertiary)]'
               }`}>
                 {request.status}
               </span>
             )}
           </div>
-          <span className="text-[10px] text-[#64748B] shrink-0">{timeAgo(request.createdAt)}</span>
+          <span className="text-[10px] text-[var(--text-tertiary)] shrink-0">{timeAgo(request.createdAt)}</span>
         </div>
 
         {/* Title + description */}
         <div>
-          <h3 className="text-sm font-medium text-[#F1F5F9] leading-snug">{request.title}</h3>
+          <h3 className="text-[12px] font-medium text-[var(--text-primary)] leading-snug">{request.title}</h3>
           {request.description && (
-            <p className="text-xs text-[#64748B] mt-0.5 line-clamp-2">{request.description}</p>
+            <p className="text-[11px] text-[var(--text-secondary)] mt-0.5 line-clamp-2">{request.description}</p>
           )}
         </div>
 
         {/* Requested by */}
-        <div className="flex items-center gap-2">
-          <div className="w-5 h-5 rounded-full bg-[#6366F1]/20 flex items-center justify-center">
-            <span className="text-[9px] font-bold text-[#818CF8]">{request.requestedBy.initials}</span>
+        <div className="flex items-center gap-1.5">
+          <div className="w-4 h-4 rounded-full bg-[var(--accent-muted)] flex items-center justify-center">
+            <span className="text-[8px] font-bold text-[var(--accent-text)]">{request.requestedBy.initials}</span>
           </div>
-          <span className="text-[11px] text-[#94A3B8]">{request.requestedBy.name}</span>
+          <span className="text-[10px] text-[var(--text-secondary)]">{request.requestedBy.name}</span>
         </div>
 
         {/* Step chain */}
@@ -223,81 +213,71 @@ function ApprovalCard({
         {/* Actions row */}
         <div className="flex items-center justify-between gap-2">
           {request.status === 'pending' && currentStep && (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5">
               <button
                 onClick={() => onApprove(request)}
-                className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium text-[#10B981] bg-[#10B981]/10 hover:bg-[#10B981]/20 transition-colors"
+                className="tool-btn py-0.5 px-2 text-[10px] text-[var(--color-success)] border-[var(--color-success)]/20 bg-[var(--color-success)]/5 hover:bg-[var(--color-success-muted)]"
               >
-                <Check className="w-3 h-3" /> Approve
+                <Check className="w-2.5 h-2.5" /> Approve
               </button>
               <button
                 onClick={() => onReject(request)}
-                className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium text-[#EF4444] bg-[#EF4444]/10 hover:bg-[#EF4444]/20 transition-colors"
+                className="tool-btn py-0.5 px-2 text-[10px] text-[var(--color-error)] border-[var(--color-error)]/20 bg-[var(--color-error)]/5 hover:bg-[var(--color-error-muted)]"
               >
-                <X className="w-3 h-3" /> Reject
+                <X className="w-2.5 h-2.5" /> Reject
               </button>
             </div>
           )}
           {request.status !== 'pending' && <div />}
           <button
             onClick={() => setExpanded(!expanded)}
-            className="flex items-center gap-1 text-[11px] text-[#64748B] hover:text-[#94A3B8] transition-colors ml-auto"
+            className="flex items-center gap-0.5 text-[10px] text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] transition-colors ml-auto"
           >
             {expanded ? 'Less' : 'Details'}
-            {expanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+            {expanded ? <ChevronUp className="w-2.5 h-2.5" /> : <ChevronDown className="w-2.5 h-2.5" />}
           </button>
         </div>
       </div>
 
       {/* Expanded details */}
-      <AnimatePresence>
-        {expanded && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="overflow-hidden"
-          >
-            <div className="px-4 pb-4 pt-1 border-t border-white/[0.06] space-y-2">
-              {request.steps
-                .sort((a, b) => a.order - b.order)
-                .map((step) => (
-                  <div key={step.id} className="flex items-start gap-2 text-xs">
-                    <div className={`w-4 h-4 rounded-full flex items-center justify-center shrink-0 mt-0.5 ${
-                      step.status === 'approved' ? 'bg-[#10B981]/20' :
-                      step.status === 'rejected' ? 'bg-[#EF4444]/20' :
-                      'bg-white/[0.06]'
-                    }`}>
-                      {step.status === 'approved' && <Check className="w-2.5 h-2.5 text-[#10B981]" />}
-                      {step.status === 'rejected' && <X className="w-2.5 h-2.5 text-[#EF4444]" />}
-                      {step.status === 'pending' && <Clock className="w-2.5 h-2.5 text-[#64748B]" />}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-[#F1F5F9]">
-                        {step.label}{' '}
-                        <span className="text-[#64748B]">({step.approverRole})</span>
-                      </p>
-                      {step.approverName && (
-                        <p className="text-[#64748B]">Decided by {step.approverName}</p>
-                      )}
-                      {step.comment && (
-                        <p className="text-[#94A3B8] italic">&quot;{step.comment}&quot;</p>
-                      )}
-                      {step.decidedAt && (
-                        <p className="text-[#64748B]">{timeAgo(step.decidedAt)}</p>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              {request.studio && (
-                <p className="text-[11px] text-[#64748B] pt-1">Studio: {request.studio}</p>
-              )}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </motion.div>
+      {expanded && (
+        <div className="px-3 pb-3 pt-1 border-t border-[var(--border-default)] space-y-1.5">
+          {request.steps
+            .sort((a, b) => a.order - b.order)
+            .map((step) => (
+              <div key={step.id} className="flex items-start gap-1.5 text-[11px]">
+                <div className={`w-3.5 h-3.5 rounded-full flex items-center justify-center shrink-0 mt-0.5 ${
+                  step.status === 'approved' ? 'bg-[var(--color-success-muted)]' :
+                  step.status === 'rejected' ? 'bg-[var(--color-error-muted)]' :
+                  'bg-[var(--border-subtle)]'
+                }`}>
+                  {step.status === 'approved' && <Check className="w-2 h-2 text-[var(--color-success)]" />}
+                  {step.status === 'rejected' && <X className="w-2 h-2 text-[var(--color-error)]" />}
+                  {step.status === 'pending' && <Clock className="w-2 h-2 text-[var(--text-tertiary)]" />}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[var(--text-primary)]">
+                    {step.label}{' '}
+                    <span className="text-[var(--text-tertiary)]">({step.approverRole})</span>
+                  </p>
+                  {step.approverName && (
+                    <p className="text-[var(--text-tertiary)]">Decided by {step.approverName}</p>
+                  )}
+                  {step.comment && (
+                    <p className="text-[var(--text-secondary)] italic">&quot;{step.comment}&quot;</p>
+                  )}
+                  {step.decidedAt && (
+                    <p className="text-[var(--text-tertiary)]">{timeAgo(step.decidedAt)}</p>
+                  )}
+                </div>
+              </div>
+            ))}
+          {request.studio && (
+            <p className="text-[10px] text-[var(--text-tertiary)] pt-1">Studio: {request.studio}</p>
+          )}
+        </div>
+      )}
+    </div>
   )
 }
 
@@ -360,7 +340,6 @@ function CreateApprovalModal({ open, onClose, productId }: { open: boolean; onCl
       })),
       priority,
     })
-    // Reset
     setTitle('')
     setDescription('')
     setType('general')
@@ -372,76 +351,67 @@ function CreateApprovalModal({ open, onClose, productId }: { open: boolean; onCl
   if (!open) return null
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
       onClick={(e) => { if (e.target === e.currentTarget) onClose() }}
     >
-      <motion.div
-        initial={{ scale: 0.95, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        exit={{ scale: 0.95, opacity: 0 }}
-        transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-        className="w-full max-w-lg rounded-2xl border border-white/[0.08] bg-[#0B1120] shadow-2xl overflow-hidden"
-      >
+      <div className="w-full max-w-lg bg-[var(--bg-surface)] border border-[var(--border-default)] overflow-hidden flex flex-col max-h-[80vh]">
         {/* Modal header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-white/[0.06]">
-          <h2 className="text-base font-semibold text-[#F1F5F9]">New Approval Request</h2>
-          <button onClick={onClose} className="text-[#64748B] hover:text-[#94A3B8] transition-colors">
-            <X className="w-4 h-4" />
+        <div className="flex items-center justify-between px-4 py-2.5 border-b border-[var(--border-default)] bg-[var(--bg-elevated)]">
+          <h2 className="text-[13px] font-medium text-[var(--text-primary)]">New Approval Request</h2>
+          <button onClick={onClose} className="text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] transition-colors">
+            <X className="w-3.5 h-3.5" />
           </button>
         </div>
 
         {/* Modal body */}
-        <div className="px-6 py-5 space-y-4 max-h-[70vh] overflow-y-auto">
+        <div className="flex-1 overflow-y-auto p-4 space-y-3">
           {/* Title */}
           <div>
-            <label className="text-xs font-medium text-[#94A3B8] mb-1.5 block">Title</label>
+            <label className="tool-section-label block mb-1">Title</label>
             <input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="e.g. Release v2.3 approval"
-              className="w-full px-3 py-2 rounded-lg bg-white/[0.03] border border-white/[0.08] text-sm text-[#F1F5F9] placeholder:text-[#64748B] outline-none focus:border-[#6366F1]/50 transition-colors"
+              className="tool-input w-full"
             />
           </div>
 
           {/* Description */}
           <div>
-            <label className="text-xs font-medium text-[#94A3B8] mb-1.5 block">Description</label>
+            <label className="tool-section-label block mb-1">Description</label>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Describe what needs approval..."
               rows={3}
-              className="w-full px-3 py-2 rounded-lg bg-white/[0.03] border border-white/[0.08] text-sm text-[#F1F5F9] placeholder:text-[#64748B] outline-none focus:border-[#6366F1]/50 transition-colors resize-none"
+              className="tool-input w-full resize-none"
             />
           </div>
 
           {/* Type + Priority row */}
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-2">
             <div>
-              <label className="text-xs font-medium text-[#94A3B8] mb-1.5 block">Type</label>
+              <label className="tool-section-label block mb-1">Type</label>
               <select
                 value={type}
                 onChange={(e) => handleTypeChange(e.target.value as ApprovalType)}
-                className="w-full px-3 py-2 rounded-lg bg-white/[0.03] border border-white/[0.08] text-sm text-[#F1F5F9] outline-none focus:border-[#6366F1]/50 transition-colors appearance-none cursor-pointer"
+                className="tool-input w-full appearance-none cursor-pointer"
               >
                 {TYPE_OPTIONS.map((t) => (
-                  <option key={t} value={t} className="bg-[#0B1120] text-[#F1F5F9]">{t.charAt(0).toUpperCase() + t.slice(1)}</option>
+                  <option key={t} value={t} className="bg-[var(--bg-surface)] text-[var(--text-primary)]">{t.charAt(0).toUpperCase() + t.slice(1)}</option>
                 ))}
               </select>
             </div>
             <div>
-              <label className="text-xs font-medium text-[#94A3B8] mb-1.5 block">Priority</label>
+              <label className="tool-section-label block mb-1">Priority</label>
               <select
                 value={priority}
                 onChange={(e) => setPriority(e.target.value as ApprovalRequest['priority'])}
-                className="w-full px-3 py-2 rounded-lg bg-white/[0.03] border border-white/[0.08] text-sm text-[#F1F5F9] outline-none focus:border-[#6366F1]/50 transition-colors appearance-none cursor-pointer"
+                className="tool-input w-full appearance-none cursor-pointer"
               >
                 {(['low', 'normal', 'high', 'urgent'] as const).map((p) => (
-                  <option key={p} value={p} className="bg-[#0B1120] text-[#F1F5F9]">{p.charAt(0).toUpperCase() + p.slice(1)}</option>
+                  <option key={p} value={p} className="bg-[var(--bg-surface)] text-[var(--text-primary)]">{p.charAt(0).toUpperCase() + p.slice(1)}</option>
                 ))}
               </select>
             </div>
@@ -449,34 +419,34 @@ function CreateApprovalModal({ open, onClose, productId }: { open: boolean; onCl
 
           {/* Approval steps */}
           <div>
-            <div className="flex items-center justify-between mb-2">
-              <label className="text-xs font-medium text-[#94A3B8]">Approval Chain</label>
-              <button onClick={addStep} className="flex items-center gap-1 text-[10px] text-[#6366F1] hover:text-[#818CF8] transition-colors">
-                <Plus className="w-3 h-3" /> Add Step
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="tool-section-label">Approval Chain</label>
+              <button onClick={addStep} className="tool-btn py-0 px-1.5 text-[10px] text-[var(--accent-text)] border-[var(--accent-text)]/20">
+                <Plus className="w-2.5 h-2.5" /> Add Step
               </button>
             </div>
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               {steps.map((step, idx) => (
-                <div key={step.id} className="flex items-center gap-2">
-                  <span className="text-[10px] text-[#64748B] w-4 text-center shrink-0">{idx + 1}</span>
+                <div key={step.id} className="flex items-center gap-1.5">
+                  <span className="text-[10px] text-[var(--text-tertiary)] w-3 text-center shrink-0">{idx + 1}</span>
                   <input
                     value={step.label}
                     onChange={(e) => updateStep(step.id, 'label', e.target.value)}
                     placeholder="Step label"
-                    className="flex-1 px-2.5 py-1.5 rounded-lg bg-white/[0.03] border border-white/[0.08] text-xs text-[#F1F5F9] placeholder:text-[#64748B] outline-none focus:border-[#6366F1]/50 transition-colors"
+                    className="tool-input flex-1 py-1 text-[11px]"
                   />
                   <select
                     value={step.approverRole}
                     onChange={(e) => updateStep(step.id, 'approverRole', e.target.value)}
-                    className="w-28 px-2.5 py-1.5 rounded-lg bg-white/[0.03] border border-white/[0.08] text-xs text-[#F1F5F9] outline-none focus:border-[#6366F1]/50 transition-colors appearance-none cursor-pointer"
+                    className="tool-input w-24 py-1 text-[11px] appearance-none cursor-pointer"
                   >
                     {['Admin', 'Manager', 'BA', 'QA', 'Designer', 'FE', 'BE'].map((r) => (
-                      <option key={r} value={r} className="bg-[#0B1120] text-[#F1F5F9]">{r}</option>
+                      <option key={r} value={r} className="bg-[var(--bg-surface)] text-[var(--text-primary)]">{r}</option>
                     ))}
                   </select>
                   {steps.length > 1 && (
-                    <button onClick={() => removeStep(step.id)} className="text-[#64748B] hover:text-[#EF4444] transition-colors">
-                      <Trash2 className="w-3.5 h-3.5" />
+                    <button onClick={() => removeStep(step.id)} className="text-[var(--text-tertiary)] hover:text-[var(--color-error)] transition-colors">
+                      <Trash2 className="w-3 h-3" />
                     </button>
                   )}
                 </div>
@@ -486,20 +456,20 @@ function CreateApprovalModal({ open, onClose, productId }: { open: boolean; onCl
         </div>
 
         {/* Modal footer */}
-        <div className="flex items-center justify-end gap-2 px-6 py-4 border-t border-white/[0.06]">
-          <button onClick={onClose} className="px-4 py-2 rounded-lg text-xs font-medium text-[#94A3B8] hover:text-[#F1F5F9] hover:bg-white/[0.04] transition-colors">
+        <div className="flex items-center justify-end gap-2 px-4 py-2.5 border-t border-[var(--border-default)]">
+          <button onClick={onClose} className="tool-btn">
             Cancel
           </button>
           <button
             onClick={handleSubmit}
             disabled={!canSubmit}
-            className="px-4 py-2 rounded-lg text-xs font-medium text-white bg-[#6366F1] hover:bg-[#5558E6] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            className="tool-btn tool-btn-primary disabled:opacity-40 disabled:cursor-not-allowed"
           >
             Create Request
           </button>
         </div>
-      </motion.div>
-    </motion.div>
+      </div>
+    </div>
   )
 }
 
@@ -566,33 +536,21 @@ export default function ApprovalsPage() {
   }, [requests])
 
   return (
-    <div className="flex flex-col h-full gap-5">
-      {/* ---- Header ---- */}
-      <div className="flex items-center justify-between flex-wrap gap-3">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-[#6366F1]/10 flex items-center justify-center">
-            <Shield className="w-5 h-5 text-[#6366F1]" />
-          </div>
-          <div>
-            <h1 className="text-xl font-semibold text-[#F1F5F9]">Approval Queue</h1>
-            <p className="text-xs text-[#64748B]">
-              {pendingCount} pending of {requests.length} total
-            </p>
-          </div>
-        </div>
-        <button
-          onClick={() => setModalOpen(true)}
-          className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium text-white bg-[#6366F1] hover:bg-[#5558E6] transition-colors"
-        >
-          <Plus className="w-4 h-4" />
-          New Request
-        </button>
-      </div>
+    <div className="flex flex-col h-full">
+      {/* ── Toolbar ── */}
+      <div className="h-[var(--toolbar-h)] min-h-[32px] flex items-center gap-2 px-2 bg-[var(--bg-surface)] border-b border-[var(--border-default)]">
+        <Shield className="w-3.5 h-3.5 text-[var(--accent-text)] shrink-0" />
+        <span className="text-[11px] font-medium text-[var(--text-primary)] shrink-0">Approvals</span>
+        {pendingCount > 0 && (
+          <span className="text-[10px] text-[var(--accent-text)] bg-[var(--accent-muted)] px-1.5 py-px font-medium">
+            {pendingCount} pending
+          </span>
+        )}
 
-      {/* ---- Filters row ---- */}
-      <div className="flex items-center gap-4 flex-wrap">
+        <div className="w-px h-3.5 bg-[var(--border-default)] mx-1" />
+
         {/* Status tabs */}
-        <div className="flex items-center gap-1 border-b border-white/[0.06] -mb-px">
+        <div className="tool-tabs border-b-0 gap-0">
           {STATUS_TABS.map((tab) => {
             const isActive = statusFilter === tab.key
             const count = statusCounts[tab.key] ?? 0
@@ -600,114 +558,99 @@ export default function ApprovalsPage() {
               <button
                 key={tab.key}
                 onClick={() => setStatusFilter(tab.key)}
-                className={`relative px-3 py-2.5 text-xs font-medium transition-colors ${
-                  isActive ? 'text-[#6366F1]' : 'text-[#64748B] hover:text-[#94A3B8]'
-                }`}
+                className={`tool-tab py-1 px-2 text-[10px] ${isActive ? 'active' : ''}`}
               >
                 {tab.label}
-                <span className={`ml-1 text-[10px] ${isActive ? 'text-[#6366F1]/70' : 'text-[#64748B]/60'}`}>
+                <span className={`ml-0.5 text-[9px] ${isActive ? 'text-[var(--accent-text)]/70' : 'text-[var(--text-tertiary)]'}`}>
                   {count}
                 </span>
-                {isActive && (
-                  <motion.div
-                    layoutId="approval-tab-indicator"
-                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#6366F1] rounded-full"
-                    transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-                  />
-                )}
               </button>
             )
           })}
         </div>
 
+        <div className="flex-1" />
+
         {/* Priority filter */}
-        <div className="flex items-center gap-1.5">
-          <Filter className="w-3.5 h-3.5 text-[#64748B]" />
+        <div className="flex items-center gap-1 shrink-0">
+          <Filter className="w-3 h-3 text-[var(--text-tertiary)]" />
           <select
             value={priorityFilter}
             onChange={(e) => setPriorityFilter(e.target.value)}
-            className="px-2.5 py-1.5 rounded-lg bg-white/[0.03] border border-white/[0.08] text-xs text-[#F1F5F9] outline-none focus:border-[#6366F1]/50 transition-colors appearance-none cursor-pointer"
+            className="tool-input py-0.5 px-1.5 text-[10px] appearance-none cursor-pointer"
           >
             {PRIORITY_OPTIONS.map((p) => (
-              <option key={p} value={p} className="bg-[#0B1120] text-[#F1F5F9]">
-                {p === 'all' ? 'All Priorities' : p.charAt(0).toUpperCase() + p.slice(1)}
+              <option key={p} value={p} className="bg-[var(--bg-surface)] text-[var(--text-primary)]">
+                {p === 'all' ? 'All Priority' : p.charAt(0).toUpperCase() + p.slice(1)}
               </option>
             ))}
           </select>
         </div>
 
         {/* Search */}
-        <div className="relative flex-1 min-w-[200px] max-w-sm ml-auto">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#64748B]" />
+        <div className="relative shrink-0">
+          <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-[var(--text-tertiary)]" />
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search approvals..."
-            className="w-full pl-8 pr-3 py-2 rounded-lg bg-white/[0.03] border border-white/[0.08] text-xs text-[#F1F5F9] placeholder:text-[#64748B] outline-none focus:border-[#6366F1]/50 transition-colors"
+            placeholder="Search..."
+            className="tool-input pl-6 pr-2 py-0.5 w-[140px] text-[11px]"
           />
         </div>
+
+        {/* New request */}
+        <button
+          onClick={() => setModalOpen(true)}
+          className="tool-btn tool-btn-primary py-0.5 px-2 text-[10px]"
+        >
+          <Plus className="w-3 h-3" />
+          New
+        </button>
       </div>
 
-      {/* ---- Request list ---- */}
-      <div className="flex-1 min-h-0 overflow-y-auto">
+      {/* ── Request list ── */}
+      <div className="flex-1 min-h-0 overflow-y-auto p-2 bg-[var(--bg-workspace)]">
         {filtered.length === 0 ? (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="flex flex-col items-center justify-center py-24 text-center"
-          >
-            <div className="w-14 h-14 rounded-2xl bg-[#6366F1]/10 flex items-center justify-center mb-4">
-              <Shield className="w-7 h-7 text-[#6366F1]" />
-            </div>
-            <p className="text-sm font-medium text-[#F1F5F9] mb-1">No approval requests</p>
-            <p className="text-xs text-[#64748B] max-w-xs">
+          <div className="flex flex-col items-center justify-center h-full gap-2 text-center">
+            <Shield className="w-5 h-5 text-[var(--text-tertiary)]" />
+            <p className="text-[12px] text-[var(--text-secondary)]">No approval requests</p>
+            <p className="text-[11px] text-[var(--text-tertiary)] max-w-xs">
               {requests.length === 0
                 ? 'Create your first approval request to start managing review workflows.'
-                : 'No requests match your current filters. Try adjusting your search or filters.'}
+                : 'No requests match your current filters.'}
             </p>
             {requests.length === 0 && (
               <button
                 onClick={() => setModalOpen(true)}
-                className="mt-4 flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-medium text-white bg-[#6366F1] hover:bg-[#5558E6] transition-colors"
+                className="tool-btn tool-btn-primary text-[11px] mt-1"
               >
-                <Plus className="w-3.5 h-3.5" />
+                <Plus className="w-3 h-3" />
                 New Request
               </button>
             )}
-          </motion.div>
+          </div>
         ) : (
-          <motion.div
-            key={`${statusFilter}-${priorityFilter}`}
-            initial={{ opacity: 0, y: 6 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.2 }}
-            className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4"
-          >
-            <AnimatePresence mode="popLayout">
-              {filtered.map((request, idx) => (
-                <ApprovalCard
-                  key={request.id}
-                  request={request}
-                  index={idx}
-                  onApprove={handleApprove}
-                  onReject={handleReject}
-                />
-              ))}
-            </AnimatePresence>
-          </motion.div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-1.5">
+            {filtered.map((request) => (
+              <ApprovalCard
+                key={request.id}
+                request={request}
+                onApprove={handleApprove}
+                onReject={handleReject}
+              />
+            ))}
+          </div>
         )}
       </div>
 
-      {/* ---- Create Modal ---- */}
-      <AnimatePresence>
-        {modalOpen && (
-          <CreateApprovalModal
-            open={modalOpen}
-            onClose={() => setModalOpen(false)}
-            productId={productId}
-          />
-        )}
-      </AnimatePresence>
+      {/* ── Create Modal ── */}
+      {modalOpen && (
+        <CreateApprovalModal
+          open={modalOpen}
+          onClose={() => setModalOpen(false)}
+          productId={productId}
+        />
+      )}
     </div>
   )
 }

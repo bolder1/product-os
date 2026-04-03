@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useMemo, useCallback } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
 import {
   BookOpen,
   Plus,
@@ -31,10 +30,17 @@ import {
 // ---------------------------------------------------------------------------
 
 const STATUS_COLORS: Record<DecisionStatus, string> = {
-  proposed: '#F59E0B',
-  decided: '#10B981',
-  revisited: '#3B82F6',
-  superseded: '#64748B',
+  proposed: 'var(--color-warning)',
+  decided: 'var(--color-success)',
+  revisited: 'var(--accent-text)',
+  superseded: 'var(--text-tertiary)',
+}
+
+const STATUS_BG_COLORS: Record<DecisionStatus, string> = {
+  proposed: 'var(--color-warning-muted)',
+  decided: 'var(--color-success-muted)',
+  revisited: 'var(--accent-muted)',
+  superseded: 'var(--border-subtle)',
 }
 
 const STATUS_LABELS: Record<DecisionStatus, string> = {
@@ -82,179 +88,185 @@ function timeAgo(dateStr: string): string {
 
 function DecisionCard({
   decision,
-  index,
   expanded,
   onToggle,
   onDecide,
 }: {
   decision: Decision
-  index: number
   expanded: boolean
   onToggle: () => void
   onDecide: (id: string) => void
 }) {
   const statusColor = STATUS_COLORS[decision.status]
+  const statusBg = STATUS_BG_COLORS[decision.status]
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.25, delay: index * 0.04 }}
-      className="bg-white/[0.03] border border-white/[0.08] rounded-xl overflow-hidden hover:border-white/[0.12] transition-colors"
+    <div
+      style={{
+        borderBottom: '1px solid var(--border-default)',
+      }}
     >
-      {/* Card header — always visible */}
+      {/* Card header */}
       <button
         onClick={onToggle}
-        className="w-full flex items-start gap-3 p-4 text-left"
+        className="w-full flex items-center gap-2 text-left"
+        style={{
+          padding: '6px 12px',
+          background: expanded ? 'var(--bg-elevated)' : 'transparent',
+        }}
       >
         <div
-          className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 mt-0.5"
-          style={{ backgroundColor: `${statusColor}15` }}
-        >
-          <Scale size={15} style={{ color: statusColor }} />
-        </div>
+          style={{
+            width: 6,
+            height: 6,
+            borderRadius: 2,
+            background: statusColor,
+            flexShrink: 0,
+          }}
+        />
 
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 flex-wrap mb-1">
-            <h3 className="text-sm font-medium text-[#F1F5F9] truncate">
+          <div className="flex items-center gap-2">
+            <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--text-primary)' }} className="truncate">
               {decision.title}
-            </h3>
+            </span>
             <span
-              className="text-[10px] font-medium px-1.5 py-0.5 rounded-full shrink-0"
               style={{
-                backgroundColor: `${statusColor}20`,
+                fontSize: 10,
+                fontWeight: 500,
                 color: statusColor,
+                background: statusBg,
+                borderRadius: 3,
+                padding: '1px 5px',
+                flexShrink: 0,
               }}
             >
               {STATUS_LABELS[decision.status]}
             </span>
           </div>
 
-          <p className="text-xs text-[#94A3B8] line-clamp-2">
-            {decision.rationale || 'No rationale provided'}
-          </p>
-
-          <div className="flex items-center gap-3 mt-2 flex-wrap">
-            <span className="text-[10px] text-[#64748B] capitalize">
+          <div className="flex items-center gap-3" style={{ marginTop: 2 }}>
+            <span style={{ fontSize: 10, color: 'var(--text-tertiary)', textTransform: 'capitalize' }}>
               {decision.studio}
             </span>
             {decision.alternatives.length > 0 && (
-              <span className="text-[10px] text-[#64748B]">
-                {decision.alternatives.length} alternative
-                {decision.alternatives.length !== 1 ? 's' : ''}
+              <span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>
+                {decision.alternatives.length} alt{decision.alternatives.length !== 1 ? 's' : ''}
               </span>
             )}
             {decision.relatedEntities.length > 0 && (
-              <span className="flex items-center gap-0.5 text-[10px] text-[#64748B]">
+              <span className="flex items-center gap-0.5" style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>
                 <Link2 size={9} />
-                {decision.relatedEntities.length} linked
+                {decision.relatedEntities.length}
               </span>
             )}
             {decision.tags.length > 0 && (
-              <span className="flex items-center gap-0.5 text-[10px] text-[#64748B]">
+              <span className="flex items-center gap-0.5" style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>
                 <Tag size={9} />
                 {decision.tags.join(', ')}
               </span>
             )}
-            <span className="text-[10px] text-[#475569] ml-auto shrink-0">
+            <span style={{ fontSize: 10, color: 'var(--text-tertiary)', marginLeft: 'auto', flexShrink: 0 }}>
               {timeAgo(decision.createdAt)}
             </span>
           </div>
         </div>
 
-        <div className="shrink-0 text-[#64748B]">
-          {expanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+        <div style={{ color: 'var(--text-tertiary)', flexShrink: 0 }}>
+          {expanded ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
         </div>
       </button>
 
       {/* Expanded detail */}
-      <AnimatePresence>
-        {expanded && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.25 }}
-            className="overflow-hidden"
-          >
-            <div className="px-4 pb-4 pt-0 border-t border-white/[0.06] space-y-3">
-              {/* Rationale */}
-              <div className="pt-3">
-                <h4 className="text-[10px] font-medium text-[#64748B] uppercase tracking-wider mb-1">
-                  Rationale
-                </h4>
-                <p className="text-xs text-[#CBD5E1] leading-relaxed">
-                  {decision.rationale || 'No rationale provided'}
-                </p>
+      {expanded && (
+        <div
+          style={{
+            padding: '8px 12px 12px 20px',
+            background: 'var(--bg-surface)',
+            borderTop: '1px solid var(--border-subtle)',
+          }}
+        >
+          {/* Rationale */}
+          <div style={{ marginBottom: 8 }}>
+            <span className="tool-section-label" style={{ padding: 0, display: 'block', marginBottom: 3 }}>
+              Rationale
+            </span>
+            <p style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+              {decision.rationale || 'No rationale provided'}
+            </p>
+          </div>
+
+          {/* Alternatives */}
+          {decision.alternatives.length > 0 && (
+            <div style={{ marginBottom: 8 }}>
+              <span className="tool-section-label" style={{ padding: 0, display: 'block', marginBottom: 4 }}>
+                Alternatives Considered
+              </span>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                {decision.alternatives.map((alt, i) => (
+                  <div
+                    key={i}
+                    style={{
+                      background: 'var(--bg-elevated)',
+                      border: '1px solid var(--border-default)',
+                      borderRadius: 3,
+                      padding: '4px 8px',
+                    }}
+                  >
+                    <p style={{ fontSize: 11, fontWeight: 500, color: 'var(--text-primary)', marginBottom: 2 }}>
+                      {alt.option}
+                    </p>
+                    <p style={{ fontSize: 11, color: 'var(--text-secondary)' }}>
+                      {alt.proscons}
+                    </p>
+                  </div>
+                ))}
               </div>
-
-              {/* Alternatives */}
-              {decision.alternatives.length > 0 && (
-                <div>
-                  <h4 className="text-[10px] font-medium text-[#64748B] uppercase tracking-wider mb-1.5">
-                    Alternatives Considered
-                  </h4>
-                  <div className="space-y-2">
-                    {decision.alternatives.map((alt, i) => (
-                      <div
-                        key={i}
-                        className="bg-white/[0.02] border border-white/[0.06] rounded-lg px-3 py-2"
-                      >
-                        <p className="text-xs font-medium text-[#F1F5F9] mb-0.5">
-                          {alt.option}
-                        </p>
-                        <p className="text-[11px] text-[#94A3B8]">
-                          {alt.proscons}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Related entities */}
-              {decision.relatedEntities.length > 0 && (
-                <div>
-                  <h4 className="text-[10px] font-medium text-[#64748B] uppercase tracking-wider mb-1">
-                    Related Entities
-                  </h4>
-                  <div className="flex flex-wrap gap-1.5">
-                    {decision.relatedEntities.map((ent) => (
-                      <span
-                        key={ent.id}
-                        className="text-[10px] text-[#94A3B8] bg-white/[0.04] rounded-md px-2 py-0.5"
-                      >
-                        {ent.label}
-                        <span className="text-[#64748B] ml-1">({ent.type})</span>
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Decided by */}
-              {decision.decidedBy && (
-                <p className="text-[10px] text-[#64748B]">
-                  Decided by <span className="text-[#94A3B8]">{decision.decidedBy}</span>
-                  {decision.decidedAt && ` — ${timeAgo(decision.decidedAt)}`}
-                </p>
-              )}
-
-              {/* Action buttons */}
-              {decision.status === 'proposed' && (
-                <button
-                  onClick={() => onDecide(decision.id)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-white bg-[#10B981] hover:bg-[#059669] transition-colors"
-                >
-                  <CheckCircle size={12} />
-                  Mark as Decided
-                </button>
-              )}
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </motion.div>
+          )}
+
+          {/* Related entities */}
+          {decision.relatedEntities.length > 0 && (
+            <div style={{ marginBottom: 8 }}>
+              <span className="tool-section-label" style={{ padding: 0, display: 'block', marginBottom: 4 }}>
+                Related Entities
+              </span>
+              <div className="flex flex-wrap gap-1">
+                {decision.relatedEntities.map((ent) => (
+                  <span
+                    key={ent.id}
+                    className="tool-badge"
+                  >
+                    {ent.label}
+                    <span style={{ color: 'var(--text-tertiary)', marginLeft: 3 }}>({ent.type})</span>
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Decided by */}
+          {decision.decidedBy && (
+            <p style={{ fontSize: 10, color: 'var(--text-tertiary)', marginBottom: 6 }}>
+              Decided by <span style={{ color: 'var(--text-secondary)' }}>{decision.decidedBy}</span>
+              {decision.decidedAt && ` -- ${timeAgo(decision.decidedAt)}`}
+            </p>
+          )}
+
+          {/* Action buttons */}
+          {decision.status === 'proposed' && (
+            <button
+              onClick={() => onDecide(decision.id)}
+              className="tool-btn"
+              style={{ color: 'var(--color-success)', borderColor: 'rgba(61,214,140,0.2)' }}
+            >
+              <CheckCircle size={12} />
+              Mark as Decided
+            </button>
+          )}
+        </div>
+      )}
+    </div>
   )
 }
 
@@ -317,7 +329,6 @@ function CreateDecisionModal({
       tags,
       studio,
     })
-    // Reset
     setTitle('')
     setRationale('')
     setStudio(STUDIO_OPTIONS[0] ?? 'planner')
@@ -327,206 +338,213 @@ function CreateDecisionModal({
     onClose()
   }
 
+  if (!open) return null
+
   return (
-    <AnimatePresence>
-      {open && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
-          onClick={onClose}
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center"
+      style={{ background: 'rgba(0,0,0,0.6)' }}
+      onClick={onClose}
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="flex flex-col"
+        style={{
+          width: 480,
+          maxHeight: '90vh',
+          background: 'var(--bg-surface)',
+          border: '1px solid var(--border-default)',
+          borderRadius: 4,
+        }}
+      >
+        {/* Header */}
+        <div
+          className="flex items-center justify-between px-3"
+          style={{
+            height: 36,
+            borderBottom: '1px solid var(--border-default)',
+          }}
         >
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            transition={{ duration: 0.25 }}
-            onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-lg bg-[#0A0F1E] border border-white/[0.08] rounded-2xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col"
+          <div className="flex items-center gap-2">
+            <Scale size={13} style={{ color: 'var(--accent-text)' }} />
+            <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>
+              Create Decision
+            </span>
+          </div>
+          <button
+            onClick={onClose}
+            className="tool-btn"
+            style={{ padding: '2px 4px', border: 'none', background: 'transparent' }}
           >
-            {/* Header */}
-            <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.06]">
-              <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-xl bg-[#F59E0B]/10 flex items-center justify-center">
-                  <Scale size={16} className="text-[#F59E0B]" />
-                </div>
-                <h2 className="text-base font-semibold text-[#F1F5F9]">
-                  Create Decision
-                </h2>
-              </div>
-              <button
-                onClick={onClose}
-                className="p-1.5 rounded-lg hover:bg-white/[0.06] text-[#64748B]"
-              >
-                <X size={16} />
-              </button>
+            <X size={13} />
+          </button>
+        </div>
+
+        {/* Body */}
+        <div className="flex-1 overflow-y-auto" style={{ padding: 12 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {/* Title */}
+            <div>
+              <label className="tool-section-label" style={{ padding: 0, display: 'block', marginBottom: 3 }}>
+                Title *
+              </label>
+              <input
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="What was decided?"
+                className="tool-input"
+                style={{ width: '100%' }}
+              />
             </div>
 
-            {/* Body */}
-            <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4">
-              {/* Title */}
-              <div>
-                <label className="text-[10px] font-medium text-[#64748B] uppercase tracking-wider mb-1 block">
-                  Title *
-                </label>
-                <input
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  placeholder="What was decided?"
-                  className="w-full bg-white/[0.03] border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-[#F1F5F9] placeholder-[#475569] outline-none focus:border-[#F59E0B]/40 transition-colors"
-                />
-              </div>
+            {/* Rationale */}
+            <div>
+              <label className="tool-section-label" style={{ padding: 0, display: 'block', marginBottom: 3 }}>
+                Rationale
+              </label>
+              <textarea
+                value={rationale}
+                onChange={(e) => setRationale(e.target.value)}
+                placeholder="Why was this decision made?"
+                rows={3}
+                className="tool-input"
+                style={{ width: '100%', resize: 'none' }}
+              />
+            </div>
 
-              {/* Rationale */}
-              <div>
-                <label className="text-[10px] font-medium text-[#64748B] uppercase tracking-wider mb-1 block">
-                  Rationale
-                </label>
-                <textarea
-                  value={rationale}
-                  onChange={(e) => setRationale(e.target.value)}
-                  placeholder="Why was this decision made?"
-                  rows={3}
-                  className="w-full bg-white/[0.03] border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-[#F1F5F9] placeholder-[#475569] outline-none focus:border-[#F59E0B]/40 transition-colors resize-none"
-                />
-              </div>
+            {/* Studio */}
+            <div>
+              <label className="tool-section-label" style={{ padding: 0, display: 'block', marginBottom: 3 }}>
+                Studio
+              </label>
+              <select
+                value={studio}
+                onChange={(e) => setStudio(e.target.value)}
+                className="tool-input"
+                style={{ width: '100%' }}
+              >
+                {STUDIO_OPTIONS.map((s) => (
+                  <option key={s} value={s} style={{ background: 'var(--bg-surface)' }}>
+                    {s.charAt(0).toUpperCase() + s.slice(1)}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-              {/* Studio */}
-              <div>
-                <label className="text-[10px] font-medium text-[#64748B] uppercase tracking-wider mb-1 block">
-                  Studio
-                </label>
-                <select
-                  value={studio}
-                  onChange={(e) => setStudio(e.target.value)}
-                  className="w-full bg-white/[0.03] border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-[#F1F5F9] outline-none focus:border-[#F59E0B]/40 transition-colors"
-                >
-                  {STUDIO_OPTIONS.map((s) => (
-                    <option key={s} value={s} className="bg-[#0A0F1E]">
-                      {s.charAt(0).toUpperCase() + s.slice(1)}
-                    </option>
-                  ))}
-                </select>
+            {/* Alternatives */}
+            <div>
+              <div className="flex items-center justify-between" style={{ marginBottom: 4 }}>
+                <span className="tool-section-label" style={{ padding: 0 }}>
+                  Alternatives
+                </span>
+                <button onClick={addAlternative} className="tool-btn" style={{ padding: '2px 6px' }}>
+                  <Plus size={10} />
+                  Add
+                </button>
               </div>
-
-              {/* Alternatives */}
-              <div>
-                <div className="flex items-center justify-between mb-1.5">
-                  <label className="text-[10px] font-medium text-[#64748B] uppercase tracking-wider">
-                    Alternatives
-                  </label>
-                  <button
-                    onClick={addAlternative}
-                    className="flex items-center gap-1 text-[10px] text-[#6366F1] hover:text-[#818CF8] transition-colors"
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                {alternatives.map((alt, i) => (
+                  <div
+                    key={i}
+                    style={{
+                      background: 'var(--bg-elevated)',
+                      border: '1px solid var(--border-default)',
+                      borderRadius: 3,
+                      padding: 6,
+                    }}
                   >
-                    <Plus size={10} />
-                    Add
-                  </button>
-                </div>
-                <div className="space-y-2">
-                  {alternatives.map((alt, i) => (
-                    <div
-                      key={i}
-                      className="bg-white/[0.02] border border-white/[0.06] rounded-lg p-2.5 space-y-2"
-                    >
-                      <div className="flex items-center gap-2">
-                        <input
-                          value={alt.option}
-                          onChange={(e) =>
-                            updateAlternative(i, 'option', e.target.value)
-                          }
-                          placeholder="Option name"
-                          className="flex-1 bg-transparent border-b border-white/[0.06] pb-1 text-xs text-[#F1F5F9] placeholder-[#475569] outline-none"
-                        />
-                        <button
-                          onClick={() => removeAlternative(i)}
-                          className="p-0.5 rounded hover:bg-white/[0.06] text-[#64748B]"
-                        >
-                          <Trash2 size={11} />
-                        </button>
-                      </div>
-                      <textarea
-                        value={alt.proscons}
-                        onChange={(e) =>
-                          updateAlternative(i, 'proscons', e.target.value)
-                        }
-                        placeholder="Pros/cons..."
-                        rows={1}
-                        className="w-full bg-transparent text-[11px] text-[#94A3B8] placeholder-[#475569] outline-none resize-none"
+                    <div className="flex items-center gap-2">
+                      <input
+                        value={alt.option}
+                        onChange={(e) => updateAlternative(i, 'option', e.target.value)}
+                        placeholder="Option name"
+                        className="tool-input"
+                        style={{ flex: 1, borderTop: 'none', borderLeft: 'none', borderRight: 'none', borderRadius: 0, padding: '2px 0' }}
                       />
-                    </div>
-                  ))}
-                  {alternatives.length === 0 && (
-                    <p className="text-[10px] text-[#475569]">
-                      No alternatives added yet
-                    </p>
-                  )}
-                </div>
-              </div>
-
-              {/* Tags */}
-              <div>
-                <label className="text-[10px] font-medium text-[#64748B] uppercase tracking-wider mb-1 block">
-                  Tags
-                </label>
-                <div className="flex items-center gap-2">
-                  <input
-                    value={tagInput}
-                    onChange={(e) => setTagInput(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())}
-                    placeholder="Add tag..."
-                    className="flex-1 bg-white/[0.03] border border-white/[0.08] rounded-lg px-3 py-1.5 text-xs text-[#F1F5F9] placeholder-[#475569] outline-none"
-                  />
-                  <button
-                    onClick={addTag}
-                    className="px-2 py-1.5 rounded-lg text-xs text-[#6366F1] bg-[#6366F1]/10 hover:bg-[#6366F1]/20 transition-colors"
-                  >
-                    Add
-                  </button>
-                </div>
-                {tags.length > 0 && (
-                  <div className="flex flex-wrap gap-1.5 mt-2">
-                    {tags.map((tag) => (
-                      <span
-                        key={tag}
-                        className="flex items-center gap-1 text-[10px] text-[#94A3B8] bg-white/[0.04] rounded-md px-2 py-0.5"
+                      <button
+                        onClick={() => removeAlternative(i)}
+                        className="tool-btn"
+                        style={{ padding: '2px 4px', border: 'none', background: 'transparent' }}
                       >
-                        {tag}
-                        <button
-                          onClick={() => setTags(tags.filter((t) => t !== tag))}
-                          className="text-[#64748B] hover:text-[#94A3B8]"
-                        >
-                          <X size={8} />
-                        </button>
-                      </span>
-                    ))}
+                        <Trash2 size={11} />
+                      </button>
+                    </div>
+                    <textarea
+                      value={alt.proscons}
+                      onChange={(e) => updateAlternative(i, 'proscons', e.target.value)}
+                      placeholder="Pros/cons..."
+                      rows={1}
+                      className="tool-input"
+                      style={{ width: '100%', border: 'none', background: 'transparent', padding: '2px 0', resize: 'none', fontSize: 11 }}
+                    />
                   </div>
+                ))}
+                {alternatives.length === 0 && (
+                  <p style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>No alternatives added yet</p>
                 )}
               </div>
             </div>
 
-            {/* Footer */}
-            <div className="flex items-center justify-end gap-2 px-5 py-3 border-t border-white/[0.06]">
-              <button
-                onClick={onClose}
-                className="px-4 py-2 rounded-lg text-sm text-[#94A3B8] hover:bg-white/[0.06] transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleSubmit}
-                disabled={!title.trim()}
-                className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium text-white bg-[#F59E0B] hover:bg-[#D97706] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-              >
-                <Plus size={14} />
-                Create Decision
-              </button>
+            {/* Tags */}
+            <div>
+              <label className="tool-section-label" style={{ padding: 0, display: 'block', marginBottom: 3 }}>
+                Tags
+              </label>
+              <div className="flex items-center gap-2">
+                <input
+                  value={tagInput}
+                  onChange={(e) => setTagInput(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())}
+                  placeholder="Add tag..."
+                  className="tool-input"
+                  style={{ flex: 1 }}
+                />
+                <button onClick={addTag} className="tool-btn">
+                  Add
+                </button>
+              </div>
+              {tags.length > 0 && (
+                <div className="flex flex-wrap gap-1" style={{ marginTop: 4 }}>
+                  {tags.map((tag) => (
+                    <span key={tag} className="tool-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: 3 }}>
+                      {tag}
+                      <button
+                        onClick={() => setTags(tags.filter((t) => t !== tag))}
+                        style={{ color: 'var(--text-tertiary)', lineHeight: 1 }}
+                      >
+                        <X size={8} />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
-          </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div
+          className="flex items-center justify-end gap-2 px-3"
+          style={{
+            height: 40,
+            borderTop: '1px solid var(--border-default)',
+          }}
+        >
+          <button onClick={onClose} className="tool-btn">
+            Cancel
+          </button>
+          <button
+            onClick={handleSubmit}
+            disabled={!title.trim()}
+            className="tool-btn tool-btn-primary"
+            style={{ opacity: title.trim() ? 1 : 0.4 }}
+          >
+            <Plus size={12} />
+            Create Decision
+          </button>
+        </div>
+      </div>
+    </div>
   )
 }
 
@@ -552,17 +570,14 @@ export default function DecisionsPage() {
   const filteredDecisions = useMemo(() => {
     let result = decisions
 
-    // Status filter
     if (activeTab !== 'all') {
       result = result.filter((d) => d.status === activeTab)
     }
 
-    // Studio filter
     if (studioFilter !== 'all') {
       result = result.filter((d) => d.studio === studioFilter)
     }
 
-    // Search
     if (search.trim()) {
       const q = search.toLowerCase()
       result = result.filter(
@@ -600,165 +615,154 @@ export default function DecisionsPage() {
     [decideOnDecision]
   )
 
-  // Studios that have decisions for the filter dropdown
   const usedStudios = useMemo(() => {
     const set = new Set(decisions.map((d) => d.studio))
     return Array.from(set).sort()
   }, [decisions])
 
   return (
-    <div className="flex flex-col h-full gap-5">
-      {/* Header */}
-      <div className="flex items-center justify-between flex-wrap gap-3">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-[#F59E0B]/10 flex items-center justify-center">
-            <BookOpen className="w-5 h-5 text-[#F59E0B]" />
-          </div>
-          <div>
-            <h1 className="text-xl font-semibold text-[#F1F5F9]">
-              Decision Log
-            </h1>
-            <p className="text-xs text-[#64748B]">
-              {filteredDecisions.length} decision
-              {filteredDecisions.length !== 1 ? 's' : ''}
-              {activeTab !== 'all' || studioFilter !== 'all'
-                ? ` (filtered from ${decisions.length})`
-                : ''}
-            </p>
-          </div>
+    <div className="flex flex-col h-full" style={{ background: 'var(--bg-workspace)' }}>
+      {/* Toolbar */}
+      <div
+        className="flex items-center justify-between px-3 shrink-0 h-[var(--toolbar-h)]"
+        style={{
+          borderBottom: '1px solid var(--border-default)',
+          background: 'var(--bg-surface)',
+        }}
+      >
+        <div className="flex items-center gap-2">
+          <BookOpen size={14} style={{ color: 'var(--text-secondary)' }} />
+          <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>
+            Decision Log
+          </span>
+          <span style={{ fontSize: 11, color: 'var(--text-tertiary)' }}>
+            {filteredDecisions.length} decision{filteredDecisions.length !== 1 ? 's' : ''}
+            {activeTab !== 'all' || studioFilter !== 'all'
+              ? ` (filtered from ${decisions.length})`
+              : ''}
+          </span>
         </div>
 
-        <div className="flex items-center gap-2">
-          <button className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs text-[#F59E0B] bg-[#F59E0B]/10 hover:bg-[#F59E0B]/20 transition-colors">
-            <Sparkles className="w-3.5 h-3.5" />
-            AI: Suggest decisions
+        <div className="flex items-center gap-1">
+          <button className="tool-btn" style={{ color: 'var(--accent-text)' }}>
+            <Sparkles size={12} />
+            AI: Suggest
           </button>
           <button
             onClick={() => setCreateOpen(true)}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium text-white bg-[#F59E0B] hover:bg-[#D97706] transition-colors"
+            className="tool-btn tool-btn-primary"
           >
-            <Plus className="w-4 h-4" />
+            <Plus size={12} />
             New Decision
           </button>
         </div>
       </div>
 
-      {/* Search & Filters */}
-      <div className="flex items-center gap-3 flex-wrap">
-        <div className="relative flex-1 min-w-[200px] max-w-sm">
-          <Search
-            size={14}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-[#64748B]"
-          />
-          <input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search decisions..."
-            className="w-full bg-white/[0.03] border border-white/[0.08] rounded-lg pl-9 pr-3 py-2 text-sm text-[#F1F5F9] placeholder-[#475569] outline-none focus:border-[#F59E0B]/40 transition-colors"
-          />
-        </div>
+      {/* Search + Studio filter + Status tabs */}
+      <div
+        className="shrink-0"
+        style={{
+          background: 'var(--bg-surface)',
+          borderBottom: '1px solid var(--border-default)',
+        }}
+      >
+        {/* Search row */}
+        <div className="flex items-center gap-2 px-3" style={{ height: 32 }}>
+          <div className="relative flex-1" style={{ maxWidth: 280 }}>
+            <Search
+              size={12}
+              style={{
+                position: 'absolute',
+                left: 6,
+                top: '50%',
+                transform: 'translateY(-50%)',
+                color: 'var(--text-tertiary)',
+              }}
+            />
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search decisions..."
+              className="tool-input"
+              style={{ width: '100%', paddingLeft: 22 }}
+            />
+          </div>
 
-        <div className="flex items-center gap-1.5">
-          <Filter size={13} className="text-[#64748B]" />
-          <select
-            value={studioFilter}
-            onChange={(e) => setStudioFilter(e.target.value)}
-            className="bg-white/[0.03] border border-white/[0.08] rounded-lg px-2.5 py-2 text-xs text-[#F1F5F9] outline-none focus:border-[#F59E0B]/40 transition-colors"
-          >
-            <option value="all" className="bg-[#0A0F1E]">
-              All Studios
-            </option>
-            {usedStudios.map((s) => (
-              <option key={s} value={s} className="bg-[#0A0F1E]">
-                {s.charAt(0).toUpperCase() + s.slice(1)}
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
-
-      {/* Status tabs */}
-      <div className="flex items-center gap-1 border-b border-white/[0.06] -mx-1 px-1">
-        {filterTabs.map((tab) => {
-          const isActive = activeTab === tab.key
-          const count =
-            tab.key === 'all'
-              ? decisions.length
-              : decisions.filter((d) => d.status === tab.key).length
-
-          return (
-            <button
-              key={tab.key}
-              onClick={() => setActiveTab(tab.key)}
-              className={`relative px-3 py-2.5 text-xs font-medium transition-colors ${
-                isActive
-                  ? 'text-[#F59E0B]'
-                  : 'text-[#64748B] hover:text-[#94A3B8]'
-              }`}
+          <div className="flex items-center gap-1">
+            <Filter size={11} style={{ color: 'var(--text-tertiary)' }} />
+            <select
+              value={studioFilter}
+              onChange={(e) => setStudioFilter(e.target.value)}
+              className="tool-input"
+              style={{ fontSize: 11 }}
             >
-              {tab.label}
-              <span
-                className={`ml-1.5 text-[10px] ${
-                  isActive ? 'text-[#F59E0B]/70' : 'text-[#64748B]/70'
-                }`}
+              <option value="all" style={{ background: 'var(--bg-surface)' }}>All Studios</option>
+              {usedStudios.map((s) => (
+                <option key={s} value={s} style={{ background: 'var(--bg-surface)' }}>
+                  {s.charAt(0).toUpperCase() + s.slice(1)}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        {/* Status tabs */}
+        <div className="tool-tabs" style={{ paddingLeft: 4 }}>
+          {filterTabs.map((tab) => {
+            const isActive = activeTab === tab.key
+            const count =
+              tab.key === 'all'
+                ? decisions.length
+                : decisions.filter((d) => d.status === tab.key).length
+
+            return (
+              <button
+                key={tab.key}
+                onClick={() => setActiveTab(tab.key)}
+                className={`tool-tab ${isActive ? 'active' : ''}`}
               >
-                {count}
-              </span>
-              {isActive && (
-                <motion.div
-                  layoutId="decisions-tab-indicator"
-                  className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#F59E0B] rounded-full"
-                  transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-                />
-              )}
-            </button>
-          )
-        })}
+                {tab.label}
+                <span className="tool-badge" style={{ marginLeft: 4 }}>
+                  {count}
+                </span>
+              </button>
+            )
+          })}
+        </div>
       </div>
 
       {/* Decision list */}
-      <motion.div
-        key={`${activeTab}-${studioFilter}`}
-        initial={{ opacity: 0, y: 6 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.25 }}
-        className="flex-1 min-h-0 overflow-y-auto"
-      >
+      <div className="flex-1 min-h-0 overflow-y-auto">
         {filteredDecisions.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 text-center">
-            <div className="w-12 h-12 rounded-xl bg-[#F59E0B]/10 flex items-center justify-center mb-3">
-              <BookOpen className="w-6 h-6 text-[#F59E0B]" />
-            </div>
-            <p className="text-sm text-[#94A3B8]">
+          <div className="flex flex-col items-center justify-center py-16 text-center">
+            <BookOpen size={18} style={{ color: 'var(--text-tertiary)', marginBottom: 8 }} />
+            <p style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
               {search || activeTab !== 'all' || studioFilter !== 'all'
                 ? 'No matching decisions'
                 : 'No decisions logged yet'}
             </p>
-            <p className="text-xs text-[#64748B] mt-1">
+            <p style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 2 }}>
               {search || activeTab !== 'all' || studioFilter !== 'all'
                 ? 'Try adjusting your filters'
                 : 'Start logging architectural and product decisions'}
             </p>
           </div>
         ) : (
-          <div className="space-y-3">
-            {filteredDecisions.map((decision, index) => (
-              <DecisionCard
-                key={decision.id}
-                decision={decision}
-                index={index}
-                expanded={expandedId === decision.id}
-                onToggle={() =>
-                  setExpandedId(
-                    expandedId === decision.id ? null : decision.id
-                  )
-                }
-                onDecide={handleDecide}
-              />
-            ))}
-          </div>
+          filteredDecisions.map((decision) => (
+            <DecisionCard
+              key={decision.id}
+              decision={decision}
+              expanded={expandedId === decision.id}
+              onToggle={() =>
+                setExpandedId(
+                  expandedId === decision.id ? null : decision.id
+                )
+              }
+              onDecide={handleDecide}
+            />
+          ))
         )}
-      </motion.div>
+      </div>
 
       {/* Create modal */}
       <CreateDecisionModal

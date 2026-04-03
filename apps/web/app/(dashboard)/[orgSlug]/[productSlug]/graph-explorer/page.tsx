@@ -2,8 +2,7 @@
 
 import { useState, useCallback, useMemo } from 'react'
 import { useParams } from 'next/navigation'
-import { AnimatePresence } from 'framer-motion'
-import { Sparkles, Share2 } from 'lucide-react'
+import { Sparkles, Share2, X } from 'lucide-react'
 import {
   mockGraphData,
   type NodeKind,
@@ -36,7 +35,7 @@ const ALL_EDGE_KINDS: EdgeKind[] = [
 ]
 
 // ---------------------------------------------------------------------------
-// Layout helper: arrange nodes in kind-based clusters around a center point
+// Layout helper
 // ---------------------------------------------------------------------------
 const CENTER_X = 550
 const CENTER_Y = 400
@@ -72,7 +71,7 @@ function computeLayout(nodes: { id: string; kind: string }[]): Record<string, { 
 }
 
 // ---------------------------------------------------------------------------
-// Convert store nodes/edges → local component format
+// Store converters
 // ---------------------------------------------------------------------------
 function storeNodesToLocal(
   storeNodes: { id: string; kind: string; label: string; data: Record<string, unknown> }[],
@@ -105,11 +104,9 @@ export default function GraphExplorerPage() {
   const params = useParams()
   const productId = params.productSlug as string
 
-  // Read flat arrays from the store (never call methods in selectors)
   const allStoreNodes = useGraphStore((s) => s.nodes)
   const allStoreEdges = useGraphStore((s) => s.edges)
 
-  // Filter to current product
   const productStoreNodes = useMemo(
     () => allStoreNodes.filter((n) => n.productId === productId),
     [allStoreNodes, productId]
@@ -119,16 +116,13 @@ export default function GraphExplorerPage() {
     [allStoreEdges, productId]
   )
 
-  // Determine if we have real data or should fall back to mock
   const hasStoreData = productStoreNodes.length > 0
 
-  // Compute layout for store nodes
   const storeLayout = useMemo(
     () => (hasStoreData ? computeLayout(productStoreNodes) : {}),
     [hasStoreData, productStoreNodes]
   )
 
-  // Build the final nodes/edges for the child components
   const graphNodes: LocalGraphNode[] = useMemo(
     () => (hasStoreData ? storeNodesToLocal(productStoreNodes, storeLayout) : mockGraphData.nodes),
     [hasStoreData, productStoreNodes, storeLayout]
@@ -138,7 +132,6 @@ export default function GraphExplorerPage() {
     [hasStoreData, productStoreEdges]
   )
 
-  // Build initial positions from whichever data source we're using
   const buildInitialPositions = useCallback(() => {
     const positions: Record<string, { x: number; y: number }> = {}
     for (const node of graphNodes) {
@@ -164,7 +157,6 @@ export default function GraphExplorerPage() {
     return positions
   })
 
-  // Sync positions when graph data source changes
   const positionsRef = useMemo(() => {
     const positions: Record<string, { x: number; y: number }> = {}
     for (const node of graphNodes) {
@@ -173,7 +165,6 @@ export default function GraphExplorerPage() {
     return positions
   }, [graphNodes])
 
-  // Merge: keep user-dragged positions, fill in defaults for new nodes
   const mergedPositions = useMemo(() => {
     const merged: Record<string, { x: number; y: number }> = {}
     for (const node of graphNodes) {
@@ -185,11 +176,8 @@ export default function GraphExplorerPage() {
   const toggleNodeKind = useCallback((kind: NodeKind) => {
     setActiveNodeKinds((prev) => {
       const next = new Set(prev)
-      if (next.has(kind)) {
-        next.delete(kind)
-      } else {
-        next.add(kind)
-      }
+      if (next.has(kind)) next.delete(kind)
+      else next.add(kind)
       return next
     })
   }, [])
@@ -197,11 +185,8 @@ export default function GraphExplorerPage() {
   const toggleEdgeKind = useCallback((kind: EdgeKind) => {
     setActiveEdgeKinds((prev) => {
       const next = new Set(prev)
-      if (next.has(kind)) {
-        next.delete(kind)
-      } else {
-        next.add(kind)
-      }
+      if (next.has(kind)) next.delete(kind)
+      else next.add(kind)
       return next
     })
   }, [])
@@ -227,67 +212,83 @@ export default function GraphExplorerPage() {
   )
 
   return (
-    <div className="flex flex-col h-full gap-3">
-      {/* Header */}
-      <div className="flex items-center justify-between flex-wrap gap-3">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-[#8B5CF6]/10 flex items-center justify-center">
-            <Share2 className="w-5 h-5 text-[#8B5CF6]" />
-          </div>
-          <div>
-            <h1 className="text-xl font-semibold text-[#F1F5F9]">Graph Explorer</h1>
-            <p className="text-xs text-[#64748B]">
-              {graphNodes.length} nodes, {graphEdges.length} edges
-              {!hasStoreData && ' (demo data)'}
-            </p>
-          </div>
+    <div className="flex flex-col h-full bg-[var(--bg-workspace)]">
+      {/* Toolbar */}
+      <div className="flex items-center justify-between px-3 shrink-0 h-[var(--toolbar-h)] border-b border-[var(--border-default)] bg-[var(--bg-surface)]">
+        <div className="flex items-center gap-2">
+          <Share2 size={14} className="text-[var(--text-secondary)]" />
+          <span className="text-[13px] font-semibold text-[var(--text-primary)]">
+            Graph Explorer
+          </span>
+          <span className="text-[11px] text-[var(--text-tertiary)]">
+            {graphNodes.length} nodes, {graphEdges.length} edges
+            {!hasStoreData && ' (demo data)'}
+          </span>
         </div>
 
-        <button className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium text-[#8B5CF6] bg-[#8B5CF6]/10 hover:bg-[#8B5CF6]/20 transition-colors">
-          <Sparkles className="w-3.5 h-3.5" />
+        <button className="tool-btn text-[var(--accent-text)]">
+          <Sparkles size={12} />
           AI: Analyze Graph
         </button>
       </div>
 
       {/* Filters */}
-      <GraphFilters
-        activeNodeKinds={activeNodeKinds}
-        onToggleNodeKind={toggleNodeKind}
-        activeEdgeKinds={activeEdgeKinds}
-        onToggleEdgeKind={toggleEdgeKind}
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-        showLabels={showLabels}
-        onToggleLabels={() => setShowLabels((p) => !p)}
-        onResetLayout={handleResetLayout}
-      />
+      <div className="shrink-0 border-b border-[var(--border-default)] bg-[var(--bg-surface)]">
+        <GraphFilters
+          activeNodeKinds={activeNodeKinds}
+          onToggleNodeKind={toggleNodeKind}
+          activeEdgeKinds={activeEdgeKinds}
+          onToggleEdgeKind={toggleEdgeKind}
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          showLabels={showLabels}
+          onToggleLabels={() => setShowLabels((p) => !p)}
+          onResetLayout={handleResetLayout}
+        />
+      </div>
 
-      {/* Canvas */}
-      <GraphCanvas
-        nodes={graphNodes}
-        edges={graphEdges}
-        activeNodeKinds={activeNodeKinds}
-        activeEdgeKinds={activeEdgeKinds}
-        searchQuery={searchQuery}
-        showLabels={showLabels}
-        selectedNodeId={selectedNodeId}
-        onSelectNode={setSelectedNodeId}
-        nodePositions={mergedPositions}
-        onUpdateNodePosition={handleUpdateNodePosition}
-      />
-
-      {/* Node detail panel */}
-      <AnimatePresence>
-        {selectedNode && (
-          <NodeDetailPanel
-            node={selectedNode}
+      {/* Canvas + optional detail panel */}
+      <div className="flex-1 flex min-h-0 relative">
+        {/* Full-bleed canvas */}
+        <div className="flex-1 min-w-0">
+          <GraphCanvas
+            nodes={graphNodes}
             edges={graphEdges}
-            allNodes={graphNodes}
+            activeNodeKinds={activeNodeKinds}
+            activeEdgeKinds={activeEdgeKinds}
+            searchQuery={searchQuery}
+            showLabels={showLabels}
+            selectedNodeId={selectedNodeId}
             onSelectNode={setSelectedNodeId}
-            onClose={() => setSelectedNodeId(null)}
+            nodePositions={mergedPositions}
+            onUpdateNodePosition={handleUpdateNodePosition}
           />
+        </div>
+
+        {/* Node detail panel */}
+        {selectedNode && (
+          <div className="shrink-0 overflow-y-auto w-[280px] border-l border-[var(--border-default)] bg-[var(--bg-surface)]">
+            <div className="flex items-center justify-between px-3 h-[var(--toolbar-h)] border-b border-[var(--border-default)]">
+              <span className="tool-section-label" style={{ padding: 0 }}>
+                Node Detail
+              </span>
+              <button
+                onClick={() => setSelectedNodeId(null)}
+                className="tool-btn px-1 py-0.5 border-none bg-transparent"
+              >
+                <X size={12} />
+              </button>
+            </div>
+            <NodeDetailPanel
+              node={selectedNode}
+              edges={graphEdges}
+              allNodes={graphNodes}
+              onSelectNode={setSelectedNodeId}
+              onClose={() => setSelectedNodeId(null)}
+            />
+          </div>
         )}
-      </AnimatePresence>
+      </div>
     </div>
   )
 }

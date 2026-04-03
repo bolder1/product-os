@@ -1,6 +1,12 @@
 import type { NextConfig } from 'next'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 const nextConfig: NextConfig = {
+  // Monorepo root (pnpm workspace) — fixes flaky "Cannot find module for page" on Windows
+  outputFileTracingRoot: path.join(__dirname, '../..'),
   typescript: {
     // Pre-existing type errors in activity-feed, approval-timeline, etc.
     // Type checking is done separately via tsc --noEmit
@@ -16,9 +22,8 @@ const nextConfig: NextConfig = {
     '@product-os/ai',
     '@product-os/templates',
   ],
-  experimental: {
-    optimizePackageImports: ['lucide-react', 'framer-motion'],
-  },
+  // Do not use experimental.optimizePackageImports for framer-motion / lucide here:
+  // it has caused webpack runtime "__webpack_modules__[moduleId] is not a function" in dev.
 }
 
 export default nextConfig

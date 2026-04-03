@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
 import {
   Settings,
   Sliders,
@@ -33,7 +32,7 @@ const TABS: TabConfig[] = [
   { key: 'roles', label: 'Roles & Access', icon: ShieldCheck },
   { key: 'changelog', label: 'Changelog', icon: Clock },
   { key: 'integrations', label: 'Integrations', icon: Plug },
-  { key: 'danger', label: 'Danger Zone', icon: AlertTriangle, color: '#F43F5E' },
+  { key: 'danger', label: 'Danger Zone', icon: AlertTriangle, color: 'var(--color-error)' },
 ]
 
 const TAB_COMPONENTS: Record<SettingsTab, React.FC> = {
@@ -51,48 +50,41 @@ export default function SettingsPage() {
   const ActiveComponent = TAB_COMPONENTS[activeTab]
 
   return (
-    <div className="flex flex-col h-full gap-6">
-      {/* Header */}
-      <div className="flex items-center gap-3">
-        <div className="w-9 h-9 rounded-xl bg-[#94A3B8]/10 flex items-center justify-center">
-          <Settings size={18} className="text-[#94A3B8]" />
-        </div>
-        <div>
-          <h1 className="text-xl font-semibold text-[#F1F5F9]">Settings</h1>
-          <p className="text-xs text-[#64748B]">
-            Manage your product configuration
-          </p>
-        </div>
+    <div className="flex flex-col h-full bg-[var(--bg-workspace)]">
+      {/* ── Toolbar ── */}
+      <div className="h-[var(--toolbar-h)] min-h-[32px] flex items-center px-3 bg-[var(--bg-surface)] border-b border-[var(--border-default)]">
+        <Settings className="w-3.5 h-3.5 text-[var(--text-secondary)] mr-2" />
+        <span className="text-[13px] font-medium text-[var(--text-primary)]">Settings</span>
+        <span className="text-[10px] text-[var(--text-tertiary)] ml-2">Product configuration</span>
       </div>
 
-      {/* Main layout: vertical tabs on left, content on right */}
-      <div className="flex flex-1 gap-6 min-h-0">
-        {/* Sidebar tabs */}
-        <nav className="w-48 shrink-0 space-y-0.5">
+      {/* ── Main layout: left nav + right content ── */}
+      <div className="flex flex-1 min-h-0">
+        {/* Left tab list */}
+        <nav className="w-[180px] shrink-0 bg-[var(--bg-surface)] border-r border-[var(--border-default)] py-2 px-1.5 flex flex-col gap-px">
           {TABS.map((tab) => {
             const isActive = activeTab === tab.key
             const Icon = tab.icon
-            const color = tab.color || (isActive ? '#3B82F6' : undefined)
+            const iconColor = tab.color || (isActive ? 'var(--accent-text)' : 'var(--text-tertiary)')
             return (
               <button
                 key={tab.key}
                 onClick={() => setActiveTab(tab.key)}
-                className={`relative w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[0.8125rem] font-medium transition-colors text-left ${
-                  isActive
-                    ? 'bg-white/[0.06] text-[#F1F5F9]'
-                    : 'text-[#94A3B8] hover:bg-white/[0.03] hover:text-[#CBD5E1]'
-                }`}
+                className={`
+                  w-full flex items-center gap-2 px-2.5 py-1.5 rounded-[var(--radius-sm)] text-[11px] font-medium text-left transition-colors
+                  ${isActive
+                    ? 'bg-[var(--bg-elevated)] text-[var(--text-primary)]'
+                    : 'text-[var(--text-secondary)] hover:bg-[var(--bg-elevated)] hover:text-[var(--text-primary)]'
+                  }
+                `}
               >
                 {isActive && (
-                  <motion.div
-                    layoutId="settings-tab-active"
-                    className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-4 rounded-r-full bg-[#3B82F6]"
-                    transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-                  />
+                  <span className="absolute left-0 w-[2px] h-3.5 rounded-r-[var(--radius-sm)] bg-[var(--accent)]" />
                 )}
                 <Icon
-                  size={16}
-                  style={{ color: color || 'currentColor' }}
+                  size={13}
+                  style={{ color: iconColor }}
+                  className="shrink-0"
                 />
                 {tab.label}
               </button>
@@ -100,19 +92,9 @@ export default function SettingsPage() {
           })}
         </nav>
 
-        {/* Content */}
-        <div className="flex-1 overflow-y-auto pr-1">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={activeTab}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.2 }}
-            >
-              <ActiveComponent />
-            </motion.div>
-          </AnimatePresence>
+        {/* Right content */}
+        <div className="flex-1 overflow-y-auto p-3">
+          <ActiveComponent />
         </div>
       </div>
     </div>

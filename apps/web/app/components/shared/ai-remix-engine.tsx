@@ -1,11 +1,9 @@
 'use client'
 
 import { useState, useCallback, useMemo } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
 import {
   Wand2,
   Shuffle,
-  Sparkles,
   Copy,
   Check,
   ChevronRight,
@@ -29,8 +27,8 @@ export interface RemixVariation {
   id: string
   label: string
   description: string
-  preview: Record<string, string> // key-value pairs representing changed properties
-  confidence: number // 0-100
+  preview: Record<string, string>
+  confidence: number
   tags: string[]
 }
 
@@ -53,12 +51,12 @@ interface AIRemixEngineProps {
 // ---------------------------------------------------------------------------
 
 const targetIcons: Record<RemixTarget, React.ReactNode> = {
-  component: <Box className="w-4 h-4" />,
-  color: <Palette className="w-4 h-4" />,
-  typography: <Type className="w-4 h-4" />,
-  layout: <Layout className="w-4 h-4" />,
-  content: <FileText className="w-4 h-4" />,
-  page: <Layout className="w-4 h-4" />,
+  component: <Box className="w-3.5 h-3.5" />,
+  color: <Palette className="w-3.5 h-3.5" />,
+  typography: <Type className="w-3.5 h-3.5" />,
+  layout: <Layout className="w-3.5 h-3.5" />,
+  content: <FileText className="w-3.5 h-3.5" />,
+  page: <Layout className="w-3.5 h-3.5" />,
 }
 
 function generateRemixVariations(req: RemixRequest): RemixVariation[] {
@@ -79,23 +77,23 @@ function generateRemixVariations(req: RemixRequest): RemixVariation[] {
           id: 'remix-c2',
           label: `${sourceLabel} — Bold`,
           description: 'High-contrast variant with stronger colors and larger font weight.',
-          preview: { ...sourceProps, fontWeight: '700', background: '#6366F1', color: '#fff', shadow: '0 4px 16px rgba(99,102,241,0.3)' },
+          preview: { ...sourceProps, fontWeight: '700', background: '#4c8dff', color: '#fff', shadow: '0 4px 16px rgba(76,141,255,0.3)' },
           confidence: 88,
           tags: ['bold', 'high-contrast'],
         },
         {
           id: 'remix-c3',
-          label: `${sourceLabel} — Glassmorphism`,
-          description: 'Frosted glass effect with backdrop blur and transparent background.',
-          preview: { ...sourceProps, background: 'rgba(255,255,255,0.05)', backdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.1)' },
+          label: `${sourceLabel} — Muted`,
+          description: 'Low-key surface with subtle background and quiet border.',
+          preview: { ...sourceProps, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' },
           confidence: 85,
-          tags: ['glass', 'modern'],
+          tags: ['muted', 'subtle'],
         },
         {
           id: 'remix-c4',
           label: `${sourceLabel} — Outlined`,
           description: 'Transparent background with prominent border and icon emphasis.',
-          preview: { ...sourceProps, background: 'transparent', border: '2px solid #6366F1', color: '#6366F1' },
+          preview: { ...sourceProps, background: 'transparent', border: '2px solid #4c8dff', color: '#4c8dff' },
           confidence: 90,
           tags: ['outline', 'lightweight'],
         },
@@ -123,7 +121,7 @@ function generateRemixVariations(req: RemixRequest): RemixVariation[] {
           id: 'remix-cl3',
           label: 'Monochrome',
           description: 'Single-hue palette with varying saturation and lightness.',
-          preview: { primary: '#6366F1', secondary: '#818CF8', accent: '#A5B4FC', surface: 'rgba(99,102,241,0.05)' },
+          preview: { primary: '#4c8dff', secondary: '#6da3ff', accent: '#a0c4ff', surface: 'rgba(76,141,255,0.05)' },
           confidence: 94,
           tags: ['mono', 'cohesive'],
         },
@@ -199,7 +197,7 @@ function generateRemixVariations(req: RemixRequest): RemixVariation[] {
         {
           id: 'remix-ct2',
           label: 'Story-driven',
-          description: 'Narrative structure with problem → solution → outcome flow.',
+          description: 'Narrative structure with problem > solution > outcome flow.',
           preview: { tone: 'narrative', structure: 'problem-solution-outcome', style: 'storytelling' },
           confidence: 85,
           tags: ['narrative', 'engaging'],
@@ -235,7 +233,6 @@ export function AIRemixEngine({ open, onClose, request, onApplyVariation }: AIRe
     setVariations([])
     setAppliedId(null)
     setSelectedId(null)
-    // Simulate AI generation delay
     setTimeout(() => {
       const results = generateRemixVariations(request)
       setVariations(results)
@@ -258,201 +255,171 @@ export function AIRemixEngine({ open, onClose, request, onApplyVariation }: AIRe
   const prevRequestRef = useState<RemixRequest | null>(null)
   if (open && request && request !== prevRequestRef[0]) {
     prevRequestRef[1](request)
-    // Defer to avoid state update during render
     setTimeout(() => handleGenerate(), 100)
   }
 
   if (!open) return null
 
   return (
-    <AnimatePresence>
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
-        onClick={onClose}
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+      onClick={onClose}
+    >
+      <div
+        className="w-[720px] max-h-[80vh] rounded-[var(--radius-md)] border border-[var(--border-strong)] bg-[var(--bg-elevated)] shadow-[var(--shadow-panel)] overflow-hidden flex flex-col"
+        onClick={(e) => e.stopPropagation()}
       >
-        <motion.div
-          initial={{ scale: 0.95, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          exit={{ scale: 0.95, opacity: 0 }}
-          transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-          className="w-[740px] max-h-[80vh] rounded-2xl border border-white/[0.1] bg-[#0A0F1E] shadow-2xl overflow-hidden flex flex-col"
-          onClick={(e) => e.stopPropagation()}
-        >
-          {/* Header */}
-          <div className="flex items-center justify-between px-6 py-4 border-b border-white/[0.06]">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#6366F1] to-[#EC4899] flex items-center justify-center">
-                <Wand2 className="w-4.5 h-4.5 text-white" />
-              </div>
-              <div>
-                <h2 className="text-sm font-semibold text-[#F1F5F9]">AI Remix Engine</h2>
-                <p className="text-[0.6875rem] text-[#64748B]">
-                  Generate smart variations of your {request?.target ?? 'selection'}
+        {/* Header */}
+        <div className="h-[var(--topbar-h)] flex items-center justify-between px-3 border-b border-[var(--border-default)] shrink-0">
+          <div className="flex items-center gap-2">
+            <Wand2 className="w-3.5 h-3.5 text-[var(--accent-text)]" />
+            <span className="text-[13px] font-medium text-[var(--text-primary)]">AI Remix Engine</span>
+            <span className="text-[10px] text-[var(--text-tertiary)]">
+              {request?.target ?? 'selection'}
+            </span>
+          </div>
+          <div className="flex items-center gap-1">
+            <button
+              onClick={handleGenerate}
+              disabled={generating || !request}
+              className="tool-btn text-[11px] disabled:opacity-40"
+            >
+              <Shuffle className="w-3 h-3" />
+              Regenerate
+            </button>
+            <button onClick={onClose} className="tool-btn p-1">
+              <X className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </div>
+
+        {/* Source context */}
+        {request && (
+          <div className="flex items-center gap-2 px-3 py-1.5 border-b border-[var(--border-default)] text-[11px]">
+            <span className="text-[var(--accent-text)]">{targetIcons[request.target]}</span>
+            <span className="text-[var(--text-primary)] font-medium">{request.sourceLabel}</span>
+            <ChevronRight className="w-3 h-3 text-[var(--text-tertiary)]" />
+            <span className="text-[var(--text-secondary)]">
+              {Object.keys(request.sourceProps).length} properties
+            </span>
+          </div>
+        )}
+
+        {/* Body */}
+        <div className="flex-1 overflow-auto p-3">
+          {generating ? (
+            <div className="flex flex-col items-center justify-center py-16 gap-3">
+              <Loader2 className="w-5 h-5 text-[var(--accent-text)] animate-spin" />
+              <div className="text-center">
+                <p className="text-[12px] text-[var(--text-secondary)]">Generating variations...</p>
+                <p className="text-[10px] text-[var(--text-tertiary)] mt-1">
+                  Analyzing patterns and creating smart alternatives
                 </p>
               </div>
             </div>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={handleGenerate}
-                disabled={generating || !request}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#6366F1]/10 text-[#818CF8] text-xs font-medium hover:bg-[#6366F1]/20 transition-colors disabled:opacity-40"
-              >
-                <Shuffle className="w-3.5 h-3.5" />
-                Regenerate
-              </button>
-              <button
-                onClick={onClose}
-                className="p-1.5 rounded-lg hover:bg-white/[0.05] text-[#64748B] transition-colors"
-              >
-                <X className="w-4 h-4" />
-              </button>
+          ) : variations.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-16 gap-2 text-center">
+              <Wand2 className="w-5 h-5 text-[var(--text-tertiary)]" />
+              <p className="text-[12px] text-[var(--text-secondary)]">
+                Select an element and click Remix to generate variations
+              </p>
             </div>
-          </div>
-
-          {/* Source context */}
-          {request && (
-            <div className="px-6 py-3 border-b border-white/[0.04] bg-white/[0.01]">
-              <div className="flex items-center gap-2 text-xs text-[#94A3B8]">
-                <span className="text-[#6366F1]">{targetIcons[request.target]}</span>
-                <span className="font-medium">{request.sourceLabel}</span>
-                <ChevronRight className="w-3 h-3 text-[#475569]" />
-                <span className="text-[#64748B]">
-                  {Object.keys(request.sourceProps).length} properties
-                </span>
-              </div>
-            </div>
-          )}
-
-          {/* Body */}
-          <div className="flex-1 overflow-auto p-6">
-            {generating ? (
-              <div className="flex flex-col items-center justify-center py-16 gap-4">
-                <div className="relative">
-                  <Loader2 className="w-8 h-8 text-[#6366F1] animate-spin" />
-                  <Sparkles className="w-4 h-4 text-[#EC4899] absolute -top-1 -right-1 animate-pulse" />
-                </div>
-                <div className="text-center">
-                  <p className="text-sm text-[#94A3B8]">Generating variations...</p>
-                  <p className="text-[0.6875rem] text-[#475569] mt-1">
-                    Analyzing patterns and creating smart alternatives
+          ) : (
+            <div className="grid grid-cols-2 gap-2">
+              {variations.map((v) => (
+                <button
+                  key={v.id}
+                  onClick={() => setSelectedId(v.id)}
+                  className={`text-left rounded-[var(--radius-md)] border p-3 transition-colors ${
+                    selectedId === v.id
+                      ? 'border-[var(--accent)]/50 bg-[var(--accent)]/5'
+                      : 'border-[var(--border-default)] bg-white/[0.02] hover:border-white/[0.12]'
+                  }`}
+                >
+                  <div className="flex items-start justify-between mb-1.5">
+                    <h3 className="text-[12px] font-medium text-[var(--text-primary)]">{v.label}</h3>
+                    <span className="tool-badge text-[var(--accent-text)]">
+                      {v.confidence}%
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-[var(--text-secondary)] leading-relaxed mb-2">
+                    {v.description}
                   </p>
-                </div>
-              </div>
-            ) : variations.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-16 gap-3 text-center">
-                <Wand2 className="w-8 h-8 text-[#475569]" />
-                <p className="text-sm text-[#64748B]">
-                  Select an element and click Remix to generate variations
-                </p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-2 gap-3">
-                {variations.map((v) => (
-                  <motion.button
-                    key={v.id}
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    onClick={() => setSelectedId(v.id)}
-                    className={`text-left rounded-xl border p-4 transition-all ${
-                      selectedId === v.id
-                        ? 'border-[#6366F1]/50 bg-[#6366F1]/5'
-                        : 'border-white/[0.06] bg-white/[0.02] hover:border-white/[0.12]'
-                    }`}
-                  >
-                    <div className="flex items-start justify-between mb-2">
-                      <h3 className="text-xs font-semibold text-[#F1F5F9]">{v.label}</h3>
-                      <span className="text-[0.5625rem] px-1.5 py-0.5 rounded-full bg-[#6366F1]/10 text-[#818CF8]">
-                        {v.confidence}% match
+                  <div className="flex flex-wrap gap-1">
+                    {v.tags.map((tag) => (
+                      <span key={tag} className="tool-badge">
+                        {tag}
                       </span>
-                    </div>
-                    <p className="text-[0.6875rem] text-[#64748B] leading-relaxed mb-3">
-                      {v.description}
-                    </p>
-                    <div className="flex flex-wrap gap-1">
-                      {v.tags.map((tag) => (
-                        <span
-                          key={tag}
-                          className="text-[0.5625rem] px-1.5 py-0.5 rounded bg-white/[0.04] text-[#475569]"
-                        >
-                          {tag}
+                    ))}
+                  </div>
+
+                  {/* Property preview */}
+                  <div className="mt-2 pt-2 border-t border-[var(--border-default)] space-y-0.5">
+                    {Object.entries(v.preview).slice(0, 4).map(([key, val]) => (
+                      <div key={key} className="flex items-center justify-between text-[10px]">
+                        <span className="text-[var(--text-tertiary)] font-mono">{key}</span>
+                        <span className="text-[var(--text-secondary)] font-mono truncate ml-2 max-w-[140px]">
+                          {val}
                         </span>
-                      ))}
-                    </div>
-
-                    {/* Property preview */}
-                    <div className="mt-3 pt-3 border-t border-white/[0.04] space-y-1">
-                      {Object.entries(v.preview).slice(0, 4).map(([key, val]) => (
-                        <div key={key} className="flex items-center justify-between text-[0.625rem]">
-                          <span className="text-[#475569] font-mono">{key}</span>
-                          <span className="text-[#94A3B8] font-mono truncate ml-2 max-w-[140px]">
-                            {val}
-                          </span>
-                        </div>
-                      ))}
-                      {Object.keys(v.preview).length > 4 && (
-                        <p className="text-[0.5625rem] text-[#475569]">
-                          +{Object.keys(v.preview).length - 4} more
-                        </p>
-                      )}
-                    </div>
-                  </motion.button>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Footer with apply */}
-          {selectedVariation && (
-            <div className="border-t border-white/[0.06] px-6 py-3 flex items-center justify-between bg-white/[0.01]">
-              <div className="text-xs text-[#94A3B8]">
-                Selected: <span className="text-[#F1F5F9] font-medium">{selectedVariation.label}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => {
-                    navigator.clipboard.writeText(JSON.stringify(selectedVariation.preview, null, 2))
-                  }}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-white/[0.08] text-[#94A3B8] text-xs hover:bg-white/[0.04] transition-colors"
-                >
-                  <Copy className="w-3 h-3" />
-                  Copy Props
+                      </div>
+                    ))}
+                    {Object.keys(v.preview).length > 4 && (
+                      <p className="text-[10px] text-[var(--text-tertiary)]">
+                        +{Object.keys(v.preview).length - 4} more
+                      </p>
+                    )}
+                  </div>
                 </button>
-                <button
-                  onClick={() => handleApply(selectedVariation)}
-                  className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-[#6366F1] text-white text-xs font-medium hover:bg-[#5558E6] transition-colors"
-                >
-                  {appliedId === selectedVariation.id ? (
-                    <>
-                      <Check className="w-3.5 h-3.5" />
-                      Applied
-                    </>
-                  ) : (
-                    <>
-                      <Zap className="w-3.5 h-3.5" />
-                      Apply Variation
-                    </>
-                  )}
-                </button>
-              </div>
+              ))}
             </div>
           )}
-        </motion.div>
-      </motion.div>
-    </AnimatePresence>
+        </div>
+
+        {/* Footer with apply */}
+        {selectedVariation && (
+          <div className="border-t border-[var(--border-default)] px-3 h-[var(--topbar-h)] flex items-center justify-between shrink-0">
+            <div className="text-[11px] text-[var(--text-secondary)]">
+              Selected: <span className="text-[var(--text-primary)] font-medium">{selectedVariation.label}</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(JSON.stringify(selectedVariation.preview, null, 2))
+                }}
+                className="tool-btn text-[11px]"
+              >
+                <Copy className="w-3 h-3" />
+                Copy Props
+              </button>
+              <button
+                onClick={() => handleApply(selectedVariation)}
+                className="tool-btn tool-btn-primary text-[11px]"
+              >
+                {appliedId === selectedVariation.id ? (
+                  <>
+                    <Check className="w-3 h-3" />
+                    Applied
+                  </>
+                ) : (
+                  <>
+                    <Zap className="w-3 h-3" />
+                    Apply Variation
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
   )
 }
 
 /** Compact trigger button for studios to open the remix engine */
 export function RemixTrigger({ onClick }: { onClick: () => void }) {
   return (
-    <button
-      onClick={onClick}
-      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-[#6366F1]/10 to-[#EC4899]/10 border border-[#6366F1]/20 text-[#818CF8] text-xs font-medium hover:from-[#6366F1]/20 hover:to-[#EC4899]/20 transition-all"
-    >
-      <Wand2 className="w-3.5 h-3.5" />
+    <button onClick={onClick} className="tool-btn text-[11px]">
+      <Wand2 className="w-3 h-3" />
       AI Remix
     </button>
   )

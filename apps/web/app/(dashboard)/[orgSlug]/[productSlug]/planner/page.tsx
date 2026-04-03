@@ -1,12 +1,13 @@
 'use client'
 
 import { useState, useCallback, useEffect } from 'react'
-import WizardShell from './_components/wizard-shell'
+import { ChevronLeft, ChevronRight, SkipForward, Check } from 'lucide-react'
 import StepVision from './_components/steps/step-vision'
 import StepUsersFeatures from './_components/steps/step-users-features'
 import StepArchitecture from './_components/steps/step-architecture'
 import StepReviewLaunch from './_components/steps/step-review-launch'
 import TemplateStartModal from './_components/template-start-modal'
+import AISuggestPanel from './_components/ai-suggest-panel'
 import { generateTasksFromPlan, type GeneratedTask } from './_lib/task-generator'
 import { useTaskStore } from '../../../../lib/task-store'
 import { useGraphStore } from '../../../../lib/graph-store'
@@ -24,6 +25,8 @@ export interface PlanData {
 }
 
 const TOTAL_STEPS = 4
+
+const STEP_LABELS = ['Vision', 'Users & Features', 'Architecture', 'Review & Launch']
 
 const initialPlanData: PlanData = {
   problem: '',
@@ -91,7 +94,6 @@ export default function ProductPlannerPage() {
 
   const handleApplyTemplate = useCallback((data: PlanData) => {
     setPlanData(data)
-    // Mark steps 1-3 as completed when applying a template
     setCompletedSteps(new Set([1, 2, 3]))
     setDirection(1)
     setCurrentStep(4)
@@ -101,10 +103,8 @@ export default function ProductPlannerPage() {
     const productName = String(params.productSlug).replace(/-/g, ' ')
     const orgSlug = String(params.orgSlug)
 
-    // 1. Scaffold the product graph
     scaffoldProduct(productId, productName)
 
-    // 2. Add features as graph nodes
     const featureNodes = bulkAddNodes(
       planData.features.map((f) => ({
         kind: 'feature' as const,
@@ -114,7 +114,6 @@ export default function ProductPlannerPage() {
       }))
     )
 
-    // 3. Add entities as graph nodes
     bulkAddNodes(
       planData.entities.map((e) => ({
         kind: 'entity' as const,
@@ -124,7 +123,6 @@ export default function ProductPlannerPage() {
       }))
     )
 
-    // 4. Add plan node with vision data
     addNode({
       kind: 'plan',
       label: `${productName} Plan`,
@@ -137,7 +135,6 @@ export default function ProductPlannerPage() {
       },
     })
 
-    // 5. Convert generated tasks into real task store entries
     const taskEntries = generatedTasks.map((gt) => ({
       title: gt.title,
       description: gt.description || '',
@@ -158,7 +155,6 @@ export default function ProductPlannerPage() {
     }))
     bulkAddTasks(taskEntries)
 
-    // 6. Log activity
     addActivity({
       type: 'plan_created',
       title: `Product plan launched for "${productName}"`,
@@ -168,7 +164,6 @@ export default function ProductPlannerPage() {
       studio: 'planner',
     })
 
-    // 7. Send notification
     addNotification({
       type: 'plan_ready',
       title: 'Product Plan Launched',
@@ -179,7 +174,6 @@ export default function ProductPlannerPage() {
       actionUrl: `/${orgSlug}/${params.productSlug}/tasks`,
     })
 
-    // 8. Navigate to the control tower
     router.push(`/${orgSlug}/${params.productSlug}/control-tower`)
   }, [params, planData, generatedTasks, productId, scaffoldProduct, bulkAddNodes, addNode, bulkAddTasks, addActivity, addNotification, router])
 
@@ -187,13 +181,15 @@ export default function ProductPlannerPage() {
     setPlanData((prev) => ({ ...prev, [key]: value }))
   }, [])
 
-  // Auto-generate tasks when reaching step 4 or when planData features change while on step 4
   useEffect(() => {
     if (currentStep === 4) {
       const tasks = generateTasksFromPlan(planData)
       setGeneratedTasks(tasks)
     }
   }, [currentStep, planData])
+
+  const isFirstStep = currentStep === 1
+  const isLastStep = currentStep === TOTAL_STEPS
 
   const renderStep = () => {
     switch (currentStep) {
@@ -240,19 +236,107 @@ export default function ProductPlannerPage() {
   }
 
   return (
-    <div className="h-full flex flex-col bg-[#060918]">
-      <WizardShell
-        currentStep={currentStep}
-        totalSteps={TOTAL_STEPS}
-        completedSteps={completedSteps}
-        direction={direction}
-        onNext={handleNext}
-        onBack={handleBack}
-        onSkip={handleSkip}
-        onStepClick={goToStep}
-      >
-        {renderStep()}
-      </WizardShell>
+    <div className="h-full flex flex-col bg-[var(--bg-inset)]">
+      {/* ── Top toolbar ── */}
+      <div className="tool-toolbar gap-4">
+        <div className="flex items-center gap-1">
+          {Array.from({ length: TOTAL_STEPS }, (_, i) => {
+            const step = i + 1
+            const isActive = step === currentStep
+            const isCompleted = completedSteps.has(step)
+            return (
+              <button
+                key={step}
+                onClick={() => goToStep(step)}
+                className="flex items-center gap-1.5 group"
+              >
+                <span
+                  className={`inline-flex items-center justify-center w-[18px] h-[18px] rounded-full text-[9px] font-medium leading-none transition-colors ${
+                    isCompleted
+                      ? 'bg-[var(--accent-muted)] text-[var(--accent-text)]'
+                      : isActive
+                        ? 'bg-[var(--accent)] text-white'
+                        : 'bg-[var(--bg-elevated)] text-[var(--text-tertiary)] border border-[var(--border-default)]'
+                  }`}
+                >
+                  {isCompleted ? <Check className="w-2.5 h-2.5" /> : step}
+                </span>
+                <span
+                  className={`text-[10px] tracking-wide ${
+                    isActive
+                      ? 'text-[var(--text-primary)]'
+                      : isCompleted
+                        ? 'text-[var(--text-secondary)]'
+                        : 'text-[var(--text-tertiary)]'
+                  }`}
+                >
+                  {STEP_LABELS[i]}
+                </span>
+                {i < TOTAL_STEPS - 1 && (
+                  <span className="w-4 h-px bg-[var(--border-default)] mx-1" />
+                )}
+              </button>
+            )
+          })}
+        </div>
+
+        <span className="ml-auto text-[10px] text-[var(--text-tertiary)] tabular-nums">
+          Step {currentStep}/{TOTAL_STEPS}
+        </span>
+      </div>
+
+      {/* ── Main area: content + AI panel ── */}
+      <div className="flex-1 flex min-h-0 overflow-hidden">
+        <div className="flex-1 min-w-0 overflow-y-auto bg-[var(--bg-inset)]">
+          <div className="max-w-2xl mx-auto px-4 py-4">
+            {renderStep()}
+          </div>
+        </div>
+
+        <div className="w-[320px] flex-shrink-0 border-l border-[var(--border-default)] bg-[var(--bg-surface)] overflow-hidden">
+          <AISuggestPanel currentStep={currentStep} />
+        </div>
+      </div>
+
+      {/* ── Bottom navigation bar ── */}
+      <div className="flex-shrink-0 h-10 flex items-center border-t border-[var(--border-default)] bg-[var(--bg-surface)] px-3">
+        <div className="flex items-center justify-between w-full max-w-2xl mx-auto">
+          <button
+            onClick={handleBack}
+            disabled={isFirstStep}
+            className={`tool-btn flex items-center gap-1 px-2.5 h-7 text-[11px] font-medium rounded border transition-colors ${
+              isFirstStep
+                ? 'opacity-30 cursor-not-allowed text-[var(--text-tertiary)] border-transparent'
+                : 'text-[var(--text-secondary)] border-[var(--border-default)] bg-[var(--bg-elevated)] hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)]'
+            }`}
+          >
+            <ChevronLeft className="w-3 h-3" />
+            Back
+          </button>
+
+          <div className="flex items-center gap-1.5">
+            {!isLastStep && (
+              <button
+                onClick={handleSkip}
+                className="tool-btn tool-btn-ghost flex items-center gap-1 px-2.5 h-7 text-[11px] text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] transition-colors"
+              >
+                Skip
+                <SkipForward className="w-3 h-3" />
+              </button>
+            )}
+
+            {!isLastStep && (
+              <button
+                onClick={handleNext}
+                className="tool-btn tool-btn-primary flex items-center gap-1 px-3 h-7 text-[11px] font-medium rounded transition-colors"
+              >
+                Next
+                <ChevronRight className="w-3 h-3" />
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
 
       <TemplateStartModal
         open={templateModalOpen}

@@ -1,7 +1,6 @@
 'use client'
 
 import { useMemo } from 'react'
-import { motion } from 'framer-motion'
 import { GitCommit, GitMerge, GitBranch } from 'lucide-react'
 import type { Version, Branch } from '../../lib/version-store'
 
@@ -17,13 +16,13 @@ interface BranchGraphProps {
 }
 
 const BRANCH_COLORS: Record<string, string> = {
-  main: '#10B981',
-  develop: '#3B82F6',
-  staging: '#F59E0B',
+  main: 'var(--accent)',
+  develop: 'var(--accent)',
+  staging: '#c89530',
 }
 
 function getBranchColor(name: string): string {
-  return BRANCH_COLORS[name] || `hsl(${Math.abs(hashString(name)) % 360}, 70%, 60%)`
+  return BRANCH_COLORS[name] || `hsl(${Math.abs(hashString(name)) % 360}, 50%, 55%)`
 }
 
 function hashString(str: string): number {
@@ -65,15 +64,15 @@ function assignLanes(versions: Version[], branches: Branch[]): Map<string, numbe
   return lanes
 }
 
-const NODE_RADIUS = 5
-const ROW_HEIGHT = 48
-const LANE_WIDTH = 24
-const LEFT_PAD = 20
+const NODE_RADIUS = 4
+const ROW_HEIGHT = 36
+const LANE_WIDTH = 20
+const LEFT_PAD = 16
 
 export function BranchGraph({ versions, branches, activeBranch, onSelectVersion }: BranchGraphProps) {
   const lanes = useMemo(() => assignLanes(versions, branches), [versions, branches])
 
-  // Sort versions chronologically (oldest first for bottom-up rendering, then reverse for top-down display)
+  // Sort versions chronologically (newest first)
   const sortedVersions = useMemo(
     () =>
       [...versions].sort(
@@ -82,11 +81,11 @@ export function BranchGraph({ versions, branches, activeBranch, onSelectVersion 
     [versions]
   )
 
-  const svgHeight = sortedVersions.length * ROW_HEIGHT + 40
+  const svgHeight = sortedVersions.length * ROW_HEIGHT + 32
   const totalLanes = Math.max(lanes.size, 1)
-  const svgWidth = LEFT_PAD + totalLanes * LANE_WIDTH + 10
+  const svgWidth = LEFT_PAD + totalLanes * LANE_WIDTH + 8
 
-  // Build a map of version id → row index
+  // Build a map of version id -> row index
   const versionRowMap = useMemo(() => {
     const map = new Map<string, number>()
     sortedVersions.forEach((v, idx) => {
@@ -98,9 +97,9 @@ export function BranchGraph({ versions, branches, activeBranch, onSelectVersion 
   // Helper: get x position for a branch lane
   const laneX = (branchName: string) => LEFT_PAD + (lanes.get(branchName) ?? 0) * LANE_WIDTH
   // Helper: get y position for a row
-  const rowY = (idx: number) => 20 + idx * ROW_HEIGHT
+  const rowY = (idx: number) => 16 + idx * ROW_HEIGHT
 
-  // Build edge lines (parent → child connections)
+  // Build edge lines (parent -> child connections)
   const edges = useMemo(() => {
     const result: { x1: number; y1: number; x2: number; y2: number; color: string; isMerge: boolean }[] = []
 
@@ -157,8 +156,8 @@ export function BranchGraph({ versions, branches, activeBranch, onSelectVersion 
               x2={x}
               y2={rowY(maxRow)}
               stroke={getBranchColor(branchName)}
-              strokeWidth={1.5}
-              strokeOpacity={0.15}
+              strokeWidth={1}
+              strokeOpacity={0.12}
             />
           )
         })}
@@ -166,7 +165,6 @@ export function BranchGraph({ versions, branches, activeBranch, onSelectVersion 
         {/* Edge connections */}
         {edges.map((edge, i) => {
           if (edge.x1 === edge.x2) {
-            // Straight line (same branch)
             return (
               <line
                 key={`edge-${i}`}
@@ -175,20 +173,19 @@ export function BranchGraph({ versions, branches, activeBranch, onSelectVersion 
                 x2={edge.x2}
                 y2={edge.y2}
                 stroke={edge.color}
-                strokeWidth={2}
-                strokeOpacity={0.5}
+                strokeWidth={1.5}
+                strokeOpacity={0.45}
               />
             )
           }
-          // Curved line (cross-branch)
           const midY = (edge.y1 + edge.y2) / 2
           return (
             <path
               key={`edge-${i}`}
               d={`M ${edge.x1} ${edge.y1} C ${edge.x1} ${midY}, ${edge.x2} ${midY}, ${edge.x2} ${edge.y2}`}
               stroke={edge.color}
-              strokeWidth={2}
-              strokeOpacity={0.5}
+              strokeWidth={1.5}
+              strokeOpacity={0.45}
               fill="none"
               strokeDasharray={edge.isMerge ? '4 2' : undefined}
             />
@@ -209,15 +206,15 @@ export function BranchGraph({ versions, branches, activeBranch, onSelectVersion 
               <circle
                 cx={x}
                 cy={y}
-                r={isMerge || isBranchPoint ? NODE_RADIUS + 2 : NODE_RADIUS}
-                fill={isActive ? color : '#0A0E23'}
+                r={isMerge || isBranchPoint ? NODE_RADIUS + 1.5 : NODE_RADIUS}
+                fill={isActive ? color : 'var(--bg-surface)'}
                 stroke={color}
-                strokeWidth={2}
+                strokeWidth={1.5}
                 className="cursor-pointer"
                 onClick={() => onSelectVersion?.(version)}
               />
               {isMerge && (
-                <circle cx={x} cy={y} r={2} fill={color} />
+                <circle cx={x} cy={y} r={1.5} fill={color} />
               )}
             </g>
           )
@@ -225,38 +222,35 @@ export function BranchGraph({ versions, branches, activeBranch, onSelectVersion 
       </svg>
 
       {/* Labels next to graph */}
-      <div className="flex flex-col shrink-0 ml-2" style={{ paddingTop: 20 - 10 }}>
-        {sortedVersions.map((version, idx) => {
+      <div className="flex flex-col shrink-0 ml-1.5" style={{ paddingTop: 16 - 9 }}>
+        {sortedVersions.map((version) => {
           const isMerge = version.label.startsWith('Merge:')
           const isBranch = version.label.startsWith('Branch:')
           const color = getBranchColor(version.branchName)
 
           return (
-            <motion.button
+            <button
               key={version.id}
               onClick={() => onSelectVersion?.(version)}
-              className="flex items-center gap-2 text-left px-2 py-1 rounded hover:bg-white/[0.04] transition-colors"
+              className="flex items-center gap-1.5 text-left px-1.5 py-0.5 rounded hover:bg-[var(--surface-hover)] transition-colors"
               style={{ height: ROW_HEIGHT }}
-              initial={{ opacity: 0, x: 8 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: idx * 0.02 }}
             >
               {isMerge ? (
-                <GitMerge size={12} style={{ color }} />
+                <GitMerge size={11} style={{ color }} />
               ) : isBranch ? (
-                <GitBranch size={12} style={{ color }} />
+                <GitBranch size={11} style={{ color }} />
               ) : (
-                <GitCommit size={12} style={{ color }} />
+                <GitCommit size={11} style={{ color }} />
               )}
               <div className="min-w-0">
-                <p className="text-[0.6875rem] font-medium text-[#F1F5F9] truncate max-w-[200px]">
+                <p className="text-[11px] font-medium text-[var(--text-primary)] truncate max-w-[200px]">
                   {version.label}
                 </p>
-                <p className="text-[0.5625rem] text-[#475569]">
+                <p className="text-[10px] text-[var(--text-tertiary)]">
                   {version.branchName} · {version.createdBy.name}
                 </p>
               </div>
-            </motion.button>
+            </button>
           )
         })}
       </div>
@@ -316,63 +310,59 @@ export function MergePreview({ sourceBranch, versions, onConfirmMerge, onCancel 
   const color = getBranchColor(sourceBranch.name)
 
   return (
-    <motion.div
-      className="rounded-xl border border-white/[0.08] bg-[#0A0E23] overflow-hidden"
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-    >
+    <div className="rounded-[var(--radius-md)] border border-[var(--border-default)] bg-[var(--bg-surface)] overflow-hidden">
       {/* Header */}
-      <div className="px-4 py-3 border-b border-white/[0.08] bg-white/[0.01]">
-        <div className="flex items-center gap-2 mb-1">
-          <GitMerge size={14} style={{ color }} />
-          <span className="text-xs font-semibold text-[#F1F5F9]">Merge Preview</span>
+      <div className="px-3 py-2.5 border-b border-[var(--border-default)] bg-[var(--bg-elevated)]">
+        <div className="flex items-center gap-2 mb-0.5">
+          <GitMerge size={13} style={{ color }} />
+          <span className="text-[13px] font-semibold text-[var(--text-primary)]">Merge Preview</span>
         </div>
-        <p className="text-[0.6875rem] text-[#64748B]">
+        <p className="text-[11px] text-[var(--text-secondary)]">
           Merging <span className="font-medium" style={{ color }}>{sourceBranch.name}</span> into{' '}
-          <span className="font-medium text-emerald-400">main</span>
+          <span className="font-medium text-[var(--accent-text)]">main</span>
         </p>
       </div>
 
       {/* Changes summary */}
-      <div className="px-4 py-3 space-y-2">
+      <div className="px-3 py-3 space-y-2">
         {diff ? (
           <>
             <div className="grid grid-cols-3 gap-2">
-              <div className="rounded-lg bg-emerald-500/10 border border-emerald-500/20 px-3 py-2 text-center">
-                <p className="text-lg font-bold text-emerald-400">{diff.added.length}</p>
-                <p className="text-[0.625rem] text-emerald-400/70">Added</p>
+              <div className="rounded border border-[var(--border-default)] bg-[var(--bg-elevated)] px-2.5 py-1.5 text-center">
+                <p className="text-sm font-bold text-emerald-400">{diff.added.length}</p>
+                <p className="text-[10px] text-[var(--text-secondary)]">Added</p>
               </div>
-              <div className="rounded-lg bg-amber-500/10 border border-amber-500/20 px-3 py-2 text-center">
-                <p className="text-lg font-bold text-amber-400">{diff.modified.length}</p>
-                <p className="text-[0.625rem] text-amber-400/70">Modified</p>
+              <div className="rounded border border-[var(--border-default)] bg-[var(--bg-elevated)] px-2.5 py-1.5 text-center">
+                <p className="text-sm font-bold text-amber-400">{diff.modified.length}</p>
+                <p className="text-[10px] text-[var(--text-secondary)]">Modified</p>
               </div>
-              <div className="rounded-lg bg-red-500/10 border border-red-500/20 px-3 py-2 text-center">
-                <p className="text-lg font-bold text-red-400">{diff.removed.length}</p>
-                <p className="text-[0.625rem] text-red-400/70">Removed</p>
+              <div className="rounded border border-[var(--border-default)] bg-[var(--bg-elevated)] px-2.5 py-1.5 text-center">
+                <p className="text-sm font-bold text-red-400">{diff.removed.length}</p>
+                <p className="text-[10px] text-[var(--text-secondary)]">Removed</p>
               </div>
             </div>
 
             {/* Node lists */}
             {diff.added.length > 0 && (
               <div>
-                <p className="text-[0.625rem] font-medium text-emerald-400 mb-1">+ Added nodes</p>
+                <p className="text-[10px] font-medium text-emerald-400 mb-1">+ Added nodes</p>
                 {diff.added.slice(0, 5).map((n) => (
-                  <p key={n.id} className="text-[0.625rem] text-[#94A3B8] pl-2">
-                    {n.label} <span className="text-[#475569]">({n.kind})</span>
+                  <p key={n.id} className="text-[10px] text-[var(--text-secondary)] pl-2">
+                    {n.label} <span className="text-[var(--text-tertiary)]">({n.kind})</span>
                   </p>
                 ))}
                 {diff.added.length > 5 && (
-                  <p className="text-[0.625rem] text-[#475569] pl-2">...and {diff.added.length - 5} more</p>
+                  <p className="text-[10px] text-[var(--text-tertiary)] pl-2">...and {diff.added.length - 5} more</p>
                 )}
               </div>
             )}
 
             {diff.modified.length > 0 && (
               <div>
-                <p className="text-[0.625rem] font-medium text-amber-400 mb-1">~ Modified nodes</p>
+                <p className="text-[10px] font-medium text-amber-400 mb-1">~ Modified nodes</p>
                 {diff.modified.slice(0, 5).map((n) => (
-                  <p key={n.id} className="text-[0.625rem] text-[#94A3B8] pl-2">
-                    {n.label} <span className="text-[#475569]">({n.kind})</span>
+                  <p key={n.id} className="text-[10px] text-[var(--text-secondary)] pl-2">
+                    {n.label} <span className="text-[var(--text-tertiary)]">({n.kind})</span>
                   </p>
                 ))}
               </div>
@@ -380,36 +370,36 @@ export function MergePreview({ sourceBranch, versions, onConfirmMerge, onCancel 
 
             {diff.removed.length > 0 && (
               <div>
-                <p className="text-[0.625rem] font-medium text-red-400 mb-1">- Removed nodes</p>
+                <p className="text-[10px] font-medium text-red-400 mb-1">- Removed nodes</p>
                 {diff.removed.slice(0, 5).map((n) => (
-                  <p key={n.id} className="text-[0.625rem] text-[#94A3B8] pl-2">
-                    {n.label} <span className="text-[#475569]">({n.kind})</span>
+                  <p key={n.id} className="text-[10px] text-[var(--text-secondary)] pl-2">
+                    {n.label} <span className="text-[var(--text-tertiary)]">({n.kind})</span>
                   </p>
                 ))}
               </div>
             )}
           </>
         ) : (
-          <p className="text-xs text-[#64748B] text-center py-4">No changes to compare</p>
+          <p className="text-[12px] text-[var(--text-tertiary)] text-center py-4">No changes to compare</p>
         )}
       </div>
 
       {/* Actions */}
-      <div className="flex items-center justify-end gap-2 px-4 py-3 border-t border-white/[0.08]">
+      <div className="flex items-center justify-end gap-2 px-3 py-2.5 border-t border-[var(--border-default)]">
         <button
           onClick={onCancel}
-          className="px-3 py-1.5 rounded-md text-xs text-[#94A3B8] hover:bg-white/[0.06] transition-colors"
+          className="tool-btn"
         >
           Cancel
         </button>
         <button
           onClick={onConfirmMerge}
-          className="flex items-center gap-1.5 px-4 py-1.5 rounded-md text-xs font-medium bg-[#8B5CF6] text-white hover:bg-[#7C3AED] transition-colors"
+          className="tool-btn-primary flex items-center gap-1.5"
         >
-          <GitMerge size={12} />
+          <GitMerge size={11} />
           Confirm Merge
         </button>
       </div>
-    </motion.div>
+    </div>
   )
 }

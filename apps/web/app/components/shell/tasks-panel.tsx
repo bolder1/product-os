@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect, useMemo } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
 import {
   CheckSquare,
   X,
@@ -14,7 +13,7 @@ import {
   User,
 } from 'lucide-react'
 import { type PanelTask, panelTasks } from './tasks-panel-data'
-import { useTaskStore, type Task } from '../../lib/task-store'
+import { useTaskStore } from '../../lib/task-store'
 import { useParams } from 'next/navigation'
 
 type FilterTab = 'all' | 'mine' | 'overdue' | 'by_studio'
@@ -29,27 +28,27 @@ const STATUS_LABELS: Record<StatusGroup, string> = {
 }
 
 const STATUS_COLORS: Record<StatusGroup, string> = {
-  in_progress: '#3B82F6',
-  todo: '#64748B',
-  in_review: '#F59E0B',
+  in_progress: 'var(--accent)',
+  todo: 'var(--text-tertiary)',
+  in_review: 'var(--color-warning)',
 }
 
 const PRIORITY_COLORS: Record<PanelTask['priority'], string> = {
-  critical: '#F43F5E',
-  high: '#F59E0B',
-  medium: '#3B82F6',
-  low: '#64748B',
+  critical: 'var(--color-error)',
+  high: 'var(--color-warning)',
+  medium: 'var(--accent)',
+  low: 'var(--text-tertiary)',
 }
 
 const STUDIO_COLORS: Record<string, string> = {
-  brand: '#EC4899',
-  workflows: '#10B981',
-  components: '#F59E0B',
-  testing: '#F59E0B',
-  design: '#06B6D4',
-  analytics: '#8B5CF6',
-  approvals: '#10B981',
-  pages: '#3B82F6',
+  brand: '#b05ce6',
+  workflows: '#3faa6f',
+  components: '#c89530',
+  testing: '#c89530',
+  design: '#6398ff',
+  analytics: '#7e57c2',
+  approvals: '#3faa6f',
+  pages: '#6398ff',
 }
 
 const STORAGE_KEY = 'tasks-panel-open'
@@ -67,7 +66,6 @@ export function TasksPanel() {
     : null
   const { tasks: storeTasks, moveTask } = useTaskStore()
 
-  // Merge store tasks with fallback mock tasks
   const tasks: PanelTask[] = useMemo(() => {
     const realTasks: PanelTask[] = storeTasks
       .filter((t) => !productId || t.productId === productId)
@@ -83,11 +81,9 @@ export function TasksPanel() {
         description: t.description,
         role: t.role,
       }))
-    // Show store tasks if available, otherwise fall back to mock data
     return realTasks.length > 0 ? realTasks : panelTasks
   }, [storeTasks, productId])
 
-  // Hydrate from localStorage after mount
   useEffect(() => {
     setMounted(true)
     try {
@@ -96,7 +92,6 @@ export function TasksPanel() {
     } catch {}
   }, [])
 
-  // Persist open/closed state
   useEffect(() => {
     if (!mounted) return
     try {
@@ -138,7 +133,6 @@ export function TasksPanel() {
   }, [filteredTasks])
 
   const markDone = (id: string) => {
-    // Try store first, then fall back to local state
     moveTask(id, 'done')
     if (expandedTaskId === id) setExpandedTaskId(null)
   }
@@ -161,315 +155,211 @@ export function TasksPanel() {
 
   return (
     <>
-      {/* Floating button (collapsed state) */}
-      <AnimatePresence>
-        {!isOpen && (
-          <motion.button
-            initial={{ scale: 0, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0, opacity: 0 }}
-            transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-            onClick={() => setIsOpen(true)}
-            className="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-3 rounded-full bg-[#3B82F6] text-white shadow-lg shadow-[#3B82F6]/25 hover:bg-[#2563EB] transition-colors group"
-          >
-            <motion.div
-              animate={{ scale: [1, 1.15, 1] }}
-              transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-            >
-              <CheckSquare size={18} />
-            </motion.div>
-            <span className="text-sm font-medium">
-              {activeTasks.length} task{activeTasks.length !== 1 ? 's' : ''}
-            </span>
-          </motion.button>
-        )}
-      </AnimatePresence>
-
-      {/* Backdrop */}
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-40 bg-black/20 backdrop-blur-[2px]"
-            onClick={() => setIsOpen(false)}
-          />
-        )}
-      </AnimatePresence>
+      {/* Floating Toggle */}
+      {!isOpen && (
+        <button
+          onClick={() => setIsOpen(true)}
+          className="fixed bottom-4 right-4 z-50 flex items-center gap-2 px-3 py-2 rounded-md bg-[var(--bg-elevated)] border border-[var(--border-strong)] text-[var(--text-primary)] hover:bg-[var(--surface-hover)] transition-colors"
+          style={{ boxShadow: 'var(--shadow-panel)' }}
+        >
+          <CheckSquare size={13} className="text-[var(--accent)]" />
+          <span className="text-[11px] font-medium">
+            {activeTasks.length} task{activeTasks.length !== 1 ? 's' : ''}
+          </span>
+        </button>
+      )}
 
       {/* Panel */}
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ x: 400, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            exit={{ x: 400, opacity: 0 }}
-            transition={{ type: 'spring', stiffness: 350, damping: 30 }}
-            className="fixed top-0 right-0 z-50 h-screen w-[380px] flex flex-col bg-[#0a0f1e]/95 backdrop-blur-xl border-l border-white/[0.08] shadow-2xl"
-          >
-            {/* Header */}
-            <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.08]">
-              <div className="flex items-center gap-2.5">
-                <CheckSquare size={18} className="text-[#3B82F6]" />
-                <h2 className="text-sm font-semibold text-[#F1F5F9]">
-                  My Tasks
-                </h2>
-                <span className="px-1.5 py-0.5 rounded-md bg-[#3B82F6]/15 text-[#3B82F6] text-[0.6875rem] font-medium">
-                  {activeTasks.length}
-                </span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <button className="p-1.5 rounded-md hover:bg-white/[0.06] text-[#64748B] hover:text-[#94A3B8] transition-colors">
-                  <Filter size={14} />
-                </button>
-                <button
-                  onClick={() => setIsOpen(false)}
-                  className="p-1.5 rounded-md hover:bg-white/[0.06] text-[#64748B] hover:text-[#94A3B8] transition-colors"
-                >
-                  <X size={14} />
-                </button>
-              </div>
+      {isOpen && (
+        <div
+          className="fixed bottom-4 right-4 z-50 w-[360px] max-h-[72vh] flex flex-col tool-panel-float"
+          style={{ animation: 'scaleIn 150ms cubic-bezier(0.16, 1, 0.3, 1)' }}
+        >
+          {/* Header */}
+          <div className="flex items-center justify-between px-3 py-2.5 border-b border-[var(--border-default)]">
+            <div className="flex items-center gap-2">
+              <CheckSquare size={14} className="text-[var(--accent)]" />
+              <h2 className="text-[12px] font-semibold text-[var(--text-primary)]">Tasks</h2>
+              <span className="tool-badge-accent">{activeTasks.length}</span>
             </div>
+            <div className="flex items-center gap-0.5">
+              <button className="tool-btn-ghost tool-btn-icon">
+                <Filter size={12} />
+              </button>
+              <button
+                onClick={() => setIsOpen(false)}
+                className="tool-btn-ghost tool-btn-icon"
+              >
+                <X size={12} />
+              </button>
+            </div>
+          </div>
 
-            {/* Filter tabs */}
-            <div className="flex items-center gap-1 px-5 py-2.5 border-b border-white/[0.05]">
+          {/* Filter Tabs */}
+          <div className="flex items-center gap-1 px-2 py-1.5 border-b border-[var(--border-default)]">
+            <div className="tool-segments">
               {(
                 [
                   ['all', 'All'],
                   ['mine', 'Mine'],
                   ['overdue', 'Overdue'],
-                  ['by_studio', 'By Studio'],
+                  ['by_studio', 'Studio'],
                 ] as [FilterTab, string][]
               ).map(([key, label]) => (
                 <button
                   key={key}
                   onClick={() => setActiveFilter(key)}
-                  className={`px-2.5 py-1 rounded-md text-[0.6875rem] font-medium transition-colors ${
-                    activeFilter === key
-                      ? 'bg-[#3B82F6]/15 text-[#3B82F6]'
-                      : 'text-[#64748B] hover:text-[#94A3B8] hover:bg-white/[0.04]'
-                  }`}
+                  className={`tool-segment ${activeFilter === key ? 'active' : ''}`}
                 >
                   {label}
                 </button>
               ))}
             </div>
+          </div>
 
-            {/* Task list */}
-            <div className="flex-1 overflow-y-auto px-3 py-3 space-y-4">
-              {STATUS_ORDER.map((status) => {
-                const groupTasks = grouped[status]
-                if (groupTasks.length === 0) return null
-                return (
-                  <div key={status}>
-                    {/* Group header */}
-                    <div className="flex items-center gap-2 px-2 mb-2">
-                      <div
-                        className="w-2 h-2 rounded-full"
-                        style={{ backgroundColor: STATUS_COLORS[status] }}
-                      />
-                      <span className="text-[0.6875rem] font-semibold text-[#94A3B8] uppercase tracking-wider">
-                        {STATUS_LABELS[status]}
-                      </span>
-                      <span className="text-[0.625rem] text-[#475569]">
-                        {groupTasks.length}
-                      </span>
-                    </div>
+          {/* Task list */}
+          <div className="flex-1 overflow-y-auto px-2 py-2 space-y-3">
+            {STATUS_ORDER.map((status) => {
+              const groupTasks = grouped[status]
+              if (groupTasks.length === 0) return null
+              return (
+                <div key={status}>
+                  <div className="flex items-center gap-2 px-1.5 mb-1.5">
+                    <div
+                      className="tool-status"
+                      style={{ backgroundColor: STATUS_COLORS[status] }}
+                    />
+                    <span className="text-[10px] font-semibold text-[var(--text-tertiary)] uppercase tracking-wider">
+                      {STATUS_LABELS[status]}
+                    </span>
+                    <span className="text-[10px] text-[var(--text-tertiary)] opacity-60">
+                      {groupTasks.length}
+                    </span>
+                  </div>
 
-                    {/* Task cards */}
-                    <div className="space-y-1.5">
-                      {groupTasks.map((task, idx) => (
-                        <motion.div
-                          key={task.id}
-                          initial={{ opacity: 0, y: 8 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: idx * 0.04, duration: 0.2 }}
+                  <div className="space-y-px">
+                    {groupTasks.map((task) => (
+                      <div key={task.id}>
+                        <button
+                          onClick={() =>
+                            setExpandedTaskId(expandedTaskId === task.id ? null : task.id)
+                          }
+                          className="w-full text-left px-2 py-1.5 rounded-[var(--radius-sm)] hover:bg-[var(--surface-hover)] transition-colors group"
                         >
-                          {/* Card */}
-                          <button
-                            onClick={() =>
-                              setExpandedTaskId(
-                                expandedTaskId === task.id ? null : task.id
-                              )
-                            }
-                            className="w-full text-left px-3 py-2.5 rounded-lg bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.05] transition-colors group"
-                          >
-                            <div className="flex items-start gap-2.5">
-                              {/* Priority dot */}
-                              <div
-                                className="w-2 h-2 rounded-full mt-1.5 shrink-0"
-                                style={{
-                                  backgroundColor:
-                                    PRIORITY_COLORS[task.priority],
-                                }}
-                              />
-                              <div className="flex-1 min-w-0">
-                                <p className="text-[0.8125rem] text-[#E2E8F0] leading-snug truncate">
-                                  {task.title}
-                                </p>
-                                <div className="flex items-center gap-2 mt-1.5">
-                                  {/* Due date */}
-                                  <span
-                                    className={`flex items-center gap-1 text-[0.625rem] ${
-                                      isOverdue(task.dueDate)
-                                        ? 'text-[#F43F5E]'
-                                        : 'text-[#64748B]'
-                                    }`}
-                                  >
-                                    <Clock size={10} />
-                                    {formatDate(task.dueDate)}
-                                  </span>
-                                  {/* Studio badge */}
-                                  <span
-                                    className="px-1.5 py-0.5 rounded text-[0.5625rem] font-medium"
-                                    style={{
-                                      color:
-                                        STUDIO_COLORS[task.studio] || '#94A3B8',
-                                      backgroundColor: `${STUDIO_COLORS[task.studio] || '#94A3B8'}15`,
-                                    }}
-                                  >
-                                    {task.studio}
-                                  </span>
-                                </div>
-                              </div>
-                              {/* Assignee avatar */}
-                              <div className="w-6 h-6 rounded-full bg-white/[0.08] flex items-center justify-center shrink-0">
-                                <span className="text-[0.5625rem] font-medium text-[#94A3B8]">
-                                  {task.assignee.initials}
+                          <div className="flex items-start gap-2">
+                            <div
+                              className="tool-status mt-[5px]"
+                              style={{ backgroundColor: PRIORITY_COLORS[task.priority] }}
+                            />
+                            <div className="flex-1 min-w-0">
+                              <p className="text-[12px] text-[var(--text-primary)] leading-snug truncate">
+                                {task.title}
+                              </p>
+                              <div className="flex items-center gap-2 mt-0.5">
+                                <span
+                                  className={`flex items-center gap-1 text-[10px] ${
+                                    isOverdue(task.dueDate)
+                                      ? 'text-[var(--color-error)]'
+                                      : 'text-[var(--text-tertiary)]'
+                                  }`}
+                                >
+                                  <Clock size={9} />
+                                  {formatDate(task.dueDate)}
+                                </span>
+                                <span
+                                  className="text-[9px] font-medium px-1.5 py-px rounded"
+                                  style={{
+                                    color: STUDIO_COLORS[task.studio] || 'var(--text-secondary)',
+                                    backgroundColor: `${STUDIO_COLORS[task.studio] || '#888'}12`,
+                                  }}
+                                >
+                                  {task.studio}
                                 </span>
                               </div>
-                              {/* Expand indicator */}
-                              {expandedTaskId === task.id ? (
-                                <ChevronUp
-                                  size={12}
-                                  className="text-[#475569] mt-1 shrink-0"
-                                />
-                              ) : (
-                                <ChevronDown
-                                  size={12}
-                                  className="text-[#475569] mt-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                                />
-                              )}
                             </div>
-                          </button>
-
-                          {/* Expanded detail */}
-                          <AnimatePresence>
-                            {expandedTaskId === task.id && (
-                              <motion.div
-                                initial={{ height: 0, opacity: 0 }}
-                                animate={{ height: 'auto', opacity: 1 }}
-                                exit={{ height: 0, opacity: 0 }}
-                                transition={{ duration: 0.2 }}
-                                className="overflow-hidden"
-                              >
-                                <div className="px-3 py-3 mx-1 mt-1 rounded-lg bg-white/[0.02] border border-white/[0.04] space-y-3">
-                                  {task.description && (
-                                    <p className="text-[0.75rem] text-[#94A3B8] leading-relaxed">
-                                      {task.description}
-                                    </p>
-                                  )}
-
-                                  {task.feature && (
-                                    <div className="flex items-center gap-2">
-                                      <span className="text-[0.625rem] text-[#475569]">
-                                        Feature:
-                                      </span>
-                                      <span className="text-[0.6875rem] text-[#CBD5E1]">
-                                        {task.feature}
-                                      </span>
-                                    </div>
-                                  )}
-
-                                  {task.role && (
-                                    <div className="flex items-center gap-2">
-                                      <User size={10} className="text-[#475569]" />
-                                      <span className="text-[0.625rem] text-[#475569]">
-                                        Role:
-                                      </span>
-                                      <span className="text-[0.6875rem] text-[#CBD5E1]">
-                                        {task.role}
-                                      </span>
-                                    </div>
-                                  )}
-
-                                  {/* Status dropdown (static for now) */}
-                                  <div className="flex items-center gap-2">
-                                    <span className="text-[0.625rem] text-[#475569]">
-                                      Status:
-                                    </span>
-                                    <span
-                                      className="px-2 py-0.5 rounded text-[0.625rem] font-medium"
-                                      style={{
-                                        color:
-                                          STATUS_COLORS[
-                                            task.status as StatusGroup
-                                          ] || '#64748B',
-                                        backgroundColor: `${STATUS_COLORS[task.status as StatusGroup] || '#64748B'}20`,
-                                      }}
-                                    >
-                                      {STATUS_LABELS[
-                                        task.status as StatusGroup
-                                      ] || task.status}
-                                    </span>
-                                  </div>
-
-                                  {/* Actions */}
-                                  <div className="flex items-center gap-2 pt-1">
-                                    <button
-                                      onClick={(e) => {
-                                        e.stopPropagation()
-                                        markDone(task.id)
-                                      }}
-                                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[0.6875rem] font-medium bg-[#10B981]/15 text-[#10B981] hover:bg-[#10B981]/25 transition-colors"
-                                    >
-                                      <Check size={12} />
-                                      Mark Done
-                                    </button>
-                                    <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[0.6875rem] font-medium bg-white/[0.04] text-[#94A3B8] hover:bg-white/[0.08] transition-colors">
-                                      <User size={12} />
-                                      Reassign
-                                    </button>
-                                  </div>
-                                </div>
-                              </motion.div>
+                            <div className="w-[22px] h-[22px] rounded bg-[var(--bg-overlay)] flex items-center justify-center shrink-0">
+                              <span className="text-[9px] font-medium text-[var(--text-secondary)]">
+                                {task.assignee.initials}
+                              </span>
+                            </div>
+                            {expandedTaskId === task.id ? (
+                              <ChevronUp size={11} className="text-[var(--text-tertiary)] mt-0.5 shrink-0" />
+                            ) : (
+                              <ChevronDown size={11} className="text-[var(--text-tertiary)] mt-0.5 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" />
                             )}
-                          </AnimatePresence>
-                        </motion.div>
-                      ))}
-                    </div>
+                          </div>
+                        </button>
+
+                        {expandedTaskId === task.id && (
+                          <div
+                            className="px-2 py-2 ml-4 mt-0.5 mb-1 rounded-[var(--radius-sm)] border border-[var(--border-default)] bg-[var(--bg-overlay)] space-y-2"
+                            style={{ animation: 'fadeInUp 100ms ease-out' }}
+                          >
+                            {task.description && (
+                              <p className="text-[11px] text-[var(--text-secondary)] leading-relaxed">
+                                {task.description}
+                              </p>
+                            )}
+                            {task.feature && (
+                              <div className="flex items-center gap-2">
+                                <span className="text-[10px] text-[var(--text-tertiary)]">Feature:</span>
+                                <span className="text-[11px] text-[var(--text-primary)]">{task.feature}</span>
+                              </div>
+                            )}
+                            {task.role && (
+                              <div className="flex items-center gap-2">
+                                <User size={9} className="text-[var(--text-tertiary)]" />
+                                <span className="text-[10px] text-[var(--text-tertiary)]">Role:</span>
+                                <span className="text-[11px] text-[var(--text-primary)]">{task.role}</span>
+                              </div>
+                            )}
+                            <div className="flex items-center gap-2 pt-1">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  markDone(task.id)
+                                }}
+                                className="tool-btn text-[10px] text-[var(--color-success)]"
+                              >
+                                <Check size={10} />
+                                Done
+                              </button>
+                              <button className="tool-btn text-[10px]">
+                                <User size={10} />
+                                Reassign
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ))}
                   </div>
-                )
-              })}
-
-              {filteredTasks.length === 0 && (
-                <div className="flex flex-col items-center justify-center py-12 text-center">
-                  <CheckSquare
-                    size={32}
-                    className="text-[#1E293B] mb-3"
-                  />
-                  <p className="text-sm text-[#64748B]">No tasks found</p>
-                  <p className="text-xs text-[#475569] mt-1">
-                    {activeFilter === 'overdue'
-                      ? 'No overdue tasks - great work!'
-                      : 'Try a different filter'}
-                  </p>
                 </div>
-              )}
-            </div>
+              )
+            })}
 
-            {/* Bottom: New Task */}
-            <div className="px-4 py-3 border-t border-white/[0.08]">
-              <button className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium text-white bg-[#3B82F6] hover:bg-[#2563EB] transition-colors">
-                <Plus size={16} />
-                New Task
-              </button>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            {filteredTasks.length === 0 && (
+              <div className="tool-empty py-10">
+                <CheckSquare size={20} className="text-[var(--text-tertiary)]" />
+                <p className="text-[12px] text-[var(--text-secondary)]">No tasks found</p>
+                <p className="text-[11px] text-[var(--text-tertiary)]">
+                  {activeFilter === 'overdue'
+                    ? 'No overdue tasks — great work!'
+                    : 'Try a different filter'}
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Footer */}
+          <div className="px-2 py-2 border-t border-[var(--border-default)]">
+            <button className="tool-btn-primary w-full flex items-center justify-center gap-1.5 py-1.5">
+              <Plus size={12} />
+              <span className="text-[11px]">New Task</span>
+            </button>
+          </div>
+        </div>
+      )}
     </>
   )
 }

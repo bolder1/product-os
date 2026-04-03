@@ -1,13 +1,11 @@
 'use client'
 
 import { useMemo } from 'react'
-import { motion } from 'framer-motion'
 import {
   CheckCircle2,
   AlertTriangle,
   AlertCircle,
   TrendingUp,
-  ArrowRight,
 } from 'lucide-react'
 import { useGraphStore } from '../../lib/graph-store'
 import { useTaskStore } from '../../lib/task-store'
@@ -60,7 +58,6 @@ function getScoreLabel(score: number) {
 
 /** Compact badge showing studio readiness score. Place in studio headers. */
 export function StudioHealthBadge({ productId, studio, showDetails = false }: StudioHealthBadgeProps) {
-  // Subscribe to store changes so score recomputes
   const _nodes = useGraphStore((s) => s.nodes)
   const _edges = useGraphStore((s) => s.edges)
   const _tasks = useTaskStore((s) => s.tasks)
@@ -71,9 +68,9 @@ export function StudioHealthBadge({ productId, studio, showDetails = false }: St
 
   if (!showDetails) {
     return (
-      <div className={`flex items-center gap-1.5 px-2 py-1 rounded-md border ${colors.bg} ${colors.border}`}>
+      <div className={`tool-badge flex items-center gap-1.5 ${colors.bg} ${colors.border}`}>
         {getScoreIcon(score)}
-        <span className={`text-[0.625rem] font-medium ${colors.text}`}>
+        <span className={`text-[10px] font-medium ${colors.text}`}>
           {score}%
         </span>
       </div>
@@ -86,38 +83,31 @@ export function StudioHealthBadge({ productId, studio, showDetails = false }: St
   }, [productId, _nodes, _edges, _tasks, studio])
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: -4 }}
-      animate={{ opacity: 1, y: 0 }}
-      className={`rounded-lg border ${colors.border} ${colors.bg} overflow-hidden`}
-    >
+    <div className={`rounded-[var(--radius-md)] border ${colors.border} ${colors.bg} overflow-hidden`}>
       <div className="flex items-center gap-2 px-3 py-2">
         {getScoreIcon(score)}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <span className={`text-xs font-medium ${colors.text}`}>
+            <span className={`text-[11px] font-medium ${colors.text}`}>
               {studioLabels[studio]} Readiness: {score}%
             </span>
-            <span className="text-[0.625rem] text-[#64748B]">
+            <span className="text-[10px] text-[var(--text-tertiary)]">
               {getScoreLabel(score)}
             </span>
           </div>
-          {/* Mini progress bar */}
-          <div className="h-1 rounded-full bg-white/[0.06] mt-1.5 overflow-hidden">
-            <motion.div
-              className="h-full rounded-full"
-              style={{ backgroundColor: colors.ring }}
-              initial={{ width: 0 }}
-              animate={{ width: `${score}%` }}
-              transition={{ duration: 0.8, ease: 'easeOut' }}
+          {/* Progress bar */}
+          <div className="h-1 rounded-sm bg-[var(--bg-inset)] mt-1.5 overflow-hidden">
+            <div
+              className="h-full rounded-sm transition-all duration-500"
+              style={{ backgroundColor: colors.ring, width: `${score}%` }}
             />
           </div>
         </div>
-        <span className={`text-lg font-bold ${colors.text}`}>{score}</span>
+        <span className={`text-[13px] font-bold ${colors.text}`}>{score}</span>
       </div>
 
       {issues.length > 0 && (
-        <div className="border-t border-white/[0.04] px-3 py-2 space-y-1">
+        <div className="border-t border-[var(--border-subtle)] px-3 py-2 space-y-1">
           {issues.slice(0, 3).map((issue) => (
             <div key={issue.id} className="flex items-start gap-1.5">
               {issue.severity === 'error' ? (
@@ -125,24 +115,24 @@ export function StudioHealthBadge({ productId, studio, showDetails = false }: St
               ) : issue.severity === 'warning' ? (
                 <AlertTriangle className="w-3 h-3 text-amber-400 mt-0.5 shrink-0" />
               ) : (
-                <TrendingUp className="w-3 h-3 text-blue-400 mt-0.5 shrink-0" />
+                <TrendingUp className="w-3 h-3 text-[var(--accent-text)] mt-0.5 shrink-0" />
               )}
               <div className="min-w-0 flex-1">
-                <p className="text-[0.625rem] text-[#94A3B8] leading-snug">{issue.title}</p>
+                <p className="text-[10px] text-[var(--text-secondary)] leading-snug">{issue.title}</p>
                 {issue.suggestion && (
-                  <p className="text-[0.5625rem] text-[#475569] mt-0.5">{issue.suggestion}</p>
+                  <p className="text-[10px] text-[var(--text-tertiary)] mt-0.5">{issue.suggestion}</p>
                 )}
               </div>
             </div>
           ))}
           {issues.length > 3 && (
-            <p className="text-[0.5625rem] text-[#475569]">
+            <p className="text-[10px] text-[var(--text-tertiary)]">
               +{issues.length - 3} more issue{issues.length - 3 !== 1 ? 's' : ''}
             </p>
           )}
         </div>
       )}
-    </motion.div>
+    </div>
   )
 }
 
@@ -159,9 +149,9 @@ export function ProductHealthBar({ productId }: { productId: string }) {
 
   return (
     <div className="flex items-center gap-3">
-      <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md border ${colors.bg} ${colors.border}`}>
+      <div className={`tool-badge flex items-center gap-1.5 ${colors.bg} ${colors.border}`}>
         {getScoreIcon(readiness.overall)}
-        <span className={`text-[0.625rem] font-medium ${colors.text}`}>
+        <span className={`text-[10px] font-medium ${colors.text}`}>
           {readiness.overall}% ready
         </span>
       </div>

@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
-import { AnimatePresence, motion } from 'framer-motion'
 import {
   Search,
   Clock,
@@ -10,7 +9,6 @@ import {
   Package,
   CheckSquare,
   LayoutGrid,
-  // Studio icons
   Lightbulb,
   FileText,
   PenTool,
@@ -161,201 +159,189 @@ export function CommandPaletteGlobal() {
   // Memoize the first 20 tasks to keep the list manageable
   const displayTasks = useMemo(() => tasks.slice(0, 20), [tasks])
 
+  if (!isOpen) return null
+
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <>
-          {/* Overlay */}
-          <motion.div
-            key="cp-overlay"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.15 }}
-            className="fixed inset-0 z-[100] bg-[#060918]/80 backdrop-blur-sm"
-            onClick={close}
-          />
+    <>
+      {/* Overlay */}
+      <div
+        className="fixed inset-0 z-[100] bg-black/50"
+        onClick={close}
+      />
 
-          {/* Dialog */}
-          <motion.div
-            key="cp-dialog"
-            initial={{ opacity: 0, scale: 0.96, y: -12 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.96, y: -12 }}
-            transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-            className="fixed left-1/2 top-[15%] z-[100] w-full max-w-xl -translate-x-1/2 px-4"
-          >
-            <CommandPalette
-              open={true}
-              onOpenChange={(open) => { if (!open) close() }}
-              placeholder="Search products, studios, tasks, actions..."
-            >
-              {/* ── Recent ── */}
-              {recentItems.length > 0 && (
-                <>
-                  <CommandGroup heading="Recent">
-                    {recentItems.map((item: RecentItem) => (
-                      <CommandItem
-                        key={`recent-${item.id}`}
-                        value={`recent ${item.label}`}
-                        onSelect={() => navigate(item.href, item)}
-                      >
-                        <Clock size={16} className="shrink-0 text-[#64748B]" />
-                        <div className="flex flex-col min-w-0">
-                          <span className="truncate">{item.label}</span>
-                          {item.description && (
-                            <span className="text-xs text-[#64748B] truncate">{item.description}</span>
-                          )}
-                        </div>
-                      </CommandItem>
-                    ))}
-                  </CommandGroup>
-                  <CommandSeparator />
-                </>
-              )}
-
-              {/* ── Studios ── */}
-              <CommandGroup heading="Studios">
-                {STUDIOS.map((studio) => {
-                  const Icon = studio.icon
-                  return (
-                    <CommandItem
-                      key={`studio-${studio.key}`}
-                      value={`studio ${studio.label} ${studio.description}`}
-                      onSelect={() =>
-                        navigate(studio.href, {
-                          id: `studio-${studio.key}`,
-                          label: studio.label,
-                          description: studio.description,
-                        })
-                      }
-                    >
-                      <Icon size={16} className="shrink-0 text-[#6366F1]" />
-                      <div className="flex flex-col min-w-0">
-                        <span className="truncate">{studio.label}</span>
-                        <span className="text-xs text-[#64748B] truncate">{studio.description}</span>
-                      </div>
-                    </CommandItem>
-                  )
-                })}
-              </CommandGroup>
-
-              <CommandSeparator />
-
-              {/* ── Products ── */}
-              {products.length > 0 && (
-                <>
-                  <CommandGroup heading="Products">
-                    {products.map((p) => (
-                      <CommandItem
-                        key={`product-${p.id}`}
-                        value={`product ${p.name} ${p.description}`}
-                        onSelect={() =>
-                          navigate(`/${p.orgSlug}/${p.slug}`, {
-                            id: `product-${p.id}`,
-                            label: p.name,
-                            description: p.description,
-                          })
-                        }
-                      >
-                        <Package size={16} className="shrink-0" style={{ color: p.color }} />
-                        <div className="flex flex-col min-w-0 flex-1">
-                          <div className="flex items-center gap-2">
-                            <span className="truncate">{p.icon} {p.name}</span>
-                            <span
-                              className="text-[0.625rem] px-1.5 py-0.5 rounded-full capitalize"
-                              style={{
-                                backgroundColor: p.status === 'active' ? 'rgba(16,185,129,0.15)' : 'rgba(100,116,139,0.15)',
-                                color: p.status === 'active' ? '#10B981' : '#64748B',
-                              }}
-                            >
-                              {p.status}
-                            </span>
-                          </div>
-                          <span className="text-xs text-[#64748B] truncate">{p.description}</span>
-                        </div>
-                      </CommandItem>
-                    ))}
-                  </CommandGroup>
-                  <CommandSeparator />
-                </>
-              )}
-
-              {/* ── Tasks ── */}
-              {displayTasks.length > 0 && (
-                <>
-                  <CommandGroup heading="Tasks">
-                    {displayTasks.map((t) => (
-                      <CommandItem
-                        key={`task-${t.id}`}
-                        value={`task ${t.title} ${t.assignee.name} ${t.status} ${t.studio}`}
-                        onSelect={() =>
-                          navigate(`/tasks`, {
-                            id: `task-${t.id}`,
-                            label: t.title,
-                            description: `${t.status} — ${t.assignee.name}`,
-                          })
-                        }
-                      >
-                        <CheckSquare size={16} className="shrink-0" style={{ color: STATUS_COLORS[t.status] ?? '#64748B' }} />
-                        <div className="flex flex-col min-w-0 flex-1">
-                          <div className="flex items-center gap-2">
-                            <span className="truncate">{t.title}</span>
-                            <span
-                              className="text-[0.625rem] px-1.5 py-0.5 rounded-full capitalize whitespace-nowrap"
-                              style={{
-                                backgroundColor: `${STATUS_COLORS[t.status] ?? '#64748B'}20`,
-                                color: STATUS_COLORS[t.status] ?? '#64748B',
-                              }}
-                            >
-                              {t.status.replace('_', ' ')}
-                            </span>
-                          </div>
-                          <span className="text-xs text-[#64748B] truncate">
-                            {t.assignee.name} &middot; {t.studio}
-                          </span>
-                        </div>
-                      </CommandItem>
-                    ))}
-                  </CommandGroup>
-                  <CommandSeparator />
-                </>
-              )}
-
-              {/* ── Actions ── */}
-              <CommandGroup heading="Actions">
-                {ACTIONS.map((action) => {
-                  const Icon = action.icon
-                  return (
-                    <CommandItem
-                      key={`action-${action.id}`}
-                      value={`action ${action.label} ${action.description}`}
-                      onSelect={() => {
-                        if (action.href) {
-                          navigate(action.href, {
-                            id: `action-${action.id}`,
-                            label: action.label,
-                            description: action.description,
-                          })
-                        }
-                      }}
-                    >
-                      <Icon size={16} className="shrink-0 text-[#F59E0B]" />
-                      <div className="flex flex-col min-w-0">
-                        <span className="truncate">{action.label}</span>
-                        <span className="text-xs text-[#64748B] truncate">{action.description}</span>
-                      </div>
-                      {action.id === 'create-product' && (
-                        <CommandShortcut>Ctrl+N</CommandShortcut>
+      {/* Dialog */}
+      <div
+        className="fixed left-1/2 top-[15%] z-[100] w-full max-w-xl -translate-x-1/2 px-4"
+      >
+        <CommandPalette
+          open={true}
+          onOpenChange={(open) => { if (!open) close() }}
+          placeholder="Search products, studios, tasks, actions..."
+        >
+          {/* Recent */}
+          {recentItems.length > 0 && (
+            <>
+              <CommandGroup heading="Recent">
+                {recentItems.map((item: RecentItem) => (
+                  <CommandItem
+                    key={`recent-${item.id}`}
+                    value={`recent ${item.label}`}
+                    onSelect={() => navigate(item.href, item)}
+                  >
+                    <Clock size={14} className="shrink-0 text-[var(--text-tertiary)]" />
+                    <div className="flex flex-col min-w-0">
+                      <span className="truncate">{item.label}</span>
+                      {item.description && (
+                        <span className="text-[11px] text-[var(--text-tertiary)] truncate">{item.description}</span>
                       )}
-                    </CommandItem>
-                  )
-                })}
+                    </div>
+                  </CommandItem>
+                ))}
               </CommandGroup>
-            </CommandPalette>
-          </motion.div>
-        </>
-      )}
-    </AnimatePresence>
+              <CommandSeparator />
+            </>
+          )}
+
+          {/* Studios */}
+          <CommandGroup heading="Studios">
+            {STUDIOS.map((studio) => {
+              const Icon = studio.icon
+              return (
+                <CommandItem
+                  key={`studio-${studio.key}`}
+                  value={`studio ${studio.label} ${studio.description}`}
+                  onSelect={() =>
+                    navigate(studio.href, {
+                      id: `studio-${studio.key}`,
+                      label: studio.label,
+                      description: studio.description,
+                    })
+                  }
+                >
+                  <Icon size={14} className="shrink-0 text-[var(--accent-text)]" />
+                  <div className="flex flex-col min-w-0">
+                    <span className="truncate">{studio.label}</span>
+                    <span className="text-[11px] text-[var(--text-tertiary)] truncate">{studio.description}</span>
+                  </div>
+                </CommandItem>
+              )
+            })}
+          </CommandGroup>
+
+          <CommandSeparator />
+
+          {/* Products */}
+          {products.length > 0 && (
+            <>
+              <CommandGroup heading="Products">
+                {products.map((p) => (
+                  <CommandItem
+                    key={`product-${p.id}`}
+                    value={`product ${p.name} ${p.description}`}
+                    onSelect={() =>
+                      navigate(`/${p.orgSlug}/${p.slug}`, {
+                        id: `product-${p.id}`,
+                        label: p.name,
+                        description: p.description,
+                      })
+                    }
+                  >
+                    <Package size={14} className="shrink-0" style={{ color: p.color }} />
+                    <div className="flex flex-col min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className="truncate">{p.icon} {p.name}</span>
+                        <span
+                          className="text-[10px] px-1.5 py-0.5 rounded-[var(--radius-sm)] capitalize"
+                          style={{
+                            backgroundColor: p.status === 'active' ? 'rgba(16,185,129,0.15)' : 'rgba(100,116,139,0.15)',
+                            color: p.status === 'active' ? '#10B981' : '#64748B',
+                          }}
+                        >
+                          {p.status}
+                        </span>
+                      </div>
+                      <span className="text-[11px] text-[var(--text-tertiary)] truncate">{p.description}</span>
+                    </div>
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+              <CommandSeparator />
+            </>
+          )}
+
+          {/* Tasks */}
+          {displayTasks.length > 0 && (
+            <>
+              <CommandGroup heading="Tasks">
+                {displayTasks.map((t) => (
+                  <CommandItem
+                    key={`task-${t.id}`}
+                    value={`task ${t.title} ${t.assignee.name} ${t.status} ${t.studio}`}
+                    onSelect={() =>
+                      navigate(`/tasks`, {
+                        id: `task-${t.id}`,
+                        label: t.title,
+                        description: `${t.status} -- ${t.assignee.name}`,
+                      })
+                    }
+                  >
+                    <CheckSquare size={14} className="shrink-0" style={{ color: STATUS_COLORS[t.status] ?? '#64748B' }} />
+                    <div className="flex flex-col min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className="truncate">{t.title}</span>
+                        <span
+                          className="text-[10px] px-1.5 py-0.5 rounded-[var(--radius-sm)] capitalize whitespace-nowrap"
+                          style={{
+                            backgroundColor: `${STATUS_COLORS[t.status] ?? '#64748B'}20`,
+                            color: STATUS_COLORS[t.status] ?? '#64748B',
+                          }}
+                        >
+                          {t.status.replace('_', ' ')}
+                        </span>
+                      </div>
+                      <span className="text-[11px] text-[var(--text-tertiary)] truncate">
+                        {t.assignee.name} &middot; {t.studio}
+                      </span>
+                    </div>
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+              <CommandSeparator />
+            </>
+          )}
+
+          {/* Actions */}
+          <CommandGroup heading="Actions">
+            {ACTIONS.map((action) => {
+              const Icon = action.icon
+              return (
+                <CommandItem
+                  key={`action-${action.id}`}
+                  value={`action ${action.label} ${action.description}`}
+                  onSelect={() => {
+                    if (action.href) {
+                      navigate(action.href, {
+                        id: `action-${action.id}`,
+                        label: action.label,
+                        description: action.description,
+                      })
+                    }
+                  }}
+                >
+                  <Icon size={14} className="shrink-0 text-[#F59E0B]" />
+                  <div className="flex flex-col min-w-0">
+                    <span className="truncate">{action.label}</span>
+                    <span className="text-[11px] text-[var(--text-tertiary)] truncate">{action.description}</span>
+                  </div>
+                  {action.id === 'create-product' && (
+                    <CommandShortcut>Ctrl+N</CommandShortcut>
+                  )}
+                </CommandItem>
+              )
+            })}
+          </CommandGroup>
+        </CommandPalette>
+      </div>
+    </>
   )
 }

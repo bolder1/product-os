@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useMemo, useCallback } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
 import { Image, Upload, Sparkles, Search, LayoutGrid, List } from 'lucide-react'
 import { type GraphicAsset, mockAssets } from './_data/mock-assets'
 import { AssetGrid } from './_components/asset-grid'
@@ -67,117 +66,97 @@ export default function GraphicsStudioPage() {
   }, [])
 
   return (
-    <div className="flex flex-col h-full gap-5">
-      {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: -8 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="flex items-center justify-between flex-wrap gap-3"
-      >
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-[#EC4899]/10 flex items-center justify-center">
-            <Image className="w-5 h-5 text-[#EC4899]" />
-          </div>
-          <div>
-            <h1 className="text-lg font-semibold text-[#F1F5F9]">Graphics Studio</h1>
-            <p className="text-xs text-[#64748B]">
-              {filteredAssets.length} asset{filteredAssets.length !== 1 ? 's' : ''}
-              {typeFilter !== 'all' ? ` (${typeFilter})` : ''}
-            </p>
-          </div>
-        </div>
-
+    <div className="flex flex-col h-full bg-[var(--bg-workspace)]">
+      {/* Toolbar */}
+      <div className="h-[var(--toolbar-h)] flex items-center justify-between px-3 border-b border-[var(--border-default)] bg-[var(--bg-surface)] shrink-0">
         <div className="flex items-center gap-2">
-          <motion.button
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-gradient-to-r from-[#8B5CF6] to-[#7C3AED] text-white text-xs font-medium"
-          >
-            <Sparkles className="w-3.5 h-3.5" />
-            AI Generate
-          </motion.button>
-          <motion.button
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
-            onClick={() => setUploadOpen(true)}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#EC4899] text-white text-sm font-medium hover:bg-[#DB2777] transition-colors"
-          >
-            <Upload className="w-4 h-4" />
-            Upload Asset
-          </motion.button>
+          <Image className="w-3.5 h-3.5 text-[var(--accent-text)]" />
+          <span className="text-[13px] font-medium text-[var(--text-primary)]">Graphics Studio</span>
+          <span className="text-[10px] text-[var(--text-tertiary)] ml-1">
+            {filteredAssets.length} asset{filteredAssets.length !== 1 ? 's' : ''}
+            {typeFilter !== 'all' ? ` (${typeFilter})` : ''}
+          </span>
         </div>
-      </motion.div>
 
-      {/* Filter bar */}
-      <motion.div
-        initial={{ opacity: 0, y: -4 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.05 }}
-        className="flex items-center justify-between gap-3 flex-wrap"
-      >
-        {/* Type filters */}
         <div className="flex items-center gap-1">
-          {typeFilters.map((filter) => {
-            const isActive = typeFilter === filter.key
+          <button className="tool-btn flex items-center gap-1.5 text-[var(--accent-text)]">
+            <Sparkles className="w-3 h-3" />
+            <span className="text-[11px]">AI Generate</span>
+          </button>
+          <button
+            onClick={() => setUploadOpen(true)}
+            className="tool-btn-primary flex items-center gap-1.5"
+          >
+            <Upload className="w-3 h-3" />
+            <span className="text-[11px]">Upload Asset</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Filter bar — search, type tabs, view toggle */}
+      <div className="h-[var(--toolbar-h)] flex items-center gap-2 px-3 border-b border-[var(--border-default)] bg-[var(--bg-surface)] shrink-0">
+        {/* Type filters */}
+        <div className="tool-tabs flex items-center">
+          {typeFilters.map((f) => {
+            const isActive = typeFilter === f.key
             const count =
-              filter.key === 'all'
+              f.key === 'all'
                 ? assets.length
-                : assets.filter((a) => a.type === filter.key).length
+                : assets.filter((a) => a.type === f.key).length
             return (
               <button
-                key={filter.key}
-                onClick={() => setTypeFilter(filter.key)}
-                className={`relative px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                  isActive
-                    ? 'text-[#EC4899] bg-[#EC4899]/10'
-                    : 'text-[#64748B] hover:text-[#94A3B8] hover:bg-white/[0.04]'
-                }`}
+                key={f.key}
+                onClick={() => setTypeFilter(f.key)}
+                className={`tool-tab px-2.5 py-1 text-[11px] ${isActive ? 'active' : ''}`}
               >
-                {filter.label}
-                <span className="ml-1 text-[10px] opacity-60">{count}</span>
+                {f.label}
+                <span className="ml-1 text-[10px] text-[var(--text-tertiary)]">{count}</span>
               </button>
             )
           })}
         </div>
 
-        {/* Search + view toggle */}
-        <div className="flex items-center gap-2">
-          <div className="relative">
-            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#64748B]" />
-            <input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search assets..."
-              className="pl-8 pr-3 py-1.5 rounded-lg border border-white/[0.08] bg-white/[0.03] text-xs text-[#F1F5F9] placeholder-[#64748B] outline-none focus:border-[#EC4899]/40 w-48"
-            />
-          </div>
-          <div className="flex items-center rounded-lg border border-white/[0.08] overflow-hidden">
-            <button
-              onClick={() => setView('grid')}
-              className={`p-1.5 transition-colors ${
-                view === 'grid'
-                  ? 'text-[#EC4899] bg-[#EC4899]/10'
-                  : 'text-[#64748B] hover:text-[#94A3B8]'
-              }`}
-            >
-              <LayoutGrid className="w-3.5 h-3.5" />
-            </button>
-            <button
-              onClick={() => setView('list')}
-              className={`p-1.5 transition-colors ${
-                view === 'list'
-                  ? 'text-[#EC4899] bg-[#EC4899]/10'
-                  : 'text-[#64748B] hover:text-[#94A3B8]'
-              }`}
-            >
-              <List className="w-3.5 h-3.5" />
-            </button>
-          </div>
+        {/* Spacer */}
+        <div className="flex-1" />
+
+        {/* Search */}
+        <div className="flex items-center gap-1.5 px-2 py-1 bg-[var(--bg-workspace)] border border-[var(--border-default)] rounded-[var(--radius-sm)] w-44">
+          <Search className="w-3 h-3 text-[var(--text-tertiary)]" />
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search assets..."
+            className="tool-input flex-1 bg-transparent border-none p-0 text-[11px] text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] outline-none"
+          />
         </div>
-      </motion.div>
+
+        {/* View toggle */}
+        <div className="flex items-center border border-[var(--border-default)] rounded-[var(--radius-sm)] overflow-hidden">
+          <button
+            onClick={() => setView('grid')}
+            className={`p-1 transition-colors ${
+              view === 'grid'
+                ? 'text-[var(--accent-text)] bg-[var(--accent)]/10'
+                : 'text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]'
+            }`}
+          >
+            <LayoutGrid className="w-3 h-3" />
+          </button>
+          <button
+            onClick={() => setView('list')}
+            className={`p-1 transition-colors ${
+              view === 'list'
+                ? 'text-[var(--accent-text)] bg-[var(--accent)]/10'
+                : 'text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]'
+            }`}
+          >
+            <List className="w-3 h-3" />
+          </button>
+        </div>
+      </div>
 
       {/* Asset grid */}
-      <div className="flex-1 min-h-0 overflow-y-auto">
+      <div className="flex-1 min-h-0 overflow-y-auto p-3">
         <AssetGrid
           assets={filteredAssets}
           view={view}
@@ -187,16 +166,14 @@ export default function GraphicsStudioPage() {
       </div>
 
       {/* Detail modal */}
-      <AnimatePresence>
-        {selectedAsset && (
-          <AssetDetail
-            asset={selectedAsset}
-            onClose={() => setSelectedAsset(null)}
-            onDelete={handleDelete}
-            onUpdate={handleUpdate}
-          />
-        )}
-      </AnimatePresence>
+      {selectedAsset && (
+        <AssetDetail
+          asset={selectedAsset}
+          onClose={() => setSelectedAsset(null)}
+          onDelete={handleDelete}
+          onUpdate={handleUpdate}
+        />
+      )}
 
       {/* Upload modal */}
       <UploadModal

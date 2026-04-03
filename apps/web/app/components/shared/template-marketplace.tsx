@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useMemo, useCallback } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
 import {
   Store,
   Search,
@@ -16,10 +15,7 @@ import {
   GitFork,
   X,
   Check,
-  ArrowRight,
-  TrendingUp,
-  Sparkles,
-  Filter,
+  RefreshCw,
 } from 'lucide-react'
 
 // ---------------------------------------------------------------------------
@@ -37,7 +33,7 @@ export interface MarketplaceTemplate {
   downloads: number
   rating: number
   tags: string[]
-  preview: string // short visual descriptor
+  preview: string
   nodeCount: number
   edgeCount: number
   featured?: boolean
@@ -192,12 +188,12 @@ const marketplaceTemplates: MarketplaceTemplate[] = [
 // ---------------------------------------------------------------------------
 
 const categoryMeta: Record<TemplateCategory, { label: string; icon: React.ReactNode }> = {
-  'full-product': { label: 'Full Product', icon: <Package className="w-3.5 h-3.5" /> },
-  'brand': { label: 'Brand', icon: <Palette className="w-3.5 h-3.5" /> },
-  'components': { label: 'Components', icon: <Layers className="w-3.5 h-3.5" /> },
-  'pages': { label: 'Pages', icon: <Layout className="w-3.5 h-3.5" /> },
-  'workflows': { label: 'Workflows', icon: <GitFork className="w-3.5 h-3.5" /> },
-  'design-system': { label: 'Design System', icon: <FileText className="w-3.5 h-3.5" /> },
+  'full-product': { label: 'Full Product', icon: <Package className="w-3 h-3" /> },
+  'brand': { label: 'Brand', icon: <Palette className="w-3 h-3" /> },
+  'components': { label: 'Components', icon: <Layers className="w-3 h-3" /> },
+  'pages': { label: 'Pages', icon: <Layout className="w-3 h-3" /> },
+  'workflows': { label: 'Workflows', icon: <GitFork className="w-3 h-3" /> },
+  'design-system': { label: 'Design System', icon: <FileText className="w-3 h-3" /> },
 }
 
 interface TemplateMarketplaceProps {
@@ -246,241 +242,204 @@ export function TemplateMarketplace({ open, onClose, onInstall }: TemplateMarket
   if (!open) return null
 
   return (
-    <AnimatePresence>
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
-        onClick={onClose}
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+      onClick={onClose}
+    >
+      <div
+        className="w-[800px] max-h-[85vh] rounded-[var(--radius-md)] border border-[var(--border-strong)] bg-[var(--bg-elevated)] shadow-xl overflow-hidden flex flex-col"
+        onClick={(e) => e.stopPropagation()}
       >
-        <motion.div
-          initial={{ scale: 0.95, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          exit={{ scale: 0.95, opacity: 0 }}
-          className="w-[820px] max-h-[85vh] rounded-2xl border border-white/[0.1] bg-[#0A0F1E] shadow-2xl overflow-hidden flex flex-col"
-          onClick={(e) => e.stopPropagation()}
-        >
-          {/* Header */}
-          <div className="flex items-center justify-between px-6 py-4 border-b border-white/[0.06]">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#6366F1] to-[#10B981] flex items-center justify-center">
-                <Store className="w-4.5 h-4.5 text-white" />
-              </div>
-              <div>
-                <h2 className="text-sm font-semibold text-[#F1F5F9]">Template Marketplace</h2>
-                <p className="text-[0.6875rem] text-[#64748B]">
-                  {marketplaceTemplates.length} templates available
-                </p>
-              </div>
-            </div>
-            <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-white/[0.05] text-[#64748B]">
-              <X className="w-4 h-4" />
-            </button>
+        {/* Header */}
+        <div className="h-[var(--topbar-h)] flex items-center justify-between px-3 border-b border-[var(--border-default)] shrink-0">
+          <div className="flex items-center gap-2">
+            <Store className="w-3.5 h-3.5 text-[var(--accent-text)]" />
+            <span className="text-[13px] font-medium text-[var(--text-primary)]">Template Marketplace</span>
+            <span className="text-[10px] text-[var(--text-secondary)]">
+              {marketplaceTemplates.length} templates
+            </span>
           </div>
+          <button onClick={onClose} className="tool-btn p-1">
+            <X className="w-3.5 h-3.5" />
+          </button>
+        </div>
 
-          {/* Search + Category filter */}
-          <div className="px-6 py-3 border-b border-white/[0.04] space-y-2.5">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#475569]" />
-              <input
-                type="text"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search templates..."
-                className="w-full pl-9 pr-4 py-2 rounded-lg bg-white/[0.04] border border-white/[0.06] text-xs text-[#F1F5F9] placeholder-[#475569] focus:outline-none focus:border-[#6366F1]/40"
-              />
-            </div>
-            <div className="flex items-center gap-1 overflow-x-auto">
-              {(['all', ...Object.keys(categoryMeta)] as (TemplateCategory | 'all')[]).map((cat) => (
-                <button
-                  key={cat}
-                  onClick={() => setActiveCategory(cat)}
-                  className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[0.6875rem] whitespace-nowrap transition-colors ${
-                    activeCategory === cat
-                      ? 'bg-[#6366F1]/10 text-[#818CF8]'
-                      : 'text-[#475569] hover:bg-white/[0.04]'
-                  }`}
-                >
-                  {cat !== 'all' && categoryMeta[cat].icon}
-                  {cat === 'all' ? 'All' : categoryMeta[cat].label}
-                </button>
-              ))}
-            </div>
+        {/* Search + Category filter */}
+        <div className="px-3 py-2 border-b border-[var(--border-default)] space-y-2">
+          <div className="relative">
+            <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-[var(--text-tertiary)]" />
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search templates..."
+              className="tool-input w-full pl-7 pr-3 py-1.5"
+            />
           </div>
+          <div className="tool-tabs border-0">
+            {(['all', ...Object.keys(categoryMeta)] as (TemplateCategory | 'all')[]).map((cat) => (
+              <button
+                key={cat}
+                onClick={() => setActiveCategory(cat)}
+                className={`tool-tab flex items-center gap-1 ${activeCategory === cat ? 'active' : ''}`}
+              >
+                {cat !== 'all' && categoryMeta[cat].icon}
+                {cat === 'all' ? 'All' : categoryMeta[cat].label}
+              </button>
+            ))}
+          </div>
+        </div>
 
-          {/* Body */}
-          <div className="flex-1 overflow-auto p-4">
-            {/* Featured section */}
-            {activeCategory === 'all' && !search && featured.length > 0 && (
-              <div className="mb-4">
-                <div className="flex items-center gap-2 mb-2 px-1">
-                  <Sparkles className="w-3.5 h-3.5 text-[#F59E0B]" />
-                  <span className="text-[0.625rem] uppercase tracking-wider text-[#64748B] font-medium">Featured</span>
-                </div>
-                <div className="grid grid-cols-2 gap-2.5 mb-4">
-                  {featured.slice(0, 2).map((tpl) => (
-                    <motion.div
-                      key={tpl.id}
-                      initial={{ opacity: 0, y: 4 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="rounded-xl border border-[#6366F1]/20 bg-gradient-to-br from-[#6366F1]/5 to-transparent p-4 cursor-pointer hover:border-[#6366F1]/40 transition-colors"
-                      onClick={() => setPreviewId(tpl.id)}
-                    >
-                      <div className="flex items-start justify-between mb-2">
-                        <h3 className="text-xs font-semibold text-[#F1F5F9]">{tpl.name}</h3>
-                        <div className="flex items-center gap-0.5">
-                          <Star className="w-3 h-3 text-[#F59E0B] fill-[#F59E0B]" />
-                          <span className="text-[0.5625rem] text-[#F59E0B]">{tpl.rating}</span>
-                        </div>
+        {/* Body */}
+        <div className="flex-1 overflow-auto p-3">
+          {/* Featured section */}
+          {activeCategory === 'all' && !search && featured.length > 0 && (
+            <div className="mb-3">
+              <p className="tool-section-label">Featured</p>
+              <div className="grid grid-cols-2 gap-2 mb-3">
+                {featured.slice(0, 2).map((tpl) => (
+                  <div
+                    key={tpl.id}
+                    className="rounded-[var(--radius-md)] border border-[var(--accent)]/20 bg-[var(--accent)]/[0.03] p-3 cursor-pointer hover:border-[var(--accent)]/40 transition-colors"
+                    onClick={() => setPreviewId(tpl.id)}
+                  >
+                    <div className="flex items-start justify-between mb-1.5">
+                      <h3 className="text-[12px] font-medium text-[var(--text-primary)]">{tpl.name}</h3>
+                      <div className="flex items-center gap-0.5">
+                        <Star className="w-3 h-3 text-[var(--color-warning)]" />
+                        <span className="text-[10px] text-[var(--color-warning)]">{tpl.rating}</span>
                       </div>
-                      <p className="text-[0.6875rem] text-[#64748B] leading-relaxed line-clamp-2">
-                        {tpl.description}
-                      </p>
-                      <div className="flex items-center gap-3 mt-3 text-[0.5625rem] text-[#475569]">
-                        <span className="flex items-center gap-1">
-                          <Download className="w-3 h-3" />{tpl.downloads.toLocaleString()}
-                        </span>
-                        <span>{tpl.nodeCount} nodes</span>
-                        <span>{tpl.author}</span>
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Grid */}
-            <div className="grid grid-cols-2 gap-2.5">
-              {filtered.map((tpl, i) => (
-                <motion.div
-                  key={tpl.id}
-                  initial={{ opacity: 0, y: 4 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.03 }}
-                  className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4 hover:border-white/[0.12] transition-colors"
-                >
-                  <div className="flex items-start justify-between mb-2">
-                    <div className="flex items-center gap-2">
-                      <h3 className="text-xs font-semibold text-[#F1F5F9]">{tpl.name}</h3>
-                      {tpl.isNew && (
-                        <span className="text-[0.5rem] px-1.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 font-medium">
-                          NEW
-                        </span>
-                      )}
                     </div>
-                    <span className={`text-[0.5625rem] px-1.5 py-0.5 rounded bg-white/[0.04] ${
-                      categoryMeta[tpl.category] ? 'text-[#818CF8]' : 'text-[#475569]'
-                    }`}>
-                      {categoryMeta[tpl.category]?.label ?? tpl.category}
-                    </span>
-                  </div>
-
-                  <p className="text-[0.6875rem] text-[#64748B] leading-relaxed line-clamp-2 mb-3">
-                    {tpl.description}
-                  </p>
-
-                  <div className="flex flex-wrap gap-1 mb-3">
-                    {tpl.tags.slice(0, 3).map((tag) => (
-                      <span key={tag} className="text-[0.5625rem] px-1.5 py-0.5 rounded bg-white/[0.04] text-[#475569]">
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3 text-[0.5625rem] text-[#475569]">
-                      <span className="flex items-center gap-1">
-                        <Star className="w-3 h-3 text-[#F59E0B]" />{tpl.rating}
-                      </span>
+                    <p className="text-[11px] text-[var(--text-secondary)] leading-relaxed line-clamp-2">
+                      {tpl.description}
+                    </p>
+                    <div className="flex items-center gap-3 mt-2 text-[10px] text-[var(--text-tertiary)]">
                       <span className="flex items-center gap-1">
                         <Download className="w-3 h-3" />{tpl.downloads.toLocaleString()}
                       </span>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      <button
-                        onClick={() => setPreviewId(tpl.id)}
-                        className="p-1.5 rounded-lg text-[#475569] hover:bg-white/[0.04] transition-colors"
-                      >
-                        <Eye className="w-3.5 h-3.5" />
-                      </button>
-                      {installedIds.has(tpl.id) ? (
-                        <span className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-500/10 text-emerald-400 text-[0.6875rem]">
-                          <Check className="w-3 h-3" /> Installed
-                        </span>
-                      ) : (
-                        <button
-                          onClick={() => handleInstall(tpl)}
-                          disabled={installingId === tpl.id}
-                          className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#6366F1]/10 text-[#818CF8] text-[0.6875rem] font-medium hover:bg-[#6366F1]/20 transition-colors disabled:opacity-50"
-                        >
-                          {installingId === tpl.id ? (
-                            <RefreshCw className="w-3 h-3 animate-spin" />
-                          ) : (
-                            <Download className="w-3 h-3" />
-                          )}
-                          {installingId === tpl.id ? 'Installing...' : 'Install'}
-                        </button>
-                      )}
+                      <span>{tpl.nodeCount} nodes</span>
+                      <span>{tpl.author}</span>
                     </div>
                   </div>
-                </motion.div>
-              ))}
-            </div>
-
-            {filtered.length === 0 && (
-              <div className="flex flex-col items-center justify-center py-16 gap-3">
-                <Search className="w-8 h-8 text-[#475569]" />
-                <p className="text-sm text-[#64748B]">No templates match your search</p>
+                ))}
               </div>
-            )}
-          </div>
+            </div>
+          )}
 
-          {/* Preview panel */}
-          <AnimatePresence>
-            {previewTemplate && (
-              <motion.div
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: 'auto', opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                className="border-t border-white/[0.06] overflow-hidden"
+          {/* Grid */}
+          <div className="grid grid-cols-2 gap-2">
+            {filtered.map((tpl) => (
+              <div
+                key={tpl.id}
+                className="rounded-[var(--radius-md)] border border-[var(--border-default)] bg-[var(--bg-inset)] p-3 hover:border-[var(--border-strong)] transition-colors"
               >
-                <div className="px-6 py-4 bg-white/[0.01]">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <h3 className="text-sm font-semibold text-[#F1F5F9]">{previewTemplate.name}</h3>
-                      <p className="text-[0.6875rem] text-[#64748B] mt-1">{previewTemplate.description}</p>
-                      <div className="flex items-center gap-4 mt-3 text-[0.6875rem] text-[#94A3B8]">
-                        <span>{previewTemplate.nodeCount} nodes</span>
-                        <span>{previewTemplate.edgeCount} edges</span>
-                        <span>by {previewTemplate.author}</span>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2 ml-4">
-                      {!installedIds.has(previewTemplate.id) && (
-                        <button
-                          onClick={() => handleInstall(previewTemplate)}
-                          disabled={installingId === previewTemplate.id}
-                          className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-[#6366F1] text-white text-xs font-medium hover:bg-[#5558E6] transition-colors"
-                        >
-                          <Download className="w-3.5 h-3.5" />
-                          Install Template
-                        </button>
-                      )}
+                <div className="flex items-start justify-between mb-1.5">
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-[12px] font-medium text-[var(--text-primary)]">{tpl.name}</h3>
+                    {tpl.isNew && (
+                      <span className="tool-badge text-[var(--color-success)]">NEW</span>
+                    )}
+                  </div>
+                  <span className="tool-badge text-[var(--accent-text)]">
+                    {categoryMeta[tpl.category]?.label ?? tpl.category}
+                  </span>
+                </div>
+
+                <p className="text-[11px] text-[var(--text-secondary)] leading-relaxed line-clamp-2 mb-2">
+                  {tpl.description}
+                </p>
+
+                <div className="flex flex-wrap gap-1 mb-2">
+                  {tpl.tags.slice(0, 3).map((tag) => (
+                    <span key={tag} className="tool-badge">{tag}</span>
+                  ))}
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3 text-[10px] text-[var(--text-tertiary)]">
+                    <span className="flex items-center gap-1">
+                      <Star className="w-3 h-3 text-[var(--color-warning)]" />{tpl.rating}
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Download className="w-3 h-3" />{tpl.downloads.toLocaleString()}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => setPreviewId(tpl.id)}
+                      className="tool-btn p-1"
+                    >
+                      <Eye className="w-3 h-3" />
+                    </button>
+                    {installedIds.has(tpl.id) ? (
+                      <span className="tool-btn text-[var(--color-success)] text-[11px]">
+                        <Check className="w-3 h-3" /> Installed
+                      </span>
+                    ) : (
                       <button
-                        onClick={() => setPreviewId(null)}
-                        className="p-1.5 rounded-lg hover:bg-white/[0.05] text-[#64748B]"
+                        onClick={() => handleInstall(tpl)}
+                        disabled={installingId === tpl.id}
+                        className="tool-btn text-[var(--accent-text)] text-[11px] disabled:opacity-50"
                       >
-                        <X className="w-4 h-4" />
+                        {installingId === tpl.id ? (
+                          <RefreshCw className="w-3 h-3 animate-spin" />
+                        ) : (
+                          <Download className="w-3 h-3" />
+                        )}
+                        {installingId === tpl.id ? 'Installing...' : 'Install'}
                       </button>
-                    </div>
+                    )}
                   </div>
                 </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </motion.div>
-      </motion.div>
-    </AnimatePresence>
+              </div>
+            ))}
+          </div>
+
+          {filtered.length === 0 && (
+            <div className="flex flex-col items-center justify-center py-16 gap-2">
+              <Search className="w-5 h-5 text-[var(--text-tertiary)]" />
+              <p className="text-[12px] text-[var(--text-secondary)]">No templates match your search</p>
+            </div>
+          )}
+        </div>
+
+        {/* Preview panel */}
+        {previewTemplate && (
+          <div className="border-t border-[var(--border-default)]">
+            <div className="px-3 py-3">
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <h3 className="text-[13px] font-medium text-[var(--text-primary)]">{previewTemplate.name}</h3>
+                  <p className="text-[11px] text-[var(--text-secondary)] mt-1">{previewTemplate.description}</p>
+                  <div className="flex items-center gap-4 mt-2 text-[11px] text-[var(--text-secondary)]">
+                    <span>{previewTemplate.nodeCount} nodes</span>
+                    <span>{previewTemplate.edgeCount} edges</span>
+                    <span>by {previewTemplate.author}</span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-1 ml-3">
+                  {!installedIds.has(previewTemplate.id) && (
+                    <button
+                      onClick={() => handleInstall(previewTemplate)}
+                      disabled={installingId === previewTemplate.id}
+                      className="tool-btn tool-btn-primary text-[11px]"
+                    >
+                      <Download className="w-3 h-3" />
+                      Install Template
+                    </button>
+                  )}
+                  <button
+                    onClick={() => setPreviewId(null)}
+                    className="tool-btn p-1"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
   )
 }

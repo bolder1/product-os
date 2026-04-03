@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
 import {
   GitBranch,
   AlertTriangle,
@@ -68,7 +67,6 @@ export function GraphImpactAnalysis({ productId, isOpen, onClose }: GraphImpactA
     const upstream: ImpactChain[] = []
     const downstream: ImpactChain[] = []
 
-    // BFS downstream (what depends on this node)
     function bfsDown(nodeId: string, depth: number) {
       if (depth > 4) return
       for (const edge of productEdges) {
@@ -83,7 +81,6 @@ export function GraphImpactAnalysis({ productId, isOpen, onClose }: GraphImpactA
       }
     }
 
-    // BFS upstream (what this node depends on)
     function bfsUp(nodeId: string, depth: number) {
       if (depth > 4) return
       for (const edge of productEdges) {
@@ -114,50 +111,50 @@ export function GraphImpactAnalysis({ productId, isOpen, onClose }: GraphImpactA
   if (!isOpen) return null
 
   return (
-    <AnimatePresence>
-      <motion.div
-        className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
+    <>
+      {/* Overlay */}
+      <div
+        className="fixed inset-0 z-50 bg-black/50"
         onClick={onClose}
+      />
+
+      {/* Modal */}
+      <div
+        className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none"
       >
-        <motion.div
-          className="w-[680px] max-h-[80vh] rounded-2xl border border-white/[0.08] bg-[#0A0E23] shadow-2xl overflow-hidden flex flex-col"
-          initial={{ scale: 0.95, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          exit={{ scale: 0.95, opacity: 0 }}
+        <div
+          className="w-[680px] max-h-[80vh] rounded-[var(--radius-md)] border border-[var(--border-default)] bg-[var(--bg-surface)] shadow-2xl overflow-hidden flex flex-col pointer-events-auto"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.08]">
+          <div className="h-[var(--topbar-h)] flex items-center justify-between px-3 border-b border-[var(--border-default)]">
             <div className="flex items-center gap-2">
-              <Zap className="w-5 h-5 text-amber-400" />
-              <h2 className="text-base font-semibold text-[#F1F5F9]">Impact Analysis</h2>
+              <Zap className="w-3.5 h-3.5 text-amber-400" />
+              <h2 className="text-[13px] font-medium text-[var(--text-primary)]">Impact Analysis</h2>
             </div>
-            <button onClick={onClose} className="p-1.5 rounded-md hover:bg-white/[0.06] text-[#64748B]">
-              <X className="w-4 h-4" />
+            <button onClick={onClose} className="tool-btn p-1">
+              <X className="w-3.5 h-3.5 text-[var(--text-tertiary)]" />
             </button>
           </div>
 
           {/* Search */}
-          <div className="px-5 py-3 border-b border-white/[0.06]">
+          <div className="px-3 py-2 border-b border-[var(--border-default)]">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#64748B]" />
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[var(--text-tertiary)]" />
               <input
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search nodes to analyze impact..."
-                className="w-full pl-9 pr-3 py-2 rounded-lg bg-white/[0.03] border border-white/[0.08] text-xs text-[#F1F5F9] placeholder-[#475569] focus:outline-none focus:border-[#8B5CF6]/40"
+                className="tool-input w-full pl-8 pr-3 py-1.5 text-[12px]"
               />
             </div>
           </div>
 
           <div className="flex flex-1 min-h-0 overflow-hidden">
             {/* Node list */}
-            <div className="w-[240px] shrink-0 border-r border-white/[0.06] overflow-y-auto">
+            <div className="w-[240px] shrink-0 border-r border-[var(--border-default)] overflow-y-auto">
               {filteredNodes.length === 0 ? (
-                <p className="text-xs text-[#64748B] text-center py-6">
+                <p className="text-[11px] text-[var(--text-tertiary)] text-center py-6">
                   {productNodes.length === 0 ? 'No graph nodes yet' : 'No matches'}
                 </p>
               ) : (
@@ -165,10 +162,10 @@ export function GraphImpactAnalysis({ productId, isOpen, onClose }: GraphImpactA
                   <button
                     key={node.id}
                     onClick={() => setSelectedNodeId(node.id)}
-                    className={`w-full flex items-center gap-2 px-4 py-2.5 text-left transition-colors ${
+                    className={`w-full flex items-center gap-2 px-3 py-2 text-left transition-colors ${
                       selectedNodeId === node.id
-                        ? 'bg-[#8B5CF6]/10 border-r-2 border-[#8B5CF6]'
-                        : 'hover:bg-white/[0.03]'
+                        ? 'bg-[var(--accent)]/10 border-r-2 border-[var(--accent)]'
+                        : 'hover:bg-[var(--surface-hover)]'
                     }`}
                   >
                     <div
@@ -176,8 +173,8 @@ export function GraphImpactAnalysis({ productId, isOpen, onClose }: GraphImpactA
                       style={{ backgroundColor: NODE_KIND_COLORS[node.kind] || '#64748B' }}
                     />
                     <div className="min-w-0 flex-1">
-                      <p className="text-xs text-[#F1F5F9] truncate">{node.label}</p>
-                      <p className="text-[0.5625rem] text-[#475569]">{node.kind}</p>
+                      <p className="text-[12px] text-[var(--text-primary)] truncate">{node.label}</p>
+                      <p className="text-[10px] text-[var(--text-tertiary)]">{node.kind}</p>
                     </div>
                   </button>
                 ))
@@ -185,43 +182,43 @@ export function GraphImpactAnalysis({ productId, isOpen, onClose }: GraphImpactA
             </div>
 
             {/* Impact view */}
-            <div className="flex-1 overflow-y-auto p-5">
+            <div className="flex-1 overflow-y-auto p-4">
               {!selectedNode ? (
                 <div className="flex flex-col items-center justify-center h-full text-center">
-                  <GitBranch className="w-8 h-8 text-[#475569] mb-2" />
-                  <p className="text-sm text-[#64748B]">Select a node</p>
-                  <p className="text-xs text-[#475569] mt-0.5">See what changes when this node is modified</p>
+                  <GitBranch className="w-6 h-6 text-[var(--text-tertiary)] mb-2" />
+                  <p className="text-[12px] text-[var(--text-secondary)]">Select a node</p>
+                  <p className="text-[11px] text-[var(--text-tertiary)] mt-0.5">See what changes when this node is modified</p>
                 </div>
               ) : (
                 <div className="space-y-4">
                   {/* Selected node */}
-                  <div className="rounded-lg border border-[#8B5CF6]/30 bg-[#8B5CF6]/5 p-3 text-center">
-                    <p className="text-sm font-medium text-[#F1F5F9]">{selectedNode.label}</p>
-                    <p className="text-[0.625rem] text-[#8B5CF6]">{selectedNode.kind}</p>
+                  <div className="rounded-[var(--radius-md)] border border-[var(--accent)]/30 bg-[var(--accent)]/5 p-3 text-center">
+                    <p className="text-[12px] font-medium text-[var(--text-primary)]">{selectedNode.label}</p>
+                    <p className="text-[10px] text-[var(--accent-text)]">{selectedNode.kind}</p>
                   </div>
 
                   {/* Impact summary */}
                   <div className="grid grid-cols-3 gap-2">
-                    <div className="rounded-lg bg-white/[0.03] border border-white/[0.06] p-2.5 text-center">
-                      <p className="text-lg font-bold text-amber-400">{totalImpacted}</p>
-                      <p className="text-[0.625rem] text-[#64748B]">Total Impacted</p>
+                    <div className="rounded-[var(--radius-md)] bg-[var(--bg-inset)] border border-[var(--border-default)] p-2.5 text-center">
+                      <p className="text-[13px] font-bold text-amber-400">{totalImpacted}</p>
+                      <p className="text-[10px] text-[var(--text-tertiary)]">Total Impacted</p>
                     </div>
-                    <div className="rounded-lg bg-white/[0.03] border border-white/[0.06] p-2.5 text-center">
-                      <p className="text-lg font-bold text-blue-400">{impactChains.upstream.length}</p>
-                      <p className="text-[0.625rem] text-[#64748B]">Dependencies</p>
+                    <div className="rounded-[var(--radius-md)] bg-[var(--bg-inset)] border border-[var(--border-default)] p-2.5 text-center">
+                      <p className="text-[13px] font-bold text-[var(--accent-text)]">{impactChains.upstream.length}</p>
+                      <p className="text-[10px] text-[var(--text-tertiary)]">Dependencies</p>
                     </div>
-                    <div className="rounded-lg bg-white/[0.03] border border-white/[0.06] p-2.5 text-center">
-                      <p className="text-lg font-bold text-rose-400">{impactChains.downstream.length}</p>
-                      <p className="text-[0.625rem] text-[#64748B]">Dependents</p>
+                    <div className="rounded-[var(--radius-md)] bg-[var(--bg-inset)] border border-[var(--border-default)] p-2.5 text-center">
+                      <p className="text-[13px] font-bold text-rose-400">{impactChains.downstream.length}</p>
+                      <p className="text-[10px] text-[var(--text-tertiary)]">Dependents</p>
                     </div>
                   </div>
 
-                  {/* Downstream (what will break) */}
+                  {/* Downstream */}
                   {impactChains.downstream.length > 0 && (
                     <div>
                       <div className="flex items-center gap-1.5 mb-2">
                         <AlertTriangle className="w-3.5 h-3.5 text-rose-400" />
-                        <p className="text-xs font-medium text-rose-400">
+                        <p className="text-[11px] font-medium text-rose-400">
                           Downstream Impact ({impactChains.downstream.length})
                         </p>
                       </div>
@@ -229,16 +226,16 @@ export function GraphImpactAnalysis({ productId, isOpen, onClose }: GraphImpactA
                         {impactChains.downstream.map((chain, i) => (
                           <div
                             key={`down-${chain.node.id}-${i}`}
-                            className="flex items-center gap-2 px-3 py-1.5 rounded-md bg-white/[0.02]"
+                            className="flex items-center gap-2 px-3 py-1.5 rounded-sm bg-[var(--bg-inset)]"
                             style={{ marginLeft: (chain.depth - 1) * 16 }}
                           >
                             <div
                               className="w-2 h-2 rounded-full shrink-0"
                               style={{ backgroundColor: NODE_KIND_COLORS[chain.node.kind] || '#64748B' }}
                             />
-                            <span className="text-xs text-[#F1F5F9]">{chain.node.label}</span>
-                            <span className="text-[0.5625rem] text-[#475569]">({chain.node.kind})</span>
-                            <span className="text-[0.5625rem] text-[#475569] ml-auto">
+                            <span className="text-[12px] text-[var(--text-primary)]">{chain.node.label}</span>
+                            <span className="text-[10px] text-[var(--text-tertiary)]">({chain.node.kind})</span>
+                            <span className="text-[10px] text-[var(--text-tertiary)] ml-auto">
                               via {chain.edgeKind.replace('_', ' ')}
                             </span>
                           </div>
@@ -247,12 +244,12 @@ export function GraphImpactAnalysis({ productId, isOpen, onClose }: GraphImpactA
                     </div>
                   )}
 
-                  {/* Upstream (what this depends on) */}
+                  {/* Upstream */}
                   {impactChains.upstream.length > 0 && (
                     <div>
                       <div className="flex items-center gap-1.5 mb-2">
-                        <ArrowRight className="w-3.5 h-3.5 text-blue-400" />
-                        <p className="text-xs font-medium text-blue-400">
+                        <ArrowRight className="w-3.5 h-3.5 text-[var(--accent-text)]" />
+                        <p className="text-[11px] font-medium text-[var(--accent-text)]">
                           Upstream Dependencies ({impactChains.upstream.length})
                         </p>
                       </div>
@@ -260,16 +257,16 @@ export function GraphImpactAnalysis({ productId, isOpen, onClose }: GraphImpactA
                         {impactChains.upstream.map((chain, i) => (
                           <div
                             key={`up-${chain.node.id}-${i}`}
-                            className="flex items-center gap-2 px-3 py-1.5 rounded-md bg-white/[0.02]"
+                            className="flex items-center gap-2 px-3 py-1.5 rounded-sm bg-[var(--bg-inset)]"
                             style={{ marginLeft: (chain.depth - 1) * 16 }}
                           >
                             <div
                               className="w-2 h-2 rounded-full shrink-0"
                               style={{ backgroundColor: NODE_KIND_COLORS[chain.node.kind] || '#64748B' }}
                             />
-                            <span className="text-xs text-[#F1F5F9]">{chain.node.label}</span>
-                            <span className="text-[0.5625rem] text-[#475569]">({chain.node.kind})</span>
-                            <span className="text-[0.5625rem] text-[#475569] ml-auto">
+                            <span className="text-[12px] text-[var(--text-primary)]">{chain.node.label}</span>
+                            <span className="text-[10px] text-[var(--text-tertiary)]">({chain.node.kind})</span>
+                            <span className="text-[10px] text-[var(--text-tertiary)] ml-auto">
                               via {chain.edgeKind.replace('_', ' ')}
                             </span>
                           </div>
@@ -279,16 +276,16 @@ export function GraphImpactAnalysis({ productId, isOpen, onClose }: GraphImpactA
                   )}
 
                   {totalImpacted === 0 && (
-                    <p className="text-xs text-[#64748B] text-center py-4">
-                      This node has no connections in the graph — no impact propagation.
+                    <p className="text-[11px] text-[var(--text-tertiary)] text-center py-4">
+                      This node has no connections in the graph -- no impact propagation.
                     </p>
                   )}
                 </div>
               )}
             </div>
           </div>
-        </motion.div>
-      </motion.div>
-    </AnimatePresence>
+        </div>
+      </div>
+    </>
   )
 }

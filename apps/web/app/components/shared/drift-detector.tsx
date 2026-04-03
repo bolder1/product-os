@@ -1,19 +1,16 @@
 'use client'
 
 import { useMemo, useState, useCallback } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
 import {
   GitCompare,
-  AlertTriangle,
   CheckCircle2,
-  Clock,
   ArrowLeftRight,
   X,
   RefreshCw,
-  Eye,
   Layers,
   FileCode,
   Paintbrush,
+  Clock,
 } from 'lucide-react'
 import { useGraphStore, type GraphNode } from '../../lib/graph-store'
 
@@ -47,7 +44,6 @@ function detectDrift(nodes: GraphNode[], productId: string): DriftItem[] {
   const drifts: DriftItem[] = []
   const now = new Date().toISOString()
 
-  // 1. Design–Code drift: components with design specs but no code-ready flag
   const components = pn.filter((n) => n.kind === 'component')
   const screens = pn.filter((n) => n.kind === 'screen')
 
@@ -68,7 +64,6 @@ function detectDrift(nodes: GraphNode[], productId: string): DriftItem[] {
     }
   }
 
-  // 2. Spec–Implementation: pages defined in planner but not created in pages studio
   const features = pn.filter((n) => n.kind === 'feature')
   const pages = pn.filter((n) => n.kind === 'page')
   for (const feature of features) {
@@ -90,7 +85,6 @@ function detectDrift(nodes: GraphNode[], productId: string): DriftItem[] {
     }
   }
 
-  // 3. Entity–Workflow drift: entities without workflows
   const entities = pn.filter((n) => n.kind === 'entity')
   const workflows = pn.filter((n) => n.kind === 'workflow')
   for (const entity of entities) {
@@ -114,7 +108,6 @@ function detectDrift(nodes: GraphNode[], productId: string): DriftItem[] {
     }
   }
 
-  // 4. State inconsistency: screens without components
   if (screens.length > 0 && components.length === 0) {
     drifts.push({
       id: 'drift-sc-no-comp',
@@ -129,10 +122,8 @@ function detectDrift(nodes: GraphNode[], productId: string): DriftItem[] {
     })
   }
 
-  // 5. Token staleness: brand tokens older than other nodes (simulated)
   const tokens = pn.filter((n) => n.kind === 'token')
   if (tokens.length > 0 && components.length > 3) {
-    // If token count is low relative to component count, flag potential staleness
     if (tokens.length < 3 && components.length >= 5) {
       drifts.push({
         id: 'drift-token-stale',
@@ -155,17 +146,17 @@ function detectDrift(nodes: GraphNode[], productId: string): DriftItem[] {
 // Component
 // ---------------------------------------------------------------------------
 
-const categoryMeta: Record<DriftCategory, { label: string; icon: React.ReactNode; color: string }> = {
-  'design-code': { label: 'Design / Code', icon: <FileCode className="w-3.5 h-3.5" />, color: 'text-purple-400' },
-  'spec-implementation': { label: 'Spec / Impl', icon: <Layers className="w-3.5 h-3.5" />, color: 'text-blue-400' },
-  'version-mismatch': { label: 'Version', icon: <Clock className="w-3.5 h-3.5" />, color: 'text-amber-400' },
-  'state-inconsistency': { label: 'State', icon: <Paintbrush className="w-3.5 h-3.5" />, color: 'text-rose-400' },
+const categoryMeta: Record<DriftCategory, { label: string; icon: React.ReactNode }> = {
+  'design-code': { label: 'Design / Code', icon: <FileCode className="w-3 h-3" /> },
+  'spec-implementation': { label: 'Spec / Impl', icon: <Layers className="w-3 h-3" /> },
+  'version-mismatch': { label: 'Version', icon: <Clock className="w-3 h-3" /> },
+  'state-inconsistency': { label: 'State', icon: <Paintbrush className="w-3 h-3" /> },
 }
 
-const severityColors: Record<DriftSeverity, string> = {
-  high: 'border-rose-500/20 bg-rose-500/5',
-  medium: 'border-amber-500/20 bg-amber-500/5',
-  low: 'border-blue-500/20 bg-blue-500/5',
+const severityColor: Record<DriftSeverity, string> = {
+  high: 'text-[var(--color-error)]',
+  medium: 'text-[var(--color-warning)]',
+  low: 'text-[var(--color-info)]',
 }
 
 interface DriftDetectorProps {
@@ -197,135 +188,104 @@ export function DriftDetector({ productId, open, onClose }: DriftDetectorProps) 
   if (!open) return null
 
   return (
-    <AnimatePresence>
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
-        onClick={onClose}
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+      onClick={onClose}
+    >
+      <div
+        className="w-[640px] max-h-[78vh] rounded-[var(--radius-md)] border border-[var(--border-strong)] bg-[var(--bg-elevated)] shadow-xl overflow-hidden flex flex-col"
+        onClick={(e) => e.stopPropagation()}
       >
-        <motion.div
-          initial={{ scale: 0.95, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          exit={{ scale: 0.95, opacity: 0 }}
-          className="w-[660px] max-h-[78vh] rounded-2xl border border-white/[0.1] bg-[#0A0F1E] shadow-2xl overflow-hidden flex flex-col"
-          onClick={(e) => e.stopPropagation()}
-        >
-          {/* Header */}
-          <div className="flex items-center justify-between px-6 py-4 border-b border-white/[0.06]">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-orange-500/10 flex items-center justify-center">
-                <GitCompare className="w-4.5 h-4.5 text-orange-400" />
-              </div>
-              <div>
-                <h2 className="text-sm font-semibold text-[#F1F5F9]">Drift Detector</h2>
-                <p className="text-[0.6875rem] text-[#64748B]">
-                  {drifts.length === 0 ? 'No drift detected' :
-                    `${highCount} high, ${medCount} medium, ${drifts.length - highCount - medCount} low`}
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={handleRescan}
-                className="p-1.5 rounded-lg hover:bg-white/[0.05] text-[#64748B]"
-              >
-                <RefreshCw className={`w-4 h-4 ${scanning ? 'animate-spin' : ''}`} />
-              </button>
-              <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-white/[0.05] text-[#64748B]">
-                <X className="w-4 h-4" />
-              </button>
-            </div>
+        {/* Header */}
+        <div className="h-[var(--topbar-h)] flex items-center justify-between px-3 border-b border-[var(--border-default)] shrink-0">
+          <div className="flex items-center gap-2">
+            <GitCompare className="w-3.5 h-3.5 text-[var(--color-warning)]" />
+            <span className="text-[13px] font-medium text-[var(--text-primary)]">Drift Detector</span>
+            <span className="text-[10px] text-[var(--text-secondary)]">
+              {drifts.length === 0 ? 'No drift' :
+                `${highCount} high, ${medCount} medium, ${drifts.length - highCount - medCount} low`}
+            </span>
           </div>
-
-          {/* Category tabs */}
-          <div className="flex items-center gap-1 px-6 py-2.5 border-b border-white/[0.04]">
-            {(['all', 'design-code', 'spec-implementation', 'version-mismatch', 'state-inconsistency'] as const).map((cat) => (
-              <button
-                key={cat}
-                onClick={() => setFilterCategory(cat)}
-                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[0.6875rem] transition-colors ${
-                  filterCategory === cat
-                    ? 'bg-[#6366F1]/10 text-[#818CF8]'
-                    : 'text-[#475569] hover:bg-white/[0.04]'
-                }`}
-              >
-                {cat !== 'all' && categoryMeta[cat].icon}
-                {cat === 'all' ? `All (${drifts.length})` : categoryMeta[cat].label}
-              </button>
-            ))}
+          <div className="flex items-center gap-1">
+            <button onClick={handleRescan} className="tool-btn p-1">
+              <RefreshCw className={`w-3 h-3 ${scanning ? 'animate-spin' : ''}`} />
+            </button>
+            <button onClick={onClose} className="tool-btn p-1">
+              <X className="w-3.5 h-3.5" />
+            </button>
           </div>
+        </div>
 
-          {/* Body */}
-          <div className="flex-1 overflow-auto p-4 space-y-2">
-            {scanning ? (
-              <div className="flex items-center justify-center py-16 gap-3">
-                <RefreshCw className="w-6 h-6 text-orange-400 animate-spin" />
-                <p className="text-sm text-[#94A3B8]">Scanning for drift...</p>
-              </div>
-            ) : filtered.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-16 gap-3">
-                <CheckCircle2 className="w-10 h-10 text-emerald-400" />
-                <p className="text-sm text-[#94A3B8]">No drift detected</p>
-                <p className="text-[0.6875rem] text-[#475569]">
-                  Specs and implementations are aligned.
-                </p>
-              </div>
-            ) : (
-              filtered.map((drift, i) => (
-                <motion.div
-                  key={drift.id}
-                  initial={{ opacity: 0, y: 4 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.04 }}
-                  className={`rounded-xl border p-4 ${severityColors[drift.severity]}`}
-                >
-                  <div className="flex items-start gap-3">
-                    <ArrowLeftRight className={`w-4 h-4 mt-0.5 shrink-0 ${
-                      drift.severity === 'high' ? 'text-rose-400' :
-                      drift.severity === 'medium' ? 'text-amber-400' : 'text-blue-400'
-                    }`} />
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <p className="text-xs font-medium text-[#F1F5F9]">{drift.title}</p>
-                        <span className={`text-[0.5625rem] px-1.5 py-0.5 rounded bg-white/[0.04] ${categoryMeta[drift.category].color}`}>
-                          {categoryMeta[drift.category].label}
+        {/* Category tabs */}
+        <div className="tool-tabs px-3">
+          {(['all', 'design-code', 'spec-implementation', 'version-mismatch', 'state-inconsistency'] as const).map((cat) => (
+            <button
+              key={cat}
+              onClick={() => setFilterCategory(cat)}
+              className={`tool-tab flex items-center gap-1 ${filterCategory === cat ? 'active' : ''}`}
+            >
+              {cat !== 'all' && categoryMeta[cat].icon}
+              {cat === 'all' ? `All (${drifts.length})` : categoryMeta[cat].label}
+            </button>
+          ))}
+        </div>
+
+        {/* Body */}
+        <div className="flex-1 overflow-auto p-3 space-y-1.5">
+          {scanning ? (
+            <div className="flex items-center justify-center py-16 gap-2">
+              <RefreshCw className="w-4 h-4 text-[var(--color-warning)] animate-spin" />
+              <p className="text-[12px] text-[var(--text-secondary)]">Scanning for drift...</p>
+            </div>
+          ) : filtered.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-16 gap-2">
+              <CheckCircle2 className="w-6 h-6 text-[var(--color-success)]" />
+              <p className="text-[12px] text-[var(--text-secondary)]">No drift detected</p>
+              <p className="text-[10px] text-[var(--text-tertiary)]">
+                Specs and implementations are aligned.
+              </p>
+            </div>
+          ) : (
+            filtered.map((drift) => (
+              <div
+                key={drift.id}
+                className="rounded-[var(--radius-md)] border border-[var(--border-default)] bg-[var(--bg-inset)] p-3"
+              >
+                <div className="flex items-start gap-2">
+                  <ArrowLeftRight className={`w-3.5 h-3.5 mt-0.5 shrink-0 ${severityColor[drift.severity]}`} />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <p className="text-[12px] font-medium text-[var(--text-primary)]">{drift.title}</p>
+                      <span className="tool-badge">{categoryMeta[drift.category].label}</span>
+                      <span className={`tool-badge ${severityColor[drift.severity]}`}>
+                        {drift.severity}
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-[var(--text-secondary)] mt-1 leading-relaxed">
+                      {drift.description}
+                    </p>
+
+                    {/* Diff view */}
+                    {drift.specValue && drift.actualValue && (
+                      <div className="flex items-center gap-2 mt-1.5 text-[10px]">
+                        <span className="px-1.5 py-0.5 rounded-sm bg-[var(--color-success)]/10 text-[var(--color-success)] font-mono">
+                          {drift.specValue}
                         </span>
-                        <span className={`text-[0.5625rem] px-1.5 py-0.5 rounded ${
-                          drift.severity === 'high' ? 'bg-rose-500/10 text-rose-400' :
-                          drift.severity === 'medium' ? 'bg-amber-500/10 text-amber-400' :
-                          'bg-blue-500/10 text-blue-400'
-                        }`}>
-                          {drift.severity}
+                        <ArrowLeftRight className="w-3 h-3 text-[var(--text-tertiary)]" />
+                        <span className="px-1.5 py-0.5 rounded-sm bg-[var(--color-error)]/10 text-[var(--color-error)] font-mono">
+                          {drift.actualValue}
                         </span>
                       </div>
-                      <p className="text-[0.6875rem] text-[#64748B] mt-1 leading-relaxed">
-                        {drift.description}
-                      </p>
+                    )}
 
-                      {/* Diff view */}
-                      {drift.specValue && drift.actualValue && (
-                        <div className="flex items-center gap-3 mt-2 text-[0.625rem]">
-                          <span className="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 font-mono">
-                            {drift.specValue}
-                          </span>
-                          <ArrowLeftRight className="w-3 h-3 text-[#475569]" />
-                          <span className="px-2 py-0.5 rounded bg-rose-500/10 text-rose-400 font-mono">
-                            {drift.actualValue}
-                          </span>
-                        </div>
-                      )}
-
-                      <p className="text-[0.625rem] text-[#818CF8] mt-2">{drift.suggestion}</p>
-                    </div>
+                    <p className="text-[10px] text-[var(--accent-text)] mt-1.5">{drift.suggestion}</p>
                   </div>
-                </motion.div>
-              ))
-            )}
-          </div>
-        </motion.div>
-      </motion.div>
-    </AnimatePresence>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+    </div>
   )
 }

@@ -2,8 +2,7 @@
 
 import { useState, useCallback, useMemo } from 'react'
 import { useParams } from 'next/navigation'
-import { motion } from 'framer-motion'
-import { Plus, LayoutGrid, List, Sparkles } from 'lucide-react'
+import { Plus, LayoutGrid, List, Sparkles, Filter } from 'lucide-react'
 import { type Task, mockTasks } from './_data/mock-tasks'
 import { TaskBoard } from './_components/task-board'
 import { TaskList } from './_components/task-list'
@@ -54,6 +53,7 @@ export default function TasksPage() {
   }, [allTasks, localUpdates])
   const [view, setView] = useState<ViewMode>('board')
   const [modalOpen, setModalOpen] = useState(false)
+  const [filtersOpen, setFiltersOpen] = useState(false)
   const [filters, setFilters] = useState<TaskFilters>({
     search: '',
     statuses: [],
@@ -80,6 +80,8 @@ export default function TasksPage() {
       return true
     })
   }, [tasks, filters])
+
+  const hasActiveFilters = filters.search || filters.statuses.length > 0 || filters.priorities.length > 0
 
   // Update a task (used by drag-and-drop)
   const handleUpdateTask = useCallback((taskId: string, updates: Partial<Task>) => {
@@ -118,53 +120,61 @@ export default function TasksPage() {
   }, [storeAddTask, addActivity, productId])
 
   return (
-    <div className="flex flex-col h-full gap-5">
-      {/* Header */}
-      <div className="flex items-center justify-between flex-wrap gap-3">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-[#3B82F6]/10 flex items-center justify-center">
-            <span className="text-[#3B82F6] text-lg font-semibold">T</span>
-          </div>
-          <div>
-            <h1 className="text-xl font-semibold text-[#F1F5F9]">Tasks</h1>
-            <p className="text-xs text-[#64748B]">
-              {filteredTasks.length} task{filteredTasks.length !== 1 ? 's' : ''}
-              {filters.search || filters.statuses.length || filters.priorities.length
-                ? ` (filtered from ${tasks.length})`
-                : ''}
-            </p>
-          </div>
+    <div className="flex flex-col h-full">
+      {/* ── Top toolbar ── */}
+      <div className="h-[var(--toolbar-h)] flex items-center justify-between bg-[var(--bg-surface)] border-b border-[var(--border-default)] px-2">
+        {/* Left: title + count */}
+        <div className="flex items-center gap-2">
+          <span className="text-[13px] font-medium text-[var(--text-primary)]">Tasks</span>
+          <span className="text-[10px] text-[var(--text-tertiary)] font-medium tabular-nums">
+            {filteredTasks.length}
+            {hasActiveFilters ? ` / ${tasks.length}` : ''}
+          </span>
         </div>
 
-        <div className="flex items-center gap-2">
-          {/* AI suggest placeholder */}
-          <button className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs text-[#3B82F6] bg-[#3B82F6]/10 hover:bg-[#3B82F6]/20 transition-colors">
-            <Sparkles className="w-3.5 h-3.5" />
-            AI: Suggest tasks
+        {/* Right: actions */}
+        <div className="flex items-center gap-1">
+          {/* AI suggest */}
+          <button className="tool-btn text-[11px] text-[var(--accent-text)] border-transparent bg-transparent hover:bg-[var(--accent)]/10">
+            <Sparkles className="w-3 h-3" />
+            <span>AI Suggest</span>
+          </button>
+
+          {/* Filter toggle */}
+          <button
+            onClick={() => setFiltersOpen(!filtersOpen)}
+            className={`tool-btn text-[11px] ${
+              hasActiveFilters
+                ? 'text-[var(--accent-text)] border-[var(--accent)]/30'
+                : 'border-transparent bg-transparent'
+            }`}
+          >
+            <Filter className="w-3 h-3" />
+            <span>Filter</span>
           </button>
 
           {/* View toggle */}
-          <div className="flex items-center rounded-lg border border-white/[0.08] bg-white/[0.03] p-0.5">
+          <div className="flex items-center border border-[var(--border-default)] rounded-[var(--radius-sm)] bg-[var(--bg-workspace)]">
             <button
               onClick={() => setView('board')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
+              className={`flex items-center gap-1 px-2 py-0.5 text-[11px] font-medium ${
                 view === 'board'
-                  ? 'bg-[#3B82F6]/15 text-[#3B82F6]'
-                  : 'text-[#64748B] hover:text-[#94A3B8]'
+                  ? 'text-[var(--text-primary)] bg-[var(--bg-elevated)]'
+                  : 'text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]'
               }`}
             >
-              <LayoutGrid className="w-3.5 h-3.5" />
+              <LayoutGrid className="w-3 h-3" />
               Board
             </button>
             <button
               onClick={() => setView('list')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
+              className={`flex items-center gap-1 px-2 py-0.5 text-[11px] font-medium ${
                 view === 'list'
-                  ? 'bg-[#3B82F6]/15 text-[#3B82F6]'
-                  : 'text-[#64748B] hover:text-[#94A3B8]'
+                  ? 'text-[var(--text-primary)] bg-[var(--bg-elevated)]'
+                  : 'text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]'
               }`}
             >
-              <List className="w-3.5 h-3.5" />
+              <List className="w-3 h-3" />
               List
             </button>
           </div>
@@ -172,31 +182,29 @@ export default function TasksPage() {
           {/* New task */}
           <button
             onClick={() => setModalOpen(true)}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium text-white bg-[#3B82F6] hover:bg-[#2563EB] transition-colors"
+            className="tool-btn tool-btn-primary text-[11px]"
           >
-            <Plus className="w-4 h-4" />
-            New Task
+            <Plus className="w-3 h-3" />
+            <span>New Task</span>
           </button>
         </div>
       </div>
 
-      {/* Filters */}
-      <TaskFiltersBar filters={filters} onChange={setFilters} />
+      {/* ── Filters bar (collapsible) ── */}
+      {filtersOpen && (
+        <div className="border-b border-[var(--border-default)] bg-[var(--bg-surface)]">
+          <TaskFiltersBar filters={filters} onChange={setFilters} />
+        </div>
+      )}
 
-      {/* Content */}
-      <motion.div
-        key={view}
-        initial={{ opacity: 0, y: 6 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.25 }}
-        className="flex-1 min-h-0"
-      >
+      {/* ── Main content ── */}
+      <div className="flex-1 min-h-0 bg-[var(--bg-workspace)]">
         {view === 'board' ? (
           <TaskBoard tasks={filteredTasks} onUpdateTask={handleUpdateTask} />
         ) : (
           <TaskList tasks={filteredTasks} onUpdateTask={handleUpdateTask} />
         )}
-      </motion.div>
+      </div>
 
       {/* Create modal */}
       <TaskCreateModal

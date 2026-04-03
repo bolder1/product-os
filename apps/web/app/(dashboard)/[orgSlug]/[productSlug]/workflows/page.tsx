@@ -2,7 +2,6 @@
 
 import { useState, useCallback, useMemo, useEffect } from "react";
 import { useParams } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
 import { Database, GitBranch, Plus, Sparkles } from "lucide-react";
 import {
   INITIAL_ENTITIES,
@@ -196,38 +195,37 @@ export default function WorkflowBuilderPage() {
       : null;
 
   return (
-    <div className="flex flex-col h-full">
-      {/* ── Header ──────────────────────────────────────────────────────── */}
-      <div className="flex items-center justify-between px-6 py-4 border-b border-white/[0.06]">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-lg bg-emerald-500/10 flex items-center justify-center">
-            <GitBranch className="w-4.5 h-4.5 text-emerald-400" />
-          </div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-lg font-semibold text-[#F1F5F9]">Workflow Builder</h1>
-            <StudioHealthBadge productId={productId} studio="workflows" />
-          </div>
-        </div>
+    <div className="flex flex-col h-full bg-[var(--bg-workspace)]">
+      {/* ── Top Toolbar (32px) ─────────────────────────────────────────── */}
+      <div className="h-[var(--toolbar-h)] flex items-center justify-between px-2 bg-[var(--bg-surface)] border-b border-[var(--border-default)]">
         <div className="flex items-center gap-2">
+          <GitBranch className="w-3.5 h-3.5 text-[var(--accent-text)]" />
+          <span className="text-[13px] font-medium text-[var(--text-primary)] leading-none">Workflow Builder</span>
+          <StudioHealthBadge productId={productId} studio="workflows" />
+          <span className="text-[10px] text-[var(--text-tertiary)] leading-none ml-1">
+            {entities.length} entities / {workflows.length} workflows
+          </span>
+        </div>
+        <div className="flex items-center gap-1">
           <button
             onClick={addEntity}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/[0.04] border border-white/[0.08] text-[#94A3B8] text-sm hover:bg-white/[0.08] hover:text-[#F1F5F9] transition-colors"
+            className="tool-btn flex items-center gap-1 px-2 h-[22px] bg-[var(--bg-elevated)] border border-[var(--border-default)] text-[var(--text-secondary)] text-[11px] hover:text-[var(--text-primary)] hover:bg-[var(--surface-hover)]"
           >
-            <Plus className="w-3.5 h-3.5" />
-            New Entity
+            <Plus className="w-3 h-3" />
+            Entity
           </button>
           <button
             onClick={addWorkflow}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/[0.04] border border-white/[0.08] text-[#94A3B8] text-sm hover:bg-white/[0.08] hover:text-[#F1F5F9] transition-colors"
+            className="tool-btn flex items-center gap-1 px-2 h-[22px] bg-[var(--bg-elevated)] border border-[var(--border-default)] text-[var(--text-secondary)] text-[11px] hover:text-[var(--text-primary)] hover:bg-[var(--surface-hover)]"
           >
-            <Plus className="w-3.5 h-3.5" />
-            New Workflow
+            <Plus className="w-3 h-3" />
+            Workflow
           </button>
           <button
             onClick={aiGenerate}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm font-medium hover:bg-emerald-500/20 transition-colors"
+            className="tool-btn flex items-center gap-1 px-2 h-[22px] bg-[var(--accent)]/10 border border-[var(--accent)]/20 text-[var(--accent-text)] text-[11px] font-medium hover:bg-[var(--accent)]/20"
           >
-            <Sparkles className="w-3.5 h-3.5" />
+            <Sparkles className="w-3 h-3" />
             AI Generate
           </button>
         </div>
@@ -235,132 +233,96 @@ export default function WorkflowBuilderPage() {
 
       {/* ── Body: two panels ────────────────────────────────────────────── */}
       <div className="flex flex-1 min-h-0">
-        {/* ── Left panel (~35%) ──────────────────────────────────────────── */}
-        <div className="w-[35%] shrink-0 flex flex-col border-r border-white/[0.06]">
+        {/* ── Left panel (~240px) ──────────────────────────────────────── */}
+        <div className="tool-panel-left w-[240px] shrink-0 flex flex-col border-r border-[var(--border-default)] bg-[var(--bg-surface)]">
           {/* Tab toggle */}
-          <div className="flex border-b border-white/[0.06]">
+          <div className="tool-tabs flex border-b border-[var(--border-default)]">
             <button
               onClick={() => setTab("entities")}
-              className={`flex-1 flex items-center justify-center gap-2 py-3 text-sm font-medium transition-colors relative ${
+              className={`tool-tab flex-1 flex items-center justify-center gap-1 h-7 text-[11px] font-medium relative ${
                 tab === "entities"
-                  ? "text-emerald-400"
-                  : "text-[#64748B] hover:text-[#94A3B8]"
+                  ? "text-[var(--accent-text)]"
+                  : "text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]"
               }`}
             >
-              <Database className="w-4 h-4" />
+              <Database className="w-3 h-3" />
               Entities
-              <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-white/[0.06] text-[#94A3B8]">
+              <span className="text-[10px] px-1 py-px bg-[var(--bg-inset)] text-[var(--text-tertiary)]">
                 {entities.length}
               </span>
               {tab === "entities" && (
-                <motion.div
-                  layoutId="tab-underline"
-                  className="absolute bottom-0 left-0 right-0 h-0.5 bg-emerald-500"
-                />
+                <span className="absolute bottom-0 left-0 right-0 h-px bg-[var(--accent)]" />
               )}
             </button>
             <button
               onClick={() => setTab("workflows")}
-              className={`flex-1 flex items-center justify-center gap-2 py-3 text-sm font-medium transition-colors relative ${
+              className={`tool-tab flex-1 flex items-center justify-center gap-1 h-7 text-[11px] font-medium relative ${
                 tab === "workflows"
-                  ? "text-emerald-400"
-                  : "text-[#64748B] hover:text-[#94A3B8]"
+                  ? "text-[var(--accent-text)]"
+                  : "text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]"
               }`}
             >
-              <GitBranch className="w-4 h-4" />
+              <GitBranch className="w-3 h-3" />
               Workflows
-              <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-white/[0.06] text-[#94A3B8]">
+              <span className="text-[10px] px-1 py-px bg-[var(--bg-inset)] text-[var(--text-tertiary)]">
                 {workflows.length}
               </span>
               {tab === "workflows" && (
-                <motion.div
-                  layoutId="tab-underline"
-                  className="absolute bottom-0 left-0 right-0 h-0.5 bg-emerald-500"
-                />
+                <span className="absolute bottom-0 left-0 right-0 h-px bg-[var(--accent)]" />
               )}
             </button>
           </div>
 
           {/* List content */}
-          <div className="flex-1 overflow-y-auto p-4">
-            <AnimatePresence mode="wait">
-              {tab === "entities" ? (
-                <motion.div
-                  key="entities-list"
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -10 }}
-                  transition={{ duration: 0.2 }}
-                  className="flex flex-col h-full"
-                >
-                  <EntityList
-                    entities={entities}
-                    selectedId={selection?.kind === "entity" ? selection.id : null}
-                    onSelect={selectEntity}
-                    onAdd={addEntity}
-                  />
-                </motion.div>
-              ) : (
-                <motion.div
-                  key="workflows-list"
-                  initial={{ opacity: 0, x: 10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: 10 }}
-                  transition={{ duration: 0.2 }}
-                  className="flex flex-col h-full"
-                >
-                  <WorkflowList
-                    workflows={workflows}
-                    entities={entities}
-                    selectedId={selection?.kind === "workflow" ? selection.id : null}
-                    onSelect={selectWorkflow}
-                    onAdd={addWorkflow}
-                  />
-                </motion.div>
-              )}
-            </AnimatePresence>
+          <div className="flex-1 overflow-y-auto p-1">
+            {tab === "entities" ? (
+              <EntityList
+                entities={entities}
+                selectedId={selection?.kind === "entity" ? selection.id : null}
+                onSelect={selectEntity}
+                onAdd={addEntity}
+              />
+            ) : (
+              <WorkflowList
+                workflows={workflows}
+                entities={entities}
+                selectedId={selection?.kind === "workflow" ? selection.id : null}
+                onSelect={selectWorkflow}
+                onAdd={addWorkflow}
+              />
+            )}
           </div>
         </div>
 
-        {/* ── Right panel (~65%) ─────────────────────────────────────────── */}
-        <div className="flex-1 min-w-0 p-6 overflow-y-auto">
-          <AnimatePresence mode="wait">
-            {selectedEntity ? (
-              <EntityEditor
-                key={`entity-${selectedEntity.id}`}
-                entity={selectedEntity}
-                allEntities={entities}
-                onChange={updateEntity}
-                onDelete={deleteEntity}
-              />
-            ) : selectedWorkflow ? (
-              <WorkflowEditor
-                key={`workflow-${selectedWorkflow.id}`}
-                workflow={selectedWorkflow}
-                entities={entities}
-                onChange={updateWorkflow}
-                onDelete={deleteWorkflow}
-              />
-            ) : (
-              <motion.div
-                key="empty"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="flex flex-col items-center justify-center h-full gap-4 text-center"
-              >
-                <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 flex items-center justify-center">
-                  <GitBranch className="w-7 h-7 text-emerald-400" />
-                </div>
-                <div>
-                  <p className="text-[#F1F5F9] font-medium mb-1">Select an item to edit</p>
-                  <p className="text-sm text-[#64748B]">
-                    Choose an entity or workflow from the left panel, or create a new one.
-                  </p>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+        {/* ── Right panel (editor area) ─────────────────────────────────── */}
+        <div className="tool-panel-right flex-1 min-w-0 p-2 overflow-y-auto bg-[var(--bg-workspace)]">
+          {selectedEntity ? (
+            <EntityEditor
+              key={`entity-${selectedEntity.id}`}
+              entity={selectedEntity}
+              allEntities={entities}
+              onChange={updateEntity}
+              onDelete={deleteEntity}
+            />
+          ) : selectedWorkflow ? (
+            <WorkflowEditor
+              key={`workflow-${selectedWorkflow.id}`}
+              workflow={selectedWorkflow}
+              entities={entities}
+              onChange={updateWorkflow}
+              onDelete={deleteWorkflow}
+            />
+          ) : (
+            <div className="flex flex-col items-center justify-center h-full gap-2 text-center">
+              <GitBranch className="w-4 h-4 text-[var(--text-tertiary)]" />
+              <div>
+                <p className="text-[12px] text-[var(--text-secondary)] mb-0.5">Select an item to edit</p>
+                <p className="text-[11px] text-[var(--text-tertiary)]">
+                  Choose an entity or workflow from the left panel, or create a new one.
+                </p>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
