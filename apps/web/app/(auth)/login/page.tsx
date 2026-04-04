@@ -60,7 +60,7 @@ function LoginForm() {
     setIsSubmitting(true)
     setErrors({})
     try {
-      await login('admin@productOS.dev', 'admin123')
+      await login('demo@productos.dev', 'demo123')
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Demo login failed.'
       setErrors({ form: message })

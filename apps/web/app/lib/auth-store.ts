@@ -20,11 +20,6 @@ export interface AuthUser {
   onboarded?: boolean
 }
 
-interface StoredAccount {
-  user: AuthUser
-  passwordHash: string // base64 of password (demo only)
-}
-
 interface AuthState {
   user: AuthUser | null
   isAuthenticated: boolean
@@ -41,86 +36,58 @@ interface AuthState {
 }
 
 // ---------------------------------------------------------------------------
-// Helpers — mock user database in localStorage
+// API helpers — call tRPC endpoints directly via fetch
+// (We can't use the trpc hooks here since this is outside the React tree)
 // ---------------------------------------------------------------------------
 
-const USERS_DB_KEY = 'product-os-users-db'
-const AUTH_COOKIE_NAME = 'product-os-token'
+async function apiCall<T>(procedure: string, input: unknown): Promise<T> {
+  const baseUrl = typeof window !== 'undefined' ? '' : 'http://localhost:3006'
+  const res = await fetch(`${baseUrl}/api/trpc/${procedure}`, {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      ...(typeof window !== 'undefined' && localStorage.getItem('product-os-session-token')
+        ? { authorization: `Bearer ${localStorage.getItem('product-os-session-token')}` }
+        : {}),
+      ...(typeof window !== 'undefined' && localStorage.getItem('product-os-org-id')
+        ? { 'x-org-id': localStorage.getItem('product-os-org-id')! }
+        : {}),
+    },
+    body: JSON.stringify(input),
+  })
 
-function getStoredAccounts(): StoredAccount[] {
-  if (typeof window === 'undefined') return []
-  try {
-    const raw = localStorage.getItem(USERS_DB_KEY)
-    return raw ? JSON.parse(raw) : []
-  } catch {
-    return []
+  const json = await res.json()
+
+  if (json.error) {
+    const msg = json.error.json?.message ?? json.error.message ?? 'Request failed'
+    throw new Error(msg)
   }
+
+  // tRPC + superjson wraps the payload: result.data.json holds the actual data
+  const data = json.result?.data
+  return (data?.json ?? data) as T
 }
 
-function saveAccounts(accounts: StoredAccount[]) {
-  localStorage.setItem(USERS_DB_KEY, JSON.stringify(accounts))
-}
-
-function findAccount(email: string): StoredAccount | undefined {
-  return getStoredAccounts().find((a) => a.user.email === email)
-}
-
-function upsertAccount(user: AuthUser, password: string) {
-  const accounts = getStoredAccounts().filter((a) => a.user.email !== user.email)
-  accounts.push({ user, passwordHash: btoa(password) })
-  saveAccounts(accounts)
-}
-
-function updateAccountUser(email: string, partial: Partial<AuthUser>) {
-  const accounts = getStoredAccounts()
-  const idx = accounts.findIndex((a) => a.user.email === email)
-  if (idx !== -1) {
-    accounts[idx].user = { ...accounts[idx].user, ...partial }
-    saveAccounts(accounts)
+/** Map DB membership roles to frontend OrgRole values */
+function mapDbRole(dbRole: string): OrgRole {
+  const mapping: Record<string, OrgRole> = {
+    owner: 'admin',
+    admin: 'admin',
+    editor: 'manager',
+    viewer: 'viewer',
+    guest: 'viewer',
   }
+  return mapping[dbRole] ?? 'viewer'
 }
 
-/** Generate a base64 demo token containing user data */
-function generateToken(user: AuthUser): string {
-  const payload = {
-    sub: user.id,
-    email: user.email,
-    role: user.role,
-    orgId: user.orgId,
-    iat: Date.now(),
-    exp: Date.now() + 7 * 24 * 60 * 60 * 1000, // 7 days
-  }
-  return btoa(JSON.stringify(payload))
+function setSessionTokens(token: string, orgId: string) {
+  localStorage.setItem('product-os-session-token', token)
+  localStorage.setItem('product-os-org-id', orgId)
 }
 
-function setAuthCookie(token: string) {
-  document.cookie = `${AUTH_COOKIE_NAME}=${token}; path=/; max-age=${7 * 24 * 60 * 60}; SameSite=Lax`
-}
-
-function clearAuthCookie() {
-  document.cookie = `${AUTH_COOKIE_NAME}=; path=/; max-age=0; SameSite=Lax`
-}
-
-// ---------------------------------------------------------------------------
-// Seed demo admin account so "Demo Login" always works
-// ---------------------------------------------------------------------------
-
-function ensureDemoAccount() {
-  if (typeof window === 'undefined') return
-  const existing = findAccount('admin@productOS.dev')
-  if (!existing) {
-    const demoUser: AuthUser = {
-      id: 'user_demo_admin',
-      name: 'Demo Admin',
-      email: 'admin@productOS.dev',
-      role: 'admin',
-      orgId: 'org_demo',
-      orgName: 'Product OS Demo',
-      orgSlug: 'product-os-demo',
-      onboarded: true,
-    }
-    upsertAccount(demoUser, 'admin123')
-  }
+function clearSessionTokens() {
+  localStorage.removeItem('product-os-session-token')
+  localStorage.removeItem('product-os-org-id')
 }
 
 // ---------------------------------------------------------------------------
@@ -138,59 +105,68 @@ export const useAuthStore = create<AuthState>()(
       setHydrated: () => set({ _hydrated: true, isLoading: false }),
 
       login: async (email: string, password: string) => {
-        ensureDemoAccount()
+        const result = await apiCall<{
+          token: string
+          user: { id: string; name: string; email: string; avatarUrl: string | null }
+          org: { id: string; name: string; slug: string; role: string } | null
+        }>('auth.login', { json: { email, password } })
 
-        const account = findAccount(email)
-        if (!account) {
-          throw new Error('No account found with this email address')
-        }
-        if (account.passwordHash !== btoa(password)) {
-          throw new Error('Invalid password')
+        if (!result.org) {
+          throw new Error('User has no organization membership')
         }
 
-        const token = generateToken(account.user)
-        setAuthCookie(token)
+        setSessionTokens(result.token, result.org.id)
+
+        const authUser: AuthUser = {
+          id: result.user.id,
+          name: result.user.name,
+          email: result.user.email,
+          avatar: result.user.avatarUrl ?? undefined,
+          role: mapDbRole(result.org.role),
+          orgId: result.org.id,
+          orgName: result.org.name,
+          orgSlug: result.org.slug,
+          onboarded: true,
+        }
 
         set({
-          user: account.user,
+          user: authUser,
           isAuthenticated: true,
           isLoading: false,
         })
       },
 
       signup: async (data: { name: string; email: string; password: string }) => {
-        ensureDemoAccount()
+        const result = await apiCall<{
+          token: string
+          user: { id: string; name: string; email: string; avatarUrl: string | null }
+          org: null
+        }>('auth.signup', { json: data })
 
-        const existing = findAccount(data.email)
-        if (existing) {
-          throw new Error('An account with this email already exists')
-        }
+        localStorage.setItem('product-os-session-token', result.token)
 
-        const newUser: AuthUser = {
-          id: `user_${crypto.randomUUID().slice(0, 12)}`,
-          name: data.name,
-          email: data.email,
-          role: 'manager',
+        const authUser: AuthUser = {
+          id: result.user.id,
+          name: result.user.name,
+          email: result.user.email,
+          role: 'admin',
           orgId: '',
           orgName: '',
           orgSlug: '',
           onboarded: false,
         }
 
-        upsertAccount(newUser, data.password)
-
-        const token = generateToken(newUser)
-        setAuthCookie(token)
-
         set({
-          user: newUser,
+          user: authUser,
           isAuthenticated: true,
           isLoading: false,
         })
       },
 
       logout: () => {
-        clearAuthCookie()
+        // Fire-and-forget API call to delete server session
+        apiCall('auth.logout', { json: {} }).catch(() => {})
+        clearSessionTokens()
         set({
           user: null,
           isAuthenticated: false,
@@ -201,31 +177,19 @@ export const useAuthStore = create<AuthState>()(
       updateProfile: (partial: Partial<AuthUser>) => {
         const current = get().user
         if (!current) return
-        const updated = { ...current, ...partial }
-        set({ user: updated })
-        updateAccountUser(current.email, partial)
-
-        // Refresh cookie with updated data
-        const token = generateToken(updated)
-        setAuthCookie(token)
+        set({ user: { ...current, ...partial } })
       },
 
       setRole: (role: OrgRole) => {
         const current = get().user
         if (!current) return
-        const updated = { ...current, role }
-        set({ user: updated })
-        updateAccountUser(current.email, { role })
-
-        const token = generateToken(updated)
-        setAuthCookie(token)
+        set({ user: { ...current, role } })
       },
     }),
     {
       name: 'product-os-auth',
       storage: createJSONStorage(() => {
         if (typeof window === 'undefined') {
-          // SSR-safe no-op storage
           return {
             getItem: () => null,
             setItem: () => {},
@@ -239,7 +203,6 @@ export const useAuthStore = create<AuthState>()(
         isAuthenticated: state.isAuthenticated,
       }),
       onRehydrateStorage: () => (state) => {
-        // Defer to avoid state update during useSyncExternalStore subscription
         queueMicrotask(() => state?.setHydrated())
       },
     },

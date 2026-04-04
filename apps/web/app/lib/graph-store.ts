@@ -2,6 +2,7 @@
 
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import { trpcMutate } from './api'
 
 // ---------------------------------------------------------------------------
 // Types (mirrors packages/graph schema)
@@ -92,8 +93,27 @@ export const useGraphStore = create<GraphState>()(
 
       addNode: (data) => {
         const now = new Date().toISOString()
-        const node: GraphNode = { ...data, id: nodeId(), createdAt: now, updatedAt: now }
+        const tempId = nodeId()
+        const node: GraphNode = { ...data, id: tempId, createdAt: now, updatedAt: now }
         set((state) => ({ nodes: [...state.nodes, node] }))
+
+        // Persist to DB
+        trpcMutate<any>('graph.createNode', {
+          productId: data.productId,
+          kind: data.kind,
+          label: data.label,
+          data: data.data,
+        }).then((dbNode) => {
+          set((state) => ({
+            nodes: state.nodes.map((n) => n.id === tempId ? { ...n, id: dbNode.id } : n),
+            edges: state.edges.map((e) => ({
+              ...e,
+              sourceId: e.sourceId === tempId ? dbNode.id : e.sourceId,
+              targetId: e.targetId === tempId ? dbNode.id : e.targetId,
+            })),
+          }))
+        }).catch(console.error)
+
         return node
       },
 
@@ -103,6 +123,13 @@ export const useGraphStore = create<GraphState>()(
             n.id === id ? { ...n, ...updates, updatedAt: new Date().toISOString() } : n
           ),
         }))
+        // Persist to DB
+        const dbUpdates: Record<string, unknown> = {}
+        if (updates.label !== undefined) dbUpdates.label = updates.label
+        if (updates.data !== undefined) dbUpdates.data = updates.data
+        if (Object.keys(dbUpdates).length > 0) {
+          trpcMutate('graph.updateNode', { id, ...dbUpdates }).catch(console.error)
+        }
       },
 
       deleteNode: (id) => {
@@ -110,6 +137,7 @@ export const useGraphStore = create<GraphState>()(
           nodes: state.nodes.filter((n) => n.id !== id),
           edges: state.edges.filter((e) => e.sourceId !== id && e.targetId !== id),
         }))
+        trpcMutate('graph.deleteNode', { id }).catch(console.error)
       },
 
       getNode: (id) => get().nodes.find((n) => n.id === id),
@@ -121,13 +149,29 @@ export const useGraphStore = create<GraphState>()(
         get().nodes.filter((n) => n.productId === productId),
 
       addEdge: (data) => {
-        const edge: GraphEdge = { ...data, id: edgeId(), createdAt: new Date().toISOString() }
+        const tempId = edgeId()
+        const edge: GraphEdge = { ...data, id: tempId, createdAt: new Date().toISOString() }
         set((state) => ({ edges: [...state.edges, edge] }))
+
+        // Persist to DB
+        trpcMutate<any>('graph.createEdge', {
+          productId: data.productId,
+          sourceId: data.sourceId,
+          targetId: data.targetId,
+          kind: data.kind,
+          data: data.data,
+        }).then((dbEdge) => {
+          set((state) => ({
+            edges: state.edges.map((e) => e.id === tempId ? { ...e, id: dbEdge.id } : e),
+          }))
+        }).catch(console.error)
+
         return edge
       },
 
       deleteEdge: (id) => {
         set((state) => ({ edges: state.edges.filter((e) => e.id !== id) }))
+        trpcMutate('graph.deleteEdge', { id }).catch(console.error)
       },
 
       getEdgesFrom: (nodeId) => get().edges.filter((e) => e.sourceId === nodeId),
@@ -147,33 +191,20 @@ export const useGraphStore = create<GraphState>()(
 
       scaffoldProduct: (productId, name) => {
         const now = new Date().toISOString()
+        const pId = nodeId()
+        const planId = nodeId()
         const productNode: GraphNode = {
-          id: nodeId(),
-          kind: 'product',
-          label: name,
-          productId,
-          data: { name, status: 'active' },
-          createdAt: now,
-          updatedAt: now,
+          id: pId, kind: 'product', label: name, productId,
+          data: { name, status: 'active' }, createdAt: now, updatedAt: now,
         }
         const planNode: GraphNode = {
-          id: nodeId(),
-          kind: 'plan',
-          label: `${name} Plan`,
-          productId,
-          data: { status: 'draft' },
-          createdAt: now,
-          updatedAt: now,
+          id: planId, kind: 'plan', label: `${name} Plan`, productId,
+          data: { status: 'draft' }, createdAt: now, updatedAt: now,
         }
         const planEdge: GraphEdge = {
-          id: edgeId(),
-          kind: 'contains',
-          sourceId: productNode.id,
-          targetId: planNode.id,
-          productId,
-          createdAt: now,
+          id: edgeId(), kind: 'contains', sourceId: pId, targetId: planId,
+          productId, createdAt: now,
         }
-
         set((state) => ({
           nodes: [...state.nodes, productNode, planNode],
           edges: [...state.edges, planEdge],
@@ -183,10 +214,7 @@ export const useGraphStore = create<GraphState>()(
       bulkAddNodes: (nodesData) => {
         const now = new Date().toISOString()
         const newNodes = nodesData.map((nd) => ({
-          ...nd,
-          id: nodeId(),
-          createdAt: now,
-          updatedAt: now,
+          ...nd, id: nodeId(), createdAt: now, updatedAt: now,
         }))
         set((state) => ({ nodes: [...state.nodes, ...newNodes] }))
         return newNodes
@@ -199,8 +227,6 @@ export const useGraphStore = create<GraphState>()(
         }))
       },
     }),
-    {
-      name: 'product-os-graph',
-    }
+    { name: 'product-os-graph' }
   )
 )

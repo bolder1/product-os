@@ -11,6 +11,7 @@ import { ValidationPanel, ValidationTrigger } from '../../../components/shared/v
 import { useProductStore, type Product } from '../../../lib/product-store'
 import { useVersionStore } from '../../../lib/version-store'
 import { useCommentStore } from '../../../lib/comment-store'
+import { useDataSync } from '../../../lib/use-data-sync'
 import { createContext, useContext } from 'react'
 import { usePathname } from 'next/navigation'
 import { GitBranch, MessageSquare, X, CircleDot } from 'lucide-react'
@@ -41,9 +42,13 @@ export default function ProductLayout({
     return allComments.filter((c) => c.entityId === entityId && !c.resolved && !c.parentId).length
   }, [allComments, orgSlug, productSlug, pathname])
 
+  // Resolve real DB product ID for data sync; fall back to composite slug
+  const dbProductId = product?.id ?? undefined
+  const { isLoading: isSyncing } = useDataSync(dbProductId)
+
   const segments = pathname.split('/')
   const currentStudio = segments[3] || 'planner'
-  const productId = `${orgSlug}-${productSlug}`
+  const productId = product?.id ?? `${orgSlug}-${productSlug}`
   const activeBranch = activeBranches[productId] ?? 'main'
   const commentEntityId = `${productId}-${currentStudio}`
 

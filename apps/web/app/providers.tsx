@@ -47,6 +47,16 @@ export function Providers({ children }: { children: React.ReactNode }) {
         httpBatchLink({
           url: `${getBaseUrl()}/api/trpc`,
           transformer: superjson,
+          headers() {
+            const headers: Record<string, string> = {}
+            if (typeof window !== 'undefined') {
+              const token = localStorage.getItem('product-os-session-token')
+              const orgId = localStorage.getItem('product-os-org-id')
+              if (token) headers['authorization'] = `Bearer ${token}`
+              if (orgId) headers['x-org-id'] = orgId
+            }
+            return headers
+          },
         }),
       ],
     }),

@@ -2,6 +2,7 @@
 
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import { trpcMutate } from './api'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -38,6 +39,18 @@ export interface TaskFilter {
   search?: string
 }
 
+// Map frontend status to DB status
+function toDbStatus(s: TaskStatus): string {
+  if (s === 'in_review') return 'review'
+  if (s === 'blocked') return 'todo' // DB doesn't have 'blocked', map to todo
+  return s
+}
+
+function toDbPriority(p: TaskPriority): string {
+  if (p === 'critical') return 'urgent'
+  return p
+}
+
 // ---------------------------------------------------------------------------
 // Store
 // ---------------------------------------------------------------------------
@@ -46,7 +59,6 @@ interface TaskState {
   tasks: Task[]
   filter: TaskFilter
 
-  // Actions
   addTask: (task: Omit<Task, 'id' | 'createdAt' | 'updatedAt'>) => Task
   updateTask: (id: string, updates: Partial<Task>) => void
   deleteTask: (id: string) => void
@@ -90,6 +102,26 @@ export const useTaskStore = create<TaskState>()(
           updatedAt: now,
         }
         set((state) => ({ tasks: [...state.tasks, task] }))
+
+        // Persist to DB
+        trpcMutate<any>('task.create', {
+          productId: taskData.productId,
+          title: taskData.title,
+          description: taskData.description,
+          status: toDbStatus(taskData.status),
+          priority: toDbPriority(taskData.priority),
+          assigneeId: taskData.assignee?.id || undefined,
+          studioOrigin: taskData.studio,
+          dueAt: taskData.dueDate || undefined,
+        }).then((dbTask) => {
+          // Replace temp ID with real DB ID
+          set((state) => ({
+            tasks: state.tasks.map((t) =>
+              t.id === task.id ? { ...t, id: dbTask.id } : t
+            ),
+          }))
+        }).catch(console.error)
+
         return task
       },
 
@@ -99,12 +131,22 @@ export const useTaskStore = create<TaskState>()(
             t.id === id ? { ...t, ...updates, updatedAt: new Date().toISOString() } : t
           ),
         }))
+        // Persist to DB
+        const dbUpdates: Record<string, unknown> = {}
+        if (updates.title !== undefined) dbUpdates.title = updates.title
+        if (updates.description !== undefined) dbUpdates.description = updates.description
+        if (updates.status !== undefined) dbUpdates.status = toDbStatus(updates.status)
+        if (updates.priority !== undefined) dbUpdates.priority = toDbPriority(updates.priority)
+        if (Object.keys(dbUpdates).length > 0) {
+          trpcMutate('task.update', { id, ...dbUpdates }).catch(console.error)
+        }
       },
 
       deleteTask: (id) => {
         set((state) => ({
           tasks: state.tasks.filter((t) => t.id !== id),
         }))
+        trpcMutate('task.delete', { id }).catch(console.error)
       },
 
       moveTask: (id, status) => {
@@ -120,6 +162,7 @@ export const useTaskStore = create<TaskState>()(
               : t
           ),
         }))
+        trpcMutate('task.update', { id, status: toDbStatus(status) }).catch(console.error)
       },
 
       bulkAddTasks: (tasksData) => {
@@ -151,6 +194,7 @@ export const useTaskStore = create<TaskState>()(
           (t) =>
             t.productId === productId &&
             t.status !== 'done' &&
+            t.dueDate &&
             new Date(t.dueDate) < now
         )
       },
@@ -166,7 +210,7 @@ export const useTaskStore = create<TaskState>()(
           done: tasks.filter((t) => t.status === 'done').length,
           blocked: tasks.filter((t) => t.status === 'blocked').length,
           overdue: tasks.filter(
-            (t) => t.status !== 'done' && new Date(t.dueDate) < now
+            (t) => t.status !== 'done' && t.dueDate && new Date(t.dueDate) < now
           ).length,
         }
       },

@@ -44,7 +44,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = useCallback(
     async (email: string, password: string) => {
       await storeLogin(email, password)
-      // Check if user needs onboarding
       const currentUser = useAuthStore.getState().user
       if (currentUser && !currentUser.onboarded) {
         router.push('/onboarding')

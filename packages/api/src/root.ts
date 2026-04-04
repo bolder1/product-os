@@ -1,4 +1,5 @@
 import { router } from './trpc'
+import { authRouter } from './routers/auth'
 import { graphRouter } from './routers/graph'
 import { productRouter } from './routers/product'
 import { taskRouter } from './routers/task'
@@ -10,6 +11,7 @@ import { aiRouter } from './routers/ai'
 import { plannerRouter } from './routers/planner'
 
 export const appRouter = router({
+  auth: authRouter,
   graph: graphRouter,
   product: productRouter,
   task: taskRouter,

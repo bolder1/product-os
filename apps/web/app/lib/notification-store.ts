@@ -2,6 +2,7 @@
 
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import { trpcMutate } from './api'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -88,6 +89,8 @@ export const useNotificationStore = create<NotificationState>()(
             ),
             unreadCount: Math.max(0, state.unreadCount - 1),
           }))
+          // Persist to DB
+          trpcMutate('notification.markRead', { id }).catch(console.error)
         }
       },
 
@@ -96,6 +99,8 @@ export const useNotificationStore = create<NotificationState>()(
           notifications: state.notifications.map((n) => ({ ...n, read: true })),
           unreadCount: 0,
         }))
+        // Persist to DB
+        trpcMutate('notification.markAllRead', {}).catch(console.error)
       },
 
       deleteNotification: (id) => {

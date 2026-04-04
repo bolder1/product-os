@@ -159,10 +159,7 @@ export default function CreateProductModal({
       setError('')
 
       try {
-        // Small delay to show loading state
-        await new Promise((r) => setTimeout(r, 400))
-
-        const product = createProduct({
+        const product = await createProduct({
           name: name.trim(),
           description: description.trim(),
           slug: slug.trim(),

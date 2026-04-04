@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import {
   Plus,
@@ -39,6 +39,7 @@ import { useActivityStore, type ActivityType } from '../lib/activity-store'
 import { useTaskStore } from '../lib/task-store'
 import { useNotificationStore } from '../lib/notification-store'
 import { useCommandPaletteStore } from '../lib/command-palette-store'
+import { trpc } from '../lib/trpc'
 import RoleTaskSummary from './_components/role-task-summary'
 import StudioShortcuts from './_components/studio-shortcuts'
 import CreateProductModal from './_components/create-product-modal'
@@ -267,6 +268,26 @@ export default function DashboardHome() {
   const { user } = useAuth()
   const orgSlug = user?.orgSlug || 'my-org'
   const allProducts = useProductStore((s) => s.products)
+
+  // Hydrate product store from DB on dashboard load
+  const productsQuery = trpc.product.list.useQuery({}, { enabled: !!user })
+  useEffect(() => {
+    if (!productsQuery.data || !user) return
+    const dbProducts = productsQuery.data.map((p: any) => ({
+      id: p.id,
+      name: p.name,
+      description: p.description ?? '',
+      slug: p.slug,
+      orgSlug: user.orgSlug,
+      color: '#3B82F6',
+      icon: p.icon ?? '🚀',
+      status: p.status as 'draft' | 'active' | 'archived',
+      createdAt: p.createdAt?.toISOString?.() ?? p.createdAt,
+      updatedAt: p.updatedAt?.toISOString?.() ?? p.updatedAt,
+    }))
+    useProductStore.setState({ products: dbProducts })
+  }, [productsQuery.data, user])
+
   const storeProducts = useMemo(() => allProducts.filter((p) => p.orgSlug === orgSlug), [allProducts, orgSlug])
   const hasProducts = storeProducts.length > 0
 
