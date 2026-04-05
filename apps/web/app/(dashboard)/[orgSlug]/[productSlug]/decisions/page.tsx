@@ -17,6 +17,7 @@ import {
   Sparkles,
 } from 'lucide-react'
 import { useParams } from 'next/navigation'
+import { useProduct } from '../layout'
 import {
   useDecisionStore,
   type Decision,
@@ -554,7 +555,8 @@ function CreateDecisionModal({
 
 export default function DecisionsPage() {
   const params = useParams<{ productSlug: string }>()
-  const productId = params.productSlug
+  const product = useProduct()
+  const productId = product?.id ?? params.productSlug
 
   const allDecisions = useDecisionStore((s) => s.decisions)
   const decisions = useMemo(() => allDecisions.filter((d) => d.productId === productId), [allDecisions, productId])

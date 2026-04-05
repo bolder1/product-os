@@ -14,6 +14,7 @@ import { useGraphStore } from '../../../../lib/graph-store'
 import { useActivityStore } from '../../../../lib/activity-store'
 import { useNotificationStore } from '../../../../lib/notification-store'
 import { useParams, useRouter } from 'next/navigation'
+import { useProduct } from '../layout'
 
 export interface PlanData {
   problem: string
@@ -47,11 +48,12 @@ export default function ProductPlannerPage() {
 
   const params = useParams()
   const router = useRouter()
+  const currentProduct = useProduct()
   const { bulkAddTasks } = useTaskStore()
   const { scaffoldProduct, bulkAddNodes, addEdge, addNode } = useGraphStore()
   const { addActivity } = useActivityStore()
   const { addNotification } = useNotificationStore()
-  const productId = `${params.orgSlug}-${params.productSlug}`
+  const productId = currentProduct?.id ?? `${params.orgSlug}-${params.productSlug}`
 
   const markStepCompleted = useCallback((step: number) => {
     setCompletedSteps((prev) => {

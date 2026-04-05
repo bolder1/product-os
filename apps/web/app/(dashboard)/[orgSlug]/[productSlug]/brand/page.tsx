@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useMemo } from 'react'
 import { useParams } from 'next/navigation'
+import { useProduct } from '../layout'
 import { Palette, Sparkles, Save, Paintbrush, Type, Ruler, Layers, Eye } from 'lucide-react'
 import { defaultBrandConfig } from './_data/default-brand'
 import type { BrandConfig, ColorGroup, TypographyConfig, SpacingConfig, EffectsConfig } from './_data/default-brand'
@@ -28,7 +29,8 @@ type TabId = (typeof tabs)[number]['id']
 
 export default function BrandBuilderPage() {
   const params = useParams<{ productSlug: string }>()
-  const productId = params.productSlug
+  const product = useProduct()
+  const productId = product?.id ?? params.productSlug
 
   // Graph store — persist brand tokens as graph nodes
   const allNodes = useGraphStore((s) => s.nodes)

@@ -3,6 +3,7 @@
 import { useState, useCallback, useMemo, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { Database, GitBranch, Plus, Sparkles } from "lucide-react";
+import { useProduct } from "../layout";
 import {
   INITIAL_ENTITIES,
   INITIAL_WORKFLOWS,
@@ -25,7 +26,8 @@ type Selection =
 
 export default function WorkflowBuilderPage() {
   const params = useParams<{ productSlug: string }>();
-  const productId = params.productSlug;
+  const product = useProduct();
+  const productId = product?.id ?? params.productSlug;
 
   // Graph store for persistence
   const allNodes = useGraphStore((s) => s.nodes);

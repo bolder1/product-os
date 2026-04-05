@@ -3,6 +3,7 @@
 import { useState, useMemo, useCallback } from 'react'
 import { useParams } from 'next/navigation'
 import { Bell, CheckCheck } from 'lucide-react'
+import { useProduct } from '../layout'
 import { type Notification, mockNotifications } from './_data/mock-notifications'
 import { NotificationItem } from './_components/notification-item'
 import { NotificationFilters, type FilterKey } from './_components/notification-filters'
@@ -24,8 +25,10 @@ const groupOrder = ['Today', 'Yesterday', 'This Week', 'Earlier']
 
 export default function NotificationsPage() {
   const params = useParams<{ productSlug: string }>()
+  const product = useProduct()
+  const productId = product?.id ?? params.productSlug
   const allNotifs = useNotificationStore((s) => s.notifications)
-  const storeNotifs = useMemo(() => allNotifs.filter((n) => n.productId === params.productSlug), [allNotifs, params.productSlug])
+  const storeNotifs = useMemo(() => allNotifs.filter((n) => n.productId === productId), [allNotifs, productId])
   const storeMarkRead = useNotificationStore((s) => s.markRead)
   const storeMarkAllRead = useNotificationStore((s) => s.markAllRead)
   const storeDelete = useNotificationStore((s) => s.deleteNotification)

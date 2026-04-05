@@ -4,6 +4,7 @@ import { useMemo } from 'react'
 import { useParams } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { Clock } from 'lucide-react'
+import { useProduct } from '../../layout'
 import { useActivityStore } from '../../../../../lib/activity-store'
 
 const studioBadgeColors: Record<string, string> = {
@@ -60,8 +61,10 @@ function getAvatarColor(name: string) {
 
 export function ActivityFeed() {
   const params = useParams<{ productSlug: string }>()
+  const product = useProduct()
+  const productId = product?.id ?? params.productSlug
   const allActivities = useActivityStore((s) => s.activities)
-  const storeActivities = useMemo(() => allActivities.filter((a) => a.productId === params.productSlug), [allActivities, params.productSlug])
+  const storeActivities = useMemo(() => allActivities.filter((a) => a.productId === productId), [allActivities, productId])
 
   const activities = useMemo(() => {
     if (storeActivities.length > 0) {

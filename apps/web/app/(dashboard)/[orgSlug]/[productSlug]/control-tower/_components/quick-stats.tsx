@@ -4,15 +4,17 @@ import { useMemo } from 'react'
 import { motion } from 'framer-motion'
 import { Boxes, ListTodo, ShieldCheck, TrendingUp, TrendingDown, AlertTriangle } from 'lucide-react'
 import { useParams } from 'next/navigation'
+import { useProduct } from '../../layout'
 import { useGraphStore } from '../../../../../lib/graph-store'
 import { useTaskStore } from '../../../../../lib/task-store'
 import { useValidation } from '../../../../../lib/validation-engine'
 
 function useLiveStats() {
   const params = useParams()
-  const productId = params?.orgSlug && params?.productSlug
+  const product = useProduct()
+  const productId = product?.id ?? (params?.orgSlug && params?.productSlug
     ? `${params.orgSlug}-${params.productSlug}`
-    : ''
+    : '')
 
   const graphNodes = useGraphStore((s) => s.nodes).filter((n) => n.productId === productId)
   const allTasks = useTaskStore((s) => s.tasks).filter((t) => t.productId === productId)

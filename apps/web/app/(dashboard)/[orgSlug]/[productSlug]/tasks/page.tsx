@@ -3,6 +3,7 @@
 import { useState, useCallback, useMemo } from 'react'
 import { useParams } from 'next/navigation'
 import { Plus, LayoutGrid, List, Sparkles, Filter } from 'lucide-react'
+import { useProduct } from '../layout'
 import { type Task, mockTasks } from './_data/mock-tasks'
 import { TaskBoard } from './_components/task-board'
 import { TaskList } from './_components/task-list'
@@ -30,7 +31,8 @@ function storeTaskToLocal(t: ReturnType<typeof useTaskStore.getState>['tasks'][n
 
 export default function TasksPage() {
   const params = useParams<{ productSlug: string }>()
-  const productId = params.productSlug
+  const product = useProduct()
+  const productId = product?.id ?? params.productSlug
 
   // Read tasks from Zustand store for this product
   const rawTasks = useTaskStore((s) => s.tasks)

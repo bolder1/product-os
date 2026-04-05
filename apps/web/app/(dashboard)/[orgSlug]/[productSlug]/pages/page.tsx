@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useMemo, useEffect } from 'react'
 import { useParams } from 'next/navigation'
+import { useProduct } from '../layout'
 import { Plus, Eye, Sparkles, FileText } from 'lucide-react'
 import { mockPages, type PageDef, type SectionDef } from './_data/mock-pages'
 import { useGraphStore } from '../../../../lib/graph-store'
@@ -14,7 +15,8 @@ import { AnalyticsOverlay } from '../../../../components/shared/analytics-overla
 
 export default function PageBuilderPage() {
   const params = useParams<{ productSlug: string }>()
-  const productId = params.productSlug
+  const product = useProduct()
+  const productId = product?.id ?? params.productSlug
 
   // Graph store for persistence
   const allNodes = useGraphStore((s) => s.nodes)

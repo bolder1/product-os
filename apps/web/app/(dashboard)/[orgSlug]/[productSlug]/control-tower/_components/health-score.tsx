@@ -4,13 +4,15 @@ import { motion, useMotionValue, useTransform, animate } from 'framer-motion'
 import { useEffect, useState, useMemo } from 'react'
 import { Heart } from 'lucide-react'
 import { useParams } from 'next/navigation'
+import { useProduct } from '../../layout'
 import { calculateReadinessScore } from '../../../../../lib/validation-engine'
 
 function useLiveHealthData() {
   const params = useParams()
-  const productId = params?.orgSlug && params?.productSlug
+  const product = useProduct()
+  const productId = product?.id ?? (params?.orgSlug && params?.productSlug
     ? `${params.orgSlug}-${params.productSlug}`
-    : ''
+    : '')
   const readiness = useMemo(() => calculateReadinessScore(productId), [productId])
   const hasRealData = readiness.overall > 0
 

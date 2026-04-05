@@ -4,6 +4,7 @@ import { useMemo } from 'react'
 import { useParams } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { ShieldCheck } from 'lucide-react'
+import { useProduct } from '../../layout'
 import { useApprovalStore } from '../../../../../lib/approval-store'
 
 function timeAgo(dateStr: string): string {
@@ -24,8 +25,10 @@ const fallbackApprovals = [
 
 export function PendingApprovals() {
   const params = useParams<{ productSlug: string }>()
+  const product = useProduct()
+  const productId = product?.id ?? params.productSlug
   const allRequests = useApprovalStore((s) => s.requests)
-  const storeRequests = useMemo(() => allRequests.filter((r) => r.productId === params.productSlug), [allRequests, params.productSlug])
+  const storeRequests = useMemo(() => allRequests.filter((r) => r.productId === productId), [allRequests, productId])
 
   const approvals = useMemo(() => {
     const pending = storeRequests.filter((r) => r.status === 'pending')

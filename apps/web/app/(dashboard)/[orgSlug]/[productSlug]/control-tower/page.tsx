@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useParams } from 'next/navigation'
+import { useProduct } from '../layout'
 import { Wand2, Shield, GitCompare, Store, Brain, Plug } from 'lucide-react'
 import { HealthScore } from './_components/health-score'
 import { QuickStats } from './_components/quick-stats'
@@ -30,7 +31,8 @@ const toolButtons = [
 
 export default function ControlTowerPage() {
   const params = useParams<{ productSlug: string }>()
-  const productId = params.productSlug
+  const product = useProduct()
+  const productId = product?.id ?? params.productSlug
 
   const [openModal, setOpenModal] = useState<string | null>(null)
 

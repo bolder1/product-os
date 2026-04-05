@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from 'react'
 import { useParams } from 'next/navigation'
+import { useProduct } from '../layout'
 import { Sparkles, Plus, ScanSearch, PenTool, Layers, ChevronDown, MousePointer2, Hand, Square, Type, Image, Minus } from 'lucide-react'
 import { mockScreens, type ScreenDef, type ElementDef } from './_data/mock-screens'
 import ScreenList from './_components/screen-list'
@@ -16,7 +17,8 @@ let nextElementId = 1000
 
 export default function DesignStudioPage() {
   const params = useParams<{ productSlug: string }>()
-  const productId = params.productSlug
+  const product = useProduct()
+  const productId = product?.id ?? params.productSlug
 
   const [screens, setScreens] = useState<ScreenDef[]>(mockScreens)
   const [selectedScreenId, setSelectedScreenId] = useState<string | null>(mockScreens[0]?.id ?? null)

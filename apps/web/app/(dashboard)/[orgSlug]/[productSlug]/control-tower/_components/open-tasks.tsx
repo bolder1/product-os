@@ -5,6 +5,7 @@ import { motion } from 'framer-motion'
 import { ListTodo, ArrowRight } from 'lucide-react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
+import { useProduct } from '../../layout'
 import { useTaskStore } from '../../../../../lib/task-store'
 
 type Priority = 'critical' | 'high' | 'medium' | 'low'
@@ -39,9 +40,10 @@ const fallbackTasks = [
 
 export function OpenTasks() {
   const params = useParams()
-  const productSlug = params.productSlug as string
+  const product = useProduct()
+  const productId = product?.id ?? (params.productSlug as string)
   const allTasks = useTaskStore((s) => s.tasks)
-  const storeTasks = useMemo(() => allTasks.filter((t) => t.productId === productSlug), [allTasks, productSlug])
+  const storeTasks = useMemo(() => allTasks.filter((t) => t.productId === productId), [allTasks, productId])
 
   const tasks = useMemo(() => {
     const open = storeTasks.filter((t) => t.status !== 'done')

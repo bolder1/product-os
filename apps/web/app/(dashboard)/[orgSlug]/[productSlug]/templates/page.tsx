@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import {
   LayoutTemplate,
@@ -20,6 +20,7 @@ import {
 } from 'lucide-react'
 import { trpcMutate, trpcQuery } from '../../../../lib/api'
 import { useProductStore } from '../../../../lib/product-store'
+import { useProduct } from '../layout'
 
 // ---------------------------------------------------------------------------
 // Types & Data
@@ -262,14 +263,39 @@ export default function TemplateGalleryPage() {
   const [applyResult, setApplyResult] = useState<{ nodes: number; edges: number } | null>(null)
   const params = useParams()
   const router = useRouter()
-  const products = useProductStore((s) => s.products)
-  const product = useMemo(
-    () => products.find((p) => p.slug === params.productSlug && p.orgSlug === params.orgSlug),
-    [products, params.orgSlug, params.productSlug],
-  )
+  const product = useProduct()
+
+  // Fetch real templates from DB
+  const [dbTemplates, setDbTemplates] = useState<Template[]>([])
+  useEffect(() => {
+    trpcQuery<Array<{ id: string; name: string; description: string | null; category: string | null; tags: string[] | null; bundle: Record<string, unknown> | null }>>('template.listBuiltIn', {})
+      .then((rows) => {
+        const mapped: Template[] = rows.map((r) => ({
+          id: r.id,
+          name: r.name,
+          description: r.description ?? '',
+          category: (r.category as Exclude<Category, 'All'>) ?? 'Workflow',
+          tags: r.tags ?? [],
+          nodeCount: Array.isArray((r.bundle as any)?.nodes) ? (r.bundle as any).nodes.length : 0,
+          author: 'Product OS',
+          usageCount: 0,
+          nodes: Array.isArray((r.bundle as any)?.nodes)
+            ? (r.bundle as any).nodes.map((n: any) => n.label ?? n.kind).slice(0, 6)
+            : [],
+        }))
+        setDbTemplates(mapped)
+      })
+      .catch(() => { /* keep hardcoded fallback */ })
+  }, [])
+
+  // Merge DB templates (first) with hardcoded ones
+  const allTemplates = useMemo(() => {
+    const ids = new Set(dbTemplates.map((t) => t.id))
+    return [...dbTemplates, ...templates.filter((t) => !ids.has(t.id))]
+  }, [dbTemplates])
 
   const filtered = useMemo(() => {
-    let result = templates
+    let result = allTemplates
 
     if (category !== 'All') {
       result = result.filter((t) => t.category === category)

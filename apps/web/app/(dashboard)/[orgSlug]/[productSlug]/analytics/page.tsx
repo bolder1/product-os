@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
+import { useProduct } from '../layout'
 import { Download, BarChart3, Zap } from 'lucide-react'
 import { mockAnalyticsData } from './_data/mock-analytics'
 import { MetricCards } from './_components/metric-cards'
@@ -19,7 +20,8 @@ type DateRange = '7d' | '30d' | '90d'
 
 export default function AnalyticsPage() {
   const params = useParams<{ productSlug: string }>()
-  const productId = params.productSlug
+  const product = useProduct()
+  const productId = product?.id ?? params.productSlug
 
   const [dateRange, setDateRange] = useState<DateRange>('7d')
   const [impactOpen, setImpactOpen] = useState(false)

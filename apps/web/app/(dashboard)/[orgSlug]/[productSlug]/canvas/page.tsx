@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useMemo } from 'react'
 import { useParams } from 'next/navigation'
+import { useProduct } from '../layout'
 import {
   MousePointer2,
   StickyNote,
@@ -37,7 +38,8 @@ const TOOL_ITEMS: { tool: ToolType; icon: typeof MousePointer2; label: string }[
 
 export default function CanvasPage() {
   const params = useParams<{ productSlug: string }>()
-  const productId = params.productSlug
+  const product = useProduct()
+  const productId = product?.id ?? params.productSlug
   const [items, setItems] = useState<CanvasItem[]>(mockCanvasItems)
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [activeTool, setActiveTool] = useState<ToolType>('select')

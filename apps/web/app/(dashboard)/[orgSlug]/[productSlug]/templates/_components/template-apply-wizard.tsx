@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, ChevronRight, ChevronLeft, Check, Circle, Loader2 } from 'lucide-react'
 import { useParams } from 'next/navigation'
+import { useProduct } from '../../layout'
 import type { Template } from '../_data/templates'
 import { useGraphStore, type NodeKind } from '../../../../../lib/graph-store'
 import { useActivityStore } from '../../../../../lib/activity-store'
@@ -48,7 +49,8 @@ export function TemplateApplyWizard({ template, onClose }: TemplateApplyWizardPr
   const [done, setDone] = useState(false)
 
   const params = useParams()
-  const productId = `${params.orgSlug}-${params.productSlug}`
+  const currentProduct = useProduct()
+  const productId = currentProduct?.id ?? `${params.orgSlug}-${params.productSlug}`
   const { bulkAddNodes, addEdge } = useGraphStore()
   const { addActivity } = useActivityStore()
   const { addNotification } = useNotificationStore()

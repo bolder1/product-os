@@ -3,6 +3,7 @@
 import { useState, useCallback, useMemo } from 'react'
 import { useParams } from 'next/navigation'
 import { Sparkles, Share2, X } from 'lucide-react'
+import { useProduct } from '../layout'
 import {
   mockGraphData,
   type NodeKind,
@@ -102,7 +103,8 @@ function storeEdgesToLocal(
 
 export default function GraphExplorerPage() {
   const params = useParams()
-  const productId = params.productSlug as string
+  const product = useProduct()
+  const productId = product?.id ?? (params.productSlug as string)
 
   const allStoreNodes = useGraphStore((s) => s.nodes)
   const allStoreEdges = useGraphStore((s) => s.edges)

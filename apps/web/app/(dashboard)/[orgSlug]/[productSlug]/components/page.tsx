@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useMemo } from 'react'
 import { useParams } from 'next/navigation'
+import { useProduct } from '../layout'
 import { Box, Plus, Sparkles, Search, Trash2, LayoutTemplate, FormInput, Database, AlertCircle, Navigation as NavIcon } from 'lucide-react'
 import { type ComponentDef, type Category, categories, mockComponents } from './_data/mock-components'
 import { useGraphStore } from '../../../../lib/graph-store'
@@ -44,7 +45,8 @@ const catIcon: Record<string, React.ReactNode> = {
 /* ------------------------------------------------------------------ */
 export default function ComponentBuilderPage() {
   const params = useParams<{ productSlug: string }>()
-  const productId = params.productSlug
+  const product = useProduct()
+  const productId = product?.id ?? params.productSlug
 
   /* --- graph store ------------------------------------------------ */
   const allNodes   = useGraphStore((s) => s.nodes)
