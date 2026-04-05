@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
+import { useParams, useRouter } from 'next/navigation'
 import {
   LayoutTemplate,
   Search,
@@ -14,7 +15,11 @@ import {
   Settings,
   Zap,
   Box,
+  Loader2,
+  CheckCircle2,
 } from 'lucide-react'
+import { trpcMutate, trpcQuery } from '../../../../lib/api'
+import { useProductStore } from '../../../../lib/product-store'
 
 // ---------------------------------------------------------------------------
 // Types & Data
@@ -149,10 +154,14 @@ function TemplatePreview({
   template,
   onClose,
   onApply,
+  applying,
+  applyResult,
 }: {
   template: Template
   onClose: () => void
   onApply: (t: Template) => void
+  applying?: boolean
+  applyResult?: { nodes: number; edges: number } | null
 }) {
   return (
     <div
@@ -209,16 +218,30 @@ function TemplatePreview({
 
         {/* Footer */}
         <div className="flex items-center justify-end gap-2 px-4 py-2.5 border-t border-[var(--border-default)]">
-          <button onClick={onClose} className="tool-btn">
-            Cancel
-          </button>
-          <button
-            onClick={() => onApply(template)}
-            className="tool-btn tool-btn-primary"
-          >
-            <Copy className="w-3 h-3" />
-            Apply Template
-          </button>
+          {applyResult ? (
+            <div className="flex items-center gap-2 text-[12px] text-[var(--color-success)]">
+              <CheckCircle2 className="w-4 h-4" />
+              Applied! {applyResult.nodes} nodes, {applyResult.edges} edges created
+            </div>
+          ) : (
+            <>
+              <button onClick={onClose} className="tool-btn" disabled={applying}>
+                Cancel
+              </button>
+              <button
+                onClick={() => onApply(template)}
+                className="tool-btn tool-btn-primary"
+                disabled={applying}
+              >
+                {applying ? (
+                  <Loader2 className="w-3 h-3 animate-spin" />
+                ) : (
+                  <Copy className="w-3 h-3" />
+                )}
+                {applying ? 'Applying...' : 'Apply Template'}
+              </button>
+            </>
+          )}
         </div>
       </div>
     </div>
@@ -235,6 +258,15 @@ export default function TemplateGalleryPage() {
   const [sort, setSort] = useState<SortOption>('Popular')
   const [previewTemplate, setPreviewTemplate] = useState<Template | null>(null)
   const [showSortDropdown, setShowSortDropdown] = useState(false)
+  const [applying, setApplying] = useState(false)
+  const [applyResult, setApplyResult] = useState<{ nodes: number; edges: number } | null>(null)
+  const params = useParams()
+  const router = useRouter()
+  const products = useProductStore((s) => s.products)
+  const product = useMemo(
+    () => products.find((p) => p.slug === params.productSlug && p.orgSlug === params.orgSlug),
+    [products, params.orgSlug, params.productSlug],
+  )
 
   const filtered = useMemo(() => {
     let result = templates
@@ -269,9 +301,35 @@ export default function TemplateGalleryPage() {
     return result
   }, [search, category, sort])
 
-  const handleApply = (template: Template) => {
-    setPreviewTemplate(null)
-    // Apply logic here
+  const handleApply = async (template: Template) => {
+    if (!product?.id) return
+
+    // Check if the template has a DB UUID (real template) vs hardcoded
+    const isDbTemplate = template.id.match(/^[0-9a-f]{8}-/)
+
+    if (isDbTemplate) {
+      setApplying(true)
+      try {
+        const result = await trpcMutate<{ nodesCreated: number; edgesCreated: number }>(
+          'template.applyTemplate',
+          { templateId: template.id, productId: product.id },
+        )
+        setApplyResult({ nodes: result.nodesCreated, edges: result.edgesCreated })
+        setTimeout(() => {
+          setPreviewTemplate(null)
+          setApplyResult(null)
+          setApplying(false)
+          // Navigate to graph explorer to see results
+          router.push(`/${params.orgSlug}/${params.productSlug}/graph-explorer`)
+        }, 1500)
+      } catch (err) {
+        console.error('Failed to apply template:', err)
+        setApplying(false)
+      }
+    } else {
+      // Hardcoded template — just close the modal for now
+      setPreviewTemplate(null)
+    }
   }
 
   return (
@@ -366,8 +424,10 @@ export default function TemplateGalleryPage() {
       {previewTemplate && (
         <TemplatePreview
           template={previewTemplate}
-          onClose={() => setPreviewTemplate(null)}
+          onClose={() => { setPreviewTemplate(null); setApplyResult(null); setApplying(false) }}
           onApply={handleApply}
+          applying={applying}
+          applyResult={applyResult}
         />
       )}
     </div>

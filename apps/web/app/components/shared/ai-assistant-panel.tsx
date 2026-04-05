@@ -13,6 +13,7 @@ import {
   Check,
   Zap,
 } from 'lucide-react'
+import { trpcMutate } from '../../lib/api'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -116,7 +117,7 @@ export function AIAssistantPanel({
     return studioResponses[studio] || studioResponses.default
   }
 
-  const handleSend = () => {
+  const handleSend = async () => {
     if (!input.trim() || isThinking) return
 
     const userMsg: AIMessage = {
@@ -126,10 +127,44 @@ export function AIAssistantPanel({
       timestamp: new Date().toISOString(),
     }
     setMessages((prev) => [...prev, userMsg])
+    const prompt = input.trim()
     setInput('')
     setIsThinking(true)
 
-    setTimeout(() => {
+    try {
+      if (productId) {
+        const result = await trpcMutate<{ success: boolean; data?: { suggestions?: AISuggestion[] }; error?: string }>(
+          'ai.suggest',
+          { productId, prompt, context: { studioOrigin: studio } },
+        )
+        const suggestions = (result?.data?.suggestions ?? []).map((s: AISuggestion, i: number) => ({
+          ...s,
+          id: `s-${Date.now()}-${i}`,
+        }))
+        const assistantMsg: AIMessage = {
+          id: `msg-${Date.now()}-ai`,
+          role: 'assistant',
+          content: suggestions.length > 0
+            ? `Based on your ${studio} studio context, here are my recommendations:`
+            : result?.error ?? 'Here are some thoughts on that:',
+          suggestions: suggestions.length > 0 ? suggestions : undefined,
+          timestamp: new Date().toISOString(),
+        }
+        setMessages((prev) => [...prev, assistantMsg])
+      } else {
+        // Fallback to mock
+        const suggestions = getSuggestions()
+        const assistantMsg: AIMessage = {
+          id: `msg-${Date.now()}-ai`,
+          role: 'assistant',
+          content: `Based on your ${studio} studio context, here are my recommendations:`,
+          suggestions: suggestions.slice(0, 3),
+          timestamp: new Date().toISOString(),
+        }
+        setMessages((prev) => [...prev, assistantMsg])
+      }
+    } catch {
+      // Fallback to mock on error
       const suggestions = getSuggestions()
       const assistantMsg: AIMessage = {
         id: `msg-${Date.now()}-ai`,
@@ -139,47 +174,94 @@ export function AIAssistantPanel({
         timestamp: new Date().toISOString(),
       }
       setMessages((prev) => [...prev, assistantMsg])
-      setIsThinking(false)
-    }, 1200 + Math.random() * 800)
+    }
+    setIsThinking(false)
   }
 
-  const handleQuickAction = (skill: AISkillType) => {
+  const handleQuickAction = async (skill: AISkillType) => {
     const prompts: Record<AISkillType, string> = {
       suggest: `Suggest improvements for my ${studio} studio`,
       scaffold: `Scaffold the next steps for ${studio}`,
       analyze: `Analyze the current state of ${studio}`,
     }
 
-    setInput(prompts[skill])
-    setTimeout(() => {
-      const userMsg: AIMessage = {
-        id: `msg-${Date.now()}`,
-        role: 'user',
-        content: prompts[skill],
-        timestamp: new Date().toISOString(),
-      }
-      setMessages((prev) => [...prev, userMsg])
-      setIsThinking(true)
+    const prompt = prompts[skill]
+    const userMsg: AIMessage = {
+      id: `msg-${Date.now()}`,
+      role: 'user',
+      content: prompt,
+      timestamp: new Date().toISOString(),
+    }
+    setMessages((prev) => [...prev, userMsg])
+    setInput('')
+    setIsThinking(true)
 
-      setTimeout(() => {
-        const suggestions = getSuggestions()
-        const assistantMsg: AIMessage = {
+    try {
+      if (productId) {
+        const procedure = skill === 'analyze' ? 'ai.analyze' : skill === 'scaffold' ? 'ai.scaffold' : 'ai.suggest'
+        const inputPayload = skill === 'analyze'
+          ? { productId, analysisType: 'gaps', context: { studioOrigin: studio } }
+          : { productId, prompt, context: { studioOrigin: studio } }
+
+        const result = await trpcMutate<{ success: boolean; data?: unknown }>(procedure, inputPayload)
+        const data = result?.data as Record<string, unknown> | undefined
+
+        let content = ''
+        let suggestions: AISuggestion[] = []
+
+        if (skill === 'suggest' && data?.suggestions) {
+          content = `Here are my suggestions for your ${studio} studio:`
+          suggestions = (data.suggestions as AISuggestion[]).map((s, i) => ({ ...s, id: `s-${Date.now()}-${i}` }))
+        } else if (skill === 'scaffold' && data?.nodes) {
+          content = (data.summary as string) ?? `Scaffolded ${(data.nodes as unknown[]).length} nodes for ${studio}`
+          const nodes = data.nodes as Array<{ label: string; kind: string }>
+          suggestions = nodes.map((n, i) => ({
+            id: `s-${Date.now()}-${i}`,
+            title: n.label,
+            description: `${n.kind} node`,
+            confidence: 0.9,
+            category: n.kind,
+          }))
+        } else if (skill === 'analyze' && data?.findings) {
+          content = (data.summary as string) ?? `Analysis of ${studio} studio:`
+          const findings = data.findings as Array<{ title: string; description: string; severity: string; category: string }>
+          suggestions = findings.map((f, i) => ({
+            id: `s-${Date.now()}-${i}`,
+            title: f.title,
+            description: f.description,
+            confidence: f.severity === 'critical' ? 0.95 : f.severity === 'warning' ? 0.85 : 0.7,
+            category: f.category,
+          }))
+        } else {
+          content = `Here's what I found for your ${studio} studio:`
+        }
+
+        setMessages((prev) => [...prev, {
           id: `msg-${Date.now()}-ai`,
           role: 'assistant',
-          content: skill === 'analyze'
-            ? `Here's my analysis of your ${studio} studio:`
-            : skill === 'scaffold'
-            ? `I can scaffold the following for your ${studio} studio:`
-            : `Here are my suggestions for your ${studio} studio:`,
-          suggestions,
+          content,
+          suggestions: suggestions.length > 0 ? suggestions : undefined,
           timestamp: new Date().toISOString(),
-        }
-        setMessages((prev) => [...prev, assistantMsg])
-        setIsThinking(false)
-      }, 1500 + Math.random() * 1000)
-
-      setInput('')
-    }, 100)
+        }])
+      } else {
+        throw new Error('No product ID')
+      }
+    } catch {
+      // Fallback to mock
+      const suggestions = getSuggestions()
+      setMessages((prev) => [...prev, {
+        id: `msg-${Date.now()}-ai`,
+        role: 'assistant',
+        content: skill === 'analyze'
+          ? `Here's my analysis of your ${studio} studio:`
+          : skill === 'scaffold'
+          ? `I can scaffold the following for your ${studio} studio:`
+          : `Here are my suggestions for your ${studio} studio:`,
+        suggestions,
+        timestamp: new Date().toISOString(),
+      }])
+    }
+    setIsThinking(false)
   }
 
   const copyText = (text: string, id: string) => {

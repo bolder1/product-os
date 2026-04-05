@@ -9,7 +9,8 @@
   },
   "packageManager": "pnpm@10.33.0",
   "scripts": {
-    "dev": "turbo dev",
+    "dev": "pnpm --filter @product-os/web dev",
+    "dev:all": "turbo dev",
     "dev:web": "pnpm --filter @product-os/web dev",
     "build": "turbo build",
     "lint": "biome check .",

@@ -7,7 +7,7 @@ import * as awarenessProtocol from 'y-protocols/awareness'
 import * as encoding from 'lib0/encoding'
 import * as decoding from 'lib0/decoding'
 
-const PORT = Number(process.env.YJS_PORT) || 4000
+const BASE_YJS_PORT = Number(process.env.YJS_PORT) || 4000
 
 // ---------------------------------------------------------------------------
 // Message types (matching y-websocket protocol)
@@ -152,7 +152,7 @@ const server = http.createServer((_req, res) => {
 const wss = new WebSocketServer({ server })
 
 wss.on('connection', (ws, req) => {
-  const url = new URL(req.url ?? '/', `http://localhost:${PORT}`)
+  const url = new URL(req.url ?? '/', 'http://localhost')
   const roomName = url.searchParams.get('room') ?? 'default'
 
   const room = getOrCreateRoom(roomName)
@@ -161,9 +161,24 @@ wss.on('connection', (ws, req) => {
   console.log(`[yjs] client connected to room "${roomName}" (${room.conns.size} peers)`)
 })
 
-server.listen(PORT, () => {
-  console.log(`[yjs-server] listening on ws://localhost:${PORT}`)
-  console.log(`[yjs-server] health check at http://localhost:${PORT}/health`)
-})
+function listenWithFallback(port: number, attemptsLeft: number) {
+  const onError = (err: NodeJS.ErrnoException) => {
+    if (err.code === 'EADDRINUSE' && attemptsLeft > 0) {
+      server.removeListener('error', onError)
+      listenWithFallback(port + 1, attemptsLeft - 1)
+      return
+    }
+    console.error('[yjs-server]', err)
+    process.exit(1)
+  }
+  server.on('error', onError)
+  server.listen(port, () => {
+    server.removeListener('error', onError)
+    console.log(`[yjs-server] listening on ws://localhost:${port}`)
+    console.log(`[yjs-server] health check at http://localhost:${port}/health`)
+  })
+}
+
+listenWithFallback(BASE_YJS_PORT, 10)
 
 export { server, wss }

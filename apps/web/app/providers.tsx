@@ -1,16 +1,26 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import dynamic from 'next/dynamic'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { httpBatchLink } from '@trpc/client'
 import superjson from 'superjson'
 import { trpc } from './lib/trpc'
 import { AuthProvider } from './lib/auth-context'
-import { CommandPaletteGlobal } from './components/shared/command-palette-global'
+
+const CommandPaletteGlobal = dynamic(
+  () =>
+    import('./components/shared/command-palette-global').then((m) => ({
+      default: m.CommandPaletteGlobal,
+    })),
+  { ssr: false },
+)
 
 function getBaseUrl() {
   if (typeof window !== 'undefined') return ''
-  return `http://localhost:${process.env.PORT ?? 3000}`
+  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`
+  const port = process.env.PORT ?? (process.env.NODE_ENV === 'production' ? '3000' : '3005')
+  return `http://localhost:${port}`
 }
 
 /**
