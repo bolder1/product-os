@@ -9,6 +9,9 @@ import { commentRouter } from './routers/comment'
 import { templateRouter } from './routers/template'
 import { aiRouter } from './routers/ai'
 import { plannerRouter } from './routers/planner'
+import { activityRouter } from './routers/activity'
+import { versionRouter } from './routers/version'
+import { connectorRouter } from './routers/connector'
 
 export const appRouter = router({
   auth: authRouter,
@@ -21,6 +24,9 @@ export const appRouter = router({
   template: templateRouter,
   ai: aiRouter,
   planner: plannerRouter,
+  activity: activityRouter,
+  version: versionRouter,
+  connector: connectorRouter,
 })
 
 export type AppRouter = typeof appRouter

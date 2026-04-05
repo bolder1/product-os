@@ -2,6 +2,7 @@
 
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import { trpcMutate } from './api'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -72,9 +73,10 @@ export const useCommentStore = create<CommentState>()(
         commentCounter += 1
         const now = new Date().toISOString()
         const mentions = parseMentions(data.body)
+        const tempId = `cmt-${Date.now()}-${commentCounter}`
         const comment: Comment = {
           ...data,
-          id: `cmt-${Date.now()}-${commentCounter}`,
+          id: tempId,
           createdAt: now,
           updatedAt: now,
           resolved: false,
@@ -83,6 +85,21 @@ export const useCommentStore = create<CommentState>()(
         set((state) => ({
           comments: [...state.comments, comment],
         }))
+
+        // Persist to DB
+        trpcMutate<{ id: string }>('comment.create', {
+          productId: data.productId,
+          nodeId: data.entityId,
+          body: data.body,
+          parentId: data.parentId,
+        }).then((result) => {
+          if (result?.id) {
+            set((state) => ({
+              comments: state.comments.map((c) => (c.id === tempId ? { ...c, id: result.id } : c)),
+            }))
+          }
+        }).catch(() => {})
+
         return comment
       },
 
@@ -114,6 +131,9 @@ export const useCommentStore = create<CommentState>()(
               : c
           ),
         }))
+
+        // Persist to DB
+        trpcMutate('comment.resolve', { id }).catch(() => {})
       },
 
       getCommentsByEntity: (entityId) =>

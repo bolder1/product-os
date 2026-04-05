@@ -18,7 +18,11 @@ function timeAgo(dateStr: string): string {
   return `${Math.floor(hours / 24)}d ago`
 }
 
-export function TopBar() {
+interface TopBarProps {
+  extraRight?: React.ReactNode
+}
+
+export function TopBar({ extraRight }: TopBarProps = {}) {
   const pathname = usePathname()
   const openPalette = useCommandPaletteStore((s) => s.open)
   const openVersionPanel = useVersionStore((s) => s.openPanel)
@@ -85,6 +89,8 @@ export function TopBar() {
       </button>
 
       {/* Actions */}
+      <div className="flex items-center gap-2">
+        {extraRight}
       <div className="flex items-center gap-0.5">
         {/* Version */}
         <button
@@ -158,6 +164,7 @@ export function TopBar() {
             </div>
           )}
         </div>
+      </div>
       </div>
     </header>
   )

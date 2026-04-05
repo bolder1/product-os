@@ -2,6 +2,7 @@
 
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import { trpcMutate } from './api'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -167,9 +168,10 @@ export const useConnectorStore = create<ConnectorState>()(
 
       addConnector: (input) => {
         const now = new Date().toISOString()
+        const tempId = uid('conn')
         const connector: ConnectorInstance = {
           ...input,
-          id: uid('conn'),
+          id: tempId,
           syncStatus: 'idle',
           lastSyncAt: null,
           mappings: [],
@@ -177,6 +179,25 @@ export const useConnectorStore = create<ConnectorState>()(
           updatedAt: now,
         }
         set((s) => ({ connectors: [...s.connectors, connector] }))
+
+        // Persist to DB (fire-and-forget)
+        const orgId = typeof window !== 'undefined' ? localStorage.getItem('product-os-org-id') : null
+        if (orgId) {
+          const dbType = input.type === 'google-analytics' ? 'google_analytics' : input.type
+          trpcMutate<{ id: string }>('connector.create', {
+            orgId,
+            type: dbType,
+            name: input.name,
+            settings: input.config,
+          }).then((result) => {
+            if (result?.id) {
+              set((s) => ({
+                connectors: s.connectors.map((c) => (c.id === tempId ? { ...c, id: result.id } : c)),
+              }))
+            }
+          }).catch(() => {})
+        }
+
         return connector
       },
 
@@ -187,11 +208,13 @@ export const useConnectorStore = create<ConnectorState>()(
           ),
         })),
 
-      deleteConnector: (id) =>
+      deleteConnector: (id) => {
         set((s) => ({
           connectors: s.connectors.filter((c) => c.id !== id),
           syncLogs: s.syncLogs.filter((l) => l.connectorId !== id),
-        })),
+        }))
+        trpcMutate('connector.delete', { id }).catch(() => {})
+      },
 
       getConnectorsByProduct: (productId) =>
         get().connectors.filter((c) => c.productId === productId),

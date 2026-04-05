@@ -1,6 +1,6 @@
 'use client'
 
-import { use, useMemo, useState } from 'react'
+import { use, useMemo, useState, useEffect } from 'react'
 import { Sidebar } from '../../../components/shell/sidebar'
 import { TopBar } from '../../../components/shell/topbar'
 import { TasksPanel } from '../../../components/shell/tasks-panel'
@@ -12,6 +12,8 @@ import { useProductStore, type Product } from '../../../lib/product-store'
 import { useVersionStore } from '../../../lib/version-store'
 import { useCommentStore } from '../../../lib/comment-store'
 import { useDataSync } from '../../../lib/use-data-sync'
+import { CollaborationProvider, useCollaborationContext } from '../../../lib/collaboration-context'
+import { PresenceAvatars, ConnectionBadge } from '../../_components/presence-avatars'
 import { createContext, useContext } from 'react'
 import { usePathname } from 'next/navigation'
 import { GitBranch, MessageSquare, X, CircleDot } from 'lucide-react'
@@ -52,12 +54,71 @@ export default function ProductLayout({
   const activeBranch = activeBranches[productId] ?? 'main'
   const commentEntityId = `${productId}-${currentStudio}`
 
+  const collabRoom = dbProductId ? `product:${dbProductId}` : null
+
   return (
     <ProductContext.Provider value={product}>
+      <CollaborationProvider roomName={collabRoom}>
+        <ProductLayoutInner
+          product={product}
+          productId={productId}
+          currentStudio={currentStudio}
+          activeBranch={activeBranch}
+          openVersionPanel={openVersionPanel}
+          commentsOpen={commentsOpen}
+          setCommentsOpen={setCommentsOpen}
+          unresolvedCount={unresolvedCount}
+        >
+          {children}
+        </ProductLayoutInner>
+      </CollaborationProvider>
+    </ProductContext.Provider>
+  )
+}
+
+/** Inner component so it can access CollaborationContext */
+function ProductLayoutInner({
+  children,
+  product,
+  productId,
+  currentStudio,
+  activeBranch,
+  openVersionPanel,
+  commentsOpen,
+  setCommentsOpen,
+  unresolvedCount,
+}: {
+  children: React.ReactNode
+  product: Product | null
+  productId: string
+  currentStudio: string
+  activeBranch: string
+  openVersionPanel: () => void
+  commentsOpen: boolean
+  setCommentsOpen: (v: boolean) => void
+  unresolvedCount: number
+}) {
+  const { status, peers, setActiveStudio } = useCollaborationContext()
+
+  const commentEntityId = `${productId}-${currentStudio}`
+
+  // Update active studio in presence
+  useEffect(() => {
+    setActiveStudio(currentStudio)
+  }, [currentStudio, setActiveStudio])
+
+  return (
       <div className="flex h-screen overflow-hidden bg-[var(--bg-base)]">
         <Sidebar />
         <div className="flex-1 flex flex-col overflow-hidden min-w-0">
-          <TopBar />
+          <TopBar
+            extraRight={
+              <div className="flex items-center gap-2">
+                <PresenceAvatars peers={peers} />
+                <ConnectionBadge status={status} />
+              </div>
+            }
+          />
 
           <main className="flex-1 overflow-auto bg-[var(--bg-workspace)]">
             {children}
@@ -86,6 +147,9 @@ export default function ProductLayout({
             </div>
 
             <div className="flex items-center gap-4 text-[var(--text-tertiary)]">
+              {peers.length > 0 && (
+                <span className="text-[var(--accent)]">{peers.length} collaborator{peers.length !== 1 ? 's' : ''}</span>
+              )}
               <div className="flex items-center gap-1.5">
                 <CircleDot size={9} className="text-[var(--color-success)]" />
                 <span>Ready</span>
@@ -133,9 +197,8 @@ export default function ProductLayout({
         <AIAssistantPanel
           studio={currentStudio}
           productId={productId}
-          contextHints={[productSlug, currentStudio]}
+          contextHints={[product?.slug ?? productId, currentStudio]}
         />
       </div>
-    </ProductContext.Provider>
   )
 }

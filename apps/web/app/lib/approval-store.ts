@@ -2,6 +2,7 @@
 
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import { trpcMutate } from './api'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -68,15 +69,30 @@ export const useApprovalStore = create<ApprovalState>()(
       createRequest: (data) => {
         approvalCounter += 1
         const now = new Date().toISOString()
+        const tempId = `apr-${Date.now()}-${approvalCounter}`
         const request: ApprovalRequest = {
           ...data,
-          id: `apr-${Date.now()}-${approvalCounter}`,
+          id: tempId,
           status: 'pending',
           currentStepIndex: 0,
           createdAt: now,
           updatedAt: now,
         }
         set((state) => ({ requests: [...state.requests, request] }))
+
+        // Persist to DB (fire-and-forget)
+        trpcMutate<{ id: string }>('approval.create', {
+          productId: data.productId,
+          nodeId: data.entityId ?? data.productId, // map to graph node
+          routing: { approvers: data.steps.map((s) => s.approverId ?? s.approverRole), mode: 'sequential' },
+        }).then((result) => {
+          if (result?.id) {
+            set((state) => ({
+              requests: state.requests.map((r) => (r.id === tempId ? { ...r, id: result.id } : r)),
+            }))
+          }
+        }).catch(() => { /* optimistic — already in local state */ })
+
         return request
       },
 
@@ -97,7 +113,6 @@ export const useApprovalStore = create<ApprovalState>()(
             })
 
             // Determine overall status
-            const currentStep = updatedSteps.find((s) => s.id === stepId)
             let newStatus = req.status
             let newStepIndex = req.currentStepIndex
             let completedAt = req.completedAt
@@ -106,14 +121,12 @@ export const useApprovalStore = create<ApprovalState>()(
               newStatus = 'rejected'
               completedAt = new Date().toISOString()
             } else if (decision === 'approved') {
-              // Check if there are more steps
               const nextPending = updatedSteps.find(
                 (s, i) => i > req.currentStepIndex && s.status === 'pending'
               )
               if (nextPending) {
                 newStepIndex = updatedSteps.indexOf(nextPending)
               } else {
-                // All steps approved
                 newStatus = 'approved'
                 completedAt = new Date().toISOString()
               }
@@ -129,6 +142,14 @@ export const useApprovalStore = create<ApprovalState>()(
             }
           }),
         }))
+
+        // Persist to DB (fire-and-forget)
+        const dbDecision = decision === 'rejected' ? 'rejected' : 'approved'
+        trpcMutate('approval.decide', {
+          approvalId: requestId,
+          decision: dbDecision,
+          comment,
+        }).catch(() => {})
       },
 
       cancelRequest: (requestId) => {

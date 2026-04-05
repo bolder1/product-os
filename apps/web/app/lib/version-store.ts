@@ -3,6 +3,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { useGraphStore, type GraphNode, type GraphEdge } from './graph-store'
+import { trpcMutate } from './api'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -167,6 +168,21 @@ export const useVersionStore = create<VersionState>()(
           versions: [version, ...s.versions],
         }))
 
+        // Persist to DB (fire-and-forget)
+        trpcMutate<{ id: string }>('version.create', {
+          productId,
+          label,
+          parentId: version.parentId,
+        }).then((result) => {
+          if (result?.id) {
+            set((s) => ({
+              versions: s.versions.map((v) =>
+                v.id === version.id ? { ...v, id: result.id } : v
+              ),
+            }))
+          }
+        }).catch(() => {})
+
         return version
       },
 
@@ -248,6 +264,21 @@ export const useVersionStore = create<VersionState>()(
           versions: [branchVersion, ...s.versions],
           activeBranches: { ...s.activeBranches, [version.productId]: name },
         }))
+
+        // Persist branch to DB (fire-and-forget)
+        trpcMutate<{ id: string }>('version.createBranch', {
+          productId: version.productId,
+          name,
+          baseVersionId: sourceVersionId,
+        }).then((result) => {
+          if (result?.id) {
+            set((s) => ({
+              branches: s.branches.map((b) =>
+                b.id === branch.id ? { ...b, id: result.id } : b
+              ),
+            }))
+          }
+        }).catch(() => {})
 
         return branch
       },

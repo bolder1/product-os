@@ -1,42 +1,169 @@
-import { WebSocketServer } from 'ws'
+import { WebSocketServer, WebSocket } from 'ws'
 import http from 'http'
+import * as Y from 'yjs'
+import { Awareness } from 'y-protocols/awareness'
+import * as syncProtocol from 'y-protocols/sync'
+import * as awarenessProtocol from 'y-protocols/awareness'
+import * as encoding from 'lib0/encoding'
+import * as decoding from 'lib0/decoding'
 
 const PORT = Number(process.env.YJS_PORT) || 4000
 
+// ---------------------------------------------------------------------------
+// Message types (matching y-websocket protocol)
+// ---------------------------------------------------------------------------
+const messageSync = 0
+const messageAwareness = 1
+
+// ---------------------------------------------------------------------------
+// In-memory document store
+// ---------------------------------------------------------------------------
+interface YjsRoom {
+  doc: Y.Doc
+  awareness: Awareness
+  conns: Map<WebSocket, Set<number>> // ws -> awareness client IDs
+}
+
+const rooms = new Map<string, YjsRoom>()
+
+function getOrCreateRoom(name: string): YjsRoom {
+  if (rooms.has(name)) return rooms.get(name)!
+
+  const doc = new Y.Doc()
+  const awareness = new Awareness(doc)
+
+  // Clean up awareness when a client disconnects
+  awareness.on('update', ({ added, updated, removed }: { added: number[]; updated: number[]; removed: number[] }) => {
+    const changedClients = [...added, ...updated, ...removed]
+    const encoder = encoding.createEncoder()
+    encoding.writeVarUint(encoder, messageAwareness)
+    encoding.writeVarUint8Array(encoder, awarenessProtocol.encodeAwarenessUpdate(awareness, changedClients))
+    const message = encoding.toUint8Array(encoder)
+
+    const room = rooms.get(name)
+    if (room) {
+      for (const [conn] of room.conns) {
+        if (conn.readyState === WebSocket.OPEN) {
+          conn.send(message)
+        }
+      }
+    }
+  })
+
+  const room: YjsRoom = { doc, awareness, conns: new Map() }
+  rooms.set(name, room)
+  return room
+}
+
+function handleMessage(room: YjsRoom, conn: WebSocket, message: Uint8Array) {
+  const decoder = decoding.createDecoder(message)
+  const messageType = decoding.readVarUint(decoder)
+
+  switch (messageType) {
+    case messageSync: {
+      const encoder = encoding.createEncoder()
+      encoding.writeVarUint(encoder, messageSync)
+      syncProtocol.readSyncMessage(decoder, encoder, room.doc, conn as unknown as object)
+      if (encoding.length(encoder) > 1) {
+        conn.send(encoding.toUint8Array(encoder))
+      }
+      break
+    }
+    case messageAwareness: {
+      const update = decoding.readVarUint8Array(decoder)
+      awarenessProtocol.applyAwarenessUpdate(room.awareness, update, conn)
+      break
+    }
+  }
+}
+
+function setupConnection(room: YjsRoom, conn: WebSocket) {
+  room.conns.set(conn, new Set())
+
+  conn.on('message', (data: Buffer | ArrayBuffer | Buffer[]) => {
+    const buf = data instanceof ArrayBuffer ? new Uint8Array(data) : new Uint8Array(data as Buffer)
+    handleMessage(room, conn, buf)
+  })
+
+  conn.on('close', () => {
+    const controlledIds = room.conns.get(conn)
+    room.conns.delete(conn)
+
+    // Remove awareness states for this connection
+    if (controlledIds) {
+      awarenessProtocol.removeAwarenessStates(room.awareness, [...controlledIds], null)
+    }
+
+    // Clean up empty rooms after a delay
+    if (room.conns.size === 0) {
+      setTimeout(() => {
+        const current = rooms.get(getRoomName(room))
+        if (current && current.conns.size === 0) {
+          current.doc.destroy()
+          rooms.delete(getRoomName(room))
+        }
+      }, 30000) // keep room alive for 30s in case of reconnects
+    }
+  })
+
+  // Send initial sync step 1
+  const encoder = encoding.createEncoder()
+  encoding.writeVarUint(encoder, messageSync)
+  syncProtocol.writeSyncStep1(encoder, room.doc)
+  conn.send(encoding.toUint8Array(encoder))
+
+  // Send current awareness state
+  const awarenessStates = room.awareness.getStates()
+  if (awarenessStates.size > 0) {
+    const encoder2 = encoding.createEncoder()
+    encoding.writeVarUint(encoder2, messageAwareness)
+    encoding.writeVarUint8Array(
+      encoder2,
+      awarenessProtocol.encodeAwarenessUpdate(room.awareness, [...awarenessStates.keys()])
+    )
+    conn.send(encoding.toUint8Array(encoder2))
+  }
+}
+
+function getRoomName(room: YjsRoom): string {
+  for (const [name, r] of rooms) {
+    if (r === room) return name
+  }
+  return 'unknown'
+}
+
+// ---------------------------------------------------------------------------
+// HTTP + WebSocket server
+// ---------------------------------------------------------------------------
 const server = http.createServer((_req, res) => {
+  if (_req.url === '/health') {
+    res.writeHead(200, { 'Content-Type': 'application/json' })
+    res.end(JSON.stringify({
+      status: 'ok',
+      rooms: rooms.size,
+      connections: [...rooms.values()].reduce((sum, r) => sum + r.conns.size, 0),
+    }))
+    return
+  }
   res.writeHead(200, { 'Content-Type': 'text/plain' })
   res.end('Product OS Yjs Collaboration Server')
 })
 
 const wss = new WebSocketServer({ server })
 
-// Track docs by room
-const rooms = new Map<string, Set<import('ws').WebSocket>>()
-
 wss.on('connection', (ws, req) => {
-  const room = new URL(req.url ?? '/', `http://localhost:${PORT}`).searchParams.get('room') ?? 'default'
+  const url = new URL(req.url ?? '/', `http://localhost:${PORT}`)
+  const roomName = url.searchParams.get('room') ?? 'default'
 
-  if (!rooms.has(room)) rooms.set(room, new Set())
-  const peers = rooms.get(room)!
-  peers.add(ws)
+  const room = getOrCreateRoom(roomName)
+  setupConnection(room, ws)
 
-  // Broadcast to all peers in the same room
-  ws.on('message', (data) => {
-    for (const peer of peers) {
-      if (peer !== ws && peer.readyState === ws.OPEN) {
-        peer.send(data)
-      }
-    }
-  })
-
-  ws.on('close', () => {
-    peers.delete(ws)
-    if (peers.size === 0) rooms.delete(room)
-  })
+  console.log(`[yjs] client connected to room "${roomName}" (${room.conns.size} peers)`)
 })
 
 server.listen(PORT, () => {
   console.log(`[yjs-server] listening on ws://localhost:${PORT}`)
+  console.log(`[yjs-server] health check at http://localhost:${PORT}/health`)
 })
 
 export { server, wss }

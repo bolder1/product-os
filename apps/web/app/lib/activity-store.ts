@@ -2,6 +2,7 @@
 
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import { trpcMutate } from './api'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -64,14 +65,33 @@ export const useActivityStore = create<ActivityState>()(
 
       addActivity: (data) => {
         activityCounter += 1
+        const tempId = `act-${Date.now()}-${activityCounter}`
         const activity: Activity = {
           ...data,
-          id: `act-${Date.now()}-${activityCounter}`,
+          id: tempId,
           timestamp: new Date().toISOString(),
         }
         set((state) => ({
           activities: [activity, ...state.activities].slice(0, 500),
         }))
+
+        // Persist to DB (fire-and-forget)
+        if (data.productId) {
+          trpcMutate<{ id: string }>('activity.create', {
+            productId: data.productId,
+            action: `${data.type}: ${data.title}`,
+            entityType: data.entityType ?? data.type,
+            entityId: data.entityId,
+            studioOrigin: data.studio,
+          }).then((result) => {
+            if (result?.id) {
+              set((state) => ({
+                activities: state.activities.map((a) => (a.id === tempId ? { ...a, id: result.id } : a)),
+              }))
+            }
+          }).catch(() => {})
+        }
+
         return activity
       },
 
