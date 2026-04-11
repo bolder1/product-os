@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useCallback, useEffect } from 'react'
-import { ChevronLeft, ChevronRight, SkipForward, Check } from 'lucide-react'
+import { ChevronLeft, ChevronRight, SkipForward, Check, LayoutTemplate } from 'lucide-react'
 import StepVision from './_components/steps/step-vision'
 import StepUsersFeatures from './_components/steps/step-users-features'
 import StepArchitecture from './_components/steps/step-architecture'
@@ -15,6 +15,7 @@ import { useActivityStore } from '../../../../lib/activity-store'
 import { useNotificationStore } from '../../../../lib/notification-store'
 import { useParams, useRouter } from 'next/navigation'
 import { useProduct } from '../layout'
+import { trpcMutate } from '../../../../lib/api'
 
 export interface PlanData {
   problem: string
@@ -101,83 +102,167 @@ export default function ProductPlannerPage() {
     setCurrentStep(4)
   }, [])
 
-  const handleLaunch = useCallback(() => {
-    const productName = String(params.productSlug).replace(/-/g, ' ')
+  const [isLaunching, setIsLaunching] = useState(false)
+
+  const handleLaunch = useCallback(async () => {
+    if (isLaunching) return
+    setIsLaunching(true)
+
+    const productName = currentProduct?.name ?? String(params.productSlug).replace(/-/g, ' ')
     const orgSlug = String(params.orgSlug)
 
-    scaffoldProduct(productId, productName)
+    try {
+      // ── 1. Write to local stores (optimistic) ──
+      scaffoldProduct(productId, productName)
 
-    const featureNodes = bulkAddNodes(
-      planData.features.map((f) => ({
-        kind: 'feature' as const,
-        label: f.name,
+      bulkAddNodes(
+        planData.features.map((f) => ({
+          kind: 'feature' as const,
+          label: f.name,
+          productId,
+          data: { description: f.description, priority: f.priority },
+        }))
+      )
+
+      bulkAddNodes(
+        planData.entities.map((e) => ({
+          kind: 'entity' as const,
+          label: e.name,
+          productId,
+          data: { fields: e.fields },
+        }))
+      )
+
+      addNode({
+        kind: 'plan',
+        label: `${productName} Plan`,
         productId,
-        data: { description: f.description, priority: f.priority },
-      }))
-    )
+        data: {
+          problem: planData.problem,
+          goals: planData.goals,
+          personas: planData.personas,
+          activeStudios: planData.activeStudios,
+        },
+      })
 
-    bulkAddNodes(
-      planData.entities.map((e) => ({
-        kind: 'entity' as const,
-        label: e.name,
+      const taskEntries = generatedTasks.map((gt) => ({
+        title: gt.title,
+        description: gt.description || '',
+        status: 'todo' as const,
+        priority: gt.priority,
+        assignee: {
+          id: gt.role.toLowerCase().replace(/\s+/g, '-'),
+          name: `Unassigned (${gt.role})`,
+          initials: gt.role.split(' ').map((w) => w[0]).join('').slice(0, 2),
+          role: gt.role,
+        },
+        dueDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        studio: gt.studio,
+        feature: gt.feature,
         productId,
-        data: { fields: e.fields },
-      }))
-    )
-
-    addNode({
-      kind: 'plan',
-      label: `${productName} Plan`,
-      productId,
-      data: {
-        problem: planData.problem,
-        goals: planData.goals,
-        personas: planData.personas,
-        activeStudios: planData.activeStudios,
-      },
-    })
-
-    const taskEntries = generatedTasks.map((gt) => ({
-      title: gt.title,
-      description: gt.description || '',
-      status: 'todo' as const,
-      priority: gt.priority,
-      assignee: {
-        id: gt.role.toLowerCase().replace(/\s+/g, '-'),
-        name: `Unassigned (${gt.role})`,
-        initials: gt.role.split(' ').map((w) => w[0]).join('').slice(0, 2),
         role: gt.role,
-      },
-      dueDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-      studio: gt.studio,
-      feature: gt.feature,
-      productId,
-      role: gt.role,
-      tags: [gt.effort],
-    }))
-    bulkAddTasks(taskEntries)
+        tags: [gt.effort],
+      }))
+      bulkAddTasks(taskEntries)
 
-    addActivity({
-      type: 'plan_created',
-      title: `Product plan launched for "${productName}"`,
-      description: `${planData.features.length} features, ${generatedTasks.length} tasks generated across ${planData.activeStudios.length} studios`,
-      actor: { id: 'current-user', name: 'You', initials: 'YO' },
-      productId,
-      studio: 'planner',
-    })
+      addActivity({
+        type: 'plan_created',
+        title: `Product plan launched for "${productName}"`,
+        description: `${planData.features.length} features, ${generatedTasks.length} tasks generated across ${planData.activeStudios.length} studios`,
+        actor: { id: 'current-user', name: 'You', initials: 'YO' },
+        productId,
+        studio: 'planner',
+      })
 
-    addNotification({
-      type: 'plan_ready',
-      title: 'Product Plan Launched',
-      body: `"${productName}" plan is ready with ${generatedTasks.length} tasks distributed across your team.`,
-      priority: 'high',
-      productId,
-      studio: 'planner',
-      actionUrl: `/${orgSlug}/${params.productSlug}/tasks`,
-    })
+      addNotification({
+        type: 'plan_ready',
+        title: 'Product Plan Launched',
+        body: `"${productName}" plan is ready with ${generatedTasks.length} tasks distributed across your team.`,
+        priority: 'high',
+        productId,
+        studio: 'planner',
+        actionUrl: `/${orgSlug}/${params.productSlug}/tasks`,
+      })
+
+      // ── 2. Write to real backend (DB) ──
+      // Create plan node in DB
+      const planNode = await trpcMutate<{ id: string }>('graph.createNode', {
+        productId,
+        kind: 'plan',
+        label: `${productName} Plan`,
+        data: {
+          problem: planData.problem,
+          goals: planData.goals,
+          personas: planData.personas,
+          activeStudios: planData.activeStudios,
+        },
+      }).catch(() => null)
+
+      // Create feature nodes in DB and collect IDs
+      const featureNodeIds: string[] = []
+      for (const f of planData.features) {
+        const node = await trpcMutate<{ id: string }>('graph.createNode', {
+          productId,
+          kind: 'feature',
+          label: f.name,
+          data: { description: f.description, priority: f.priority },
+        }).catch(() => null)
+        if (node) featureNodeIds.push(node.id)
+      }
+
+      // Create entity nodes in DB
+      const entityNodeIds: string[] = []
+      for (const e of planData.entities) {
+        const node = await trpcMutate<{ id: string }>('graph.createNode', {
+          productId,
+          kind: 'entity',
+          label: e.name,
+          data: { fields: e.fields },
+        }).catch(() => null)
+        if (node) entityNodeIds.push(node.id)
+      }
+
+      // Create edges: plan → features (contains)
+      if (planNode) {
+        for (const fid of featureNodeIds) {
+          await trpcMutate('graph.createEdge', {
+            productId,
+            sourceId: planNode.id,
+            targetId: fid,
+            kind: 'contains',
+          }).catch(() => null)
+        }
+      }
+
+      // Create tasks in DB for each generated task
+      for (const gt of generatedTasks) {
+        await trpcMutate('task.create', {
+          productId,
+          title: gt.title,
+          description: gt.description || '',
+          status: 'todo',
+          priority: gt.priority === 'critical' ? 'urgent' : gt.priority === 'high' ? 'high' : gt.priority === 'medium' ? 'medium' : 'low',
+          studioOrigin: gt.studio,
+        }).catch(() => null)
+      }
+
+      // Log activity in DB
+      await trpcMutate('activity.log', {
+        productId,
+        action: 'plan.launched',
+        entityType: 'plan',
+        entityId: planNode?.id,
+        studioOrigin: 'planner',
+      }).catch(() => null)
+
+    } catch {
+      // Local stores already updated optimistically — navigate regardless
+    } finally {
+      setIsLaunching(false)
+    }
 
     router.push(`/${orgSlug}/${params.productSlug}/control-tower`)
-  }, [params, planData, generatedTasks, productId, scaffoldProduct, bulkAddNodes, addNode, bulkAddTasks, addActivity, addNotification, router])
+  }, [isLaunching, params, planData, generatedTasks, productId, currentProduct, scaffoldProduct, bulkAddNodes, addNode, bulkAddTasks, addActivity, addNotification, router])
 
   const updatePlanData = useCallback(<K extends keyof PlanData>(key: K, value: PlanData[K]) => {
     setPlanData((prev) => ({ ...prev, [key]: value }))
@@ -282,9 +367,20 @@ export default function ProductPlannerPage() {
           })}
         </div>
 
-        <span className="ml-auto text-[10px] text-[var(--text-tertiary)] tabular-nums">
-          Step {currentStep}/{TOTAL_STEPS}
-        </span>
+        <div className="ml-auto flex items-center gap-2">
+          {currentStep === 1 && (
+            <button
+              onClick={() => setTemplateModalOpen(true)}
+              className="tool-btn flex items-center gap-1.5 px-2.5 h-6 rounded text-[11px] font-medium border border-[var(--accent-muted)] text-[var(--accent-text)] hover:bg-[var(--accent-muted)]/20 transition-colors"
+            >
+              <LayoutTemplate className="w-3 h-3" />
+              Start from Template
+            </button>
+          )}
+          <span className="text-[10px] text-[var(--text-tertiary)] tabular-nums">
+            Step {currentStep}/{TOTAL_STEPS}
+          </span>
+        </div>
       </div>
 
       {/* ── Main area: content + AI panel ── */}

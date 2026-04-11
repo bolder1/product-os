@@ -14,6 +14,20 @@ export interface VariantDef {
   props: Record<string, string>
 }
 
+/**
+ * A token binding maps a component property (e.g. "backgroundColor")
+ * to a brand token path (e.g. "color.primary.500").
+ */
+export interface TokenBinding {
+  id: string
+  /** The CSS property or component prop being bound */
+  property: string
+  /** The brand token path (e.g. "color.primary", "font.heading", "spacing.4") */
+  tokenPath: string
+  /** Resolved value from token (for preview) */
+  resolvedValue?: string
+}
+
 export interface ComponentDef {
   id: string
   name: string
@@ -22,6 +36,8 @@ export interface ComponentDef {
   props: PropDef[]
   variants: VariantDef[]
   usageCount: number
+  /** Token bindings — connects component styling to brand tokens */
+  tokenBindings?: TokenBinding[]
 }
 
 export const categories = ['All', 'Layout', 'Form', 'Data', 'Feedback', 'Navigation'] as const

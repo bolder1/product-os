@@ -1,7 +1,8 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { Calendar, Link2 } from 'lucide-react'
+import { Calendar, Link2, ExternalLink } from 'lucide-react'
+import { useParams, useRouter } from 'next/navigation'
 import { type Task, PRIORITY_CONFIG } from '../_data/mock-tasks'
 
 interface TaskCardProps {
@@ -10,8 +11,55 @@ interface TaskCardProps {
   onDragStart: (e: React.DragEvent, taskId: string) => void
 }
 
+/** Map a node kind to the studio route where it lives */
+const KIND_TO_STUDIO: Record<string, string> = {
+  Feature: 'planner',
+  feature: 'planner',
+  Module: 'planner',
+  module: 'planner',
+  Plan: 'planner',
+  plan: 'planner',
+  Component: 'components',
+  component: 'components',
+  Page: 'pages',
+  page: 'pages',
+  Screen: 'design',
+  screen: 'design',
+  Workflow: 'workflows',
+  workflow: 'workflows',
+  Entity: 'workflows',
+  entity: 'workflows',
+  Token: 'brand',
+  token: 'brand',
+  Route: 'code',
+  route: 'code',
+  Journey: 'design',
+  journey: 'design',
+  Asset: 'graphics',
+  asset: 'graphics',
+  Release: 'releases',
+  release: 'releases',
+  Task: 'tasks',
+  task: 'tasks',
+  Approval: 'approvals',
+  approval: 'approvals',
+  Insight: 'analytics',
+  insight: 'analytics',
+}
+
 export function TaskCard({ task, index, onDragStart }: TaskCardProps) {
   const priority = PRIORITY_CONFIG[task.priority]
+  const params = useParams()
+  const router = useRouter()
+  const orgSlug = params?.orgSlug as string
+  const productSlug = params?.productSlug as string
+
+  const handleLinkedNodeClick = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    if (!task.linkedNode) return
+    const studio = KIND_TO_STUDIO[task.linkedNode.kind] ?? 'planner'
+    router.push(`/${orgSlug}/${productSlug}/${studio}`)
+  }
 
   return (
     <motion.div
@@ -32,14 +80,18 @@ export function TaskCard({ task, index, onDragStart }: TaskCardProps) {
         {task.description}
       </p>
 
-      {/* Linked node */}
+      {/* Linked node — clickable to navigate to source studio */}
       {task.linkedNode && (
-        <div className="flex items-center gap-1.5 mb-3">
-          <Link2 className="w-3 h-3 text-[#64748B]" />
-          <span className="text-[10px] text-[#64748B] bg-white/[0.05] px-1.5 py-0.5 rounded">
+        <button
+          onClick={handleLinkedNodeClick}
+          className="flex items-center gap-1.5 mb-3 group/link hover:opacity-80 transition-opacity"
+        >
+          <Link2 className="w-3 h-3 text-[var(--accent)]" />
+          <span className="text-[10px] text-[var(--accent-text)] bg-[var(--accent)]/10 px-1.5 py-0.5 rounded">
             {task.linkedNode.kind}: {task.linkedNode.label}
           </span>
-        </div>
+          <ExternalLink className="w-2.5 h-2.5 text-[var(--accent)] opacity-0 group-hover/link:opacity-100 transition-opacity" />
+        </button>
       )}
 
       {/* Bottom row */}

@@ -6,9 +6,11 @@ import { useProduct } from '../layout'
 import { Box, Plus, Sparkles, Search, Trash2, LayoutTemplate, FormInput, Database, AlertCircle, Navigation as NavIcon } from 'lucide-react'
 import { type ComponentDef, type Category, categories, mockComponents } from './_data/mock-components'
 import { useGraphStore } from '../../../../lib/graph-store'
+import { useBrandTokens } from '../../../../lib/use-brand-tokens'
 import { ComponentDetail } from './_components/component-detail'
 import { ComponentCreateModal } from './_components/component-create-modal'
 import { StudioHealthBadge } from '../../../../components/shared/studio-health-badge'
+import { StudioEmptyState } from '../../../../components/shared/studio-empty-state'
 
 /* ------------------------------------------------------------------ */
 /*  Graph-node → local ComponentDef converter                         */
@@ -23,9 +25,10 @@ function nodeToComponent(n: { id: string; label: string; data: Record<string, un
       props: n.data.props ? JSON.parse(String(n.data.props)) : [],
       variants: n.data.variants ? JSON.parse(String(n.data.variants)) : [],
       usageCount: Number(n.data.usageCount || 0),
+      tokenBindings: n.data.tokenBindings ? JSON.parse(String(n.data.tokenBindings)) : [],
     }
   } catch {
-    return { id: n.id, name: n.label, category: 'Layout', description: '', props: [], variants: [], usageCount: 0 }
+    return { id: n.id, name: n.label, category: 'Layout', description: '', props: [], variants: [], usageCount: 0, tokenBindings: [] }
   }
 }
 
@@ -47,6 +50,9 @@ export default function ComponentBuilderPage() {
   const params = useParams<{ productSlug: string }>()
   const product = useProduct()
   const productId = product?.id ?? params.productSlug
+
+  /* --- brand tokens (for token binding) ---------------------------- */
+  const brandTokens = useBrandTokens(productId)
 
   /* --- graph store ------------------------------------------------ */
   const allNodes   = useGraphStore((s) => s.nodes)
@@ -108,6 +114,7 @@ export default function ComponentBuilderPage() {
             props: JSON.stringify(merged.props),
             variants: JSON.stringify(merged.variants),
             usageCount: String(merged.usageCount),
+            tokenBindings: JSON.stringify(merged.tokenBindings ?? []),
           },
         })
       }
@@ -127,6 +134,7 @@ export default function ComponentBuilderPage() {
           props: JSON.stringify(data.props),
           variants: JSON.stringify(data.variants),
           usageCount: '0',
+          tokenBindings: JSON.stringify(data.tokenBindings ?? []),
         },
       })
       setSelectedId(node.id)
@@ -273,8 +281,17 @@ export default function ComponentBuilderPage() {
               <ComponentDetail
                 component={selectedComponent}
                 onUpdate={handleUpdateComponent}
+                brandTokens={brandTokens}
               />
             </div>
+          ) : components.length === 0 && hasStoreData ? (
+            <StudioEmptyState
+              title="No Components Yet"
+              description="Create reusable UI building blocks with variants, props, and token bindings. Components are shared across Design Studio, Page Builder, and Code Studio."
+              icon={<Box className="w-6 h-6" />}
+              createLabel="New Component"
+              onCreate={() => setModalOpen(true)}
+            />
           ) : (
             <div className="flex flex-col items-center justify-center h-full gap-2 text-center">
               <Box className="w-5 h-5 text-[var(--text-tertiary)]" />

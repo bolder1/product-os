@@ -12,6 +12,7 @@ import {
   type Workflow,
 } from "./_data/mock-data";
 import { useGraphStore } from "../../../../lib/graph-store";
+import { StudioEmptyState } from "../../../../components/shared/studio-empty-state";
 import EntityList from "./_components/entity-list";
 import EntityEditor from "./_components/entity-editor";
 import WorkflowList from "./_components/workflow-list";
@@ -313,6 +314,14 @@ export default function WorkflowBuilderPage() {
               entities={entities}
               onChange={updateWorkflow}
               onDelete={deleteWorkflow}
+            />
+          ) : entities.length === 0 && workflows.length === 0 ? (
+            <StudioEmptyState
+              title="No Workflows Yet"
+              description="Model your product's business logic — entities, state machines, forms, and automations. Workflows drive pages, tasks, and approval chains."
+              icon={<GitBranch className="w-6 h-6" />}
+              createLabel="New Entity"
+              onCreate={addEntity}
             />
           ) : (
             <div className="flex flex-col items-center justify-center h-full gap-2 text-center">

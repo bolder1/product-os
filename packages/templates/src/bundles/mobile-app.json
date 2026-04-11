@@ -1,0 +1,72 @@
+{
+  "id": "tpl_mobile_app",
+  "name": "Mobile App Starter",
+  "description": "Mobile application product scaffold with onboarding, tab navigation, profile, push notifications, and offline-first architecture.",
+  "category": "mobile",
+  "tags": ["mobile", "ios", "android", "onboarding", "push-notifications", "offline"],
+  "version": "1.0.0",
+  "author": "Product OS",
+  "compatibility": "0.1.0",
+  "variables": [
+    { "key": "productName", "label": "App Name", "type": "text", "default": "My App" },
+    { "key": "primaryColor", "label": "Primary Color", "type": "color", "default": "#8B5CF6" },
+    { "key": "platform", "label": "Platform", "type": "select", "default": "cross-platform", "options": ["ios", "android", "cross-platform"] }
+  ],
+  "nodes": [
+    { "templateId": "mod_onboarding", "kind": "module", "label": "Onboarding", "data": { "description": "First-run onboarding experience with feature highlights and sign-up", "priority": "high" } },
+    { "templateId": "mod_home", "kind": "module", "label": "Home & Feed", "data": { "description": "Main home screen with personalised feed", "priority": "high" } },
+    { "templateId": "mod_profile", "kind": "module", "label": "Profile & Settings", "data": { "description": "User profile, preferences, and app settings", "priority": "medium" } },
+    { "templateId": "mod_notifications", "kind": "module", "label": "Notifications", "data": { "description": "Push notification management and in-app notification center", "priority": "medium" } },
+    { "templateId": "mod_search", "kind": "module", "label": "Search & Discover", "data": { "description": "Search functionality and content discovery", "priority": "medium" } },
+
+    { "templateId": "feat_splash", "kind": "feature", "label": "Splash & Welcome", "data": { "description": "Animated splash screen and welcome carousel", "status": "planned" } },
+    { "templateId": "feat_auth", "kind": "feature", "label": "Mobile Auth", "data": { "description": "Email, social, and biometric authentication", "status": "planned" } },
+    { "templateId": "feat_home_feed", "kind": "feature", "label": "Home Feed", "data": { "description": "Personalised content feed with pull-to-refresh", "status": "planned" } },
+    { "templateId": "feat_profile_edit", "kind": "feature", "label": "Edit Profile", "data": { "description": "Avatar upload, name, bio, and preferences", "status": "planned" } },
+    { "templateId": "feat_push", "kind": "feature", "label": "Push Notifications", "data": { "description": "FCM/APNs integration with deep linking", "status": "planned" } },
+
+    { "templateId": "screen_splash", "kind": "screen", "label": "Splash Screen", "data": { "publishState": "draft", "platform": "{{platform}}", "seoMetadata": { "title": "{{productName}}" } } },
+    { "templateId": "screen_onboarding", "kind": "screen", "label": "Onboarding Carousel", "data": { "publishState": "draft", "platform": "{{platform}}" } },
+    { "templateId": "screen_login", "kind": "screen", "label": "Login Screen", "data": { "publishState": "draft", "platform": "{{platform}}" } },
+    { "templateId": "screen_home", "kind": "screen", "label": "Home Screen", "data": { "publishState": "draft", "platform": "{{platform}}" } },
+    { "templateId": "screen_profile", "kind": "screen", "label": "Profile Screen", "data": { "publishState": "draft", "platform": "{{platform}}" } },
+    { "templateId": "screen_notifications", "kind": "screen", "label": "Notification Center", "data": { "publishState": "draft", "platform": "{{platform}}" } },
+    { "templateId": "screen_search", "kind": "screen", "label": "Search Screen", "data": { "publishState": "draft", "platform": "{{platform}}" } },
+
+    { "templateId": "entity_user_profile", "kind": "entity", "label": "User Profile", "data": { "displayField": "displayName", "fields": ["displayName", "email", "avatarUrl", "bio", "preferences", "pushToken", "lastActiveAt"] } },
+    { "templateId": "entity_notification", "kind": "entity", "label": "Notification", "data": { "displayField": "title", "fields": ["title", "body", "type", "deepLink", "read", "sentAt"] } },
+
+    { "templateId": "wf_onboarding", "kind": "workflow", "label": "Onboarding Flow", "data": { "states": ["splash", "carousel", "sign_up", "permissions", "home"], "transitions": [{ "from": "splash", "to": "carousel", "trigger": "splash_done" }, { "from": "carousel", "to": "sign_up", "trigger": "get_started" }, { "from": "sign_up", "to": "permissions", "trigger": "auth_success" }, { "from": "permissions", "to": "home", "trigger": "permissions_done" }] } },
+    { "templateId": "wf_push_delivery", "kind": "workflow", "label": "Push Notification Delivery", "data": { "states": ["created", "queued", "sent", "delivered", "opened", "failed"], "transitions": [{ "from": "created", "to": "queued", "trigger": "schedule" }, { "from": "queued", "to": "sent", "trigger": "dispatch" }, { "from": "sent", "to": "delivered", "trigger": "ack" }, { "from": "delivered", "to": "opened", "trigger": "tap" }] } },
+
+    { "templateId": "comp_tab_bar", "kind": "component", "label": "Tab Bar", "data": { "variants": ["default", "floating"], "slots": ["home", "search", "notifications", "profile"] } },
+    { "templateId": "comp_feed_card", "kind": "component", "label": "Feed Card", "data": { "variants": ["compact", "expanded", "media"], "props": { "title": "string", "subtitle": "string", "imageUrl": "string" } } },
+
+    { "templateId": "token_primary", "kind": "token", "label": "App Primary", "data": { "namespace": "color", "tokenType": "color", "value": "{{primaryColor}}", "semanticAlias": "brand-primary" } },
+    { "templateId": "token_bg", "kind": "token", "label": "App Background", "data": { "namespace": "color", "tokenType": "color", "value": "#060918", "semanticAlias": "bg-primary" } }
+  ],
+  "edges": [
+    { "sourceTemplateId": "mod_onboarding", "targetTemplateId": "feat_splash", "kind": "contains" },
+    { "sourceTemplateId": "mod_onboarding", "targetTemplateId": "feat_auth", "kind": "contains" },
+    { "sourceTemplateId": "mod_home", "targetTemplateId": "feat_home_feed", "kind": "contains" },
+    { "sourceTemplateId": "mod_profile", "targetTemplateId": "feat_profile_edit", "kind": "contains" },
+    { "sourceTemplateId": "mod_notifications", "targetTemplateId": "feat_push", "kind": "contains" },
+
+    { "sourceTemplateId": "feat_splash", "targetTemplateId": "screen_splash", "kind": "implements" },
+    { "sourceTemplateId": "feat_splash", "targetTemplateId": "screen_onboarding", "kind": "implements" },
+    { "sourceTemplateId": "feat_auth", "targetTemplateId": "screen_login", "kind": "implements" },
+    { "sourceTemplateId": "feat_home_feed", "targetTemplateId": "screen_home", "kind": "implements" },
+    { "sourceTemplateId": "feat_profile_edit", "targetTemplateId": "screen_profile", "kind": "implements" },
+    { "sourceTemplateId": "feat_push", "targetTemplateId": "screen_notifications", "kind": "implements" },
+
+    { "sourceTemplateId": "screen_splash", "targetTemplateId": "wf_onboarding", "kind": "references" },
+    { "sourceTemplateId": "screen_notifications", "targetTemplateId": "wf_push_delivery", "kind": "references" },
+    { "sourceTemplateId": "wf_onboarding", "targetTemplateId": "entity_user_profile", "kind": "references" },
+    { "sourceTemplateId": "wf_push_delivery", "targetTemplateId": "entity_notification", "kind": "references" },
+
+    { "sourceTemplateId": "screen_home", "targetTemplateId": "comp_tab_bar", "kind": "uses_component" },
+    { "sourceTemplateId": "screen_home", "targetTemplateId": "comp_feed_card", "kind": "uses_component" },
+    { "sourceTemplateId": "screen_home", "targetTemplateId": "token_primary", "kind": "uses_token" },
+    { "sourceTemplateId": "comp_tab_bar", "targetTemplateId": "token_primary", "kind": "uses_token" }
+  ]
+}

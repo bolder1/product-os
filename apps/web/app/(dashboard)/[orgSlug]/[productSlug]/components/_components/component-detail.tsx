@@ -2,25 +2,29 @@
 
 import { useState, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Eye, Settings2, Layers, ChevronDown } from 'lucide-react'
-import { type ComponentDef, type VariantDef, categoryColors, categories } from '../_data/mock-components'
+import { Eye, Settings2, Layers, Link2, ChevronDown } from 'lucide-react'
+import { type ComponentDef, type VariantDef, type TokenBinding, categoryColors, categories } from '../_data/mock-components'
 import { ComponentPreview } from './component-preview'
 import { VariantGrid } from './variant-grid'
+import { TokenBindingPanel } from './token-binding-panel'
+import type { BrandTokens } from '../../../../../lib/use-brand-tokens'
 
-type Tab = 'preview' | 'props' | 'variants'
+type Tab = 'preview' | 'props' | 'variants' | 'tokens'
 
 const tabs: { id: Tab; label: string; icon: React.ReactNode }[] = [
   { id: 'preview', label: 'Preview', icon: <Eye className="w-3.5 h-3.5" /> },
   { id: 'props', label: 'Props', icon: <Settings2 className="w-3.5 h-3.5" /> },
   { id: 'variants', label: 'Variants', icon: <Layers className="w-3.5 h-3.5" /> },
+  { id: 'tokens', label: 'Tokens', icon: <Link2 className="w-3.5 h-3.5" /> },
 ]
 
 interface ComponentDetailProps {
   component: ComponentDef
   onUpdate: (id: string, updates: Partial<ComponentDef>) => void
+  brandTokens?: BrandTokens
 }
 
-export function ComponentDetail({ component, onUpdate }: ComponentDetailProps) {
+export function ComponentDetail({ component, onUpdate, brandTokens }: ComponentDetailProps) {
   const [activeTab, setActiveTab] = useState<Tab>('preview')
   const [editingName, setEditingName] = useState(false)
   const [nameValue, setNameValue] = useState(component.name)
@@ -79,6 +83,13 @@ export function ComponentDetail({ component, onUpdate }: ComponentDetailProps) {
   const handleCategoryChange = (cat: string) => {
     onUpdate(component.id, { category: cat as ComponentDef['category'] })
   }
+
+  const handleTokenBindingsChange = useCallback(
+    (tokenBindings: TokenBinding[]) => {
+      onUpdate(component.id, { tokenBindings })
+    },
+    [component.id, onUpdate]
+  )
 
   return (
     <div className="flex flex-col h-full">
@@ -241,6 +252,39 @@ export function ComponentDetail({ component, onUpdate }: ComponentDetailProps) {
                 onAddVariant={handleAddVariant}
                 onDeleteVariant={handleDeleteVariant}
               />
+            </motion.div>
+          )}
+
+          {activeTab === 'tokens' && brandTokens && (
+            <motion.div
+              key="tokens"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.2 }}
+            >
+              <TokenBindingPanel
+                component={component}
+                brandTokens={brandTokens}
+                onBindingsChange={handleTokenBindingsChange}
+              />
+            </motion.div>
+          )}
+
+          {activeTab === 'tokens' && !brandTokens && (
+            <motion.div
+              key="tokens-empty"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.2 }}
+              className="flex flex-col items-center justify-center py-8 text-center"
+            >
+              <Link2 className="w-5 h-5 text-[var(--text-tertiary)] mb-2" />
+              <p className="text-[12px] text-[var(--text-secondary)]">Token binding unavailable</p>
+              <p className="text-[10px] text-[var(--text-tertiary)] mt-1 max-w-[200px]">
+                Brand tokens are loading or not yet configured.
+              </p>
             </motion.div>
           )}
         </AnimatePresence>

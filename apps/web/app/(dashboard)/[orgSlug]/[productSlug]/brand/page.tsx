@@ -3,10 +3,13 @@
 import { useState, useCallback, useMemo } from 'react'
 import { useParams } from 'next/navigation'
 import { useProduct } from '../layout'
-import { Palette, Sparkles, Save, Paintbrush, Type, Ruler, Layers, Eye } from 'lucide-react'
+import { Palette, Sparkles, Save, Paintbrush, Type, Ruler, Layers, Eye, Check, Code2 } from 'lucide-react'
 import { defaultBrandConfig } from './_data/default-brand'
 import type { BrandConfig, ColorGroup, TypographyConfig, SpacingConfig, EffectsConfig } from './_data/default-brand'
 import { useGraphStore } from '../../../../lib/graph-store'
+import { useBrandTokens } from '../../../../lib/use-brand-tokens'
+import { useEventBridge } from '../../../../lib/use-event-bridge'
+import { trpcMutate } from '../../../../lib/api'
 import ColorPalette from './_components/color-palette'
 import TypographySystem from './_components/typography-system'
 import SpacingSystem from './_components/spacing-system'
@@ -63,11 +66,24 @@ export default function BrandBuilderPage() {
     }
   })
 
+  // Cross-studio token resolution (also used for CSS export)
+  const brandTokens = useBrandTokens(productId)
+  const emitEvent = useEventBridge()
+
   const [activeTab, setActiveTab] = useState<TabId>('colors')
   const [aiPanelOpen, setAiPanelOpen] = useState(false)
+  const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved'>('idle')
+
+  const handleExportCSS = useCallback(() => {
+    const css = brandTokens.toCSSVariables()
+    navigator.clipboard.writeText(css).catch(() => {})
+  }, [brandTokens])
 
   // Persist brand data to graph store when Save is clicked
-  const handleSaveBrand = useCallback(() => {
+  const handleSaveBrand = useCallback(async () => {
+    if (saveState === 'saving') return
+    setSaveState('saving')
+
     const sections: { tokenType: string; label: string; payload: unknown }[] = [
       { tokenType: 'brand-colors', label: 'Brand Colors', payload: brandData.colorGroups },
       { tokenType: 'brand-typography', label: 'Brand Typography', payload: brandData.typography },
@@ -75,6 +91,7 @@ export default function BrandBuilderPage() {
       { tokenType: 'brand-effects', label: 'Brand Effects', payload: brandData.effects },
     ]
 
+    // 1. Save blob token nodes (local + DB via graph store)
     for (const section of sections) {
       const existing = tokenNodes.find((n) => (n.data as Record<string, unknown>).tokenType === section.tokenType)
       if (existing) {
@@ -91,7 +108,32 @@ export default function BrandBuilderPage() {
         })
       }
     }
-  }, [brandData, tokenNodes, productId, addNode, updateNode])
+
+    // 2. Emit brand.token.updated event to backend (fire-and-forget)
+    trpcMutate('activity.log', {
+      productId,
+      action: 'brand.token.updated',
+      entityType: 'token',
+      studioOrigin: 'brand',
+      meta: {
+        colorCount: brandData.colorGroups.length,
+        fonts: [brandData.typography.headingFont, brandData.typography.bodyFont],
+      },
+    }).catch(() => {})
+
+    // 3. Emit client-side event for cross-studio reactivity
+    emitEvent('brand.tokens.changed', {
+      productId,
+      data: {
+        colorCount: brandData.colorGroups.length,
+        headingFont: brandData.typography.headingFont,
+        bodyFont: brandData.typography.bodyFont,
+      },
+    })
+
+    setSaveState('saved')
+    setTimeout(() => setSaveState('idle'), 2000)
+  }, [saveState, brandData, tokenNodes, productId, addNode, updateNode, emitEvent])
 
   // ── Handlers ──
 
@@ -192,6 +234,14 @@ export default function BrandBuilderPage() {
 
           <div className="flex items-center gap-1">
             <button
+              onClick={handleExportCSS}
+              className="tool-btn flex items-center gap-1.5 px-2.5 h-6 rounded text-[11px] font-medium text-[var(--text-secondary)] bg-transparent border border-transparent hover:bg-[var(--bg-elevated)] hover:border-[var(--border-default)] transition-colors"
+              title="Copy CSS custom properties to clipboard"
+            >
+              <Code2 className="w-3 h-3" />
+              Export CSS
+            </button>
+            <button
               onClick={() => setAiPanelOpen(!aiPanelOpen)}
               className="tool-btn flex items-center gap-1.5 px-2.5 h-6 rounded text-[11px] font-medium bg-[var(--accent-muted)] text-[var(--accent-text)] border border-[var(--border-accent)] hover:bg-[var(--surface-selected-strong)] transition-colors"
             >
@@ -200,10 +250,15 @@ export default function BrandBuilderPage() {
             </button>
             <button
               onClick={handleSaveBrand}
-              className="tool-btn flex items-center gap-1.5 px-2.5 h-6 rounded text-[11px] font-medium text-[var(--text-primary)] bg-[var(--bg-elevated)] border border-[var(--border-default)] hover:bg-[var(--surface-hover)] transition-colors"
+              disabled={saveState === 'saving'}
+              className={`tool-btn flex items-center gap-1.5 px-2.5 h-6 rounded text-[11px] font-medium transition-colors ${
+                saveState === 'saved'
+                  ? 'text-emerald-400 bg-emerald-500/10 border border-emerald-500/20'
+                  : 'text-[var(--text-primary)] bg-[var(--bg-elevated)] border border-[var(--border-default)] hover:bg-[var(--surface-hover)]'
+              }`}
             >
-              <Save className="w-3 h-3" />
-              Save
+              {saveState === 'saved' ? <Check className="w-3 h-3" /> : <Save className="w-3 h-3" />}
+              {saveState === 'saving' ? 'Saving…' : saveState === 'saved' ? 'Saved' : 'Save'}
             </button>
           </div>
         </div>

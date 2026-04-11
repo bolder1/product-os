@@ -12,6 +12,7 @@ import { plannerRouter } from './routers/planner'
 import { activityRouter } from './routers/activity'
 import { versionRouter } from './routers/version'
 import { connectorRouter } from './routers/connector'
+import { memberRouter } from './routers/member'
 
 export const appRouter = router({
   auth: authRouter,
@@ -27,6 +28,7 @@ export const appRouter = router({
   activity: activityRouter,
   version: versionRouter,
   connector: connectorRouter,
+  member: memberRouter,
 })
 
 export type AppRouter = typeof appRouter

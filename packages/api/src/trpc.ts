@@ -2,6 +2,11 @@ import { initTRPC, TRPCError } from '@trpc/server'
 import superjson from 'superjson'
 import { db } from '@product-os/db'
 import type { Database } from '@product-os/db'
+import { eventBus, initializeEventHandlers } from '@product-os/events'
+import type { EventBus } from '@product-os/events'
+
+// Initialize event handlers once at module load
+initializeEventHandlers()
 
 export interface Session {
   userId: string
@@ -12,6 +17,7 @@ export interface Session {
 export interface TRPCContext {
   db: Database
   session: Session | null
+  eventBus: EventBus
 }
 
 /**
@@ -24,7 +30,7 @@ export async function createTRPCContext(opts: {
   const token = opts.headers.get('authorization')?.replace('Bearer ', '')
 
   if (!token) {
-    return { db, session: null }
+    return { db, session: null, eventBus }
   }
 
   // Resolve session from the token via the sessions table
@@ -42,7 +48,7 @@ export async function createTRPCContext(opts: {
     .limit(1)
 
   if (!sessionRow) {
-    return { db, session: null }
+    return { db, session: null, eventBus }
   }
 
   // Resolve org from x-org-id header
@@ -62,6 +68,7 @@ export async function createTRPCContext(opts: {
 
   return {
     db,
+    eventBus,
     session: {
       userId: sessionRow.userId,
       orgId,

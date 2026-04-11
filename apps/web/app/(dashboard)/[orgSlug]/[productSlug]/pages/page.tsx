@@ -12,6 +12,7 @@ import { SectionProperties } from './_components/section-properties'
 import { PagePreview } from './_components/page-preview'
 import { StudioHealthBadge } from '../../../../components/shared/studio-health-badge'
 import { AnalyticsOverlay } from '../../../../components/shared/analytics-overlay'
+import { StudioEmptyState } from '../../../../components/shared/studio-empty-state'
 
 export default function PageBuilderPage() {
   const params = useParams<{ productSlug: string }>()
@@ -253,6 +254,14 @@ export default function PageBuilderPage() {
               onSelectSection={setSelectedSectionId}
               onAddSection={handleAddSection}
               onDeleteSection={handleDeleteSection}
+            />
+          ) : pages.length === 0 ? (
+            <StudioEmptyState
+              title="No Pages Yet"
+              description="Build pages by assembling components into sections. Define page routes, navigation, SEO metadata, and publish workflows."
+              icon={<FileText className="w-6 h-6" />}
+              createLabel="New Page"
+              onCreate={handleAddPage}
             />
           ) : (
             <div className="flex flex-col items-center justify-center h-full text-center">

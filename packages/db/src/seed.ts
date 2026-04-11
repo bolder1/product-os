@@ -158,35 +158,62 @@ async function seed() {
   ])
   console.log('  ✓ Notifications: 2 created')
 
-  // 11. Create sample template bundle
-  await db.insert(schema.templateBundles).values({
-    name: 'SaaS Starter',
-    description: 'Complete SaaS product template with auth, dashboard, settings, and billing pages',
-    category: 'product',
-    tags: ['saas', 'starter', 'dashboard', 'billing'],
-    bundle: {
-      nodes: [
-        { kind: 'module', label: 'Auth' },
-        { kind: 'module', label: 'Dashboard' },
-        { kind: 'module', label: 'Settings' },
-        { kind: 'module', label: 'Billing' },
-        { kind: 'page', label: 'Login Page' },
-        { kind: 'page', label: 'Dashboard Home' },
-        { kind: 'page', label: 'User Settings' },
-        { kind: 'page', label: 'Billing Page' },
-      ],
-      edges: [
-        { from: 'Auth', to: 'Login Page', kind: 'contains' },
-        { from: 'Dashboard', to: 'Dashboard Home', kind: 'contains' },
-        { from: 'Settings', to: 'User Settings', kind: 'contains' },
-        { from: 'Billing', to: 'Billing Page', kind: 'contains' },
-      ],
+  // 11. Create all 5 built-in template bundles
+  const templateBundleValues = [
+    {
+      name: 'SaaS Starter',
+      description: 'Complete SaaS product scaffold with auth, dashboard, settings, billing pages, user management workflows, and design tokens.',
+      category: 'saas',
+      tags: ['saas', 'dashboard', 'auth', 'billing', 'settings'],
+      bundle: (await import('../../../templates/src/bundles/saas-starter.json', { with: { type: 'json' } })).default,
+      isPublic: true,
+      isBuiltIn: true,
+      createdBy: user.id,
     },
-    isPublic: true,
-    isBuiltIn: true,
-    createdBy: user.id,
-  })
-  console.log('  ✓ Template bundle: SaaS Starter')
+    {
+      name: 'OpsPilot — Internal Operations',
+      description: 'Internal operations SaaS for employee onboarding, access requests, asset provisioning, service requests, and policy acknowledgement.',
+      category: 'internal_ops',
+      tags: ['ops', 'internal', 'onboarding', 'hr', 'service-desk', 'approvals'],
+      bundle: (await import('../../../templates/src/bundles/ops-pilot.json', { with: { type: 'json' } })).default,
+      isPublic: true,
+      isBuiltIn: true,
+      createdBy: user.id,
+    },
+    {
+      name: 'Marketing Landing Page',
+      description: 'Marketing landing page with hero, features showcase, pricing tiers, testimonials, and call-to-action sections.',
+      category: 'marketing',
+      tags: ['landing-page', 'marketing', 'pricing', 'hero', 'testimonials'],
+      bundle: (await import('../../../templates/src/bundles/landing-page.json', { with: { type: 'json' } })).default,
+      isPublic: true,
+      isBuiltIn: true,
+      createdBy: user.id,
+    },
+    {
+      name: 'Mobile App Starter',
+      description: 'Mobile application scaffold with onboarding, tab navigation, profile, push notifications, and offline-first architecture.',
+      category: 'mobile',
+      tags: ['mobile', 'ios', 'android', 'onboarding', 'push-notifications'],
+      bundle: (await import('../../../templates/src/bundles/mobile-app.json', { with: { type: 'json' } })).default,
+      isPublic: true,
+      isBuiltIn: true,
+      createdBy: user.id,
+    },
+    {
+      name: 'Design System Starter',
+      description: 'Comprehensive design system with tokens (colors, typography, spacing, shadows), 12 base components with variants, and documentation pages.',
+      category: 'design_system',
+      tags: ['design-system', 'tokens', 'components', 'typography', 'colors'],
+      bundle: (await import('../../../templates/src/bundles/design-system.json', { with: { type: 'json' } })).default,
+      isPublic: true,
+      isBuiltIn: true,
+      createdBy: user.id,
+    },
+  ]
+
+  await db.insert(schema.templateBundles).values(templateBundleValues)
+  console.log(`  ✓ Template bundles: ${templateBundleValues.length} created`)
 
   // 12. Activity log entries
   await db.insert(schema.activityLog).values([

@@ -11,12 +11,13 @@ import {
   Plus,
   Check,
   User,
+  ExternalLink,
 } from 'lucide-react'
 import { type PanelTask, panelTasks } from './tasks-panel-data'
 import { useTaskStore } from '../../lib/task-store'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter, usePathname } from 'next/navigation'
 
-type FilterTab = 'all' | 'mine' | 'overdue' | 'by_studio'
+type FilterTab = 'all' | 'mine' | 'overdue' | 'by_studio' | 'this_studio'
 type StatusGroup = 'in_progress' | 'todo' | 'in_review'
 
 const STATUS_ORDER: StatusGroup[] = ['in_progress', 'todo', 'in_review']
@@ -61,9 +62,14 @@ export function TasksPanel() {
   const [mounted, setMounted] = useState(false)
 
   const params = useParams()
+  const router = useRouter()
+  const pathname = usePathname()
   const productId = params?.orgSlug && params?.productSlug
     ? `${params.orgSlug}-${params.productSlug}`
     : null
+  const orgSlug = params?.orgSlug as string | undefined
+  const productSlug = params?.productSlug as string | undefined
+  const currentStudio = pathname?.split('/')[3] || ''
   const { tasks: storeTasks, moveTask } = useTaskStore()
 
   const tasks: PanelTask[] = useMemo(() => {
@@ -113,10 +119,12 @@ export function TasksPanel() {
         return activeTasks.filter((t) => new Date(t.dueDate) < now)
       case 'by_studio':
         return [...activeTasks].sort((a, b) => a.studio.localeCompare(b.studio))
+      case 'this_studio':
+        return activeTasks.filter((t) => t.studio === currentStudio)
       default:
         return activeTasks
     }
-  }, [activeTasks, activeFilter])
+  }, [activeTasks, activeFilter, currentStudio])
 
   const grouped = useMemo(() => {
     const map: Record<StatusGroup, PanelTask[]> = {
@@ -135,6 +143,15 @@ export function TasksPanel() {
   const markDone = (id: string) => {
     moveTask(id, 'done')
     if (expandedTaskId === id) setExpandedTaskId(null)
+  }
+
+  const navigateToStudio = (studio: string) => {
+    if (!orgSlug || !productSlug) return
+    const studioPath = `/${orgSlug}/${productSlug}/${studio}`
+    if (pathname !== studioPath) {
+      router.push(studioPath)
+    }
+    setIsOpen(false)
   }
 
   const formatDate = (d: string) => {
@@ -201,9 +218,10 @@ export function TasksPanel() {
               {(
                 [
                   ['all', 'All'],
+                  ['this_studio', 'This Studio'],
                   ['mine', 'Mine'],
                   ['overdue', 'Overdue'],
-                  ['by_studio', 'Studio'],
+                  ['by_studio', 'By Studio'],
                 ] as [FilterTab, string][]
               ).map(([key, label]) => (
                 <button
@@ -328,6 +346,18 @@ export function TasksPanel() {
                                 <User size={10} />
                                 Reassign
                               </button>
+                              {task.studio && task.studio !== currentStudio && (
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    navigateToStudio(task.studio)
+                                  }}
+                                  className="tool-btn text-[10px] text-[var(--accent-text)]"
+                                >
+                                  <ExternalLink size={10} />
+                                  Open {task.studio}
+                                </button>
+                              )}
                             </div>
                           </div>
                         )}

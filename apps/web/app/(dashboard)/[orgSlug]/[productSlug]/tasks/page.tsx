@@ -2,17 +2,18 @@
 
 import { useState, useCallback, useMemo } from 'react'
 import { useParams } from 'next/navigation'
-import { Plus, LayoutGrid, List, Sparkles, Filter } from 'lucide-react'
+import { Plus, LayoutGrid, List, Sparkles, Filter, GanttChart } from 'lucide-react'
 import { useProduct } from '../layout'
 import { type Task, mockTasks } from './_data/mock-tasks'
 import { TaskBoard } from './_components/task-board'
 import { TaskList } from './_components/task-list'
+import { TaskTimeline } from './_components/task-timeline'
 import { TaskFiltersBar, type TaskFilters } from './_components/task-filters'
 import { TaskCreateModal } from './_components/task-create-modal'
 import { useTaskStore } from '../../../../lib/task-store'
 import { useActivityStore } from '../../../../lib/activity-store'
 
-type ViewMode = 'board' | 'list'
+type ViewMode = 'board' | 'list' | 'timeline'
 
 /** Convert a Zustand store task to the local Task format used by board/list components */
 function storeTaskToLocal(t: ReturnType<typeof useTaskStore.getState>['tasks'][number]): Task {
@@ -157,28 +158,27 @@ export default function TasksPage() {
 
           {/* View toggle */}
           <div className="flex items-center border border-[var(--border-default)] rounded-[var(--radius-sm)] bg-[var(--bg-workspace)]">
-            <button
-              onClick={() => setView('board')}
-              className={`flex items-center gap-1 px-2 py-0.5 text-[11px] font-medium ${
-                view === 'board'
-                  ? 'text-[var(--text-primary)] bg-[var(--bg-elevated)]'
-                  : 'text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]'
-              }`}
-            >
-              <LayoutGrid className="w-3 h-3" />
-              Board
-            </button>
-            <button
-              onClick={() => setView('list')}
-              className={`flex items-center gap-1 px-2 py-0.5 text-[11px] font-medium ${
-                view === 'list'
-                  ? 'text-[var(--text-primary)] bg-[var(--bg-elevated)]'
-                  : 'text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]'
-              }`}
-            >
-              <List className="w-3 h-3" />
-              List
-            </button>
+            {([
+              { id: 'board' as const, icon: LayoutGrid, label: 'Board' },
+              { id: 'list' as const, icon: List, label: 'List' },
+              { id: 'timeline' as const, icon: GanttChart, label: 'Timeline' },
+            ]).map((v) => {
+              const Icon = v.icon
+              return (
+                <button
+                  key={v.id}
+                  onClick={() => setView(v.id)}
+                  className={`flex items-center gap-1 px-2 py-0.5 text-[11px] font-medium ${
+                    view === v.id
+                      ? 'text-[var(--text-primary)] bg-[var(--bg-elevated)]'
+                      : 'text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]'
+                  }`}
+                >
+                  <Icon className="w-3 h-3" />
+                  {v.label}
+                </button>
+              )
+            })}
           </div>
 
           {/* New task */}
@@ -201,10 +201,14 @@ export default function TasksPage() {
 
       {/* ── Main content ── */}
       <div className="flex-1 min-h-0 bg-[var(--bg-workspace)]">
-        {view === 'board' ? (
+        {view === 'board' && (
           <TaskBoard tasks={filteredTasks} onUpdateTask={handleUpdateTask} />
-        ) : (
+        )}
+        {view === 'list' && (
           <TaskList tasks={filteredTasks} onUpdateTask={handleUpdateTask} />
+        )}
+        {view === 'timeline' && (
+          <TaskTimeline tasks={filteredTasks} onUpdateTask={handleUpdateTask} />
         )}
       </div>
 
