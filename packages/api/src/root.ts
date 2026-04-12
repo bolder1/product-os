@@ -15,6 +15,8 @@ import { connectorRouter } from './routers/connector'
 import { memberRouter } from './routers/member'
 import { componentRouter } from './routers/component'
 import { designRouter } from './routers/design'
+import { pageRouter } from './routers/page'
+import { workflowRouter } from './routers/workflow'
 
 export const appRouter = router({
   auth: authRouter,
@@ -33,6 +35,8 @@ export const appRouter = router({
   member: memberRouter,
   component: componentRouter,
   design: designRouter,
+  page: pageRouter,
+  workflow: workflowRouter,
 })
 
 export type AppRouter = typeof appRouter

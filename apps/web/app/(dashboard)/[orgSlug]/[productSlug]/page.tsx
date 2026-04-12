@@ -83,7 +83,7 @@ export default function ProductOverview({
   }
 
   return (
-    <motion.div initial="hidden" animate="visible" variants={stagger}>
+    <motion.div initial="hidden" animate="visible" variants={stagger} className="p-6 pb-12">
       {/* Product Header */}
       <motion.div className="mb-8" variants={fadeUp} custom={0}>
         <div className="flex items-center gap-4">

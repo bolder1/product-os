@@ -84,7 +84,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
   line-height: 1.45;
   letter-spacing: -0.003em;
-  overflow: hidden;
+  overflow-x: hidden;
 }
 
 /* ── Scrollbar — invisible until hover ── */
