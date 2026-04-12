@@ -77,6 +77,22 @@ export const EVENT_TYPES = [
   'design.screen.updated',
   'design.screen.deleted',
   'design.component.placed',
+
+  // Pages
+  'page.created',
+  'page.updated',
+  'page.deleted',
+  'page.published',
+  'page.unpublished',
+
+  // Workflows (entities + state machines + automations)
+  'workflow.entity.created',
+  'workflow.entity.updated',
+  'workflow.entity.deleted',
+  'workflow.created',
+  'workflow.updated',
+  'workflow.deleted',
+  'workflow.automation.created',
 ] as const;
 
 export type EventType = (typeof EVENT_TYPES)[number];
@@ -358,6 +374,71 @@ export const DesignComponentPlacedPayload = z.object({
   userId: z.string(),
 });
 
+// Pages (Phase 18)
+export const PageCreatedPayload = z.object({
+  nodeId: z.string(),
+  productId: z.string(),
+  label: z.string(),
+  slug: z.string(),
+  userId: z.string(),
+});
+export const PageUpdatedPayload = z.object({
+  nodeId: z.string(),
+  productId: z.string(),
+  label: z.string(),
+  version: z.number().optional(),
+  userId: z.string(),
+});
+export const PageDeletedPayload = z.object({
+  nodeId: z.string(),
+  productId: z.string(),
+  userId: z.string(),
+});
+// Note: PagePublishedPayload and PageUnpublishedPayload already exist above
+
+// Workflows (Phase 18)
+export const WorkflowEntityCreatedPayload = z.object({
+  nodeId: z.string(),
+  productId: z.string(),
+  label: z.string(),
+  userId: z.string(),
+});
+export const WorkflowEntityUpdatedPayload = z.object({
+  nodeId: z.string(),
+  productId: z.string(),
+  label: z.string(),
+  userId: z.string(),
+});
+export const WorkflowEntityDeletedPayload = z.object({
+  nodeId: z.string(),
+  productId: z.string(),
+  userId: z.string(),
+});
+export const WorkflowCreatedPayload = z.object({
+  nodeId: z.string(),
+  productId: z.string(),
+  label: z.string(),
+  stateCount: z.number(),
+  userId: z.string(),
+});
+export const WorkflowUpdatedPayload = z.object({
+  nodeId: z.string(),
+  productId: z.string(),
+  label: z.string(),
+  userId: z.string(),
+});
+export const WorkflowDeletedPayload = z.object({
+  nodeId: z.string(),
+  productId: z.string(),
+  userId: z.string(),
+});
+export const WorkflowAutomationCreatedPayload = z.object({
+  nodeId: z.string(),
+  label: z.string(),
+  triggerType: z.string(),
+  userId: z.string(),
+});
+
 // ---------------------------------------------------------------------------
 // Payload map — maps each EventType to its Zod schema
 // ---------------------------------------------------------------------------
@@ -404,6 +485,16 @@ export const PayloadSchemas = {
   'design.screen.updated': DesignScreenUpdatedPayload,
   'design.screen.deleted': DesignScreenDeletedPayload,
   'design.component.placed': DesignComponentPlacedPayload,
+  'page.created': PageCreatedPayload,
+  'page.updated': PageUpdatedPayload,
+  'page.deleted': PageDeletedPayload,
+  'workflow.entity.created': WorkflowEntityCreatedPayload,
+  'workflow.entity.updated': WorkflowEntityUpdatedPayload,
+  'workflow.entity.deleted': WorkflowEntityDeletedPayload,
+  'workflow.created': WorkflowCreatedPayload,
+  'workflow.updated': WorkflowUpdatedPayload,
+  'workflow.deleted': WorkflowDeletedPayload,
+  'workflow.automation.created': WorkflowAutomationCreatedPayload,
 } as const satisfies Record<EventType, z.ZodTypeAny>;
 
 // ---------------------------------------------------------------------------
