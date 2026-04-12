@@ -3,14 +3,17 @@
 import { useState, useCallback } from 'react'
 import { useParams } from 'next/navigation'
 import { useProduct } from '../layout'
-import { Sparkles, Plus, ScanSearch, PenTool, Layers, ChevronDown, MousePointer2, Hand, Square, Type, Image, Minus } from 'lucide-react'
+import { Sparkles, Plus, ScanSearch, PenTool, Layers, ChevronDown, MousePointer2, Hand, Square, Type, Image, Minus, Package, ArrowUpRight } from 'lucide-react'
 import { mockScreens, type ScreenDef, type ElementDef } from './_data/mock-screens'
 import ScreenList from './_components/screen-list'
 import DesignCanvas from './_components/design-canvas'
 import PropertiesPanel from './_components/properties-panel'
 import InspectPanel from './_components/inspect-panel'
+import { ComponentPalette } from './_components/component-palette'
+import { ExtractComponentModal } from './_components/extract-component-modal'
 import { StudioHealthBadge } from '../../../../components/shared/studio-health-badge'
 import { AnalyticsOverlay } from '../../../../components/shared/analytics-overlay'
+import { useGraphStore } from '../../../../lib/graph-store'
 
 let nextScreenId = 100
 let nextElementId = 1000
@@ -25,6 +28,11 @@ export default function DesignStudioPage() {
   const [selectedElementId, setSelectedElementId] = useState<string | null>(null)
   const [inspectMode, setInspectMode] = useState(false)
   const [rightTab, setRightTab] = useState<'properties' | 'inspect'>('properties')
+  const [componentPaletteOpen, setComponentPaletteOpen] = useState(false)
+  const [extractModalOpen, setExtractModalOpen] = useState(false)
+
+  /* Graph store for component placement */
+  const addNode = useGraphStore((s) => s.addNode)
 
   const selectedScreen = screens.find((s) => s.id === selectedScreenId) ?? null
   const selectedElement =
@@ -115,6 +123,76 @@ export default function DesignStudioPage() {
     else setRightTab('properties')
   }, [])
 
+  /* ── Component palette: place component on canvas ── */
+  const handlePlaceComponent = useCallback(
+    (componentId: string, componentName: string) => {
+      if (!selectedScreenId) return
+      const id = `el-comp-${nextElementId++}`
+      const newEl: ElementDef = {
+        id,
+        type: 'ComponentInstance',
+        x: 40,
+        y: 40,
+        width: 200,
+        height: 100,
+        style: {
+          background: 'rgba(6,182,212,0.08)',
+          border: '1px dashed rgba(6,182,212,0.4)',
+          borderRadius: '8px',
+        },
+        content: componentName,
+      }
+      setScreens((prev) =>
+        prev.map((s) =>
+          s.id === selectedScreenId ? { ...s, elements: [...s.elements, newEl] } : s,
+        ),
+      )
+      setSelectedElementId(id)
+    },
+    [selectedScreenId],
+  )
+
+  /* ── Extract selection to component ── */
+  const handleExtractComponent = useCallback(
+    (name: string, category: string) => {
+      if (!selectedElement || !selectedScreenId) return
+
+      // Create component node in graph store
+      addNode({
+        kind: 'component',
+        label: name,
+        productId,
+        data: {
+          category,
+          description: `Extracted from design — ${selectedScreen?.name ?? 'unknown screen'}`,
+          props: JSON.stringify([]),
+          variants: JSON.stringify([]),
+          tokenBindings: JSON.stringify([]),
+          elements: JSON.stringify([{
+            type: selectedElement.type,
+            width: selectedElement.width,
+            height: selectedElement.height,
+            style: selectedElement.style,
+            content: selectedElement.content,
+          }]),
+        },
+      })
+
+      // Replace the original element with a ComponentInstance reference
+      handleUpdateElement(selectedElement.id, {
+        type: 'ComponentInstance',
+        content: name,
+        style: {
+          ...selectedElement.style,
+          background: 'rgba(6,182,212,0.08)',
+          border: '1px dashed rgba(6,182,212,0.4)',
+          borderRadius: '8px',
+        },
+      })
+    },
+    [selectedElement, selectedScreenId, selectedScreen, addNode, productId, handleUpdateElement],
+  )
+
   // ── Render ──
 
   return (
@@ -149,10 +227,29 @@ export default function DesignStudioPage() {
           <button className="tool-btn" title="Divider" onClick={() => handleAddElement('Divider')}>
             <Minus className="w-3.5 h-3.5" />
           </button>
+          <div className="w-px h-4 bg-[var(--border-default)] mx-1" />
+          <button
+            onClick={() => setComponentPaletteOpen((v) => !v)}
+            className={`tool-btn ${componentPaletteOpen ? 'text-[var(--accent-text)] bg-[var(--accent)]/[0.08]' : ''}`}
+            title="Component palette"
+          >
+            <Package className="w-3.5 h-3.5" />
+            <span className="text-[11px]">Components</span>
+          </button>
         </div>
 
         {/* Right: actions */}
         <div className="flex items-center gap-1">
+          {selectedElement && selectedElement.type !== 'ComponentInstance' && (
+            <button
+              onClick={() => setExtractModalOpen(true)}
+              className="tool-btn text-[var(--accent-text)]"
+              title="Extract to component"
+            >
+              <ArrowUpRight className="w-3.5 h-3.5" />
+              <span className="text-[11px]">Extract</span>
+            </button>
+          )}
           <button
             onClick={() => handleSetInspectMode(!inspectMode)}
             className={`tool-btn ${inspectMode ? 'text-[var(--accent-text)] bg-[var(--accent)]/[0.08]' : ''}`}
@@ -199,8 +296,15 @@ export default function DesignStudioPage() {
           />
         </div>
 
-        {/* Center — Canvas */}
-        <div className="flex-1 min-w-0 bg-[var(--bg-workspace)]">
+        {/* Center — Canvas (with palette overlay) */}
+        <div className="flex-1 min-w-0 bg-[var(--bg-workspace)] relative">
+          {/* Component Palette Overlay */}
+          <ComponentPalette
+            productId={productId}
+            open={componentPaletteOpen}
+            onClose={() => setComponentPaletteOpen(false)}
+            onPlaceComponent={handlePlaceComponent}
+          />
           <DesignCanvas
             screen={selectedScreen}
             selectedElementId={selectedElementId}
@@ -238,6 +342,14 @@ export default function DesignStudioPage() {
           )}
         </div>
       </div>
+
+      {/* ── Extract Component Modal ── */}
+      <ExtractComponentModal
+        open={extractModalOpen}
+        onClose={() => setExtractModalOpen(false)}
+        selectedElements={selectedElement ? [selectedElement] : []}
+        onExtract={handleExtractComponent}
+      />
 
       {/* ── Utility styles ── */}
       <style jsx global>{`

@@ -58,6 +58,25 @@ export const EVENT_TYPES = [
 
   // Notifications
   'notification.created',
+
+  // Members
+  'member.invited',
+  'member.role_changed',
+  'member.removed',
+
+  // Components
+  'component.created',
+  'component.updated',
+  'component.deleted',
+  'component.version_saved',
+  'component.version_restored',
+  'component.extracted',
+
+  // Design
+  'design.screen.created',
+  'design.screen.updated',
+  'design.screen.deleted',
+  'design.component.placed',
 ] as const;
 
 export type EventType = (typeof EVENT_TYPES)[number];
@@ -261,6 +280,84 @@ export const NotificationCreatedPayload = z.object({
   actionUrl: z.string().optional(),
 });
 
+// Members
+export const MemberInvitedPayload = z.object({
+  membershipId: z.string(),
+  email: z.string(),
+  role: z.string(),
+  orgId: z.string(),
+});
+export const MemberRoleChangedPayload = z.object({
+  membershipId: z.string(),
+  oldRole: z.string(),
+  newRole: z.string(),
+});
+export const MemberRemovedPayload = z.object({
+  membershipId: z.string(),
+  userId: z.string(),
+});
+
+// Components
+export const ComponentCreatedPayload = z.object({
+  nodeId: z.string(),
+  productId: z.string(),
+  label: z.string(),
+  userId: z.string(),
+});
+export const ComponentUpdatedPayload = z.object({
+  nodeId: z.string(),
+  productId: z.string(),
+  label: z.string(),
+  version: z.number().optional(),
+  userId: z.string(),
+});
+export const ComponentDeletedPayload = z.object({
+  nodeId: z.string(),
+  productId: z.string(),
+  userId: z.string(),
+});
+export const ComponentVersionSavedPayload = z.object({
+  nodeId: z.string(),
+  label: z.string(),
+  userId: z.string(),
+});
+export const ComponentVersionRestoredPayload = z.object({
+  nodeId: z.string(),
+  versionLabel: z.string(),
+  userId: z.string(),
+});
+export const ComponentExtractedPayload = z.object({
+  nodeId: z.string(),
+  screenNodeId: z.string(),
+  label: z.string(),
+  userId: z.string(),
+});
+
+// Design
+export const DesignScreenCreatedPayload = z.object({
+  nodeId: z.string(),
+  productId: z.string(),
+  label: z.string(),
+  category: z.string(),
+  userId: z.string(),
+});
+export const DesignScreenUpdatedPayload = z.object({
+  nodeId: z.string(),
+  productId: z.string(),
+  userId: z.string(),
+});
+export const DesignScreenDeletedPayload = z.object({
+  nodeId: z.string(),
+  productId: z.string(),
+  userId: z.string(),
+});
+export const DesignComponentPlacedPayload = z.object({
+  screenId: z.string(),
+  componentId: z.string(),
+  componentLabel: z.string(),
+  userId: z.string(),
+});
+
 // ---------------------------------------------------------------------------
 // Payload map — maps each EventType to its Zod schema
 // ---------------------------------------------------------------------------
@@ -294,6 +391,19 @@ export const PayloadSchemas = {
   'page.published': PagePublishedPayload,
   'page.unpublished': PageUnpublishedPayload,
   'notification.created': NotificationCreatedPayload,
+  'member.invited': MemberInvitedPayload,
+  'member.role_changed': MemberRoleChangedPayload,
+  'member.removed': MemberRemovedPayload,
+  'component.created': ComponentCreatedPayload,
+  'component.updated': ComponentUpdatedPayload,
+  'component.deleted': ComponentDeletedPayload,
+  'component.version_saved': ComponentVersionSavedPayload,
+  'component.version_restored': ComponentVersionRestoredPayload,
+  'component.extracted': ComponentExtractedPayload,
+  'design.screen.created': DesignScreenCreatedPayload,
+  'design.screen.updated': DesignScreenUpdatedPayload,
+  'design.screen.deleted': DesignScreenDeletedPayload,
+  'design.component.placed': DesignComponentPlacedPayload,
 } as const satisfies Record<EventType, z.ZodTypeAny>;
 
 // ---------------------------------------------------------------------------

@@ -14,6 +14,37 @@ interface ComponentPreviewProps {
   onPropChange: (propName: string, value: string) => void
 }
 
+/* ---------- Live JSX generator ----------------------------------- */
+function generateJSX(component: ComponentDef, propValues: Record<string, string>): string {
+  const name = component.name.replace(/\s+/g, '')
+  const propEntries = Object.entries(propValues).filter(([, v]) => v !== '' && v !== undefined)
+
+  if (propEntries.length === 0) {
+    return `<${name} />`
+  }
+
+  const propsStr = propEntries
+    .map(([key, val]) => {
+      const prop = component.props.find((p) => p.name === key)
+      if (prop?.type === 'boolean') {
+        return val === 'true' ? `  ${key}` : `  ${key}={false}`
+      }
+      if (prop?.type === 'number') {
+        return `  ${key}={${val}}`
+      }
+      return `  ${key}="${val}"`
+    })
+    .join('\n')
+
+  // Check for token binding annotations
+  const bindings = component.tokenBindings ?? []
+  const bindingComments = bindings.length > 0
+    ? `\n  {/* tokens: ${bindings.map(b => `${b.property} → ${b.tokenPath}`).join(', ')} */}`
+    : ''
+
+  return `<${name}\n${propsStr}\n/>${bindingComments}`
+}
+
 /* ---------- visual placeholder for each component type ---------- */
 function renderComponentPlaceholder(
   component: ComponentDef,
@@ -321,7 +352,7 @@ export function ComponentPreview({ component, propValues, onPropChange }: Compon
 
       {/* Prop controls */}
       <div className="space-y-2">
-        <h4 className="text-xs font-medium text-[#64748B] uppercase tracking-wider">Props</h4>
+        <h4 className="text-xs font-medium text-[#64748B] uppercase tracking-wider">Props Playground</h4>
         <div className="grid grid-cols-2 gap-2">
           {component.props.map((prop) => (
             <div key={prop.id} className="flex items-center justify-between gap-2 px-3 py-2 rounded-lg bg-white/[0.02] border border-white/[0.04]">
@@ -338,6 +369,44 @@ export function ComponentPreview({ component, propValues, onPropChange }: Compon
           ))}
         </div>
       </div>
+
+      {/* Live JSX output */}
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <h4 className="text-xs font-medium text-[#64748B] uppercase tracking-wider">Live JSX</h4>
+          <button
+            onClick={() => {
+              const code = generateJSX(component, propValues)
+              navigator.clipboard?.writeText(code)
+            }}
+            className="px-2 py-0.5 rounded text-[10px] text-[#64748B] hover:text-[#94A3B8] hover:bg-white/[0.04] transition-colors"
+          >
+            Copy
+          </button>
+        </div>
+        <pre className="p-3 rounded-lg bg-[#0a0f1e] border border-white/[0.06] text-[11px] font-mono text-[#94A3B8] overflow-x-auto whitespace-pre-wrap leading-relaxed">
+          <code>{generateJSX(component, propValues)}</code>
+        </pre>
+      </div>
+
+      {/* Token bindings summary */}
+      {component.tokenBindings && component.tokenBindings.length > 0 && (
+        <div className="space-y-2">
+          <h4 className="text-xs font-medium text-[#64748B] uppercase tracking-wider">Active Token Bindings</h4>
+          <div className="flex flex-wrap gap-1.5">
+            {component.tokenBindings.map((tb, i) => (
+              <span
+                key={i}
+                className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-[#06B6D4]/10 text-[10px] text-[#06B6D4] font-mono"
+              >
+                <span className="text-[#64748B]">{tb.property}</span>
+                <span>→</span>
+                <span>{tb.tokenPath}</span>
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

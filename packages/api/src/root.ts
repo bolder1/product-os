@@ -13,6 +13,8 @@ import { activityRouter } from './routers/activity'
 import { versionRouter } from './routers/version'
 import { connectorRouter } from './routers/connector'
 import { memberRouter } from './routers/member'
+import { componentRouter } from './routers/component'
+import { designRouter } from './routers/design'
 
 export const appRouter = router({
   auth: authRouter,
@@ -29,6 +31,8 @@ export const appRouter = router({
   version: versionRouter,
   connector: connectorRouter,
   member: memberRouter,
+  component: componentRouter,
+  design: designRouter,
 })
 
 export type AppRouter = typeof appRouter
