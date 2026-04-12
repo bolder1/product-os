@@ -1,99 +1,100 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
 @import 'tailwindcss';
 
-/* ── Font Imports ── */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
-
-/* ── CSS Custom Properties — Dark Futuristic Theme ── */
+/* ── Design Tokens ── */
 :root {
-  /* Backgrounds — deep space navy */
-  --bg-primary: #060918;
-  --bg-secondary: #0C1024;
-  --bg-tertiary: #121733;
-  --bg-elevated: #181E3A;
+  --bg-base: #0a0a0a;
+  --bg-surface: #161616;
+  --bg-elevated: #1e1e1e;
+  --bg-overlay: #252525;
+  --bg-inset: #111111;
+  --bg-workspace: #0e0e0e;
+  --bg-canvas: #121212;
 
-  /* Surfaces — glass morphism layers */
-  --surface-default: rgba(255, 255, 255, 0.03);
-  --surface-hover: rgba(255, 255, 255, 0.06);
-  --surface-active: rgba(255, 255, 255, 0.09);
-  --surface-overlay: rgba(6, 9, 24, 0.8);
+  --surface-default: #161616;
+  --surface-hover: #1f1f1f;
+  --surface-active: #272727;
+  --surface-selected: rgba(99, 152, 255, 0.07);
+  --surface-selected-strong: rgba(99, 152, 255, 0.12);
 
-  /* Borders — subtle glow lines */
-  --border-default: rgba(255, 255, 255, 0.08);
-  --border-hover: rgba(255, 255, 255, 0.12);
-  --border-active: rgba(255, 255, 255, 0.18);
-  --border-focus: rgba(59, 130, 246, 0.5);
+  --border-default: rgba(255, 255, 255, 0.06);
+  --border-strong: rgba(255, 255, 255, 0.1);
+  --border-subtle: rgba(255, 255, 255, 0.03);
+  --border-focus: rgba(99, 152, 255, 0.5);
+  --border-accent: rgba(99, 152, 255, 0.25);
 
-  /* Accent colors */
-  --accent-blue: #3B82F6;
-  --accent-violet: #8B5CF6;
-  --accent-cyan: #06B6D4;
-  --accent-emerald: #10B981;
-  --accent-amber: #F59E0B;
-  --accent-rose: #F43F5E;
-  --accent-pink: #EC4899;
-  --accent-indigo: #6366F1;
+  --accent: #6398ff;
+  --accent-hover: #7aa8ff;
+  --accent-muted: rgba(99, 152, 255, 0.12);
+  --accent-text: #6398ff;
+  --accent-subtle: rgba(99, 152, 255, 0.06);
 
-  /* Text */
-  --text-primary: #F1F5F9;
-  --text-secondary: #94A3B8;
-  --text-tertiary: #64748B;
-  --text-inverse: #0F172A;
+  --color-success: #3dd68c;
+  --color-success-muted: rgba(61, 214, 140, 0.12);
+  --color-warning: #e8a830;
+  --color-warning-muted: rgba(232, 168, 48, 0.12);
+  --color-error: #ef5350;
+  --color-error-muted: rgba(239, 83, 80, 0.12);
+  --color-info: #64b5f6;
 
-  /* Status */
-  --status-success: #10B981;
-  --status-warning: #F59E0B;
-  --status-error: #F43F5E;
-  --status-info: #06B6D4;
+  --text-primary: #e4e4e7;
+  --text-secondary: #8b8b8e;
+  --text-tertiary: #525255;
+  --text-accent: #6398ff;
+  --text-inverse: #0a0a0a;
 
-  /* Glow effects */
-  --glow-blue: 0 0 20px rgba(59, 130, 246, 0.15);
-  --glow-violet: 0 0 20px rgba(139, 92, 246, 0.15);
-  --glow-cyan: 0 0 20px rgba(6, 182, 212, 0.15);
-  --glow-emerald: 0 0 20px rgba(16, 185, 129, 0.15);
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', 'Consolas', monospace;
 
-  /* Studio-specific accent colors */
-  --studio-planner: #3B82F6;
-  --studio-templates: #8B5CF6;
-  --studio-canvas: #6366F1;
-  --studio-brand: #EC4899;
-  --studio-components: #F59E0B;
-  --studio-design: #06B6D4;
-  --studio-workflow: #10B981;
-  --studio-pages: #3B82F6;
-  --studio-code: #64748B;
-  --studio-handoff: #94A3B8;
-  --studio-graphics: #EC4899;
-  --studio-analytics: #8B5CF6;
-  --studio-tasks: #F59E0B;
-  --studio-approvals: #10B981;
-  --studio-notifications: #F43F5E;
-  --studio-releases: #06B6D4;
-  --studio-testing: #F59E0B;
-  --studio-control-tower: #3B82F6;
-  --studio-graph-explorer: #6366F1;
+  --activity-bar-w: 46px;
+  --sidebar-w: 220px;
+  --topbar-h: 40px;
+  --toolbar-h: 34px;
+  --statusbar-h: 26px;
 
-  /* Typography */
-  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --font-mono: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+
+  --shadow-panel: 0 0 0 1px rgba(0, 0, 0, 0.3), 0 8px 32px rgba(0, 0, 0, 0.5);
+  --shadow-dropdown: 0 4px 24px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.06);
+  --shadow-float: 0 12px 48px rgba(0, 0, 0, 0.5);
+
+  --duration-fast: 100ms;
+  --duration-normal: 150ms;
+  --duration-slow: 250ms;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* ── Base Styles ── */
+/* ── Reset & Base ── */
 html {
   scroll-behavior: smooth;
+  font-size: 13px;
+  text-rendering: optimizeLegibility;
 }
 
 body {
-  background-color: var(--bg-primary);
+  background: var(--bg-base);
   color: var(--text-primary);
   font-family: var(--font-sans);
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  line-height: 1.45;
+  letter-spacing: -0.003em;
+  overflow: hidden;
 }
 
-/* ── Scrollbar Styling ── */
+/* ── Scrollbar — invisible until hover ── */
 * {
   scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+  scrollbar-color: transparent transparent;
+}
+
+*:hover {
+  scrollbar-color: rgba(255, 255, 255, 0.07) transparent;
 }
 
 ::-webkit-scrollbar {
@@ -106,23 +107,626 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
+  background: transparent;
   border-radius: 3px;
+  transition: background 0.2s;
+}
+
+*:hover::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.07);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.14);
 }
 
-/* ── Glass Morphism Utility ── */
-.glass {
-  background: rgba(255, 255, 255, 0.03);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+::-webkit-scrollbar-corner {
+  background: transparent;
 }
 
 /* ── Selection ── */
 ::selection {
-  background: rgba(59, 130, 246, 0.3);
-  color: #F1F5F9;
+  background: rgba(99, 152, 255, 0.25);
+  color: #e4e4e7;
+}
+
+/* ── Focus Ring ── */
+:focus-visible {
+  outline: 1.5px solid var(--accent);
+  outline-offset: -1.5px;
+  border-radius: 2px;
+}
+
+/* ── Keyframes ── */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideInRight {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes slideInLeft {
+  from { transform: translateX(-100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.97); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes pulse-subtle {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Layout Surfaces ── */
+.tool-workspace {
+  background: var(--bg-workspace);
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+
+.tool-canvas {
+  background: var(--bg-canvas);
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  position: relative;
+}
+
+/* ── Panel System ── */
+.tool-surface {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+}
+
+.tool-panel {
+  background: var(--bg-surface);
+  border-right: 1px solid var(--border-default);
+}
+
+.tool-panel-left {
+  background: var(--bg-surface);
+  border-right: 1px solid var(--border-default);
+}
+
+.tool-panel-right {
+  background: var(--bg-surface);
+  border-left: 1px solid var(--border-default);
+  animation: slideInRight var(--duration-slow) var(--ease-out);
+}
+
+.tool-panel-bottom {
+  background: var(--bg-surface);
+  border-top: 1px solid var(--border-default);
+}
+
+.tool-panel-float {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-strong);
+  box-shadow: var(--shadow-panel);
+  border-radius: var(--radius-md);
+  animation: scaleIn var(--duration-normal) var(--ease-out);
+}
+
+/* ── Toolbar ── */
+.tool-toolbar {
+  height: var(--toolbar-h);
+  min-height: var(--toolbar-h);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 10px;
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border-default);
+  flex-shrink: 0;
+}
+
+.tool-toolbar-section {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.tool-toolbar-divider {
+  width: 1px;
+  height: 16px;
+  background: var(--border-default);
+  margin: 0 4px;
+}
+
+/* ── List Items ── */
+.tool-list-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 8px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  border-radius: var(--radius-sm);
+  transition: background var(--duration-fast), color var(--duration-fast);
+  cursor: pointer;
+  user-select: none;
+}
+
+.tool-list-item:hover {
+  background: var(--surface-hover);
+  color: var(--text-primary);
+}
+
+.tool-list-item.active {
+  background: var(--surface-selected);
+  color: var(--accent-text);
+}
+
+/* ── Tree View ── */
+.tool-tree-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 6px 3px 0;
+  font-size: 12px;
+  color: var(--text-secondary);
+  border-radius: 3px;
+  transition: background var(--duration-fast), color var(--duration-fast);
+  cursor: pointer;
+  user-select: none;
+}
+
+.tool-tree-item:hover {
+  background: var(--surface-hover);
+  color: var(--text-primary);
+}
+
+.tool-tree-item.active {
+  background: var(--surface-selected);
+  color: var(--accent-text);
+}
+
+.tool-tree-indent {
+  width: 16px;
+  flex-shrink: 0;
+}
+
+/* ── Badge ── */
+.tool-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 6px;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  border-radius: 3px;
+  background: var(--bg-overlay);
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.tool-badge-accent {
+  background: var(--accent-muted);
+  color: var(--accent-text);
+}
+
+.tool-badge-success {
+  background: var(--color-success-muted);
+  color: var(--color-success);
+}
+
+.tool-badge-warning {
+  background: var(--color-warning-muted);
+  color: var(--color-warning);
+}
+
+.tool-badge-error {
+  background: var(--color-error-muted);
+  color: var(--color-error);
+}
+
+/* ── Input ── */
+.tool-input {
+  background: var(--bg-inset);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  padding: 5px 8px;
+  font-size: 12px;
+  font-family: var(--font-sans);
+  color: var(--text-primary);
+  outline: none;
+  transition: border-color var(--duration-normal), box-shadow var(--duration-normal);
+  line-height: 1.4;
+}
+
+.tool-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-subtle);
+}
+
+.tool-input::placeholder {
+  color: var(--text-tertiary);
+}
+
+/* ── Button ── */
+.tool-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 500;
+  font-family: var(--font-sans);
+  border-radius: var(--radius-sm);
+  background: var(--bg-elevated);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-default);
+  transition: all var(--duration-fast);
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+  line-height: 1.4;
+}
+
+.tool-btn:hover {
+  background: var(--surface-hover);
+  color: var(--text-primary);
+  border-color: var(--border-strong);
+}
+
+.tool-btn:active {
+  background: var(--surface-active);
+  transform: translateY(0.5px);
+}
+
+.tool-btn-primary {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+
+.tool-btn-primary:hover {
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
+  color: #fff;
+}
+
+.tool-btn-ghost {
+  background: transparent;
+  border-color: transparent;
+  color: var(--text-secondary);
+}
+
+.tool-btn-ghost:hover {
+  background: var(--surface-hover);
+  color: var(--text-primary);
+  border-color: transparent;
+}
+
+.tool-btn-danger {
+  background: transparent;
+  border-color: var(--border-default);
+  color: var(--color-error);
+}
+
+.tool-btn-danger:hover {
+  background: var(--color-error-muted);
+  border-color: rgba(239, 83, 80, 0.3);
+  color: var(--color-error);
+}
+
+.tool-btn-icon {
+  padding: 4px;
+  width: 26px;
+  height: 26px;
+  flex-shrink: 0;
+}
+
+/* ── Tab bar ── */
+.tool-tabs {
+  display: flex;
+  align-items: stretch;
+  border-bottom: 1px solid var(--border-default);
+  gap: 0;
+}
+
+.tool-tab {
+  padding: 7px 12px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-tertiary);
+  border-bottom: 2px solid transparent;
+  transition: color var(--duration-fast), border-color var(--duration-fast);
+  cursor: pointer;
+  white-space: nowrap;
+  user-select: none;
+}
+
+.tool-tab:hover {
+  color: var(--text-secondary);
+}
+
+.tool-tab.active {
+  color: var(--text-primary);
+  border-bottom-color: var(--accent);
+}
+
+/* ── Segment Control (pill tabs) ── */
+.tool-segments {
+  display: inline-flex;
+  align-items: center;
+  background: var(--bg-inset);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  padding: 2px;
+  gap: 1px;
+}
+
+.tool-segment {
+  padding: 3px 10px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-tertiary);
+  border-radius: 3px;
+  transition: all var(--duration-fast);
+  cursor: pointer;
+  user-select: none;
+}
+
+.tool-segment:hover {
+  color: var(--text-secondary);
+}
+
+.tool-segment.active {
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+/* ── Section label ── */
+.tool-section-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+  padding: 10px 8px 5px;
+  user-select: none;
+}
+
+/* ── Divider ── */
+.tool-divider {
+  height: 1px;
+  background: var(--border-default);
+  margin: 4px 0;
+  flex-shrink: 0;
+}
+
+.tool-divider-vertical {
+  width: 1px;
+  height: 16px;
+  background: var(--border-default);
+  flex-shrink: 0;
+}
+
+/* ── Card ── */
+.tool-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  transition: border-color var(--duration-fast), background var(--duration-fast);
+}
+
+.tool-card:hover {
+  border-color: var(--border-strong);
+  background: var(--surface-hover);
+}
+
+.tool-card-selected {
+  border-color: var(--border-accent);
+  background: var(--accent-subtle);
+}
+
+/* ── Table ── */
+.tool-table {
+  width: 100%;
+  font-size: 12px;
+  border-collapse: collapse;
+}
+
+.tool-table th {
+  padding: 6px 10px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-tertiary);
+  text-align: left;
+  border-bottom: 1px solid var(--border-default);
+  position: sticky;
+  top: 0;
+  background: var(--bg-surface);
+  z-index: 1;
+}
+
+.tool-table td {
+  padding: 6px 10px;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.tool-table tr:hover td {
+  background: var(--surface-hover);
+  color: var(--text-primary);
+}
+
+/* ── Kbd shortcut ── */
+.tool-kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  font-size: 10px;
+  font-family: var(--font-sans);
+  font-weight: 500;
+  color: var(--text-tertiary);
+  background: var(--bg-inset);
+  border: 1px solid var(--border-default);
+  border-radius: 3px;
+  line-height: 1;
+}
+
+/* ── Tooltip ── */
+.tool-tooltip {
+  position: relative;
+}
+
+.tool-tooltip::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  left: calc(100% + 8px);
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 4px 8px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-primary);
+  background: var(--bg-overlay);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--duration-fast);
+  z-index: 100;
+}
+
+.tool-tooltip:hover::after {
+  opacity: 1;
+}
+
+/* ── Status Indicator ── */
+.tool-status {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.tool-status-pulse {
+  animation: pulse-subtle 2s ease-in-out infinite;
+}
+
+/* ── Overlay / Modal ── */
+.tool-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(2px);
+  z-index: 50;
+  animation: fadeIn var(--duration-fast) var(--ease-out);
+}
+
+.tool-modal {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-float);
+  animation: scaleIn var(--duration-normal) var(--ease-out);
+  overflow: hidden;
+}
+
+/* ── Empty State ── */
+.tool-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 48px 24px;
+  color: var(--text-tertiary);
+  text-align: center;
+}
+
+/* ── Dropdown ── */
+.tool-dropdown {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-dropdown);
+  overflow: hidden;
+  animation: fadeInUp var(--duration-normal) var(--ease-out);
+  z-index: 50;
+}
+
+.tool-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: background var(--duration-fast), color var(--duration-fast);
+}
+
+.tool-dropdown-item:hover {
+  background: var(--surface-hover);
+  color: var(--text-primary);
+}
+
+/* ── Progress ── */
+.tool-progress {
+  height: 3px;
+  background: var(--bg-inset);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.tool-progress-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 2px;
+  transition: width var(--duration-slow) var(--ease-out);
+}
+
+/* ── Backward compat ── */
+.glass {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+}
+
+/* ── Utility ── */
+.truncate-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.font-mono {
+  font-family: var(--font-mono);
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }

@@ -1,5 +1,5 @@
 import { pgTable, uuid, text, timestamp, jsonb, pgEnum } from 'drizzle-orm/pg-core'
-import { users } from './users.js'
+import { users } from './users'
 
 export const orgPlanEnum = pgEnum('org_plan', ['free', 'starter', 'pro', 'enterprise'])
 

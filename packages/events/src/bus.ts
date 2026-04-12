@@ -7,8 +7,8 @@ import type {
   EventHandler,
   EventMetadata,
   PayloadOf,
-} from './types.js';
-import { ProductOSEventSchema } from './types.js';
+} from './types';
+import { ProductOSEventSchema } from './types';
 
 // ---------------------------------------------------------------------------
 // Helpers

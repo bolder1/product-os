@@ -1,0 +1,83 @@
+import { NextRequest, NextResponse } from 'next/server'
+
+// Routes that don't require authentication
+const PUBLIC_ROUTES = ['/login', '/signup', '/onboarding']
+
+// Prefixes that are always public
+const PUBLIC_PREFIXES = ['/api/trpc', '/_next', '/favicon']
+
+const AUTH_COOKIE_NAME = 'product-os-token'
+
+export function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl
+
+  // Allow static assets and Next.js internals
+  if (PUBLIC_PREFIXES.some((prefix) => pathname.startsWith(prefix))) {
+    return NextResponse.next()
+  }
+
+  // Allow exact public routes
+  if (PUBLIC_ROUTES.includes(pathname)) {
+    // If user is already authenticated and visits login/signup, redirect to dashboard
+    const token = request.cookies.get(AUTH_COOKIE_NAME)?.value
+    if (token && (pathname === '/login' || pathname === '/signup')) {
+      try {
+        const payload = JSON.parse(atob(token))
+        // Check token hasn't expired
+        if (payload.exp && payload.exp > Date.now()) {
+          return NextResponse.redirect(new URL('/', request.url))
+        }
+      } catch {
+        // Invalid token, let them through to login
+      }
+    }
+    return NextResponse.next()
+  }
+
+  // Protected routes: check for auth cookie
+  const token = request.cookies.get(AUTH_COOKIE_NAME)?.value
+
+  if (!token) {
+    const loginUrl = new URL('/login', request.url)
+    loginUrl.searchParams.set('callbackUrl', pathname)
+    return NextResponse.redirect(loginUrl)
+  }
+
+  // Validate token (demo: just check it's valid base64 JSON with non-expired timestamp)
+  try {
+    const payload = JSON.parse(atob(token))
+    if (payload.exp && payload.exp < Date.now()) {
+      // Token expired
+      const loginUrl = new URL('/login', request.url)
+      loginUrl.searchParams.set('callbackUrl', pathname)
+      const response = NextResponse.redirect(loginUrl)
+      response.cookies.delete(AUTH_COOKIE_NAME)
+      return response
+    }
+
+    // Admin-only routes
+    if (pathname.startsWith('/admin') && payload.role !== 'admin') {
+      return NextResponse.redirect(new URL('/', request.url))
+    }
+  } catch {
+    // Malformed token — redirect to login
+    const loginUrl = new URL('/login', request.url)
+    const response = NextResponse.redirect(loginUrl)
+    response.cookies.delete(AUTH_COOKIE_NAME)
+    return response
+  }
+
+  return NextResponse.next()
+}
+
+export const config = {
+  matcher: [
+    /*
+     * Match all request paths except:
+     * - _next/static (static files)
+     * - _next/image (image optimization)
+     * - favicon.ico, sitemap.xml, robots.txt (metadata files)
+     */
+    '/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)',
+  ],
+}

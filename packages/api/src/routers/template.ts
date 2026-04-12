@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { eq, and, or, ilike } from 'drizzle-orm'
-import { templateBundles } from '@product-os/db'
-import { router, protectedProcedure } from '../trpc.js'
+import { templateBundles, graphNodes, graphEdges } from '@product-os/db'
+import { router, protectedProcedure } from '../trpc'
 
 export const templateRouter = router({
   listBuiltIn: protectedProcedure.query(async ({ ctx }) => {
@@ -53,7 +53,7 @@ export const templateRouter = router({
       return template
     }),
 
-  apply: protectedProcedure
+  applyTemplate: protectedProcedure
     .input(
       z.object({
         templateId: z.string().uuid(),
@@ -73,16 +73,55 @@ export const templateRouter = router({
         throw new Error('Template not found')
       }
 
-      // Delegate to the templates package applier
-      const { applyTemplate } = await import('@product-os/templates')
-      const result = await applyTemplate({
-        db: ctx.db,
-        bundle: template.bundle,
-        productId: input.productId,
-        userId: ctx.session.userId,
-        options: input.options,
-      })
+      // Delegate to the templates package applier with DB callbacks
+      const { applyTemplate, resolveVariables } = await import('@product-os/templates')
 
-      return result
+      // Resolve template variables from options
+      const resolvedBundle = resolveVariables(template.bundle, input.options as Record<string, string>)
+
+      const createNode = async (node: {
+        productId: string
+        kind: string
+        label: string
+        data: Record<string, unknown>
+      }): Promise<string> => {
+        const [row] = await ctx.db
+          .insert(graphNodes)
+          .values({
+            productId: node.productId,
+            kind: node.kind as typeof graphNodes.$inferInsert.kind,
+            label: node.label,
+            data: node.data,
+            createdBy: ctx.session.userId,
+          })
+          .returning({ id: graphNodes.id })
+        return row.id
+      }
+
+      const createEdge = async (edge: {
+        productId: string
+        sourceId: string
+        targetId: string
+        kind: string
+      }): Promise<string> => {
+        const [row] = await ctx.db
+          .insert(graphEdges)
+          .values({
+            productId: edge.productId,
+            sourceId: edge.sourceId,
+            targetId: edge.targetId,
+            kind: edge.kind as typeof graphEdges.$inferInsert.kind,
+          })
+          .returning({ id: graphEdges.id })
+        return row.id
+      }
+
+      const result = await applyTemplate(resolvedBundle, input.productId, createNode, createEdge)
+
+      return {
+        nodesCreated: result.nodesCreated,
+        edgesCreated: result.edgesCreated,
+        nodeIdMap: Object.fromEntries(result.nodeIdMap),
+      }
     }),
 })

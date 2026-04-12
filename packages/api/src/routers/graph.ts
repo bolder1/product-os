@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { eq, and, or, isNull } from 'drizzle-orm'
 import { graphNodes, graphEdges } from '@product-os/db'
-import { router, protectedProcedure } from '../trpc.js'
+import { router, protectedProcedure } from '../trpc'
 
 const nodeKindValues = [
   'product', 'plan', 'template_bundle', 'module', 'feature', 'journey',
@@ -71,6 +71,20 @@ export const graphRouter = router({
           createdBy: ctx.session.userId,
         })
         .returning()
+
+      // Emit graph.node.created event
+      ctx.eventBus.emit('graph.node.created', {
+        productId: input.productId,
+        actorId: ctx.session.userId,
+        payload: {
+          nodeId: node.id,
+          nodeType: input.kind,
+          label: input.label,
+          properties: input.data,
+        },
+        metadata: { studioOrigin: input.kind },
+      }).catch(() => {})
+
       return node
     }),
 
@@ -98,6 +112,19 @@ export const graphRouter = router({
       if (!node) {
         throw new Error('Node not found')
       }
+
+      // Emit graph.node.updated event
+      ctx.eventBus.emit('graph.node.updated', {
+        productId: node.productId,
+        actorId: ctx.session.userId,
+        payload: {
+          nodeId: node.id,
+          changes: updates,
+          previousValues: {},
+        },
+        metadata: { studioOrigin: node.kind },
+      }).catch(() => {})
+
       return node
     }),
 
@@ -112,6 +139,17 @@ export const graphRouter = router({
       if (!node) {
         throw new Error('Node not found')
       }
+
+      // Emit graph.node.deleted event
+      ctx.eventBus.emit('graph.node.deleted', {
+        productId: node.productId,
+        actorId: ctx.session.userId,
+        payload: {
+          nodeId: node.id,
+          nodeType: node.kind,
+        },
+      }).catch(() => {})
+
       return node
     }),
 
@@ -155,6 +193,20 @@ export const graphRouter = router({
           data: input.data,
         })
         .returning()
+
+      // Emit graph.edge.created event
+      ctx.eventBus.emit('graph.edge.created', {
+        productId: input.productId,
+        actorId: ctx.session.userId,
+        payload: {
+          edgeId: edge.id,
+          edgeType: input.kind,
+          sourceNodeId: input.sourceId,
+          targetNodeId: input.targetId,
+          properties: input.data,
+        },
+      }).catch(() => {})
+
       return edge
     }),
 
@@ -168,6 +220,19 @@ export const graphRouter = router({
       if (!edge) {
         throw new Error('Edge not found')
       }
+
+      // Emit graph.edge.deleted event
+      ctx.eventBus.emit('graph.edge.deleted', {
+        productId: edge.productId,
+        actorId: ctx.session.userId,
+        payload: {
+          edgeId: edge.id,
+          edgeType: edge.kind,
+          sourceNodeId: edge.sourceId,
+          targetNodeId: edge.targetId,
+        },
+      }).catch(() => {})
+
       return edge
     }),
 

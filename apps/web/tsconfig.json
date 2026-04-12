@@ -1,6 +1,7 @@
 {
   "extends": "@product-os/config/tsconfig/nextjs.json",
   "compilerOptions": {
+    "noUncheckedIndexedAccess": false,
     "paths": {
       "@/*": ["./app/*"],
       "@/components/*": ["./app/components/*"],

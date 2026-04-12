@@ -1,6 +1,6 @@
 import { pgTable, uuid, text, timestamp, jsonb, boolean } from 'drizzle-orm/pg-core'
-import { organizations } from './organizations.js'
-import { users } from './users.js'
+import { organizations } from './organizations'
+import { users } from './users'
 
 export const templateBundles = pgTable('template_bundles', {
   id: uuid('id').primaryKey().defaultRandom(),

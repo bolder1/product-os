@@ -1,9 +1,9 @@
-import { suggestSkill } from './suggest.js'
-import { scaffoldSkill } from './scaffold.js'
-import { analyzeSkill } from './analyze.js'
-import type { SkillDefinition } from './types.js'
+import { suggestSkill } from './suggest'
+import { scaffoldSkill } from './scaffold'
+import { analyzeSkill } from './analyze'
+import type { SkillDefinition } from './types'
 
-export type { SkillDefinition, SkillAction, SkillResult } from './types.js'
+export type { SkillDefinition, SkillAction, SkillResult } from './types'
 
 const skillRegistry = new Map<string, SkillDefinition>()
 

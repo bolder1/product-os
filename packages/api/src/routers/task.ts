@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { eq, and } from 'drizzle-orm'
 import { tasks } from '@product-os/db'
-import { router, protectedProcedure } from '../trpc.js'
+import { router, protectedProcedure } from '../trpc'
 
 const taskStatusValues = ['todo', 'in_progress', 'review', 'done', 'cancelled'] as const
 const taskPriorityValues = ['low', 'medium', 'high', 'urgent'] as const
@@ -54,6 +54,19 @@ export const taskRouter = router({
           createdBy: ctx.session.userId,
         })
         .returning()
+
+      // Emit task.created event
+      ctx.eventBus.emit('task.created', {
+        productId: input.productId,
+        actorId: ctx.session.userId,
+        payload: {
+          taskId: task.id,
+          title: input.title,
+          assigneeId: input.assigneeId,
+          priority: input.priority,
+        },
+      }).catch(() => {})
+
       return task
     }),
 
@@ -87,6 +100,28 @@ export const taskRouter = router({
       if (!task) {
         throw new Error('Task not found')
       }
+
+      // Emit task.updated or task.completed event
+      if (updates.status === 'done') {
+        ctx.eventBus.emit('task.completed', {
+          productId: task.productId,
+          actorId: ctx.session.userId,
+          payload: {
+            taskId: task.id,
+            completedBy: ctx.session.userId,
+          },
+        }).catch(() => {})
+      } else {
+        ctx.eventBus.emit('task.updated', {
+          productId: task.productId,
+          actorId: ctx.session.userId,
+          payload: {
+            taskId: task.id,
+            changes: updates as Record<string, unknown>,
+          },
+        }).catch(() => {})
+      }
+
       return task
     }),
 

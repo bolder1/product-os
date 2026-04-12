@@ -1,13 +1,17 @@
-import type { TemplateBundle } from './types.js'
-import { loadBundle } from './loader.js'
+import type { TemplateBundle } from './types'
+import { loadBundle } from './loader'
 import saasStarter from './bundles/saas-starter.json' with { type: 'json' }
 import opsPilot from './bundles/ops-pilot.json' with { type: 'json' }
 import landingPage from './bundles/landing-page.json' with { type: 'json' }
+import mobileApp from './bundles/mobile-app.json' with { type: 'json' }
+import designSystem from './bundles/design-system.json' with { type: 'json' }
 
 const builtInBundles: TemplateBundle[] = [
   loadBundle(saasStarter),
   loadBundle(opsPilot),
   loadBundle(landingPage),
+  loadBundle(mobileApp),
+  loadBundle(designSystem),
 ]
 
 export function getBuiltInTemplates(): TemplateBundle[] {

@@ -1,4 +1,4 @@
-import { type TemplateBundle, templateBundleSchema } from './types.js'
+import { type TemplateBundle, templateBundleSchema } from './types'
 
 export function loadBundle(raw: unknown): TemplateBundle {
   return templateBundleSchema.parse(raw)

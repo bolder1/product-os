@@ -1,3 +1,4 @@
-export * from './types.js'
-export * from './bus.js'
-export * from './handlers/index.js'
+export * from './types'
+export * from './bus'
+export * from './handlers/index'
+export * from './setup'

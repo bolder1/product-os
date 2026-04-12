@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { eq, and } from 'drizzle-orm'
 import { comments } from '@product-os/db'
-import { router, protectedProcedure } from '../trpc.js'
+import { router, protectedProcedure } from '../trpc'
 
 export const commentRouter = router({
   list: protectedProcedure
@@ -42,6 +42,20 @@ export const commentRouter = router({
           parentId: input.parentId,
         })
         .returning()
+
+      // Emit comment.created event
+      ctx.eventBus.emit('comment.created', {
+        productId: input.productId,
+        actorId: ctx.session.userId,
+        payload: {
+          commentId: comment.id,
+          entityId: input.nodeId,
+          entityType: 'node',
+          body: input.body,
+          parentCommentId: input.parentId,
+        },
+      }).catch(() => {})
+
       return comment
     }),
 
@@ -56,6 +70,17 @@ export const commentRouter = router({
       if (!comment) {
         throw new Error('Comment not found')
       }
+
+      // Emit comment.resolved event
+      ctx.eventBus.emit('comment.resolved', {
+        productId: comment.productId,
+        actorId: ctx.session.userId,
+        payload: {
+          commentId: comment.id,
+          resolvedBy: ctx.session.userId,
+        },
+      }).catch(() => {})
+
       return comment
     }),
 })

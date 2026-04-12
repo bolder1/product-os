@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { eq, and, isNull } from 'drizzle-orm'
 import { graphNodes } from '@product-os/db'
-import { router, protectedProcedure } from '../trpc.js'
+import { router, protectedProcedure } from '../trpc'
 
 export const plannerRouter = router({
   getPlan: protectedProcedure

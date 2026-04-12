@@ -9,7 +9,9 @@
   },
   "packageManager": "pnpm@10.33.0",
   "scripts": {
-    "dev": "turbo dev",
+    "dev": "pnpm --filter @product-os/web dev",
+    "dev:all": "turbo dev",
+    "dev:web": "pnpm --filter @product-os/web dev",
     "build": "turbo build",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
@@ -21,5 +23,8 @@
     "test": "turbo test",
     "test:e2e": "turbo test:e2e",
     "typecheck": "turbo typecheck"
+  },
+  "devDependencies": {
+    "turbo": "^2.8.20"
   }
 }

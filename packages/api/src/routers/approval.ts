@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { eq } from 'drizzle-orm'
 import { approvals, approvalDecisions } from '@product-os/db'
-import { router, protectedProcedure } from '../trpc.js'
+import { router, protectedProcedure } from '../trpc'
 
 const approvalStatusValues = ['pending', 'approved', 'rejected', 'changes_requested'] as const
 
@@ -38,6 +38,19 @@ export const approvalRouter = router({
           routing: input.routing,
         })
         .returning()
+
+      // Emit approval.requested event
+      ctx.eventBus.emit('approval.requested', {
+        productId: input.productId,
+        actorId: ctx.session.userId,
+        payload: {
+          approvalId: approval.id,
+          entityId: input.nodeId,
+          entityType: 'node',
+          requestedFrom: input.routing?.approvers ?? [],
+        },
+      }).catch(() => {})
+
       return approval
     }),
 
@@ -62,13 +75,26 @@ export const approvalRouter = router({
         .returning()
 
       // Update the parent approval status and decidedAt timestamp
-      await ctx.db
+      const [approval] = await ctx.db
         .update(approvals)
         .set({
           status: input.decision,
           decidedAt: new Date(),
         })
         .where(eq(approvals.id, input.approvalId))
+        .returning()
+
+      // Emit approval.decided event
+      ctx.eventBus.emit('approval.decided', {
+        productId: approval?.productId ?? '',
+        actorId: ctx.session.userId,
+        payload: {
+          approvalId: input.approvalId,
+          entityId: approval?.nodeId ?? '',
+          decision: input.decision as 'approved' | 'rejected',
+          reason: input.comment,
+        },
+      }).catch(() => {})
 
       return decisionRow
     }),

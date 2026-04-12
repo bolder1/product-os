@@ -1,4 +1,4 @@
-import type { GraphNodeKind } from '../schema/index.js'
+import type { GraphNodeKind } from '../schema/index'
 
 // ---------------------------------------------------------------------------
 // Edge kinds — matches the pgEnum in db/schema/graph.ts

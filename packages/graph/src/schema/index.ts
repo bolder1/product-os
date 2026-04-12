@@ -27,11 +27,11 @@ export {
   // Map & type utilities
   nodeDataSchemas,
   graphNodeKinds,
-} from './node-kinds.js'
+} from './node-kinds'
 
-export type { GraphNodeKind, NodeData } from './node-kinds.js'
+export type { GraphNodeKind, NodeData } from './node-kinds'
 
-import { nodeDataSchemas, type GraphNodeKind } from './node-kinds.js'
+import { nodeDataSchemas, type GraphNodeKind } from './node-kinds'
 
 // ---------------------------------------------------------------------------
 // Runtime validator

@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { eq, and, sql } from 'drizzle-orm'
 import { notifications } from '@product-os/db'
-import { router, protectedProcedure } from '../trpc.js'
+import { router, protectedProcedure } from '../trpc'
 
 export const notificationRouter = router({
   list: protectedProcedure
