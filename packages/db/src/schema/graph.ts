@@ -27,6 +27,14 @@ export const graphNodeKindEnum = pgEnum('graph_node_kind', [
   'mcp_binding',
   'skill_action',
   'computer_action',
+  // Phase 19 — remaining studios
+  'handoff_item',
+  'analytics_dashboard',
+  'analytics_event',
+  'experiment',
+  'test_suite',
+  'test_run',
+  'test_coverage',
 ])
 
 export const graphEdgeKindEnum = pgEnum('graph_edge_kind', [
@@ -42,6 +50,9 @@ export const graphEdgeKindEnum = pgEnum('graph_edge_kind', [
   'assigned_to',
   'approves',
   'blocks',
+  // Phase 19
+  'has_handoff',
+  'has_run',
 ])
 
 export const graphNodes = pgTable(

@@ -17,6 +17,12 @@ import { componentRouter } from './routers/component'
 import { designRouter } from './routers/design'
 import { pageRouter } from './routers/page'
 import { workflowRouter } from './routers/workflow'
+import { codeRouter } from './routers/code'
+import { handoffRouter } from './routers/handoff'
+import { analyticsRouter } from './routers/analytics'
+import { releaseRouter } from './routers/release'
+import { testingRouter } from './routers/testing'
+import { graphicsRouter } from './routers/graphics'
 
 export const appRouter = router({
   auth: authRouter,
@@ -37,6 +43,12 @@ export const appRouter = router({
   design: designRouter,
   page: pageRouter,
   workflow: workflowRouter,
+  code: codeRouter,
+  handoff: handoffRouter,
+  analytics: analyticsRouter,
+  release: releaseRouter,
+  testing: testingRouter,
+  graphics: graphicsRouter,
 })
 
 export type AppRouter = typeof appRouter
