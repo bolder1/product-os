@@ -181,8 +181,10 @@ export default function GraphExplorerPage() {
   }, [edgesQuery.data])
 
   // ── Success banner ───────────────────────────────────────────────────────
-  const fromTemplate = searchParams?.get('from') === 'template'
-  const [showBanner, setShowBanner] = useState(fromTemplate)
+  const fromParam = searchParams?.get('from')
+  const fromTemplate = fromParam === 'template'
+  const fromPlanner = fromParam === 'planner'
+  const [showBanner, setShowBanner] = useState(fromTemplate || fromPlanner)
   useEffect(() => {
     if (!showBanner) return
     const t = setTimeout(() => setShowBanner(false), 5000)
@@ -370,8 +372,17 @@ export default function GraphExplorerPage() {
       {showBanner && (
         <div className="flex items-center gap-2 px-4 py-2 bg-[#10B981]/10 border-b border-[#10B981]/20 text-[#10B981] text-[11px] shrink-0">
           <CheckCircle2 size={13} />
-          <span className="font-medium">Template applied successfully!</span>
-          <span className="text-[#10B981]/70">Your product graph now includes all template nodes and edges below.</span>
+          {fromPlanner ? (
+            <>
+              <span className="font-medium">Product launched!</span>
+              <span className="text-[#10B981]/70">Your plan has been committed — features, entities and tasks are now in the graph.</span>
+            </>
+          ) : (
+            <>
+              <span className="font-medium">Template applied successfully!</span>
+              <span className="text-[#10B981]/70">Your product graph now includes all template nodes and edges below.</span>
+            </>
+          )}
           <button onClick={() => setShowBanner(false)} className="ml-auto text-[#10B981]/60 hover:text-[#10B981]"><X size={12} /></button>
         </div>
       )}

@@ -31,6 +31,7 @@ interface StepReviewLaunchProps {
   planData: PlanData
   onEditStep: (step: number) => void
   onLaunch: () => void
+  isLaunching?: boolean
   generatedTasks: GeneratedTask[]
   onTasksChange: (tasks: GeneratedTask[]) => void
 }
@@ -76,6 +77,7 @@ export default function StepReviewLaunch({
   planData,
   onEditStep,
   onLaunch,
+  isLaunching = false,
   generatedTasks,
   onTasksChange,
 }: StepReviewLaunchProps) {
@@ -312,17 +314,30 @@ export default function StepReviewLaunch({
 
       {/* ── Launch Button ── */}
       <motion.button
-        whileHover={{ scale: 1.02 }}
-        whileTap={{ scale: 0.98 }}
-        onClick={onLaunch}
-        className="w-full flex items-center justify-center gap-2 px-5 py-4 rounded-xl text-sm text-white font-semibold bg-gradient-to-r from-[#8B5CF6] to-[#7C3AED] hover:from-[#8B5CF6]/90 hover:to-[#7C3AED]/90 transition-all shadow-lg shadow-[#8B5CF6]/20"
+        whileHover={isLaunching ? {} : { scale: 1.02 }}
+        whileTap={isLaunching ? {} : { scale: 0.98 }}
+        onClick={isLaunching ? undefined : onLaunch}
+        disabled={isLaunching}
+        className="w-full flex items-center justify-center gap-2 px-5 py-4 rounded-xl text-sm text-white font-semibold bg-gradient-to-r from-[#8B5CF6] to-[#7C3AED] hover:from-[#8B5CF6]/90 hover:to-[#7C3AED]/90 transition-all shadow-lg shadow-[#8B5CF6]/20 disabled:opacity-60 disabled:cursor-not-allowed"
       >
-        <Rocket className="w-5 h-5" />
-        Launch Product
-        {generatedTasks.length > 0 && (
-          <span className="text-xs opacity-70 ml-1">
-            with {generatedTasks.length} tasks
-          </span>
+        {isLaunching ? (
+          <>
+            <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none">
+              <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" strokeOpacity="0.3" />
+              <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+            </svg>
+            Launching…
+          </>
+        ) : (
+          <>
+            <Rocket className="w-5 h-5" />
+            Launch Product
+            {generatedTasks.length > 0 && (
+              <span className="text-xs opacity-70 ml-1">
+                with {generatedTasks.length} tasks
+              </span>
+            )}
+          </>
         )}
       </motion.button>
     </div>
