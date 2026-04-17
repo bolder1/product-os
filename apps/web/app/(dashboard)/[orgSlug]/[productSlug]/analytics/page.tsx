@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useEffect } from 'react'
 import { useParams } from 'next/navigation'
 import { useProduct } from '../layout'
 import { Download, BarChart3, Zap } from 'lucide-react'
@@ -15,6 +15,8 @@ import { AIRecommendations } from '../../../../components/shared/ai-recommendati
 import { GraphImpactAnalysis } from '../../../../components/shared/graph-impact-analysis'
 import { useInsightStore } from '../../../../lib/insight-store'
 import { StudioHealthBadge } from '../../../../components/shared/studio-health-badge'
+import { useAnalyticsStore } from '../../../../lib/analytics-store'
+import { useState } from 'react'
 
 type DateRange = '7d' | '30d' | '90d'
 
@@ -23,9 +25,37 @@ export default function AnalyticsPage() {
   const product = useProduct()
   const productId = product?.id ?? params.productSlug
 
-  const [dateRange, setDateRange] = useState<DateRange>('7d')
+  // Date range: keep local (store persists its own '30d' default)
+  const storeDateRange = useAnalyticsStore((s) => s.dateRange)
+  const setStoreDateRange = useAnalyticsStore((s) => s.setDateRange)
+  const [dateRange, setDateRange] = useState<DateRange>(
+    (storeDateRange as DateRange) ?? '7d',
+  )
+
   const [impactOpen, setImpactOpen] = useState(false)
-  const { metrics, dailyTraffic, funnel, topPages } = mockAnalyticsData
+
+  // Live analytics data from store
+  const storeMetrics = useAnalyticsStore((s) => s.metrics)
+  const storeDailyTraffic = useAnalyticsStore((s) => s.dailyTraffic)
+  const storeFunnel = useAnalyticsStore((s) => s.funnel)
+  const storeTopPages = useAnalyticsStore((s) => s.topPages)
+
+  const isLive =
+    storeMetrics.length > 0 ||
+    storeDailyTraffic.length > 0 ||
+    storeFunnel.length > 0 ||
+    storeTopPages.length > 0
+
+  const metrics = isLive ? storeMetrics : mockAnalyticsData.metrics
+  const dailyTraffic = isLive ? storeDailyTraffic : mockAnalyticsData.dailyTraffic
+  const funnel = isLive ? storeFunnel : mockAnalyticsData.funnel
+  const topPages = isLive ? storeTopPages : mockAnalyticsData.topPages
+
+  // Sync date range selection to store
+  const handleDateRange = (r: DateRange) => {
+    setDateRange(r)
+    setStoreDateRange(r as '7d' | '30d' | '90d' | '1y')
+  }
 
   // Seed insights on first load
   const seedInsights = useInsightStore((s) => s.seedInsights)
@@ -48,6 +78,15 @@ export default function AnalyticsPage() {
           <span className="text-[13px] font-medium text-[var(--text-primary)]">Analytics</span>
           <StudioHealthBadge productId={productId} studio="analytics" />
           <span className="text-[10px] text-[var(--text-tertiary)] ml-1">Metrics & experiments</span>
+          {isLive ? (
+            <span className="text-[10px] px-1.5 py-0.5 rounded bg-[var(--accent-bg)] text-[var(--accent-text)]">
+              live
+            </span>
+          ) : (
+            <span className="text-[10px] px-1.5 py-0.5 rounded bg-[var(--bg-inset)] text-[var(--text-tertiary)]">
+              sample
+            </span>
+          )}
         </div>
 
         <div className="flex items-center gap-1">
@@ -56,7 +95,7 @@ export default function AnalyticsPage() {
             {ranges.map((r) => (
               <button
                 key={r.key}
-                onClick={() => setDateRange(r.key)}
+                onClick={() => handleDateRange(r.key)}
                 className={`tool-tab ${dateRange === r.key ? 'active' : ''}`}
               >
                 {r.label}

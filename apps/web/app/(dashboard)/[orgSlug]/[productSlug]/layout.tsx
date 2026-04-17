@@ -12,6 +12,7 @@ import { useProductStore, type Product } from '../../../lib/product-store'
 import { useVersionStore } from '../../../lib/version-store'
 import { useCommentStore } from '../../../lib/comment-store'
 import { useDataSync } from '../../../lib/use-data-sync'
+import { usePhase19Sync } from '../../../lib/use-phase19-sync'
 import { CollaborationProvider, useCollaborationContext } from '../../../lib/collaboration-context'
 import { PresenceAvatars, ConnectionBadge } from '../../_components/presence-avatars'
 import { createContext, useContext } from 'react'
@@ -47,6 +48,7 @@ export default function ProductLayout({
   // Resolve real DB product ID for data sync; fall back to composite slug
   const dbProductId = product?.id ?? undefined
   const { isLoading: isSyncing } = useDataSync(dbProductId)
+  usePhase19Sync(dbProductId)
 
   const segments = pathname.split('/')
   const currentStudio = segments[3] || 'planner'

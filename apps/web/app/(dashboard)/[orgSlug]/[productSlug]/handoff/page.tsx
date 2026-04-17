@@ -1,31 +1,75 @@
 'use client'
 
 import { useState, useMemo } from 'react'
+import { useParams } from 'next/navigation'
 import { FileOutput, Sparkles, Filter } from 'lucide-react'
-import { mockHandoffs } from './_data/mock-handoffs'
+import {
+  mockHandoffs,
+  type HandoffItem as MockItem,
+  type DesignToken as MockToken,
+} from './_data/mock-handoffs'
 import { HandoffCard } from './_components/handoff-card'
 import { SpecDetail } from './_components/spec-detail'
+import { useProduct } from '../layout'
+import { useHandoffStore, type HandoffItem as StoreItem } from '../../../../lib/handoff-store'
 
-type FilterType = 'all' | 'component' | 'page' | 'token'
+type FilterType = 'all' | MockItem['type']
+
+/** Fold shadow/opacity store tokens into the closest mock equivalent. */
+function toMockTokenType(t: StoreItem['tokens'][number]['type']): MockToken['type'] {
+  if (t === 'shadow' || t === 'opacity') return 'color'
+  return t
+}
+
+function toMockItem(s: StoreItem): MockItem {
+  // The mock UI understands component / page / token; collapse 'pattern' onto component for display.
+  const uiType: MockItem['type'] = s.type === 'pattern' ? 'component' : s.type
+  return {
+    id: s.id,
+    name: s.label,
+    type: uiType,
+    completeness: s.completeness,
+    previewColor: s.previewColor,
+    specs: s.specs,
+    tokens: s.tokens.map((t) => ({
+      name: t.name,
+      value: t.value,
+      type: toMockTokenType(t.type),
+    })),
+    criteria: s.criteria,
+  }
+}
 
 export default function DevHandoffPage() {
+  const params = useParams<{ productSlug: string }>()
+  const product = useProduct()
+  const productId = product?.id ?? params.productSlug
+
+  const storeItems = useHandoffStore((s) => s.items)
+  const productItems = useMemo(
+    () => storeItems.filter((i) => i.productId === productId),
+    [storeItems, productId],
+  )
+  const isLive = productItems.length > 0
+  const items: MockItem[] = isLive ? productItems.map(toMockItem) : mockHandoffs
+
   const [filter, setFilter] = useState<FilterType>('all')
   const [selectedId, setSelectedId] = useState<string | null>(null)
 
   const filteredItems = useMemo(() => {
-    if (filter === 'all') return mockHandoffs
-    return mockHandoffs.filter((item) => item.type === filter)
-  }, [filter])
+    if (filter === 'all') return items
+    return items.filter((item) => item.type === filter)
+  }, [items, filter])
 
   const selectedItem = useMemo(
-    () => mockHandoffs.find((item) => item.id === selectedId) ?? null,
-    [selectedId]
+    () => items.find((item) => item.id === selectedId) ?? null,
+    [items, selectedId],
   )
 
   const avgCompleteness = useMemo(() => {
     if (filteredItems.length === 0) return 0
     return Math.round(
-      filteredItems.reduce((sum, item) => sum + item.completeness, 0) / filteredItems.length
+      filteredItems.reduce((sum, item) => sum + item.completeness, 0) / filteredItems.length,
     )
   }, [filteredItems])
 
@@ -46,6 +90,15 @@ export default function DevHandoffPage() {
           <span className="text-[10px] text-[var(--text-tertiary)] ml-1">
             {filteredItems.length} items / {avgCompleteness}% avg
           </span>
+          {isLive ? (
+            <span className="text-[10px] px-1.5 py-0.5 rounded bg-[var(--accent-bg)] text-[var(--accent-text)]">
+              live
+            </span>
+          ) : (
+            <span className="text-[10px] px-1.5 py-0.5 rounded bg-[var(--bg-inset)] text-[var(--text-tertiary)]">
+              sample
+            </span>
+          )}
         </div>
 
         <div className="flex items-center gap-1">
