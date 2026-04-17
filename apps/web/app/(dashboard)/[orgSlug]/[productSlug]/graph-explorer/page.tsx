@@ -478,12 +478,14 @@ export default function GraphExplorerPage() {
               node={selectedNode}
               edges={graphEdges}
               allNodes={graphNodes}
+              productId={productId}
               onSelectNode={setSelectedNodeId}
               onClose={() => setSelectedNodeId(null)}
               onEdit={(n) => setEditNode(n)}
               onDelete={handleDeleteNode}
               onConnect={(n) => setConnectSourceNode(n)}
               onDeleteEdge={handleDeleteEdge}
+              onCreateEdge={handleCreateEdge}
             />
           </div>
         )}
