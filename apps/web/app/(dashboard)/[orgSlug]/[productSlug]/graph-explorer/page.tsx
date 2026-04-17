@@ -2,7 +2,8 @@
 
 import { useState, useCallback, useMemo, useEffect } from 'react'
 import { useParams, useSearchParams } from 'next/navigation'
-import { Sparkles, Share2, X, RefreshCw, CheckCircle2 } from 'lucide-react'
+import { AnimatePresence } from 'framer-motion'
+import { Sparkles, Share2, X, RefreshCw, CheckCircle2, Plus } from 'lucide-react'
 import { useProduct } from '../layout'
 import {
   mockGraphData,
@@ -15,6 +16,7 @@ import { useGraphStore } from '../../../../lib/graph-store'
 import { GraphCanvas } from './_components/graph-canvas'
 import { GraphFilters } from './_components/graph-filters'
 import { NodeDetailPanel } from './_components/node-detail-panel'
+import { AddNodeModal, EditNodeModal, AddEdgeModal } from './_components/node-crud-modals'
 import { trpc } from '../../../../lib/trpc'
 
 const ALL_NODE_KINDS: NodeKind[] = [
@@ -108,7 +110,7 @@ export default function GraphExplorerPage() {
   const product = useProduct()
   const productId = product?.id ?? (params.productSlug as string)
 
-  // Self-contained live query so this page always has fresh data after template apply
+  // ── Queries ──────────────────────────────────────────────────────────────
   const enabled = !!product?.id
   const nodesQuery = trpc.graph.getNodes.useQuery(
     { productId: product?.id ?? '' },
@@ -119,7 +121,24 @@ export default function GraphExplorerPage() {
     { enabled, staleTime: 0 },
   )
 
-  // Hydrate store from fresh query data
+  // ── Mutations ────────────────────────────────────────────────────────────
+  const createNodeMutation = trpc.graph.createNode.useMutation({
+    onSuccess: () => { nodesQuery.refetch() },
+  })
+  const updateNodeMutation = trpc.graph.updateNode.useMutation({
+    onSuccess: () => { nodesQuery.refetch() },
+  })
+  const deleteNodeMutation = trpc.graph.deleteNode.useMutation({
+    onSuccess: () => { nodesQuery.refetch(); edgesQuery.refetch() },
+  })
+  const createEdgeMutation = trpc.graph.createEdge.useMutation({
+    onSuccess: () => { edgesQuery.refetch() },
+  })
+  const deleteEdgeMutation = trpc.graph.deleteEdge.useMutation({
+    onSuccess: () => { edgesQuery.refetch() },
+  })
+
+  // ── Store hydration ──────────────────────────────────────────────────────
   useEffect(() => {
     if (!nodesQuery.data) return
     const rows = nodesQuery.data as Array<{ id: string; kind: string; label: string; data: unknown; productId: string; createdAt: unknown; updatedAt: unknown }>
@@ -159,7 +178,7 @@ export default function GraphExplorerPage() {
     })
   }, [edgesQuery.data])
 
-  // Success banner when arriving from template apply
+  // ── Success banner ───────────────────────────────────────────────────────
   const fromTemplate = searchParams?.get('from') === 'template'
   const [showBanner, setShowBanner] = useState(fromTemplate)
   useEffect(() => {
@@ -174,6 +193,7 @@ export default function GraphExplorerPage() {
     edgesQuery.refetch()
   }, [nodesQuery, edgesQuery])
 
+  // ── Store selectors ──────────────────────────────────────────────────────
   const allStoreNodes = useGraphStore((s) => s.nodes)
   const allStoreEdges = useGraphStore((s) => s.edges)
 
@@ -202,6 +222,7 @@ export default function GraphExplorerPage() {
     [hasStoreData, productStoreEdges]
   )
 
+  // ── Layout / filter state ────────────────────────────────────────────────
   const buildInitialPositions = useCallback(() => {
     const positions: Record<string, { x: number; y: number }> = {}
     for (const node of graphNodes) {
@@ -210,12 +231,8 @@ export default function GraphExplorerPage() {
     return positions
   }, [graphNodes])
 
-  const [activeNodeKinds, setActiveNodeKinds] = useState<Set<NodeKind>>(
-    new Set(ALL_NODE_KINDS)
-  )
-  const [activeEdgeKinds, setActiveEdgeKinds] = useState<Set<EdgeKind>>(
-    new Set(ALL_EDGE_KINDS)
-  )
+  const [activeNodeKinds, setActiveNodeKinds] = useState<Set<NodeKind>>(new Set(ALL_NODE_KINDS))
+  const [activeEdgeKinds, setActiveEdgeKinds] = useState<Set<EdgeKind>>(new Set(ALL_EDGE_KINDS))
   const [searchQuery, setSearchQuery] = useState('')
   const [showLabels, setShowLabels] = useState(true)
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null)
@@ -281,6 +298,68 @@ export default function GraphExplorerPage() {
     [selectedNodeId, graphNodes]
   )
 
+  // ── Modal state ──────────────────────────────────────────────────────────
+  const [addNodeOpen, setAddNodeOpen] = useState(false)
+  const [editNode, setEditNode] = useState<LocalGraphNode | null>(null)
+  const [connectSourceNode, setConnectSourceNode] = useState<LocalGraphNode | null>(null)
+
+  // ── CRUD handlers ────────────────────────────────────────────────────────
+  const handleCreateNode = useCallback(
+    async (label: string, kind: NodeKind, data: Record<string, string>) => {
+      if (!product?.id) return
+      const node = await createNodeMutation.mutateAsync({
+        productId: product.id,
+        kind,
+        label,
+        data,
+        position: { x: CENTER_X, y: CENTER_Y },
+      })
+      // Place new node at canvas center
+      setNodePositions((prev) => ({ ...prev, [node.id]: { x: CENTER_X, y: CENTER_Y } }))
+    },
+    [product?.id, createNodeMutation]
+  )
+
+  const handleUpdateNode = useCallback(
+    async (id: string, label: string, data: Record<string, string>) => {
+      await updateNodeMutation.mutateAsync({ id, label, data })
+    },
+    [updateNodeMutation]
+  )
+
+  const handleDeleteNode = useCallback(
+    async (nodeId: string) => {
+      await deleteNodeMutation.mutateAsync({ id: nodeId })
+      setSelectedNodeId(null)
+      // Optimistic: remove from store immediately
+      useGraphStore.setState((s) => ({
+        nodes: s.nodes.filter((n) => n.id !== nodeId),
+        edges: s.edges.filter((e) => e.sourceId !== nodeId && e.targetId !== nodeId),
+      }))
+    },
+    [deleteNodeMutation]
+  )
+
+  const handleCreateEdge = useCallback(
+    async (sourceId: string, targetId: string, kind: EdgeKind) => {
+      if (!product?.id) return
+      await createEdgeMutation.mutateAsync({ productId: product.id, sourceId, targetId, kind })
+    },
+    [product?.id, createEdgeMutation]
+  )
+
+  const handleDeleteEdge = useCallback(
+    async (edgeId: string) => {
+      await deleteEdgeMutation.mutateAsync({ id: edgeId })
+      // Optimistic: remove from store immediately
+      useGraphStore.setState((s) => ({
+        edges: s.edges.filter((e) => e.id !== edgeId),
+      }))
+    },
+    [deleteEdgeMutation]
+  )
+
+  // ── Render ───────────────────────────────────────────────────────────────
   return (
     <div className="flex flex-col h-full bg-[var(--bg-workspace)]">
       {/* Template apply success banner */}
@@ -317,6 +396,14 @@ export default function GraphExplorerPage() {
           >
             <RefreshCw size={12} className={isRefreshing ? 'animate-spin' : ''} />
             <span className="text-[10px]">{isRefreshing ? 'Syncing…' : 'Refresh'}</span>
+          </button>
+          <button
+            onClick={() => setAddNodeOpen(true)}
+            className="tool-btn text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+            title="Add a new node"
+          >
+            <Plus size={12} />
+            <span className="text-[10px]">Add Node</span>
           </button>
           <button className="tool-btn text-[var(--accent-text)]">
             <Sparkles size={12} />
@@ -360,28 +447,49 @@ export default function GraphExplorerPage() {
 
         {/* Node detail panel */}
         {selectedNode && (
-          <div className="shrink-0 overflow-y-auto w-[280px] border-l border-[var(--border-default)] bg-[var(--bg-surface)]">
-            <div className="flex items-center justify-between px-3 h-[var(--toolbar-h)] border-b border-[var(--border-default)]">
-              <span className="tool-section-label" style={{ padding: 0 }}>
-                Node Detail
-              </span>
-              <button
-                onClick={() => setSelectedNodeId(null)}
-                className="tool-btn px-1 py-0.5 border-none bg-transparent"
-              >
-                <X size={12} />
-              </button>
-            </div>
+          <div className="shrink-0 w-[260px] border-l border-[var(--border-default)] bg-[var(--bg-surface)] flex flex-col">
             <NodeDetailPanel
               node={selectedNode}
               edges={graphEdges}
               allNodes={graphNodes}
               onSelectNode={setSelectedNodeId}
               onClose={() => setSelectedNodeId(null)}
+              onEdit={(n) => setEditNode(n)}
+              onDelete={handleDeleteNode}
+              onConnect={(n) => setConnectSourceNode(n)}
+              onDeleteEdge={handleDeleteEdge}
             />
           </div>
         )}
       </div>
+
+      {/* Modals */}
+      <AnimatePresence>
+        {addNodeOpen && (
+          <AddNodeModal
+            key="add-node"
+            onClose={() => setAddNodeOpen(false)}
+            onSubmit={handleCreateNode}
+          />
+        )}
+        {editNode && (
+          <EditNodeModal
+            key="edit-node"
+            node={editNode}
+            onClose={() => setEditNode(null)}
+            onSubmit={handleUpdateNode}
+          />
+        )}
+        {connectSourceNode && (
+          <AddEdgeModal
+            key="add-edge"
+            sourceNode={connectSourceNode}
+            allNodes={graphNodes}
+            onClose={() => setConnectSourceNode(null)}
+            onSubmit={handleCreateEdge}
+          />
+        )}
+      </AnimatePresence>
     </div>
   )
 }
