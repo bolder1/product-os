@@ -1,8 +1,8 @@
 'use client'
 
-import { useState, useCallback, useMemo } from 'react'
-import { useParams } from 'next/navigation'
-import { Sparkles, Share2, X } from 'lucide-react'
+import { useState, useCallback, useMemo, useEffect } from 'react'
+import { useParams, useSearchParams } from 'next/navigation'
+import { Sparkles, Share2, X, RefreshCw, CheckCircle2 } from 'lucide-react'
 import { useProduct } from '../layout'
 import {
   mockGraphData,
@@ -15,6 +15,7 @@ import { useGraphStore } from '../../../../lib/graph-store'
 import { GraphCanvas } from './_components/graph-canvas'
 import { GraphFilters } from './_components/graph-filters'
 import { NodeDetailPanel } from './_components/node-detail-panel'
+import { trpc } from '../../../../lib/trpc'
 
 const ALL_NODE_KINDS: NodeKind[] = [
   'module',
@@ -103,8 +104,75 @@ function storeEdgesToLocal(
 
 export default function GraphExplorerPage() {
   const params = useParams()
+  const searchParams = useSearchParams()
   const product = useProduct()
   const productId = product?.id ?? (params.productSlug as string)
+
+  // Self-contained live query so this page always has fresh data after template apply
+  const enabled = !!product?.id
+  const nodesQuery = trpc.graph.getNodes.useQuery(
+    { productId: product?.id ?? '' },
+    { enabled, staleTime: 0 },
+  )
+  const edgesQuery = trpc.graph.getEdges.useQuery(
+    { productId: product?.id ?? '' },
+    { enabled, staleTime: 0 },
+  )
+
+  // Hydrate store from fresh query data
+  useEffect(() => {
+    if (!nodesQuery.data) return
+    const rows = nodesQuery.data as Array<{ id: string; kind: string; label: string; data: unknown; productId: string; createdAt: unknown; updatedAt: unknown }>
+    useGraphStore.setState((s) => {
+      const existing = new Map(s.nodes.map((n) => [n.id, n]))
+      for (const r of rows) {
+        existing.set(r.id, {
+          id: r.id,
+          kind: r.kind as NodeKind,
+          label: r.label,
+          data: (r.data ?? {}) as Record<string, unknown>,
+          productId: r.productId,
+          createdAt: (r.createdAt as string) ?? '',
+          updatedAt: (r.updatedAt as string) ?? '',
+        })
+      }
+      return { nodes: Array.from(existing.values()) }
+    })
+  }, [nodesQuery.data])
+
+  useEffect(() => {
+    if (!edgesQuery.data) return
+    const rows = edgesQuery.data as Array<{ id: string; kind: string; sourceId: string; targetId: string; productId: string; createdAt: unknown }>
+    useGraphStore.setState((s) => {
+      const existing = new Map(s.edges.map((e) => [e.id, e]))
+      for (const r of rows) {
+        existing.set(r.id, {
+          id: r.id,
+          kind: r.kind as EdgeKind,
+          sourceId: r.sourceId,
+          targetId: r.targetId,
+          productId: r.productId,
+          createdAt: (r.createdAt as string) ?? '',
+        })
+      }
+      return { edges: Array.from(existing.values()) }
+    })
+  }, [edgesQuery.data])
+
+  // Success banner when arriving from template apply
+  const fromTemplate = searchParams?.get('from') === 'template'
+  const [showBanner, setShowBanner] = useState(fromTemplate)
+  useEffect(() => {
+    if (!showBanner) return
+    const t = setTimeout(() => setShowBanner(false), 5000)
+    return () => clearTimeout(t)
+  }, [showBanner])
+
+  const isRefreshing = nodesQuery.isFetching || edgesQuery.isFetching
+  const handleRefresh = useCallback(() => {
+    nodesQuery.refetch()
+    edgesQuery.refetch()
+  }, [nodesQuery, edgesQuery])
 
   const allStoreNodes = useGraphStore((s) => s.nodes)
   const allStoreEdges = useGraphStore((s) => s.edges)
@@ -215,23 +283,46 @@ export default function GraphExplorerPage() {
 
   return (
     <div className="flex flex-col h-full bg-[var(--bg-workspace)]">
+      {/* Template apply success banner */}
+      {showBanner && (
+        <div className="flex items-center gap-2 px-4 py-2 bg-[#10B981]/10 border-b border-[#10B981]/20 text-[#10B981] text-[11px] shrink-0">
+          <CheckCircle2 size={13} />
+          <span className="font-medium">Template applied successfully!</span>
+          <span className="text-[#10B981]/70">Your product graph now includes all template nodes and edges below.</span>
+          <button onClick={() => setShowBanner(false)} className="ml-auto text-[#10B981]/60 hover:text-[#10B981]"><X size={12} /></button>
+        </div>
+      )}
+
       {/* Toolbar */}
       <div className="flex items-center justify-between px-3 shrink-0 h-[var(--toolbar-h)] border-b border-[var(--border-default)] bg-[var(--bg-surface)]">
         <div className="flex items-center gap-2">
           <Share2 size={14} className="text-[var(--text-secondary)]" />
-          <span className="text-[13px] font-semibold text-[var(--text-primary)]">
-            Graph Explorer
-          </span>
+          <span className="text-[13px] font-semibold text-[var(--text-primary)]">Graph Explorer</span>
           <span className="text-[11px] text-[var(--text-tertiary)]">
-            {graphNodes.length} nodes, {graphEdges.length} edges
-            {!hasStoreData && ' (demo data)'}
+            {graphNodes.length} nodes · {graphEdges.length} edges
           </span>
+          {hasStoreData ? (
+            <span className="text-[10px] px-1.5 py-0.5 rounded bg-[var(--accent-bg)] text-[var(--accent-text)]">live</span>
+          ) : (
+            <span className="text-[10px] px-1.5 py-0.5 rounded bg-[var(--bg-inset)] text-[var(--text-tertiary)]">sample</span>
+          )}
         </div>
 
-        <button className="tool-btn text-[var(--accent-text)]">
-          <Sparkles size={12} />
-          AI: Analyze Graph
-        </button>
+        <div className="flex items-center gap-1">
+          <button
+            onClick={handleRefresh}
+            disabled={isRefreshing}
+            className="tool-btn text-[var(--text-tertiary)]"
+            title="Refresh graph from DB"
+          >
+            <RefreshCw size={12} className={isRefreshing ? 'animate-spin' : ''} />
+            <span className="text-[10px]">{isRefreshing ? 'Syncing…' : 'Refresh'}</span>
+          </button>
+          <button className="tool-btn text-[var(--accent-text)]">
+            <Sparkles size={12} />
+            AI: Analyze
+          </button>
+        </div>
       </div>
 
       {/* Filters */}

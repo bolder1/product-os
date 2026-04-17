@@ -1,14 +1,13 @@
 'use client'
 
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect, useCallback } from 'react'
 import { useParams, useRouter } from 'next/navigation'
+import { motion, AnimatePresence } from 'framer-motion'
 import {
   LayoutTemplate,
   Search,
   ChevronDown,
   X,
-  Copy,
-  FileText,
   Layers,
   GitBranch,
   Palette,
@@ -17,445 +16,610 @@ import {
   Box,
   Loader2,
   CheckCircle2,
+  FileText,
+  Sparkles,
+  ArrowRight,
+  Hash,
+  Type,
+  ToggleLeft,
+  ChevronRight,
 } from 'lucide-react'
 import { trpcMutate, trpcQuery } from '../../../../lib/api'
-import { useProductStore } from '../../../../lib/product-store'
 import { useProduct } from '../layout'
 
-// ---------------------------------------------------------------------------
-// Types & Data
-// ---------------------------------------------------------------------------
+/* ------------------------------------------------------------------ */
+/*  Types                                                              */
+/* ------------------------------------------------------------------ */
 
-type Category = 'All' | 'Workflow' | 'Page' | 'Component' | 'Design' | 'Release' | 'Integration'
-type SortOption = 'Popular' | 'Name A-Z' | 'Recent'
+type Category = 'All' | 'saas' | 'mobile' | 'ecommerce' | 'marketing' | 'design_system' | 'internal_ops' | 'custom'
 
-interface Template {
+interface TemplateVariable {
+  key: string
+  label: string
+  type: 'text' | 'color' | 'boolean' | 'number' | 'select'
+  default: unknown
+  options?: string[]
+  description?: string
+}
+
+interface BundleNodeSample {
+  kind: string
+  label: string
+}
+
+interface BundleManifest {
   id: string
   name: string
   description: string
-  category: Exclude<Category, 'All'>
+  category: string
   tags: string[]
-  nodeCount: number
+  version: string
   author: string
-  usageCount: number
-  nodes: string[]
+  nodeCount: number
+  edgeCount: number
+  variables: TemplateVariable[]
+  nodeKinds: string[]
+  nodeSample: BundleNodeSample[]
 }
 
-const CATEGORIES: Category[] = ['All', 'Workflow', 'Page', 'Component', 'Design', 'Release', 'Integration']
+/* ------------------------------------------------------------------ */
+/*  Constants                                                          */
+/* ------------------------------------------------------------------ */
 
-const CATEGORY_ICONS: Record<string, React.ReactNode> = {
-  Workflow: <GitBranch className="w-3 h-3" />,
-  Page: <FileText className="w-3 h-3" />,
-  Component: <Box className="w-3 h-3" />,
-  Design: <Palette className="w-3 h-3" />,
-  Release: <Zap className="w-3 h-3" />,
-  Integration: <Settings className="w-3 h-3" />,
-}
-
-const templates: Template[] = [
-  {
-    id: 't-1', name: 'SaaS Onboarding Flow', description: 'End-to-end onboarding workflow with email sequences, feature tours, and activation tracking.',
-    category: 'Workflow', tags: ['onboarding', 'saas', 'activation'], nodeCount: 24, author: 'Product OS', usageCount: 1820,
-    nodes: ['Welcome Email', 'Feature Tour', 'Activation Check', 'Follow-up Sequence'],
-  },
-  {
-    id: 't-2', name: 'Landing Page', description: 'Conversion-optimized landing page with hero, features, pricing, and CTA sections.',
-    category: 'Page', tags: ['landing', 'marketing', 'conversion'], nodeCount: 18, author: 'Product OS', usageCount: 2340,
-    nodes: ['Hero Section', 'Feature Grid', 'Pricing Table', 'CTA Block'],
-  },
-  {
-    id: 't-3', name: 'Design System Starter', description: 'Foundation tokens, color scales, typography, and spacing for a new design system.',
-    category: 'Design', tags: ['tokens', 'typography', 'colors'], nodeCount: 32, author: 'Product OS', usageCount: 1560,
-    nodes: ['Color Tokens', 'Typography Scale', 'Spacing Grid', 'Shadow Set'],
-  },
-  {
-    id: 't-4', name: 'React Component Kit', description: 'Button, Input, Modal, and Table primitives with variants and accessibility baked in.',
-    category: 'Component', tags: ['react', 'a11y', 'primitives'], nodeCount: 16, author: 'Product OS', usageCount: 2890,
-    nodes: ['Button', 'Input', 'Modal', 'Table'],
-  },
-  {
-    id: 't-5', name: 'Release Checklist', description: 'Pre-launch verification workflow with QA gates, stakeholder sign-off, and rollback plan.',
-    category: 'Release', tags: ['release', 'qa', 'checklist'], nodeCount: 14, author: 'Product OS', usageCount: 980,
-    nodes: ['QA Gate', 'Staging Deploy', 'Stakeholder Review', 'Go/No-Go'],
-  },
-  {
-    id: 't-6', name: 'API Integration Blueprint', description: 'REST/GraphQL integration scaffold with auth, error handling, and retry patterns.',
-    category: 'Integration', tags: ['api', 'rest', 'graphql'], nodeCount: 20, author: 'Product OS', usageCount: 1120,
-    nodes: ['Auth Setup', 'Endpoint Map', 'Error Handler', 'Retry Logic'],
-  },
-  {
-    id: 't-7', name: 'Sprint Planning Board', description: 'Kanban-style sprint layout with backlog, in-progress, review, and done columns.',
-    category: 'Workflow', tags: ['sprint', 'agile', 'kanban'], nodeCount: 12, author: 'Product OS', usageCount: 1640,
-    nodes: ['Backlog', 'In Progress', 'Review', 'Done'],
-  },
-  {
-    id: 't-8', name: 'Settings Page', description: 'Account settings page with profile, billing, notifications, and security sections.',
-    category: 'Page', tags: ['settings', 'account', 'profile'], nodeCount: 22, author: 'Product OS', usageCount: 1350,
-    nodes: ['Profile Section', 'Billing Tab', 'Notification Prefs', 'Security Panel'],
-  },
-  {
-    id: 't-9', name: 'Dashboard Layout', description: 'Analytics dashboard with KPI cards, chart panels, and data table.',
-    category: 'Page', tags: ['dashboard', 'analytics', 'charts'], nodeCount: 28, author: 'Product OS', usageCount: 3100,
-    nodes: ['KPI Row', 'Line Chart', 'Bar Chart', 'Data Table'],
-  },
+const CATEGORIES: { key: Category; label: string }[] = [
+  { key: 'All',          label: 'All'          },
+  { key: 'saas',         label: 'SaaS'         },
+  { key: 'mobile',       label: 'Mobile'       },
+  { key: 'design_system',label: 'Design System'},
+  { key: 'internal_ops', label: 'Internal Ops' },
+  { key: 'marketing',    label: 'Marketing'    },
+  { key: 'ecommerce',    label: 'E-Commerce'   },
 ]
 
-// ---------------------------------------------------------------------------
-// Template Card
-// ---------------------------------------------------------------------------
-
-function TemplateCard({
-  template,
-  onClick,
-}: {
-  template: Template
-  onClick: () => void
-}) {
-  return (
-    <button
-      onClick={onClick}
-      className="text-left bg-[var(--bg-surface)] border border-[var(--border-default)] hover:border-[var(--border-active)] transition-colors p-3 flex flex-col gap-2"
-    >
-      {/* Category + usage */}
-      <div className="flex items-center justify-between">
-        <span className="flex items-center gap-1 text-[10px] font-medium text-[var(--text-secondary)] uppercase tracking-wide">
-          {CATEGORY_ICONS[template.category]}
-          {template.category}
-        </span>
-        <span className="text-[10px] text-[var(--text-tertiary)]">{template.usageCount.toLocaleString()} uses</span>
-      </div>
-
-      {/* Name */}
-      <h3 className="text-[13px] font-medium text-[var(--text-primary)] leading-snug">{template.name}</h3>
-
-      {/* Description */}
-      <p className="text-[11px] text-[var(--text-secondary)] leading-relaxed line-clamp-2">{template.description}</p>
-
-      {/* Tags */}
-      <div className="flex items-center gap-1 flex-wrap mt-auto">
-        {template.tags.slice(0, 3).map((tag) => (
-          <span key={tag} className="tool-badge">{tag}</span>
-        ))}
-      </div>
-
-      {/* Footer */}
-      <div className="flex items-center justify-between pt-1 border-t border-[var(--border-default)]">
-        <span className="text-[10px] text-[var(--text-tertiary)]">{template.nodeCount} nodes</span>
-        <span className="text-[10px] text-[var(--text-tertiary)]">{template.author}</span>
-      </div>
-    </button>
-  )
+const CATEGORY_ICONS: Record<string, React.ReactNode> = {
+  saas:         <GitBranch className="w-3 h-3" />,
+  mobile:       <Box className="w-3 h-3" />,
+  design_system:<Palette className="w-3 h-3" />,
+  internal_ops: <Settings className="w-3 h-3" />,
+  marketing:    <Zap className="w-3 h-3" />,
+  ecommerce:    <FileText className="w-3 h-3" />,
+  custom:       <Layers className="w-3 h-3" />,
 }
 
-// ---------------------------------------------------------------------------
-// Preview Modal
-// ---------------------------------------------------------------------------
+const CATEGORY_GRADIENTS: Record<string, string> = {
+  saas:         'from-blue-500/20 to-violet-500/10',
+  mobile:       'from-emerald-500/20 to-teal-500/10',
+  design_system:'from-pink-500/20 to-rose-500/10',
+  internal_ops: 'from-amber-500/20 to-orange-500/10',
+  marketing:    'from-cyan-500/20 to-sky-500/10',
+  ecommerce:    'from-purple-500/20 to-indigo-500/10',
+  custom:       'from-slate-500/20 to-slate-700/10',
+}
 
-function TemplatePreview({
-  template,
-  onClose,
-  onApply,
-  applying,
-  applyResult,
+const KIND_COLORS: Record<string, string> = {
+  module:   '#3B82F6',
+  feature:  '#8B5CF6',
+  page:     '#10B981',
+  entity:   '#F59E0B',
+  workflow: '#06B6D4',
+  token:    '#EC4899',
+  component:'#F97316',
+  journey:  '#64748B',
+}
+
+/* ------------------------------------------------------------------ */
+/*  Variable input component                                           */
+/* ------------------------------------------------------------------ */
+
+function VariableField({
+  variable,
+  value,
+  onChange,
 }: {
-  template: Template
-  onClose: () => void
-  onApply: (t: Template) => void
-  applying?: boolean
-  applyResult?: { nodes: number; edges: number } | null
+  variable: TemplateVariable
+  value: unknown
+  onChange: (v: unknown) => void
 }) {
+  const Icon = variable.type === 'color' ? Palette : variable.type === 'boolean' ? ToggleLeft : Type
+
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
-      onClick={(e) => { if (e.target === e.currentTarget) onClose() }}
-    >
-      <div className="w-full max-w-lg bg-[var(--bg-surface)] border border-[var(--border-default)] overflow-hidden flex flex-col max-h-[80vh]">
-        {/* Header */}
-        <div className="flex items-center justify-between px-4 py-2.5 border-b border-[var(--border-default)] bg-[var(--bg-elevated)]">
-          <div className="flex items-center gap-2">
-            <LayoutTemplate className="w-3.5 h-3.5 text-[var(--accent-text)]" />
-            <span className="text-[13px] font-medium text-[var(--text-primary)]">{template.name}</span>
-          </div>
-          <button onClick={onClose} className="text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] transition-colors">
-            <X className="w-3.5 h-3.5" />
-          </button>
-        </div>
-
-        {/* Body */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">
-          {/* Meta row */}
-          <div className="flex items-center gap-3">
-            <span className="flex items-center gap-1 text-[10px] font-medium text-[var(--text-secondary)] uppercase tracking-wide">
-              {CATEGORY_ICONS[template.category]}
-              {template.category}
-            </span>
-            <span className="text-[10px] text-[var(--text-tertiary)]">{template.nodeCount} nodes</span>
-            <span className="text-[10px] text-[var(--text-tertiary)]">{template.usageCount.toLocaleString()} uses</span>
-          </div>
-
-          {/* Description */}
-          <p className="text-[12px] text-[var(--text-secondary)] leading-relaxed">{template.description}</p>
-
-          {/* Tags */}
-          <div className="flex items-center gap-1 flex-wrap">
-            {template.tags.map((tag) => (
-              <span key={tag} className="tool-badge">{tag}</span>
-            ))}
-          </div>
-
-          {/* Nodes preview */}
-          <div>
-            <span className="tool-section-label block mb-2">Included Nodes</span>
-            <div className="space-y-1">
-              {template.nodes.map((node, i) => (
-                <div key={i} className="flex items-center gap-2 px-2 py-1.5 bg-[var(--bg-elevated)] border border-[var(--border-default)]">
-                  <Layers className="w-3 h-3 text-[var(--text-tertiary)]" />
-                  <span className="text-[12px] text-[var(--text-primary)]">{node}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Footer */}
-        <div className="flex items-center justify-end gap-2 px-4 py-2.5 border-t border-[var(--border-default)]">
-          {applyResult ? (
-            <div className="flex items-center gap-2 text-[12px] text-[var(--color-success)]">
-              <CheckCircle2 className="w-4 h-4" />
-              Applied! {applyResult.nodes} nodes, {applyResult.edges} edges created
-            </div>
-          ) : (
-            <>
-              <button onClick={onClose} className="tool-btn" disabled={applying}>
-                Cancel
-              </button>
-              <button
-                onClick={() => onApply(template)}
-                className="tool-btn tool-btn-primary"
-                disabled={applying}
-              >
-                {applying ? (
-                  <Loader2 className="w-3 h-3 animate-spin" />
-                ) : (
-                  <Copy className="w-3 h-3" />
-                )}
-                {applying ? 'Applying...' : 'Apply Template'}
-              </button>
-            </>
-          )}
-        </div>
+    <div className="space-y-1.5">
+      <div className="flex items-center gap-1.5">
+        <Icon size={11} className="text-[#64748B]" />
+        <label className="text-[11px] font-medium text-[var(--text-primary)]">{variable.label}</label>
+        {variable.description && (
+          <span className="text-[10px] text-[var(--text-tertiary)]">— {variable.description}</span>
+        )}
       </div>
+
+      {variable.type === 'boolean' ? (
+        <button
+          onClick={() => onChange(!value)}
+          className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border text-[11px] transition-colors ${
+            value
+              ? 'border-[var(--accent)]/40 bg-[var(--accent)]/10 text-[var(--accent-text)]'
+              : 'border-white/[0.08] bg-white/[0.03] text-[var(--text-tertiary)]'
+          }`}
+        >
+          <div className={`w-7 h-3.5 rounded-full transition-colors ${value ? 'bg-[var(--accent)]' : 'bg-white/[0.12]'} relative`}>
+            <div className={`absolute top-0.5 w-2.5 h-2.5 rounded-full bg-white transition-all ${value ? 'left-4' : 'left-0.5'}`} />
+          </div>
+          {value ? 'Enabled' : 'Disabled'}
+        </button>
+      ) : variable.type === 'color' ? (
+        <div className="flex items-center gap-2">
+          <input
+            type="color"
+            value={String(value ?? variable.default ?? '#3B82F6')}
+            onChange={(e) => onChange(e.target.value)}
+            className="w-8 h-8 rounded-md cursor-pointer border border-white/[0.08] bg-transparent"
+          />
+          <input
+            type="text"
+            value={String(value ?? variable.default ?? '#3B82F6')}
+            onChange={(e) => onChange(e.target.value)}
+            className="flex-1 px-3 py-1.5 rounded-lg bg-white/[0.03] border border-white/[0.08] text-[11px] text-[var(--text-primary)] font-mono outline-none focus:border-[var(--accent)]/40"
+          />
+        </div>
+      ) : variable.type === 'select' && variable.options ? (
+        <select
+          value={String(value ?? variable.default ?? '')}
+          onChange={(e) => onChange(e.target.value)}
+          className="w-full px-3 py-1.5 rounded-lg bg-white/[0.03] border border-white/[0.08] text-[11px] text-[var(--text-primary)] outline-none focus:border-[var(--accent)]/40"
+        >
+          {variable.options.map((opt) => (
+            <option key={opt} value={opt}>{opt}</option>
+          ))}
+        </select>
+      ) : (
+        <input
+          type={variable.type === 'number' ? 'number' : 'text'}
+          value={String(value ?? variable.default ?? '')}
+          onChange={(e) => onChange(variable.type === 'number' ? Number(e.target.value) : e.target.value)}
+          className="w-full px-3 py-1.5 rounded-lg bg-white/[0.03] border border-white/[0.08] text-[11px] text-[var(--text-primary)] outline-none focus:border-[var(--accent)]/40"
+          placeholder={String(variable.default ?? '')}
+        />
+      )}
     </div>
   )
 }
 
-// ---------------------------------------------------------------------------
-// Main Page
-// ---------------------------------------------------------------------------
+/* ------------------------------------------------------------------ */
+/*  Template card                                                      */
+/* ------------------------------------------------------------------ */
+
+function TemplateCard({ bundle, onClick }: { bundle: BundleManifest; onClick: () => void }) {
+  const gradient = CATEGORY_GRADIENTS[bundle.category] ?? CATEGORY_GRADIENTS.custom
+  const Icon = CATEGORY_ICONS[bundle.category] ?? <Layers className="w-3 h-3" />
+
+  return (
+    <motion.button
+      whileHover={{ y: -2 }}
+      onClick={onClick}
+      className="text-left bg-[var(--bg-surface)] border border-[var(--border-default)] hover:border-[var(--border-active)] rounded-lg overflow-hidden transition-colors flex flex-col"
+    >
+      {/* Gradient header */}
+      <div className={`h-16 bg-gradient-to-br ${gradient} flex items-end px-3 pb-2`}>
+        <div className="flex items-center gap-2">
+          <span className="text-[10px] font-medium text-[var(--text-secondary)] uppercase tracking-wide flex items-center gap-1">
+            {Icon}
+            {bundle.category.replace('_', ' ')}
+          </span>
+        </div>
+      </div>
+
+      <div className="p-3 flex flex-col gap-2 flex-1">
+        <h3 className="text-[13px] font-semibold text-[var(--text-primary)] leading-snug">{bundle.name}</h3>
+        <p className="text-[11px] text-[var(--text-secondary)] leading-relaxed line-clamp-2">{bundle.description}</p>
+
+        {/* Node kind pills */}
+        <div className="flex items-center gap-1 flex-wrap mt-auto">
+          {bundle.nodeKinds.slice(0, 4).map((kind) => (
+            <span
+              key={kind}
+              className="text-[9px] px-1.5 py-0.5 rounded-full font-medium"
+              style={{ background: `${KIND_COLORS[kind] ?? '#64748B'}18`, color: KIND_COLORS[kind] ?? '#94A3B8' }}
+            >
+              {kind}
+            </span>
+          ))}
+        </div>
+
+        <div className="flex items-center justify-between text-[10px] text-[var(--text-tertiary)] pt-1 border-t border-[var(--border-default)]">
+          <span>{bundle.nodeCount} nodes · {bundle.edgeCount} edges</span>
+          {bundle.variables.length > 0 && (
+            <span className="text-[var(--accent-text)]">{bundle.variables.length} vars</span>
+          )}
+        </div>
+      </div>
+    </motion.button>
+  )
+}
+
+/* ------------------------------------------------------------------ */
+/*  Apply flow modal (preview → personalize → apply → done)           */
+/* ------------------------------------------------------------------ */
+
+type ApplyStep = 'preview' | 'personalize' | 'applying' | 'done'
+
+interface ApplyProgress {
+  nodesCreated: number
+  edgesCreated: number
+  bundleName: string
+}
+
+function ApplyModal({
+  bundle,
+  onClose,
+  onSuccess,
+  productId,
+}: {
+  bundle: BundleManifest
+  onClose: () => void
+  onSuccess: (result: ApplyProgress) => void
+  productId: string
+}) {
+  const [step, setStep] = useState<ApplyStep>('preview')
+  const [variableValues, setVariableValues] = useState<Record<string, unknown>>(
+    Object.fromEntries(bundle.variables.map((v) => [v.key, v.default]))
+  )
+  const [error, setError] = useState<string | null>(null)
+  const [progress, setProgress] = useState<ApplyProgress | null>(null)
+  const [animStep, setAnimStep] = useState(0)
+
+  const gradient = CATEGORY_GRADIENTS[bundle.category] ?? CATEGORY_GRADIENTS.custom
+
+  const handleApply = useCallback(async () => {
+    setStep('applying')
+    setError(null)
+
+    // Animate steps
+    const interval = setInterval(() => {
+      setAnimStep((s) => Math.min(s + 1, bundle.nodeCount))
+    }, Math.max(20, 1200 / bundle.nodeCount))
+
+    try {
+      const result = await trpcMutate<{
+        bundleName: string
+        nodesCreated: number
+        edgesCreated: number
+      }>('template.applyBuiltIn', {
+        bundleId: bundle.id,
+        productId,
+        variables: variableValues,
+      })
+      clearInterval(interval)
+      setAnimStep(bundle.nodeCount)
+      setProgress({ nodesCreated: result.nodesCreated, edgesCreated: result.edgesCreated, bundleName: result.bundleName })
+      setStep('done')
+    } catch (err) {
+      clearInterval(interval)
+      setError(err instanceof Error ? err.message : 'Apply failed')
+      setStep('personalize')
+    }
+  }, [bundle, productId, variableValues])
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
+      onClick={(e) => { if (e.target === e.currentTarget && step !== 'applying') onClose() }}
+    >
+      <motion.div
+        initial={{ opacity: 0, scale: 0.96, y: 8 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        className="w-full max-w-lg bg-[#0B1120] border border-white/[0.1] rounded-2xl overflow-hidden flex flex-col max-h-[85vh]"
+        style={{ boxShadow: '0 24px 80px rgba(0,0,0,0.6)' }}
+      >
+        {/* Header */}
+        <div className={`h-20 bg-gradient-to-br ${gradient} flex items-end px-5 pb-3 shrink-0`}>
+          <div className="flex-1 min-w-0">
+            <p className="text-[10px] text-white/60 uppercase tracking-wider mb-0.5">{bundle.category.replace('_', ' ')}</p>
+            <h2 className="text-[16px] font-bold text-white truncate">{bundle.name}</h2>
+          </div>
+          {step !== 'applying' && (
+            <button onClick={onClose} className="p-1.5 rounded-lg bg-black/20 text-white/60 hover:text-white transition-colors">
+              <X size={14} />
+            </button>
+          )}
+        </div>
+
+        {/* Step indicator */}
+        {step !== 'done' && (
+          <div className="flex px-5 py-2 gap-2 border-b border-white/[0.06] shrink-0">
+            {(['preview', 'personalize', 'applying'] as ApplyStep[]).map((s, i) => (
+              <div key={s} className="flex items-center gap-1.5">
+                <div className={`w-4 h-4 rounded-full text-[9px] font-bold flex items-center justify-center transition-colors ${
+                  s === step ? 'bg-[var(--accent)] text-white' :
+                  ['preview', 'personalize', 'applying'].indexOf(s) < ['preview', 'personalize', 'applying'].indexOf(step)
+                    ? 'bg-[#10B981] text-white' : 'bg-white/[0.08] text-[#64748B]'
+                }`}>{i + 1}</div>
+                <span className={`text-[10px] capitalize ${s === step ? 'text-[var(--text-primary)]' : 'text-[#64748B]'}`}>{s}</span>
+                {i < 2 && <ChevronRight size={10} className="text-[#475569]" />}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Content */}
+        <div className="flex-1 min-h-0 overflow-y-auto">
+          <AnimatePresence mode="wait">
+            {step === 'preview' && (
+              <motion.div key="preview" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="p-5 space-y-4">
+                <p className="text-[12px] text-[var(--text-secondary)] leading-relaxed">{bundle.description}</p>
+
+                {/* Node kind breakdown */}
+                <div>
+                  <p className="text-[10px] font-medium text-[var(--text-tertiary)] uppercase tracking-wider mb-2">What gets created</p>
+                  <div className="grid grid-cols-2 gap-1.5">
+                    {bundle.nodeSample.map((n, i) => (
+                      <div key={i} className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-white/[0.03] border border-white/[0.06]">
+                        <div
+                          className="w-1.5 h-1.5 rounded-full shrink-0"
+                          style={{ background: KIND_COLORS[n.kind] ?? '#64748B' }}
+                        />
+                        <span className="text-[11px] text-[var(--text-primary)] truncate">{n.label}</span>
+                        <span className="text-[9px] text-[#64748B] ml-auto shrink-0">{n.kind}</span>
+                      </div>
+                    ))}
+                    {bundle.nodeCount > 8 && (
+                      <div className="flex items-center justify-center px-2.5 py-1.5 rounded-lg bg-white/[0.02] border border-dashed border-white/[0.06]">
+                        <span className="text-[10px] text-[#64748B]">+{bundle.nodeCount - 8} more nodes</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3 text-[10px] text-[#64748B]">
+                  <span className="flex items-center gap-1"><Layers size={10} />{bundle.nodeCount} nodes</span>
+                  <span className="flex items-center gap-1"><Hash size={10} />{bundle.edgeCount} edges</span>
+                  {bundle.variables.length > 0 && (
+                    <span className="flex items-center gap-1 text-[var(--accent-text)]">
+                      <Settings size={10} />{bundle.variables.length} personalizable
+                    </span>
+                  )}
+                </div>
+              </motion.div>
+            )}
+
+            {step === 'personalize' && (
+              <motion.div key="personalize" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="p-5 space-y-4">
+                {bundle.variables.length === 0 ? (
+                  <p className="text-[12px] text-[var(--text-secondary)]">This template has no variables. Click Apply to proceed.</p>
+                ) : (
+                  <>
+                    <p className="text-[12px] text-[var(--text-secondary)]">Personalize this template before applying it to your product.</p>
+                    <div className="space-y-4">
+                      {bundle.variables.map((v) => (
+                        <VariableField
+                          key={v.key}
+                          variable={v}
+                          value={variableValues[v.key]}
+                          onChange={(val) => setVariableValues((prev) => ({ ...prev, [v.key]: val }))}
+                        />
+                      ))}
+                    </div>
+                  </>
+                )}
+                {error && (
+                  <div className="px-3 py-2 rounded-lg bg-red-500/10 border border-red-500/20 text-[11px] text-red-400">{error}</div>
+                )}
+              </motion.div>
+            )}
+
+            {step === 'applying' && (
+              <motion.div key="applying" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="p-5 flex flex-col items-center justify-center gap-4 min-h-[200px]">
+                <div className="relative w-16 h-16">
+                  <svg className="w-16 h-16 -rotate-90" viewBox="0 0 64 64">
+                    <circle cx="32" cy="32" r="28" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="4" />
+                    <motion.circle
+                      cx="32" cy="32" r="28"
+                      fill="none" stroke="var(--accent)" strokeWidth="4" strokeLinecap="round"
+                      strokeDasharray={`${2 * Math.PI * 28}`}
+                      strokeDashoffset={2 * Math.PI * 28 * (1 - animStep / bundle.nodeCount)}
+                      transition={{ ease: 'linear' }}
+                    />
+                  </svg>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <Loader2 size={18} className="text-[var(--accent-text)] animate-spin" />
+                  </div>
+                </div>
+                <div className="text-center">
+                  <p className="text-[13px] font-medium text-[var(--text-primary)]">Applying template…</p>
+                  <p className="text-[11px] text-[#64748B] mt-1">Creating {animStep} / {bundle.nodeCount} nodes</p>
+                </div>
+              </motion.div>
+            )}
+
+            {step === 'done' && progress && (
+              <motion.div key="done" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="p-5 flex flex-col items-center gap-4 text-center">
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ type: 'spring', damping: 12, stiffness: 200, delay: 0.1 }}
+                  className="w-16 h-16 rounded-full bg-[#10B981]/15 border border-[#10B981]/30 flex items-center justify-center"
+                >
+                  <CheckCircle2 size={28} className="text-[#10B981]" />
+                </motion.div>
+                <div>
+                  <p className="text-[16px] font-bold text-[var(--text-primary)]">{progress.bundleName} applied!</p>
+                  <p className="text-[12px] text-[#64748B] mt-1">
+                    {progress.nodesCreated} nodes and {progress.edgesCreated} edges added to your product graph.
+                  </p>
+                </div>
+                <div className="grid grid-cols-2 gap-3 w-full">
+                  <div className="rounded-xl bg-white/[0.03] border border-white/[0.06] p-3">
+                    <p className="text-[22px] font-bold text-[var(--text-primary)]">{progress.nodesCreated}</p>
+                    <p className="text-[10px] text-[#64748B]">Nodes created</p>
+                  </div>
+                  <div className="rounded-xl bg-white/[0.03] border border-white/[0.06] p-3">
+                    <p className="text-[22px] font-bold text-[var(--text-primary)]">{progress.edgesCreated}</p>
+                    <p className="text-[10px] text-[#64748B]">Edges linked</p>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        {/* Footer actions */}
+        <div className="flex items-center justify-between gap-2 px-5 py-3 border-t border-white/[0.06] shrink-0">
+          {step === 'preview' && (
+            <>
+              <button onClick={onClose} className="tool-btn text-[11px]">Cancel</button>
+              <button
+                onClick={() => bundle.variables.length > 0 ? setStep('personalize') : handleApply()}
+                className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-[var(--accent)] text-white text-[11px] font-medium hover:bg-[var(--accent-hover)] transition-colors"
+              >
+                {bundle.variables.length > 0 ? 'Personalize' : 'Apply Template'}
+                <ArrowRight size={12} />
+              </button>
+            </>
+          )}
+          {step === 'personalize' && (
+            <>
+              <button onClick={() => setStep('preview')} className="tool-btn text-[11px]">Back</button>
+              <button
+                onClick={handleApply}
+                className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-[var(--accent)] text-white text-[11px] font-medium hover:bg-[var(--accent-hover)] transition-colors"
+              >
+                <Sparkles size={12} />
+                Apply Template
+              </button>
+            </>
+          )}
+          {step === 'done' && (
+            <>
+              <button onClick={onClose} className="tool-btn text-[11px]">Back to Templates</button>
+              <button
+                onClick={() => onSuccess(progress!)}
+                className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-[#10B981] text-white text-[11px] font-medium hover:bg-[#059669] transition-colors"
+              >
+                View in Graph Explorer
+                <ArrowRight size={12} />
+              </button>
+            </>
+          )}
+        </div>
+      </motion.div>
+    </div>
+  )
+}
+
+/* ------------------------------------------------------------------ */
+/*  Main page                                                          */
+/* ------------------------------------------------------------------ */
 
 export default function TemplateGalleryPage() {
-  const [search, setSearch] = useState('')
-  const [category, setCategory] = useState<Category>('All')
-  const [sort, setSort] = useState<SortOption>('Popular')
-  const [previewTemplate, setPreviewTemplate] = useState<Template | null>(null)
-  const [showSortDropdown, setShowSortDropdown] = useState(false)
-  const [applying, setApplying] = useState(false)
-  const [applyResult, setApplyResult] = useState<{ nodes: number; edges: number } | null>(null)
-  const params = useParams()
+  const params = useParams<{ orgSlug: string; productSlug: string }>()
   const router = useRouter()
   const product = useProduct()
 
-  // Fetch real templates from DB
-  const [dbTemplates, setDbTemplates] = useState<Template[]>([])
+  const [bundles, setBundles] = useState<BundleManifest[]>([])
+  const [loading, setLoading] = useState(true)
+  const [search, setSearch] = useState('')
+  const [category, setCategory] = useState<Category>('All')
+  const [selectedBundle, setSelectedBundle] = useState<BundleManifest | null>(null)
+
+  // Load built-in bundles from registry (no DB seed needed)
   useEffect(() => {
-    trpcQuery<Array<{ id: string; name: string; description: string | null; category: string | null; tags: string[] | null; bundle: Record<string, unknown> | null }>>('template.listBuiltIn', {})
-      .then((rows) => {
-        const mapped: Template[] = rows.map((r) => ({
-          id: r.id,
-          name: r.name,
-          description: r.description ?? '',
-          category: (r.category as Exclude<Category, 'All'>) ?? 'Workflow',
-          tags: r.tags ?? [],
-          nodeCount: Array.isArray((r.bundle as any)?.nodes) ? (r.bundle as any).nodes.length : 0,
-          author: 'Product OS',
-          usageCount: 0,
-          nodes: Array.isArray((r.bundle as any)?.nodes)
-            ? (r.bundle as any).nodes.map((n: any) => n.label ?? n.kind).slice(0, 6)
-            : [],
-        }))
-        setDbTemplates(mapped)
-      })
-      .catch(() => { /* keep hardcoded fallback */ })
+    trpcQuery<BundleManifest[]>('template.listBuiltInBundles', {})
+      .then((rows) => setBundles(rows))
+      .catch(() => setBundles([]))
+      .finally(() => setLoading(false))
   }, [])
 
-  // Merge DB templates (first) with hardcoded ones
-  const allTemplates = useMemo(() => {
-    const ids = new Set(dbTemplates.map((t) => t.id))
-    return [...dbTemplates, ...templates.filter((t) => !ids.has(t.id))]
-  }, [dbTemplates])
-
   const filtered = useMemo(() => {
-    let result = allTemplates
-
-    if (category !== 'All') {
-      result = result.filter((t) => t.category === category)
-    }
-
+    let result = bundles
+    if (category !== 'All') result = result.filter((b) => b.category === category)
     if (search.trim()) {
       const q = search.toLowerCase()
       result = result.filter(
-        (t) =>
-          t.name.toLowerCase().includes(q) ||
-          t.description.toLowerCase().includes(q) ||
-          t.tags.some((tag) => tag.toLowerCase().includes(q))
+        (b) =>
+          b.name.toLowerCase().includes(q) ||
+          b.description.toLowerCase().includes(q) ||
+          b.tags.some((t) => t.includes(q)),
       )
     }
-
-    switch (sort) {
-      case 'Name A-Z':
-        result = [...result].sort((a, b) => a.name.localeCompare(b.name))
-        break
-      case 'Recent':
-        result = [...result].reverse()
-        break
-      case 'Popular':
-      default:
-        result = [...result].sort((a, b) => b.usageCount - a.usageCount)
-        break
-    }
-
     return result
-  }, [search, category, sort])
+  }, [bundles, category, search])
 
-  const handleApply = async (template: Template) => {
-    if (!product?.id) return
-
-    // Check if the template has a DB UUID (real template) vs hardcoded
-    const isDbTemplate = template.id.match(/^[0-9a-f]{8}-/)
-
-    if (isDbTemplate) {
-      setApplying(true)
-      try {
-        const result = await trpcMutate<{ nodesCreated: number; edgesCreated: number }>(
-          'template.applyTemplate',
-          { templateId: template.id, productId: product.id },
-        )
-        setApplyResult({ nodes: result.nodesCreated, edges: result.edgesCreated })
-        setTimeout(() => {
-          setPreviewTemplate(null)
-          setApplyResult(null)
-          setApplying(false)
-          // Navigate to graph explorer to see results
-          router.push(`/${params.orgSlug}/${params.productSlug}/graph-explorer`)
-        }, 1500)
-      } catch (err) {
-        console.error('Failed to apply template:', err)
-        setApplying(false)
-      }
-    } else {
-      // Hardcoded template — just close the modal for now
-      setPreviewTemplate(null)
-    }
-  }
+  const handleSuccess = useCallback(() => {
+    setSelectedBundle(null)
+    router.push(`/${params.orgSlug}/${params.productSlug}/graph-explorer?from=template`)
+  }, [router, params])
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full bg-[var(--bg-workspace)]">
       {/* ── Toolbar ── */}
-      <div className="h-[var(--toolbar-h)] flex items-center gap-2 px-2 bg-[var(--bg-surface)] border-b border-[var(--border-default)]">
+      <div className="h-[var(--toolbar-h)] flex items-center gap-2 px-3 bg-[var(--bg-surface)] border-b border-[var(--border-default)] shrink-0">
         <LayoutTemplate className="w-3.5 h-3.5 text-[var(--accent-text)] shrink-0" />
-        <span className="text-[11px] font-medium text-[var(--text-primary)] shrink-0">Templates</span>
+        <span className="text-[13px] font-medium text-[var(--text-primary)]">Template Gallery</span>
+        <span className="text-[10px] text-[var(--text-tertiary)] ml-1">{bundles.length} bundles</span>
 
-        <div className="w-px h-3.5 bg-[var(--border-default)] mx-1" />
+        <div className="w-px h-3.5 bg-[var(--border-default)] mx-2" />
 
         {/* Category tabs */}
-        <div className="flex items-center gap-0 overflow-x-auto">
+        <div className="flex items-center overflow-x-auto gap-0">
           {CATEGORIES.map((cat) => (
             <button
-              key={cat}
-              onClick={() => setCategory(cat)}
-              className={`tool-tab py-1 px-2 text-[10px] border-b-0 ${category === cat ? 'active text-[var(--text-primary)]' : ''}`}
+              key={cat.key}
+              onClick={() => setCategory(cat.key)}
+              className={`tool-tab py-1 px-2.5 text-[10px] whitespace-nowrap ${category === cat.key ? 'active' : ''}`}
             >
-              {cat}
+              {cat.label}
             </button>
           ))}
         </div>
 
         <div className="flex-1" />
 
-        {/* Sort */}
-        <div className="relative shrink-0">
-          <button
-            onClick={() => setShowSortDropdown(!showSortDropdown)}
-            className="tool-btn py-0.5 px-2 text-[10px]"
-          >
-            {sort}
-            <ChevronDown className="w-2.5 h-2.5" />
-          </button>
-          {showSortDropdown && (
-            <div className="absolute right-0 top-full mt-1 z-20 bg-[var(--bg-elevated)] border border-[var(--border-default)] py-1 min-w-[100px]">
-              {(['Popular', 'Name A-Z', 'Recent'] as SortOption[]).map((opt) => (
-                <button
-                  key={opt}
-                  onClick={() => { setSort(opt); setShowSortDropdown(false) }}
-                  className={`block w-full text-left px-3 py-1 text-[11px] transition-colors ${
-                    sort === opt ? 'text-[var(--accent-text)] bg-[var(--accent)]/8' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-inset)]'
-                  }`}
-                >
-                  {opt}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-
         {/* Search */}
-        <div className="relative shrink-0">
-          <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-[var(--text-tertiary)]" />
+        <div className="flex items-center gap-1.5 px-2 py-1 bg-[var(--bg-workspace)] border border-[var(--border-default)] rounded-[var(--radius-sm)] w-44">
+          <Search className="w-3 h-3 text-[var(--text-tertiary)] shrink-0" />
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search templates..."
-            className="tool-input pl-6 pr-2 py-0.5 w-[160px] text-[11px]"
+            placeholder="Search bundles..."
+            className="tool-input flex-1 bg-transparent border-none p-0 text-[11px] outline-none"
           />
         </div>
       </div>
 
-      {/* ── Grid ── */}
-      <div className="flex-1 min-h-0 overflow-y-auto p-2 bg-[var(--bg-workspace)]">
-        {filtered.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-1.5">
-            {filtered.map((template) => (
-              <TemplateCard
-                key={template.id}
-                template={template}
-                onClick={() => setPreviewTemplate(template)}
-              />
-            ))}
+      {/* ── Content ── */}
+      <div className="flex-1 min-h-0 overflow-y-auto p-3">
+        {loading ? (
+          <div className="flex items-center justify-center h-48 gap-2 text-[var(--text-tertiary)]">
+            <Loader2 className="w-4 h-4 animate-spin" />
+            <span className="text-[12px]">Loading templates…</span>
           </div>
-        ) : (
-          <div className="flex flex-col items-center justify-center h-full gap-2 text-center">
-            <LayoutTemplate className="w-5 h-5 text-[var(--text-tertiary)]" />
+        ) : filtered.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-48 gap-2 text-center">
+            <LayoutTemplate className="w-6 h-6 text-[var(--text-tertiary)]" />
             <p className="text-[12px] text-[var(--text-secondary)]">No templates match your filters</p>
-            <button
-              onClick={() => { setSearch(''); setCategory('All') }}
-              className="text-[11px] text-[var(--accent-text)] hover:underline"
-            >
+            <button onClick={() => { setSearch(''); setCategory('All') }} className="text-[11px] text-[var(--accent-text)] hover:underline">
               Clear filters
             </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-3">
+            {filtered.map((bundle) => (
+              <TemplateCard key={bundle.id} bundle={bundle} onClick={() => setSelectedBundle(bundle)} />
+            ))}
           </div>
         )}
       </div>
 
-      {/* ── Preview Modal ── */}
-      {previewTemplate && (
-        <TemplatePreview
-          template={previewTemplate}
-          onClose={() => { setPreviewTemplate(null); setApplyResult(null); setApplying(false) }}
-          onApply={handleApply}
-          applying={applying}
-          applyResult={applyResult}
-        />
-      )}
+      {/* ── Apply modal ── */}
+      <AnimatePresence>
+        {selectedBundle && product?.id && (
+          <ApplyModal
+            bundle={selectedBundle}
+            productId={product.id}
+            onClose={() => setSelectedBundle(null)}
+            onSuccess={handleSuccess}
+          />
+        )}
+      </AnimatePresence>
     </div>
   )
 }
