@@ -37,9 +37,14 @@ const CATEGORY_CONFIG: Record<Category, { color: string; icon: typeof Rocket }> 
 }
 
 const PHASE_CONFIG: Record<number, { label: string; gradient: string }> = {
-  1: { label: 'Phase 1 -- Foundation', gradient: 'from-[#3B82F6]/20 to-transparent' },
-  2: { label: 'Phase 2 -- Core Studios', gradient: 'from-[#8B5CF6]/20 to-transparent' },
-  3: { label: 'Phase 3 -- Advanced Studios', gradient: 'from-[#10B981]/20 to-transparent' },
+  1:  { label: 'Phase 1 — Foundation',                   gradient: 'from-[#3B82F6]/20 to-transparent' },
+  2:  { label: 'Phase 2 — Core Studios',                 gradient: 'from-[#8B5CF6]/20 to-transparent' },
+  3:  { label: 'Phase 3 — Advanced Studios',             gradient: 'from-[#10B981]/20 to-transparent' },
+  17: { label: 'Phase 17 — Component & Design Studio',   gradient: 'from-[#F59E0B]/20 to-transparent' },
+  18: { label: 'Phase 18 — Page & Workflow Enhancement', gradient: 'from-[#EC4899]/20 to-transparent' },
+  19: { label: 'Phase 19 — Remaining Studio Routers',    gradient: 'from-[#06B6D4]/20 to-transparent' },
+  20: { label: 'Phase 20 — Live Data Wiring',            gradient: 'from-[#14B8A6]/20 to-transparent' },
+  21: { label: 'Phase 21 — Computer Mode & Command Palette', gradient: 'from-[#A855F7]/20 to-transparent' },
 }
 
 const changelogData: ChangelogEntry[] = [
@@ -68,6 +73,29 @@ const changelogData: ChangelogEntry[] = [
   { id: 'cl-18', timestamp: '2026-03-25T09:00:00Z', actor: { name: 'Charlie Kim', initials: 'CK', color: '#14B8A6' }, action: 'Deployed v0.2-rc to staging', category: 'Deployment', description: 'Provisioned staging environment and deployed release candidate v0.2 with all Phase 3 studios, seed data, and monitoring dashboards.', phase: 3 },
   { id: 'cl-19', timestamp: '2026-03-27T12:00:00Z', actor: { name: 'Dana Patel', initials: 'DP', color: '#F97316' }, action: 'Fixed sidebar collapse on route change', category: 'Bug Fix', description: 'Resolved sidebar unexpectedly collapsing in Firefox when navigating between studios due to stale animation state.', phase: 3 },
   { id: 'cl-20', timestamp: '2026-03-28T16:00:00Z', actor: { name: 'Alice Chen', initials: 'AC', color: '#8B5CF6' }, action: 'Configured Figma + GitHub integrations', category: 'Configuration', description: 'Connected Figma design sync and GitHub repository webhooks for automated code change tracking and design handoff.', phase: 3 },
+
+  // Phase 17
+  { id: 'cl-21', timestamp: '2026-03-30T09:00:00Z', actor: { name: 'Eve Santos', initials: 'ES', color: '#06B6D4' }, action: 'Component Builder v2 with live preview', category: 'Feature', description: 'Rebuilt Component studio with full variant/prop matrix, design token binding, live preview rendering, and one-click code export.', phase: 17 },
+  { id: 'cl-22', timestamp: '2026-04-01T11:00:00Z', actor: { name: 'Bob Rivera', initials: 'BR', color: '#EC4899' }, action: 'Design Studio frame & layer system', category: 'Feature', description: 'Upgraded Design studio with frame canvas, layer tree, inspect mode CSS output, annotation overlays, and Figma export bridge.', phase: 17 },
+
+  // Phase 18
+  { id: 'cl-23', timestamp: '2026-04-03T10:00:00Z', actor: { name: 'Eve Santos', initials: 'ES', color: '#06B6D4' }, action: 'Page Builder section drag-and-drop', category: 'Feature', description: 'Revamped Page studio with section reordering, responsive breakpoint preview, component slot system, and SEO metadata panel.', phase: 18 },
+  { id: 'cl-24', timestamp: '2026-04-05T14:00:00Z', actor: { name: 'Alice Chen', initials: 'AC', color: '#8B5CF6' }, action: 'Workflow Builder state machine upgrade', category: 'Feature', description: 'Extended Workflow studio with guard conditions, parallel states, webhook trigger actions, and connector-aware automation hooks.', phase: 18 },
+
+  // Phase 19
+  { id: 'cl-25', timestamp: '2026-04-07T09:00:00Z', actor: { name: 'Charlie Kim', initials: 'CK', color: '#14B8A6' }, action: 'Code, Handoff, Analytics routers built', category: 'Architecture', description: 'Created tRPC routers and Drizzle graph-node persistence for Code, Handoff, Analytics, Release, Testing, and Graphics studios.', phase: 19 },
+  { id: 'cl-26', timestamp: '2026-04-08T13:00:00Z', actor: { name: 'Charlie Kim', initials: 'CK', color: '#14B8A6' }, action: 'Phase 19 Zustand stores + event bus', category: 'Architecture', description: 'Built 6 persisted Zustand stores (code, handoff, analytics, release, testing, graphics) with full hydrate/CRUD actions and typed events.', phase: 19 },
+
+  // Phase 20
+  { id: 'cl-27', timestamp: '2026-04-10T10:00:00Z', actor: { name: 'Alice Chen', initials: 'AC', color: '#8B5CF6' }, action: 'usePhase19Sync hook live data wiring', category: 'Feature', description: 'Created central hydration hook running 9 tRPC queries across all Phase 19 studios, wired into product layout alongside existing data sync.', phase: 20 },
+  { id: 'cl-28', timestamp: '2026-04-11T09:00:00Z', actor: { name: 'Eve Santos', initials: 'ES', color: '#06B6D4' }, action: 'All 6 studios wired to live DB data', category: 'Feature', description: 'Rewrote Code, Testing, Releases, Handoff, Graphics, and Analytics pages to read from Zustand stores with mock fallback and live/sample badges.', phase: 20 },
+  { id: 'cl-29', timestamp: '2026-04-11T15:00:00Z', actor: { name: 'Eve Santos', initials: 'ES', color: '#06B6D4' }, action: 'Graphics upload wired to tRPC mutation', category: 'Feature', description: 'Asset upload flow calls trpc.graphics.create.useMutation with cache invalidation; delete/update also wired. First fully live CRUD studio.', phase: 20 },
+
+  // Phase 21
+  { id: 'cl-30', timestamp: '2026-04-17T09:00:00Z', actor: { name: 'Alice Chen', initials: 'AC', color: '#8B5CF6' }, action: 'Computer Mode store & execution engine', category: 'Feature', description: 'Built computer-mode-store with Suggest/Assist/Auto modes, typed action log, pending confirmation queue, and multi-step execution plan state machine.', phase: 21 },
+  { id: 'cl-31', timestamp: '2026-04-17T11:00:00Z', actor: { name: 'Bob Rivera', initials: 'BR', color: '#EC4899' }, action: 'Computer Mode Panel UI launched', category: 'Feature', description: 'Full-featured drawer with mode switcher, natural language command input, action log with status cards, confirm/reject for Assist mode, and auto-advance plan progress bar.', phase: 21 },
+  { id: 'cl-32', timestamp: '2026-04-17T13:00:00Z', actor: { name: 'Eve Santos', initials: 'ES', color: '#06B6D4' }, action: 'Global Cmd+K Command Palette', category: 'Feature', description: 'Launched fuzzy-search command palette across all 21 studios, live tasks, AI skill quick actions, and navigation shortcuts. Keyboard-navigable with ↑↓ and ↵.', phase: 21 },
+  { id: 'cl-33', timestamp: '2026-04-17T15:00:00Z', actor: { name: 'Alice Chen', initials: 'AC', color: '#8B5CF6' }, action: 'Changelog entries for all phases added', category: 'Configuration', description: 'Settings changelog now tracks all product build phases (1–21) with actor attribution, category classification, and phase grouping.', phase: 21 },
 ]
 
 const ALL_CATEGORIES: Category[] = ['Feature', 'Bug Fix', 'Configuration', 'Team', 'Deployment', 'Architecture']

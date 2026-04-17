@@ -15,9 +15,11 @@ import { useDataSync } from '../../../lib/use-data-sync'
 import { usePhase19Sync } from '../../../lib/use-phase19-sync'
 import { CollaborationProvider, useCollaborationContext } from '../../../lib/collaboration-context'
 import { PresenceAvatars, ConnectionBadge } from '../../_components/presence-avatars'
+import { ComputerModePanel } from '../../../components/shared/computer-mode-panel'
+import { CommandPalette } from '../../../components/shared/command-palette'
 import { createContext, useContext } from 'react'
 import { usePathname } from 'next/navigation'
-import { GitBranch, MessageSquare, X, CircleDot } from 'lucide-react'
+import { GitBranch, MessageSquare, X, CircleDot, Search } from 'lucide-react'
 
 export const ProductContext = createContext<Product | null>(null)
 
@@ -39,6 +41,7 @@ export default function ProductLayout({
   const openVersionPanel = useVersionStore((s) => s.openPanel)
   const activeBranches = useVersionStore((s) => s.activeBranches)
   const [commentsOpen, setCommentsOpen] = useState(false)
+  const [paletteOpen, setPaletteOpen] = useState(false)
   const allComments = useCommentStore((s) => s.comments)
   const unresolvedCount = useMemo(() => {
     const entityId = `${orgSlug}-${productSlug}-${pathname.split('/')[3] || 'planner'}`
@@ -49,6 +52,18 @@ export default function ProductLayout({
   const dbProductId = product?.id ?? undefined
   const { isLoading: isSyncing } = useDataSync(dbProductId)
   usePhase19Sync(dbProductId)
+
+  // Cmd+K / Ctrl+K → open command palette
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault()
+        setPaletteOpen((v) => !v)
+      }
+    }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [])
 
   const segments = pathname.split('/')
   const currentStudio = segments[3] || 'planner'
@@ -70,6 +85,10 @@ export default function ProductLayout({
           commentsOpen={commentsOpen}
           setCommentsOpen={setCommentsOpen}
           unresolvedCount={unresolvedCount}
+          paletteOpen={paletteOpen}
+          setPaletteOpen={setPaletteOpen}
+          orgSlug={orgSlug}
+          productSlug={productSlug}
         >
           {children}
         </ProductLayoutInner>
@@ -89,6 +108,10 @@ function ProductLayoutInner({
   commentsOpen,
   setCommentsOpen,
   unresolvedCount,
+  paletteOpen,
+  setPaletteOpen,
+  orgSlug,
+  productSlug,
 }: {
   children: React.ReactNode
   product: Product | null
@@ -99,10 +122,15 @@ function ProductLayoutInner({
   commentsOpen: boolean
   setCommentsOpen: (v: boolean) => void
   unresolvedCount: number
+  paletteOpen: boolean
+  setPaletteOpen: (v: boolean) => void
+  orgSlug: string
+  productSlug: string
 }) {
   const { status, peers, setActiveStudio } = useCollaborationContext()
 
   const commentEntityId = `${productId}-${currentStudio}`
+  const dbProductId = product?.id
 
   // Update active studio in presence
   useEffect(() => {
@@ -130,6 +158,7 @@ function ProductLayoutInner({
 
           {/* ── Status Bar ── */}
           <div className="h-[var(--statusbar-h)] flex items-center justify-between px-3 bg-[var(--bg-surface)] border-t border-[var(--border-default)] flex-shrink-0 text-[10px] select-none">
+
             <div className="flex items-center gap-4">
               <button
                 onClick={openVersionPanel}
@@ -154,6 +183,15 @@ function ProductLayoutInner({
               {peers.length > 0 && (
                 <span className="text-[var(--accent)]">{peers.length} collaborator{peers.length !== 1 ? 's' : ''}</span>
               )}
+              {/* Cmd+K trigger */}
+              <button
+                onClick={() => setPaletteOpen(true)}
+                className="flex items-center gap-1.5 text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] transition-colors"
+              >
+                <Search size={10} />
+                <span>Search</span>
+                <kbd className="ml-0.5 px-1 py-px rounded bg-white/[0.06] text-[9px] font-mono">⌘K</kbd>
+              </button>
               <div className="flex items-center gap-1.5">
                 <CircleDot size={9} className="text-[var(--color-success)]" />
                 <span>Ready</span>
@@ -202,6 +240,18 @@ function ProductLayoutInner({
           studio={currentStudio}
           productId={productId}
           contextHints={[product?.slug ?? productId, currentStudio]}
+        />
+        <ComputerModePanel
+          studio={currentStudio}
+          productId={dbProductId}
+        />
+        <CommandPalette
+          isOpen={paletteOpen}
+          onClose={() => setPaletteOpen(false)}
+          orgSlug={orgSlug}
+          productSlug={productSlug}
+          currentStudio={currentStudio}
+          productId={dbProductId}
         />
       </div>
   )
