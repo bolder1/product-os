@@ -17,6 +17,7 @@ import { GraphCanvas } from './_components/graph-canvas'
 import { GraphFilters } from './_components/graph-filters'
 import { NodeDetailPanel } from './_components/node-detail-panel'
 import { AddNodeModal, EditNodeModal, AddEdgeModal } from './_components/node-crud-modals'
+import { AIAnalysisPanel } from './_components/ai-analysis-panel'
 import { trpc } from '../../../../lib/trpc'
 
 const ALL_NODE_KINDS: NodeKind[] = [
@@ -298,10 +299,11 @@ export default function GraphExplorerPage() {
     [selectedNodeId, graphNodes]
   )
 
-  // ── Modal state ──────────────────────────────────────────────────────────
+  // ── Modal / panel state ───────────────────────────────────────────────────
   const [addNodeOpen, setAddNodeOpen] = useState(false)
   const [editNode, setEditNode] = useState<LocalGraphNode | null>(null)
   const [connectSourceNode, setConnectSourceNode] = useState<LocalGraphNode | null>(null)
+  const [aiPanelOpen, setAiPanelOpen] = useState(false)
 
   // ── CRUD handlers ────────────────────────────────────────────────────────
   const handleCreateNode = useCallback(
@@ -405,7 +407,10 @@ export default function GraphExplorerPage() {
             <Plus size={12} />
             <span className="text-[10px]">Add Node</span>
           </button>
-          <button className="tool-btn text-[var(--accent-text)]">
+          <button
+            onClick={() => setAiPanelOpen((v) => !v)}
+            className={`tool-btn transition-colors ${aiPanelOpen ? 'text-[#A78BFA] bg-[#8B5CF6]/10' : 'text-[var(--accent-text)]'}`}
+          >
             <Sparkles size={12} />
             AI: Analyze
           </button>
@@ -461,6 +466,20 @@ export default function GraphExplorerPage() {
             />
           </div>
         )}
+
+        {/* AI Analysis panel */}
+        <AnimatePresence>
+          {aiPanelOpen && product?.id && (
+            <AIAnalysisPanel
+              key="ai-analysis"
+              productId={product.id}
+              nodes={graphNodes}
+              edges={graphEdges}
+              onClose={() => setAiPanelOpen(false)}
+              onSelectNode={setSelectedNodeId}
+            />
+          )}
+        </AnimatePresence>
       </div>
 
       {/* Modals */}
