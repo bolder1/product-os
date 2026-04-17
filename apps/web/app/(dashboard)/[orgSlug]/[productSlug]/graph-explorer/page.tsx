@@ -18,6 +18,7 @@ import { GraphFilters } from './_components/graph-filters'
 import { NodeDetailPanel } from './_components/node-detail-panel'
 import { AddNodeModal, EditNodeModal, AddEdgeModal } from './_components/node-crud-modals'
 import { AIAnalysisPanel } from './_components/ai-analysis-panel'
+import { AIScaffoldModal } from './_components/ai-scaffold-modal'
 import { trpc } from '../../../../lib/trpc'
 
 const ALL_NODE_KINDS: NodeKind[] = [
@@ -304,6 +305,7 @@ export default function GraphExplorerPage() {
   const [editNode, setEditNode] = useState<LocalGraphNode | null>(null)
   const [connectSourceNode, setConnectSourceNode] = useState<LocalGraphNode | null>(null)
   const [aiPanelOpen, setAiPanelOpen] = useState(false)
+  const [scaffoldOpen, setScaffoldOpen] = useState(false)
 
   // ── CRUD handlers ────────────────────────────────────────────────────────
   const handleCreateNode = useCallback(
@@ -408,6 +410,14 @@ export default function GraphExplorerPage() {
             <span className="text-[10px]">Add Node</span>
           </button>
           <button
+            onClick={() => setScaffoldOpen(true)}
+            className="tool-btn text-[var(--accent-text)]"
+            title="Generate graph from description"
+          >
+            <Sparkles size={12} />
+            AI: Generate
+          </button>
+          <button
             onClick={() => setAiPanelOpen((v) => !v)}
             className={`tool-btn transition-colors ${aiPanelOpen ? 'text-[#A78BFA] bg-[#8B5CF6]/10' : 'text-[var(--accent-text)]'}`}
           >
@@ -484,6 +494,14 @@ export default function GraphExplorerPage() {
 
       {/* Modals */}
       <AnimatePresence>
+        {scaffoldOpen && product?.id && (
+          <AIScaffoldModal
+            key="ai-scaffold"
+            productId={product.id}
+            onClose={() => setScaffoldOpen(false)}
+            onSuccess={() => { nodesQuery.refetch(); edgesQuery.refetch() }}
+          />
+        )}
         {addNodeOpen && (
           <AddNodeModal
             key="add-node"

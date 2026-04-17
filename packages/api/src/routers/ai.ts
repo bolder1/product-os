@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { router, protectedProcedure } from '../trpc'
-import { aiSkillHistory } from '@product-os/db'
+import { aiSkillHistory, graphNodes, graphEdges } from '@product-os/db'
 
 export const aiRouter = router({
   suggest: protectedProcedure
@@ -210,5 +210,110 @@ export const aiRouter = router({
       })
 
       return { goal: input.goal, mode: input.mode, result }
+    }),
+
+  /**
+   * Scaffold a product graph from a natural-language description and immediately
+   * persist the generated nodes + edges to the DB.
+   * Returns { nodesCreated, edgesCreated, summary, nodeIdMap }.
+   */
+  scaffoldAndApply: protectedProcedure
+    .input(
+      z.object({
+        productId: z.string().uuid(),
+        prompt: z.string().min(1).max(2000),
+        targetStructure: z.enum([
+          'product_plan',
+          'feature_breakdown',
+          'entity_schema',
+          'workflow',
+          'journey_map',
+          'page_layout',
+          'component_tree',
+          'brand_system',
+        ]).default('product_plan'),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { invokeSkill } = await import('@product-os/ai')
+
+      // 1. Call scaffold skill
+      const result = await invokeSkill({
+        skill: 'scaffold',
+        productId: input.productId,
+        prompt: input.prompt,
+        context: {
+          studioOrigin: 'graph-explorer',
+          targetStructure: input.targetStructure,
+          prompt: input.prompt,
+        },
+        userId: ctx.session.userId,
+      })
+
+      type ScaffoldData = {
+        nodes: Array<{ tempId: string; kind: string; label: string; data: Record<string, unknown> }>
+        edges: Array<{ sourceTempId: string; targetTempId: string; kind: string }>
+        summary: string
+      }
+
+      const data = result.data as ScaffoldData | undefined
+      if (!result.success || !data) {
+        throw new Error(result.error ?? 'Scaffold skill returned no data')
+      }
+
+      // 2. Insert nodes, collect tempId → realId map
+      const nodeIdMap = new Map<string, string>()
+      let nodesCreated = 0
+
+      for (const node of data.nodes) {
+        const [row] = await ctx.db
+          .insert(graphNodes)
+          .values({
+            productId: input.productId,
+            kind: node.kind as typeof graphNodes.$inferInsert.kind,
+            label: node.label,
+            data: node.data,
+            createdBy: ctx.session.userId,
+          })
+          .returning({ id: graphNodes.id })
+        if (row) {
+          nodeIdMap.set(node.tempId, row.id)
+          nodesCreated++
+        }
+      }
+
+      // 3. Insert edges using resolved IDs
+      let edgesCreated = 0
+      for (const edge of data.edges) {
+        const sourceId = nodeIdMap.get(edge.sourceTempId)
+        const targetId = nodeIdMap.get(edge.targetTempId)
+        if (!sourceId || !targetId) continue
+        await ctx.db.insert(graphEdges).values({
+          productId: input.productId,
+          sourceId,
+          targetId,
+          kind: edge.kind as typeof graphEdges.$inferInsert.kind,
+        })
+        edgesCreated++
+      }
+
+      // 4. Log to ai_skill_history
+      await ctx.db.insert(aiSkillHistory).values({
+        productId: input.productId,
+        skill: 'scaffold_and_apply',
+        inputContext: { prompt: input.prompt, targetStructure: input.targetStructure },
+        output: { nodesCreated, edgesCreated, summary: data.summary } as Record<string, unknown>,
+        model: result.model ?? null,
+        tokensUsed: result.tokensUsed ?? null,
+        actorId: ctx.session.userId,
+      })
+
+      return {
+        nodesCreated,
+        edgesCreated,
+        summary: data.summary,
+        nodeIdMap: Object.fromEntries(nodeIdMap),
+        model: result.model,
+      }
     }),
 })

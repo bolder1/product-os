@@ -292,13 +292,20 @@ export default function ProductOverview({
                 <Share2 size={22} className="text-[#8B5CF6]/60" />
               </div>
               <p className="text-[13px] font-medium text-[#94A3B8] mb-1">No graph nodes yet</p>
-              <p className="text-[11px] text-[#64748B] mb-4 max-w-[280px]">
-                Apply a template to instantly populate your graph, or add nodes manually.
+              <p className="text-[11px] text-[#64748B] mb-4 max-w-[300px]">
+                Describe your product and AI will generate the graph, or apply a starter template.
               </p>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap justify-center">
+                <a
+                  href={`/${orgSlug}/${productSlug}/graph-explorer`}
+                  className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-[11px] font-semibold bg-[#8B5CF6] text-white hover:bg-[#7C3AED] transition-colors"
+                >
+                  <Sparkles size={12} />
+                  AI: Generate Graph
+                </a>
                 <a
                   href={`/${orgSlug}/${productSlug}/templates`}
-                  className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-[11px] font-semibold bg-[#8B5CF6] text-white hover:bg-[#7C3AED] transition-colors"
+                  className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-[11px] font-medium bg-white/[0.05] text-[#94A3B8] hover:bg-white/[0.09] transition-colors border border-white/[0.08]"
                 >
                   <LayoutTemplate size={12} />
                   Browse Templates
