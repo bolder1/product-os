@@ -21,11 +21,13 @@ import {
   FlaskConical,
   Gauge,
   Network,
+  ListChecks,
   type LucideIcon,
 } from 'lucide-react'
 
 const studioIconMap: Record<string, LucideIcon> = {
   planner: Compass,
+  features: ListChecks,
   templates: LayoutGrid,
   canvas: Paintbrush,
   brand: Palette,

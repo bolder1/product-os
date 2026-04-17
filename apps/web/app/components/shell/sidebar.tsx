@@ -32,6 +32,7 @@ const navSections: NavSection[] = [
     title: 'PLAN',
     items: [
       { key: 'planner', label: 'Planner', href: 'planner' },
+      { key: 'features', label: 'Features', href: 'features' },
       { key: 'templates', label: 'Templates', href: 'templates' },
       { key: 'canvas', label: 'Canvas', href: 'canvas' },
     ],
