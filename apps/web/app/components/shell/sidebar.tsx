@@ -29,6 +29,12 @@ interface NavSection {
 
 const navSections: NavSection[] = [
   {
+    title: 'HOME',
+    items: [
+      { key: 'home', label: 'Home', href: 'home' },
+    ],
+  },
+  {
     title: 'PLAN',
     items: [
       { key: 'planner', label: 'Planner', href: 'planner' },

@@ -22,10 +22,12 @@ import {
   Gauge,
   Network,
   ListChecks,
+  Home,
   type LucideIcon,
 } from 'lucide-react'
 
 const studioIconMap: Record<string, LucideIcon> = {
+  home: Home,
   planner: Compass,
   features: ListChecks,
   templates: LayoutGrid,
