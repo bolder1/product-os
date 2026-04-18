@@ -350,21 +350,21 @@ Reply helpfully and concisely. If you see gaps in their product graph, mention t
       const isEmpty = nodes.length === 0
 
       const studioSuggestions: Record<string, string[]> = {
-        'planner':       ['What modules are planned?', 'Create a task for the next sprint', 'What's missing in my product plan?'],
-        'features':      ['List all features in progress', 'Create a task for a new feature', 'What features are blocking launch?'],
-        'components':    ['How many components exist?', 'Scaffold a button component', 'What components are missing?'],
-        'brand':         ['What brand tokens are defined?', 'Analyse my brand completeness', 'Create a task to define typography'],
-        'design':        ['Show me my design system health', 'What pages need design work?', 'Navigate to components'],
-        'workflows':     ['How many workflows exist?', 'Scaffold a checkout workflow', 'What entities are missing?'],
-        'pages':         ['List all pages', 'Create a task for the homepage', 'Navigate to design'],
-        'analytics':     ['Show me product stats', 'What metrics are being tracked?', 'Navigate to testing'],
-        'control-tower': ['What's the overall health score?', 'Show me critical blockers', 'Run an AI health analysis'],
-        'testing':       ['What's the test coverage?', 'Create a task for QA', 'Navigate to releases'],
-        'code':          ['Show product graph stats', 'Create a bug task', 'Navigate to handoff'],
+        planner:          ['What modules are planned?', 'Create a task for the next sprint', 'What is missing in my product plan?'],
+        features:         ['List all features in progress', 'Create a task for a new feature', 'What features are blocking launch?'],
+        components:       ['How many components exist?', 'Scaffold a button component', 'What components are missing?'],
+        brand:            ['What brand tokens are defined?', 'Analyse my brand completeness', 'Create a task to define typography'],
+        design:           ['Show me my design system health', 'What pages need design work?', 'Navigate to components'],
+        workflows:        ['How many workflows exist?', 'Scaffold a checkout workflow', 'What entities are missing?'],
+        pages:            ['List all pages', 'Create a task for the homepage', 'Navigate to design'],
+        analytics:        ['Show me product stats', 'What metrics are being tracked?', 'Navigate to testing'],
+        'control-tower':  ['What is the overall health score?', 'Show me critical blockers', 'Run an AI health analysis'],
+        testing:          ['What is the test coverage?', 'Create a task for QA', 'Navigate to releases'],
+        code:             ['Show product graph stats', 'Create a bug task', 'Navigate to handoff'],
       }
 
       const base = studioSuggestions[input.currentStudio] ?? [
-        'What's the current health score?',
+        'What is the current health score?',
         'Show me product stats',
         'Create a task',
       ]
