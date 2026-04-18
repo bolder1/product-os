@@ -4,7 +4,6 @@ import { useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
 import { useParams, useRouter } from 'next/navigation'
 import { ListTodo, ArrowRight, Plus, Circle, Clock, AlertCircle } from 'lucide-react'
-import { useProduct } from '../../layout'
 import { useTaskStore } from '../../../../../lib/task-store'
 import { useAuth } from '../../../../../lib/auth-context'
 import { trpc } from '../../../../../lib/trpc'
@@ -19,7 +18,7 @@ const STATUS_CONFIG = {
 }
 
 const PRIORITY_COLOR: Record<string, string> = {
-  urgent: '#F43F5E', high: '#F59E0B', medium: '#3B82F6', low: '#64748B',
+  critical: '#F43F5E', urgent: '#F43F5E', high: '#F59E0B', medium: '#3B82F6', low: '#64748B',
 }
 
 interface Props {
@@ -32,7 +31,6 @@ interface Props {
 export function MyTasksPanel({ productId, myTasksOnly = true, maxItems = 6 }: Props) {
   const params  = useParams<{ orgSlug: string; productSlug: string }>()
   const router  = useRouter()
-  const product = useProduct()
   const { user } = useAuth()
   const [creating, setCreating] = useState(false)
   const [newTitle, setNewTitle] = useState('')
@@ -50,12 +48,12 @@ export function MyTasksPanel({ productId, myTasksOnly = true, maxItems = 6 }: Pr
   const tasks = useMemo(() => {
     let filtered = storeTasks.filter((t) => t.status !== 'done' && t.status !== 'cancelled')
     if (myTasksOnly && user) {
-      const mine = filtered.filter((t) => t.assignee?.id === user.id || t.createdBy === user.id)
+      const mine = filtered.filter((t) => t.assignee?.id === user.id)
       filtered = mine.length > 0 ? mine : filtered
     }
     return filtered
       .sort((a, b) => {
-        const P: Record<string, number> = { urgent: 0, high: 1, medium: 2, low: 3 }
+        const P: Record<string, number> = { critical: 0, urgent: 0, high: 1, medium: 2, low: 3 }
         return (P[a.priority] ?? 2) - (P[b.priority] ?? 2)
       })
       .slice(0, maxItems)

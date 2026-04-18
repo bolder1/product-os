@@ -16,8 +16,11 @@ export function HandoffQueuePanel({ productId }: Props) {
     { staleTime: 30_000, enabled: !!productId },
   )
 
-  const items = data ?? []
-  const pending = items.filter((h: { status: string }) => h.status === 'pending' || h.status === 'ready')
+  // handoff.list returns graphNodes rows: { id, label, kind, data, ... }
+  type HandoffNode = { id: string; label: string; data: Record<string, unknown> | null }
+  const items: HandoffNode[] = (data ?? []) as HandoffNode[]
+  // All returned rows are handoff_item nodes — show them all (no top-level status field)
+  const pending = items
 
   return (
     <motion.div
@@ -32,7 +35,7 @@ export function HandoffQueuePanel({ productId }: Props) {
           <span className="text-[11px] font-semibold text-[#94A3B8] uppercase tracking-wider">Handoff Queue</span>
           {pending.length > 0 && (
             <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-[#F59E0B]/15 text-[#F59E0B] font-bold">
-              {pending.length}
+              {items.length}
             </span>
           )}
         </div>
@@ -49,31 +52,34 @@ export function HandoffQueuePanel({ productId }: Props) {
           <Loader2 size={13} className="animate-spin" />
           <span className="text-[11px]">Loading…</span>
         </div>
-      ) : pending.length === 0 ? (
+      ) : items.length === 0 ? (
         <div className="flex-1 flex flex-col items-center justify-center gap-2 text-center py-4">
           <CheckCircle2 size={20} className="text-[#10B981]" />
           <p className="text-[11px] text-[#475569]">No pending handoffs.</p>
         </div>
       ) : (
         <div className="flex-1 space-y-1 overflow-y-auto pr-0.5">
-          {pending.slice(0, 6).map((h: { id: string; title?: string; name?: string; status: string }, i: number) => (
-            <motion.button
-              key={h.id ?? i}
-              initial={{ opacity: 0, x: -6 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: i * 0.05 }}
-              onClick={() => router.push(`/${params.orgSlug}/${params.productSlug}/handoff`)}
-              className="w-full flex items-center gap-2.5 py-2 border-b border-white/[0.04] last:border-0 group text-left"
-            >
-              <FileStack size={10} className="text-[#F59E0B] shrink-0" />
-              <span className="flex-1 text-[11px] text-[#E2E8F0] truncate group-hover:text-[#F1F5F9] transition-colors">
-                {h.title ?? h.name ?? 'Handoff item'}
-              </span>
-              <span className="text-[9px] px-1.5 py-0.5 rounded bg-[#F59E0B]/15 text-[#F59E0B] font-semibold capitalize shrink-0">
-                {h.status}
-              </span>
-            </motion.button>
-          ))}
+          {items.slice(0, 6).map((h, i) => {
+            const itemType = (h.data?.type as string | undefined) ?? 'item'
+            return (
+              <motion.button
+                key={h.id}
+                initial={{ opacity: 0, x: -6 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: i * 0.05 }}
+                onClick={() => router.push(`/${params.orgSlug}/${params.productSlug}/handoff`)}
+                className="w-full flex items-center gap-2.5 py-2 border-b border-white/[0.04] last:border-0 group text-left"
+              >
+                <FileStack size={10} className="text-[#F59E0B] shrink-0" />
+                <span className="flex-1 text-[11px] text-[#E2E8F0] truncate group-hover:text-[#F1F5F9] transition-colors">
+                  {h.label}
+                </span>
+                <span className="text-[9px] px-1.5 py-0.5 rounded bg-[#F59E0B]/15 text-[#F59E0B] font-semibold capitalize shrink-0">
+                  {itemType}
+                </span>
+              </motion.button>
+            )
+          })}
         </div>
       )}
     </motion.div>
