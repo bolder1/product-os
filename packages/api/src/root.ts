@@ -24,6 +24,7 @@ import { releaseRouter } from './routers/release'
 import { testingRouter } from './routers/testing'
 import { graphicsRouter } from './routers/graphics'
 import { controlTowerRouter } from './routers/control-tower'
+import { opsPilotRouter } from './routers/ops-pilot'
 
 export const appRouter = router({
   auth: authRouter,
@@ -51,6 +52,7 @@ export const appRouter = router({
   testing: testingRouter,
   graphics: graphicsRouter,
   controlTower: controlTowerRouter,
+  opsPilot: opsPilotRouter,
 })
 
 export type AppRouter = typeof appRouter

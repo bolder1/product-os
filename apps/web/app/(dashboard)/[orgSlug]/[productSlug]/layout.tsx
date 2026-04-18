@@ -17,6 +17,7 @@ import { CollaborationProvider, useCollaborationContext } from '../../../lib/col
 import { PresenceAvatars, ConnectionBadge } from '../../_components/presence-avatars'
 import { ComputerModePanel } from '../../../components/shared/computer-mode-panel'
 import { CommandPalette } from '../../../components/shared/command-palette'
+import { OpsPilot } from '../../../components/shared/ops-pilot'
 import { createContext, useContext } from 'react'
 import { usePathname } from 'next/navigation'
 import { GitBranch, MessageSquare, X, CircleDot, Search } from 'lucide-react'
@@ -253,6 +254,16 @@ function ProductLayoutInner({
           currentStudio={currentStudio}
           productId={dbProductId}
         />
+
+        {/* ── OpsPilot AI Copilot ── */}
+        {dbProductId && (
+          <OpsPilot
+            productId={dbProductId}
+            currentStudio={currentStudio}
+            orgSlug={orgSlug}
+            productSlug={productSlug}
+          />
+        )}
       </div>
   )
 }
