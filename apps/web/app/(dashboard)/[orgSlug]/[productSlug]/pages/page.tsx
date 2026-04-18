@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useCallback, useMemo, useEffect } from 'react'
-import { useParams } from 'next/navigation'
+import { useParams, useSearchParams } from 'next/navigation'
 import { useProduct } from '../layout'
 import { Plus, Eye, Sparkles, FileText, Rocket, Search, Database, Menu } from 'lucide-react'
 import { mockPages, type PageDef, type SectionDef } from './_data/mock-pages'
@@ -17,11 +17,13 @@ import { PublishModal } from './_components/publish-modal'
 import { StudioHealthBadge } from '../../../../components/shared/studio-health-badge'
 import { AnalyticsOverlay } from '../../../../components/shared/analytics-overlay'
 import { StudioEmptyState } from '../../../../components/shared/studio-empty-state'
+import { ViewInGraphLink } from '../../../../components/shared/view-in-graph-link'
 
 type RightPanelTab = 'properties' | 'seo' | 'data' | 'nav'
 
 export default function PageBuilderPage() {
   const params = useParams<{ productSlug: string }>()
+  const searchParams = useSearchParams()
   const product = useProduct()
   const productId = product?.id ?? params.productSlug
 
@@ -62,6 +64,14 @@ export default function PageBuilderPage() {
   const [selectedPageId, setSelectedPageId] = useState<string | null>(
     pages[0]?.id ?? 'page-home'
   )
+
+  // Auto-select page when navigated from Graph Explorer via ?nodeId
+  useEffect(() => {
+    const nodeId = searchParams.get('nodeId')
+    if (!nodeId || pages.length === 0) return
+    const match = pages.find((p) => p.id === nodeId)
+    if (match) setSelectedPageId(match.id)
+  }, [searchParams, pages])
 
   // Sync pages to graph store
   useEffect(() => {
@@ -305,6 +315,9 @@ export default function PageBuilderPage() {
             {pages.length} pages
             {selectedPage ? ` / ${selectedPage.name}` : ''}
           </span>
+          {selectedPage && (
+            <ViewInGraphLink nodeId={selectedPage.id} className="ml-1" />
+          )}
         </div>
 
         <div className="flex items-center gap-0.5">

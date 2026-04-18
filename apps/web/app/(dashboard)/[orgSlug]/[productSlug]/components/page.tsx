@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useCallback, useMemo } from 'react'
-import { useParams } from 'next/navigation'
+import { useState, useCallback, useMemo, useEffect } from 'react'
+import { useParams, useSearchParams } from 'next/navigation'
 import { useProduct } from '../layout'
 import { Box, Plus, Sparkles, Search, Trash2, LayoutTemplate, FormInput, Database, AlertCircle, Navigation as NavIcon } from 'lucide-react'
 import { type ComponentDef, type Category, categories, mockComponents } from './_data/mock-components'
@@ -48,6 +48,7 @@ const catIcon: Record<string, React.ReactNode> = {
 /* ------------------------------------------------------------------ */
 export default function ComponentBuilderPage() {
   const params = useParams<{ productSlug: string }>()
+  const searchParams = useSearchParams()
   const product = useProduct()
   const productId = product?.id ?? params.productSlug
 
@@ -76,6 +77,14 @@ export default function ComponentBuilderPage() {
   const [selectedId, setSelectedId] = useState<string | null>(components[0]?.id ?? null)
   const [modalOpen, setModalOpen]   = useState(false)
   const [search, setSearch]         = useState('')
+
+  // Auto-select component when navigated from Graph Explorer via ?nodeId
+  useEffect(() => {
+    const nodeId = searchParams.get('nodeId')
+    if (!nodeId || components.length === 0) return
+    const match = components.find((c) => c.id === nodeId)
+    if (match) setSelectedId(match.id)
+  }, [searchParams, components])
   const [catFilter, setCatFilter]   = useState<Category>('All')
 
   const selectedComponent = components.find((c) => c.id === selectedId) ?? null

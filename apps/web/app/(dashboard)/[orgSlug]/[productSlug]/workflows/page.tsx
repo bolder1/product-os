@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback, useMemo, useEffect } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { Database, GitBranch, Plus, Sparkles, Zap, FileInput, Trash2 } from "lucide-react";
 import { useProduct } from "../layout";
@@ -48,6 +48,7 @@ interface FormDef {
 
 export default function WorkflowBuilderPage() {
   const params = useParams<{ productSlug: string }>();
+  const searchParams = useSearchParams();
   const product = useProduct();
   const productId = product?.id ?? params.productSlug;
 
@@ -84,6 +85,16 @@ export default function WorkflowBuilderPage() {
     } catch { return INITIAL_WORKFLOWS; }
   });
   const [selection, setSelection] = useState<Selection>(null);
+
+  // Auto-select entity or workflow when navigated from Graph Explorer via ?nodeId
+  useEffect(() => {
+    const nodeId = searchParams.get("nodeId");
+    if (!nodeId) return;
+    const matchEntity = entities.find((e) => e.id === nodeId);
+    if (matchEntity) { setTab("entities"); setSelection({ kind: "entity", id: nodeId }); return; }
+    const matchWorkflow = workflows.find((w) => w.id === nodeId);
+    if (matchWorkflow) { setTab("workflows"); setSelection({ kind: "workflow", id: nodeId }); }
+  }, [searchParams, entities, workflows]);
 
   // ── Automations & Forms (mock data — wired to graph store) ──────────
   const [automations, setAutomations] = useState<AutomationDef[]>([

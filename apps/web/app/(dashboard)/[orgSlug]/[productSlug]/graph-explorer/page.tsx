@@ -239,7 +239,9 @@ export default function GraphExplorerPage() {
   const [activeEdgeKinds, setActiveEdgeKinds] = useState<Set<EdgeKind>>(new Set(ALL_EDGE_KINDS))
   const [searchQuery, setSearchQuery] = useState('')
   const [showLabels, setShowLabels] = useState(true)
-  const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null)
+  const [selectedNodeId, setSelectedNodeId] = useState<string | null>(
+    () => searchParams.get('focus') ?? null,
+  )
   const [nodePositions, setNodePositions] = useState(() => {
     const positions: Record<string, { x: number; y: number }> = {}
     for (const node of mockGraphData.nodes) {

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useMemo, useRef, useCallback, useEffect } from 'react'
-import { useParams } from 'next/navigation'
+import { useParams, useSearchParams } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Zap,
@@ -18,6 +18,7 @@ import {
 } from 'lucide-react'
 import { trpc } from '../../../../lib/trpc'
 import { useProduct } from '../layout'
+import { ViewInGraphLink } from '../../../../components/shared/view-in-graph-link'
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                               */
@@ -366,7 +367,10 @@ function DetailPanel({
               {feature.label}
             </h3>
           )}
-          <p className="text-[10px] text-[var(--text-tertiary)] mt-0.5">Feature</p>
+          <div className="flex items-center gap-1.5 mt-1">
+            <p className="text-[10px] text-[var(--text-tertiary)]">Feature</p>
+            <ViewInGraphLink nodeId={feature.id} />
+          </div>
         </div>
         <button
           onClick={onClose}
@@ -590,6 +594,7 @@ export default function FeaturesPage() {
   const params = useParams<{ orgSlug: string; productSlug: string }>()
   const orgSlug = params.orgSlug ?? ''
   const productSlug = params.productSlug ?? ''
+  const searchParams = useSearchParams()
   const { product } = useProduct()
   const productId = product?.id ?? ''
 
@@ -631,6 +636,14 @@ export default function FeaturesPage() {
     if (!featuresQuery.data) return []
     return featuresQuery.data as FeatureNode[]
   }, [featuresQuery.data])
+
+  // Auto-select feature when navigated from Graph Explorer via ?nodeId
+  useEffect(() => {
+    const nodeId = searchParams.get('nodeId')
+    if (!nodeId || features.length === 0) return
+    const match = features.find((f) => f.id === nodeId)
+    if (match) setSelectedFeature(match)
+  }, [searchParams, features])
 
   // Map nodeId → label for all nodes (used for module resolution)
   const nodeLabels = useMemo<Record<string, string>>(() => {

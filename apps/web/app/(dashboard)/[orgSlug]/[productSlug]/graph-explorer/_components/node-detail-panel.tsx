@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useParams, useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ExternalLink, Sparkles, ArrowRight, ArrowLeft, X, Pencil, Trash2, Link2 } from 'lucide-react'
 import {
@@ -10,6 +11,7 @@ import {
   NODE_KIND_LABELS,
 } from '../_data/mock-graph'
 import { NodeAISuggestPanel } from './node-ai-suggest-panel'
+import { nodeStudioHref } from '../../_lib/node-studio-link'
 
 interface NodeDetailPanelProps {
   node: GraphNode
@@ -41,6 +43,14 @@ export function NodeDetailPanel({
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [aiOpen, setAiOpen] = useState(false)
   const color = NODE_KIND_COLORS[node.kind]
+  const router = useRouter()
+  const params = useParams<{ orgSlug: string; productSlug: string }>()
+
+  const studioLink = nodeStudioHref(
+    `/${params.orgSlug}/${params.productSlug}`,
+    node.kind,
+    node.id,
+  )
   const nodeMap = new Map(allNodes.map((n) => [n.id, n]))
 
   const incomingEdges = edges.filter((e) => e.target === node.id)
@@ -249,9 +259,13 @@ export function NodeDetailPanel({
 
         {/* Utility row */}
         <div className="flex items-center gap-1">
-          <button className="flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-medium text-[var(--accent-text)] hover:bg-[var(--accent-bg)] transition-all">
+          <button
+            onClick={() => router.push(studioLink.href)}
+            title={`Open in ${studioLink.label}`}
+            className="flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-medium text-[var(--accent-text)] hover:bg-[var(--accent-bg)] transition-all"
+          >
             <ExternalLink size={10} />
-            Open in Studio
+            {studioLink.label}
           </button>
           <button
             onClick={() => setAiOpen((p) => !p)}
