@@ -121,3 +121,26 @@ export const notifications = pgTable('notifications', {
   read: boolean('read').default(false).notNull(),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
 })
+
+// --- Notification Preferences ---
+export const notificationChannelEnum = pgEnum('notification_channel', [
+  'in_app',
+  'email',
+  'both',
+])
+
+export const notificationPreferences = pgTable('notification_preferences', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  userId: uuid('user_id')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  productId: uuid('product_id')
+    .notNull()
+    .references(() => products.id, { onDelete: 'cascade' }),
+  type: notificationTypeEnum('type').notNull(),
+  enabled: boolean('enabled').default(true).notNull(),
+  channel: notificationChannelEnum('channel').default('in_app').notNull(),
+  emailDigestFrequency: text('email_digest_frequency').default('off').notNull(), // 'off', 'instant', 'daily', 'weekly'
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+})

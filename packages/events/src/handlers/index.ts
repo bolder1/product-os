@@ -153,15 +153,38 @@ export const notificationHandler: EventHandler = async (
   if (!config) return;
 
   try {
-    await db.insert(notifications).values({
-      userId: event.actorId,
-      productId: event.productId,
-      type: config.type,
-      title: config.title(event),
-      body: config.body(event),
-      link: null,
-    });
-    console.debug(`[notification] Created ${config.type} notification for ${event.type}`);
+    // Determine which users should receive the notification
+    let targetUserIds: string[] = [event.actorId];
+
+    // For task.created, notify the assignee if different from actor
+    if (event.type === 'task.created') {
+      const assigneeId = (event.payload as Record<string, unknown>).assigneeId as string | undefined;
+      if (assigneeId && assigneeId !== event.actorId) {
+        targetUserIds.push(assigneeId);
+      }
+    }
+
+    // For task.updated with status change, notify assignee if applicable
+    if (event.type === 'task.updated') {
+      const changes = (event.payload as Record<string, unknown>).changes as Record<string, unknown> | undefined;
+      if (changes?.assigneeId && changes.assigneeId !== event.actorId) {
+        targetUserIds.push(changes.assigneeId as string);
+      }
+    }
+
+    // Create notification for each target user
+    for (const userId of targetUserIds) {
+      await db.insert(notifications).values({
+        userId,
+        productId: event.productId,
+        type: config.type,
+        title: config.title(event),
+        body: config.body(event),
+        link: null,
+      });
+    }
+
+    console.debug(`[notification] Created ${config.type} notification for ${event.type} (${targetUserIds.length} users)`);
   } catch (err) {
     console.error(`[notification] Failed to persist notification for ${event.type}:`, err);
   }
