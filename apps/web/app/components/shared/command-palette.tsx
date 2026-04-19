@@ -23,12 +23,14 @@ import {
 } from 'lucide-react'
 import { useTaskStore } from '../../lib/task-store'
 import { useComputerModeStore } from '../../lib/computer-mode-store'
+import { useGraphStore } from '../../lib/graph-store'
+import type { NodeKind } from '../../lib/graph-store'
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
 /* ------------------------------------------------------------------ */
 
-type CommandCategory = 'studio' | 'task' | 'ai_skill' | 'action' | 'recent'
+type CommandCategory = 'studio' | 'task' | 'ai_skill' | 'action' | 'recent' | 'graph'
 
 interface Command {
   id: string
@@ -117,6 +119,55 @@ const CATEGORY_STYLES: Record<CommandCategory, { label: string; bg: string; colo
   ai_skill:  { label: 'AI',        bg: 'bg-purple-500/10',  color: 'text-purple-400'  },
   action:    { label: 'Action',    bg: 'bg-emerald-500/10', color: 'text-emerald-400' },
   recent:    { label: 'Recent',    bg: 'bg-white/[0.06]',   color: 'text-[#94A3B8]'   },
+  graph:     { label: 'Graph',     bg: 'bg-cyan-500/10',    color: 'text-cyan-400'    },
+}
+
+/** Map a graph node kind to the product studio route that owns it */
+function kindToStudio(kind: NodeKind): string {
+  switch (kind) {
+    case 'feature': case 'plan': case 'module': return 'features'
+    case 'page': case 'route': return 'pages'
+    case 'screen': return 'design'
+    case 'component': case 'variant': return 'components'
+    case 'token': case 'asset': return 'brand'
+    case 'workflow': case 'entity': case 'field': return 'workflows'
+    case 'task': case 'approval': return 'tasks'
+    case 'analytics_dashboard': case 'analytics_event': case 'insight': case 'experiment': return 'analytics'
+    case 'release': return 'releases'
+    case 'handoff_item': return 'handoff'
+    case 'test_suite': case 'test_run': case 'test_coverage': return 'testing'
+    case 'connector_binding': case 'mcp_binding': return 'connectors'
+    case 'skill_action': case 'computer_action': return 'ai-skills'
+    default: return 'graph-explorer'
+  }
+}
+
+/** Human label for a node kind */
+function kindLabel(kind: NodeKind): string {
+  const map: Partial<Record<NodeKind, string>> = {
+    feature: 'Feature', plan: 'Plan', module: 'Module',
+    page: 'Page', route: 'Route', screen: 'Screen',
+    component: 'Component', variant: 'Variant',
+    token: 'Token', asset: 'Asset',
+    workflow: 'Workflow', entity: 'Entity', field: 'Field',
+    task: 'Task', approval: 'Approval',
+    insight: 'Insight', release: 'Release',
+    handoff_item: 'Handoff', connector_binding: 'Connector',
+    skill_action: 'AI Skill', test_suite: 'Test Suite',
+  }
+  return map[kind] ?? kind
+}
+
+/** Pick an accent color per node kind */
+function kindColor(kind: NodeKind): string {
+  if (['feature', 'plan', 'module'].includes(kind)) return '#3B82F6'
+  if (['page', 'route', 'screen'].includes(kind)) return '#8B5CF6'
+  if (['component', 'variant'].includes(kind)) return '#EC4899'
+  if (['token', 'asset'].includes(kind)) return '#F59E0B'
+  if (['workflow', 'entity', 'field'].includes(kind)) return '#10B981'
+  if (['task', 'approval'].includes(kind)) return '#F97316'
+  if (['insight', 'analytics_dashboard'].includes(kind)) return '#06B6D4'
+  return '#6398FF'
 }
 
 /* ------------------------------------------------------------------ */
@@ -142,6 +193,13 @@ export function CommandPalette({ isOpen, onClose, orgSlug, productSlug, currentS
   const setCommandInput = useComputerModeStore((s) => s.setCommandInput)
 
   const tasks = useTaskStore((s) => s.tasks)
+
+  // Graph nodes for live search
+  const graphNodes = useGraphStore((s) =>
+    productId
+      ? s.nodes.filter((n) => n.productId === productId && !['product', 'plan', 'connector_binding', 'mcp_binding', 'computer_action'].includes(n.kind))
+      : []
+  )
 
   /* Focus input when opened */
   useEffect(() => {
@@ -212,6 +270,21 @@ export function CommandPalette({ isOpen, onClose, orgSlug, productSlug, currentS
         })
       })
 
+    // Graph nodes — only shown when there is a search query
+    graphNodes.forEach((node) => {
+      const studio = kindToStudio(node.kind)
+      const color = kindColor(node.kind)
+      base.push({
+        id: `graph-${node.id}`,
+        label: node.label,
+        description: `${kindLabel(node.kind)} · ${studio}`,
+        category: 'graph',
+        icon: Hash,
+        color,
+        action: () => navigate(studio),
+      })
+    })
+
     // Quick actions
     base.push({
       id: 'action-new-task',
@@ -241,21 +314,26 @@ export function CommandPalette({ isOpen, onClose, orgSlug, productSlug, currentS
     })
 
     return base
-  }, [currentStudio, tasks, navigate, openComputerMode, setCommandInput, onClose])
+  }, [currentStudio, tasks, graphNodes, navigate, openComputerMode, setCommandInput, onClose])
 
   /* ── Filter + rank ──────────────────────────────────────────────── */
   const filteredCommands = useMemo(() => {
     if (!query.trim()) {
-      // Default: show AI skills first, then studios, then actions
+      // Default: show AI skills first, then studios, then actions — no graph nodes
       return allCommands
-        .filter((c) => ['ai_skill', 'action'].includes(c.category) || c.id === `studio-${currentStudio}`)
+        .filter((c) => c.category !== 'graph' && (['ai_skill', 'action'].includes(c.category) || c.id === `studio-${currentStudio}`))
         .slice(0, 12)
     }
 
     return allCommands
       .filter((c) => fuzzyMatch(query, c.label) || fuzzyMatch(query, c.description ?? ''))
-      .sort((a, b) => score(query, b.label) - score(query, a.label))
-      .slice(0, 12)
+      .sort((a, b) => {
+        // Exact graph node match should surface high
+        const aScore = score(query, a.label) + (a.category === 'graph' && a.label.toLowerCase().includes(query.toLowerCase()) ? 5 : 0)
+        const bScore = score(query, b.label) + (b.category === 'graph' && b.label.toLowerCase().includes(query.toLowerCase()) ? 5 : 0)
+        return bScore - aScore
+      })
+      .slice(0, 14)
   }, [query, allCommands, currentStudio])
 
   /* ── Keyboard navigation ────────────────────────────────────────── */
@@ -309,12 +387,19 @@ export function CommandPalette({ isOpen, onClose, orgSlug, productSlug, currentS
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="Search studios, tasks, AI skills…"
+                placeholder="Search studios, graph nodes, tasks, AI skills…"
                 className="flex-1 bg-transparent text-[14px] text-[#F1F5F9] placeholder-[#475569] outline-none"
               />
-              <kbd className="hidden sm:flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-white/[0.06] text-[10px] text-[#64748B] font-mono">
-                ESC
-              </kbd>
+              <div className="hidden sm:flex items-center gap-2 shrink-0">
+                {graphNodes.length > 0 && !query && (
+                  <span className="text-[9px] text-[#475569] px-1.5 py-0.5 rounded bg-cyan-500/10 text-cyan-500">
+                    {graphNodes.length} nodes
+                  </span>
+                )}
+                <kbd className="flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-white/[0.06] text-[10px] text-[#64748B] font-mono">
+                  ESC
+                </kbd>
+              </div>
             </div>
 
             {/* Results */}

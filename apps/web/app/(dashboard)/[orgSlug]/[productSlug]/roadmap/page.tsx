@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo, useCallback } from 'react'
+import React, { useState, useMemo, useCallback } from 'react'
 import { AIActionBar } from '../../../../components/primitives/ai-action-bar'
 import {
   Map,
@@ -520,49 +520,271 @@ function AISuggestions({ milestones, onDismiss }: { milestones: Milestone[]; onD
 }
 
 // ---------------------------------------------------------------------------
-// Timeline overview bar
+// Gantt chart — full horizontal timeline
 // ---------------------------------------------------------------------------
 
-function TimelineBar({ milestones }: { milestones: Milestone[] }) {
-  const quarters: Quarter[] = ['Q1', 'Q2', 'Q3', 'Q4']
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+
+// Quarter → 0-based month start / end indices
+const Q_BOUNDS: Record<Quarter, [number, number]> = {
+  Q1: [0, 2],
+  Q2: [3, 5],
+  Q3: [6, 8],
+  Q4: [9, 11],
+}
+
+/** Convert a milestone's quarter + year into pixel offsets in a 12-month grid */
+function ganttLayout(milestone: Milestone, totalCols: number): { left: number; width: number } {
+  const [startMonth, endMonth] = Q_BOUNDS[milestone.quarter]
+  const left = (startMonth / 12) * 100
+  const width = ((endMonth - startMonth + 1) / 12) * 100
+  return { left, width }
+}
+
+interface GanttTooltip {
+  milestone: Milestone
+  x: number
+  y: number
+}
+
+function GanttChart({ milestones }: { milestones: Milestone[] }) {
+  const [tooltip, setTooltip] = useState<GanttTooltip | null>(null)
+  const containerRef = React.useRef<HTMLDivElement>(null)
+
+  // Today marker — fraction of year elapsed
+  const now = new Date()
+  const yearStart = new Date(now.getFullYear(), 0, 1)
+  const yearEnd = new Date(now.getFullYear() + 1, 0, 1)
+  const todayPct = ((now.getTime() - yearStart.getTime()) / (yearEnd.getTime() - yearStart.getTime())) * 100
+
+  // Detect if the year is 2026 (our demo year) — if so, show today as mid-April 2026
+  const demoYear = 2026
+  const demoTodayPct = ((4 - 1 + 20 / 30) / 12) * 100 // ~April 20 in 12-month grid
+
+  const todayMarker = demoTodayPct
 
   return (
-    <div className="rounded-2xl border border-[var(--border-subtle)] p-4" style={{ background: 'var(--bg-card)' }}>
-      <div className="flex items-center gap-2 mb-3">
-        <Calendar className="w-4 h-4 text-[var(--text-secondary)]" />
-        <span className="text-xs font-semibold text-[var(--text-primary)]">2026 Timeline</span>
+    <div
+      ref={containerRef}
+      className="rounded-2xl border border-[var(--border-subtle)] overflow-hidden"
+      style={{ background: 'var(--bg-card)' }}
+    >
+      {/* Header row — month labels */}
+      <div className="border-b border-[var(--border-subtle)] px-4 py-2.5 flex items-center gap-3">
+        <div className="w-[180px] shrink-0 flex items-center gap-2">
+          <Calendar className="w-3.5 h-3.5 text-[var(--text-secondary)]" />
+          <span className="text-[11px] font-semibold text-[var(--text-primary)]">{demoYear} Roadmap</span>
+        </div>
+        <div className="flex-1 relative">
+          <div className="grid" style={{ gridTemplateColumns: 'repeat(12, 1fr)' }}>
+            {MONTHS.map((m, i) => (
+              <div key={m} className="text-center">
+                <span className="text-[9px] font-medium text-[var(--text-tertiary)] uppercase tracking-wide">{m}</span>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
-      <div className="grid grid-cols-4 gap-2">
-        {quarters.map((q) => {
-          const qMilestones = milestones.filter((m) => m.quarter === q)
+
+      {/* Quarter shading row */}
+      <div className="flex items-center border-b border-[var(--border-subtle)] px-4">
+        <div className="w-[180px] shrink-0" />
+        <div className="flex-1 grid grid-cols-4 h-5">
+          {(['Q1', 'Q2', 'Q3', 'Q4'] as Quarter[]).map((q, i) => (
+            <div
+              key={q}
+              className="flex items-center justify-center text-[9px] font-semibold text-[var(--text-tertiary)] border-r border-[var(--border-subtle)] last:border-0"
+              style={{ background: i % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.015)' }}
+            >
+              {q}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Milestone rows */}
+      <div className="divide-y divide-[var(--border-subtle)]">
+        {milestones.map((milestone) => {
+          const { left, width } = ganttLayout(milestone, 12)
+          const prog = progressOf(milestone.items)
+          const st = MILESTONE_STATUS[milestone.status]
+          const StatusIcon = st.icon
+
           return (
-            <div key={q} className="rounded-xl p-3 border border-[var(--border-subtle)]" style={{ background: 'var(--bg-subtle)' }}>
-              <p className="text-[10px] font-semibold text-[var(--text-tertiary)] mb-1">{q} · {QUARTER_MONTHS[q]}</p>
-              {qMilestones.length === 0 ? (
-                <p className="text-[10px] text-[var(--text-tertiary)] italic">No milestones</p>
-              ) : (
-                <div className="space-y-1.5">
-                  {qMilestones.map((m) => {
-                    const st = MILESTONE_STATUS[m.status]
-                    const prog = progressOf(m.items)
-                    return (
-                      <div key={m.id}>
-                        <div className="flex items-center justify-between mb-0.5">
-                          <span className="text-[10px] font-medium truncate" style={{ color: m.color }}>{m.title}</span>
-                          <span className="text-[10px] text-[var(--text-tertiary)]">{prog}%</span>
-                        </div>
-                        <div className="h-1 rounded-full overflow-hidden" style={{ background: 'var(--border-subtle)' }}>
-                          <div className="h-full rounded-full" style={{ width: `${prog}%`, background: m.color }} />
-                        </div>
-                      </div>
-                    )
-                  })}
+            <div key={milestone.id} className="flex items-center px-4 h-[52px] hover:bg-[var(--surface-hover)] transition-colors group">
+              {/* Row label */}
+              <div className="w-[180px] shrink-0 pr-4 flex items-center gap-2 min-w-0">
+                <div
+                  className="w-2.5 h-2.5 rounded-sm shrink-0"
+                  style={{ background: milestone.color }}
+                />
+                <div className="min-w-0">
+                  <p className="text-[11px] font-semibold text-[var(--text-primary)] truncate leading-tight">
+                    {milestone.title}
+                  </p>
+                  <p className="text-[9px] text-[var(--text-tertiary)] truncate">{prog}% · {milestone.items.length} items</p>
                 </div>
-              )}
+              </div>
+
+              {/* Bar area */}
+              <div className="flex-1 relative h-full flex items-center">
+                {/* Month grid lines */}
+                <div className="absolute inset-0 grid pointer-events-none" style={{ gridTemplateColumns: 'repeat(12, 1fr)' }}>
+                  {MONTHS.map((_, i) => (
+                    <div key={i} className="border-r border-[var(--border-subtle)] last:border-0 h-full opacity-40" />
+                  ))}
+                </div>
+
+                {/* Today line */}
+                <div
+                  className="absolute top-0 bottom-0 w-[1.5px] z-10 pointer-events-none"
+                  style={{
+                    left: `${todayMarker}%`,
+                    background: 'rgba(99,152,255,0.6)',
+                    boxShadow: '0 0 6px rgba(99,152,255,0.4)',
+                  }}
+                />
+
+                {/* Milestone bar */}
+                <div
+                  className="absolute top-1/2 -translate-y-1/2 h-[22px] rounded-full cursor-pointer transition-all group-hover:h-[26px] z-20"
+                  style={{
+                    left: `${left}%`,
+                    width: `${width}%`,
+                    background: `${milestone.color}22`,
+                    border: `1.5px solid ${milestone.color}66`,
+                  }}
+                  onMouseEnter={(e) => {
+                    const rect = e.currentTarget.getBoundingClientRect()
+                    const containerRect = containerRef.current?.getBoundingClientRect()
+                    setTooltip({
+                      milestone,
+                      x: rect.left - (containerRect?.left ?? 0) + rect.width / 2,
+                      y: rect.top - (containerRect?.top ?? 0) - 8,
+                    })
+                  }}
+                  onMouseLeave={() => setTooltip(null)}
+                >
+                  {/* Progress fill */}
+                  <div
+                    className="absolute inset-y-0 left-0 rounded-full transition-all"
+                    style={{
+                      width: `${prog}%`,
+                      background: `linear-gradient(90deg, ${milestone.color}55, ${milestone.color}88)`,
+                    }}
+                  />
+                  {/* Label inside bar */}
+                  <div className="absolute inset-0 flex items-center px-2.5 gap-1.5 overflow-hidden">
+                    <StatusIcon size={9} className="shrink-0" style={{ color: milestone.color }} />
+                    <span
+                      className="text-[9px] font-semibold truncate leading-none"
+                      style={{ color: milestone.color }}
+                    >
+                      {milestone.title}
+                    </span>
+                    <span className="text-[9px] opacity-60 shrink-0" style={{ color: milestone.color }}>
+                      {prog}%
+                    </span>
+                  </div>
+
+                  {/* Due date diamond marker */}
+                  {milestone.dueDate && (
+                    <div
+                      className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 w-[10px] h-[10px] rotate-45 z-10"
+                      style={{ background: milestone.color }}
+                      title={`Due ${milestone.dueDate}`}
+                    />
+                  )}
+                </div>
+
+                {/* Item dots below bar */}
+                <div
+                  className="absolute flex items-center gap-0.5 z-20"
+                  style={{ left: `${left}%`, top: 'calc(50% + 14px)', transform: 'translateY(0)' }}
+                >
+                  {milestone.items.slice(0, 8).map((item) => (
+                    <div
+                      key={item.id}
+                      className="w-[5px] h-[5px] rounded-full"
+                      style={{
+                        background: item.status === 'done'
+                          ? milestone.color
+                          : item.status === 'in-progress'
+                            ? `${milestone.color}88`
+                            : 'var(--border-strong)',
+                      }}
+                      title={item.title}
+                    />
+                  ))}
+                  {milestone.items.length > 8 && (
+                    <span className="text-[8px] text-[var(--text-tertiary)]">+{milestone.items.length - 8}</span>
+                  )}
+                </div>
+              </div>
+
+              {/* Status badge */}
+              <div className="w-[90px] shrink-0 pl-3 flex justify-end">
+                <span
+                  className="text-[9px] px-2 py-0.5 rounded-full font-medium"
+                  style={{ background: `${milestone.color}18`, color: milestone.color }}
+                >
+                  {st.label}
+                </span>
+              </div>
             </div>
           )
         })}
       </div>
+
+      {/* Footer legend */}
+      <div className="flex items-center gap-6 px-4 py-2.5 border-t border-[var(--border-subtle)] bg-[var(--bg-subtle)]">
+        <div className="w-[180px] shrink-0" />
+        <div className="flex items-center gap-4 text-[9px] text-[var(--text-tertiary)]">
+          <div className="flex items-center gap-1.5">
+            <div className="w-3 h-1 rounded-full bg-[var(--accent)]" />
+            <span>Today ({new Date(demoYear, 3, 20).toLocaleDateString('en', { month: 'short', day: 'numeric' })})</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <div className="w-2.5 h-2.5 rounded-sm bg-[var(--accent-muted)]" />
+            <span>Milestone span</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <div className="w-2.5 h-2.5 rotate-45 bg-[var(--text-tertiary)]" />
+            <span>Due date</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <div className="w-[5px] h-[5px] rounded-full bg-[var(--accent)]" />
+            <div className="w-[5px] h-[5px] rounded-full bg-[var(--border-strong)]" />
+            <span>Item progress</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Tooltip */}
+      {tooltip && (
+        <div
+          className="absolute z-50 pointer-events-none"
+          style={{ left: tooltip.x, top: tooltip.y, transform: 'translate(-50%, -100%)' }}
+        >
+          <div
+            className="rounded-xl border border-[var(--border-default)] p-3 shadow-2xl min-w-[180px]"
+            style={{ background: 'var(--bg-overlay)' }}
+          >
+            <div className="flex items-center gap-2 mb-1.5">
+              <div className="w-2.5 h-2.5 rounded-sm" style={{ background: tooltip.milestone.color }} />
+              <span className="text-[11px] font-semibold text-[var(--text-primary)]">{tooltip.milestone.title}</span>
+            </div>
+            <p className="text-[10px] text-[var(--text-secondary)] mb-2 leading-relaxed">{tooltip.milestone.description}</p>
+            <div className="flex items-center justify-between text-[9px]">
+              <span className="text-[var(--text-tertiary)]">{tooltip.milestone.quarter} {tooltip.milestone.year}</span>
+              <span style={{ color: tooltip.milestone.color }}>{progressOf(tooltip.milestone.items)}% done</span>
+            </div>
+            {tooltip.milestone.dueDate && (
+              <p className="text-[9px] text-[var(--text-tertiary)] mt-1">Due {tooltip.milestone.dueDate}</p>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
@@ -600,7 +822,7 @@ function SummaryStats({ milestones }: { milestones: Milestone[] }) {
 // Main page
 // ---------------------------------------------------------------------------
 
-type ViewMode = 'list' | 'timeline'
+type ViewMode = 'list' | 'gantt'
 
 export default function RoadmapPage() {
   const params = useParams()
@@ -612,13 +834,44 @@ export default function RoadmapPage() {
   const [showAddMilestone, setShowAddMilestone] = useState(false)
   const [addingItemTo, setAddingItemTo] = useState<string | null>(null)
   const [showAI, setShowAI] = useState(true)
-  const [viewMode, setViewMode] = useState<ViewMode>('list')
+  const [viewMode, setViewMode] = useState<ViewMode>('gantt')
   const [statusFilter, setStatusFilter] = useState<MilestoneStatus | 'all'>('all')
+
+  // Live graph features — shown as unscheduled backlog items
+  const graphFeatures = useGraphStore((s) =>
+    s.nodes.filter((n) => n.productId === productId && n.kind === 'feature')
+  )
+
+  // Features not yet pinned to any milestone
+  const pinnedNodeIds = useMemo(
+    () => new Set(milestones.flatMap((m) => m.items.map((i) => i.nodeId).filter(Boolean))),
+    [milestones]
+  )
+  const unscheduledFeatures = useMemo(
+    () => graphFeatures.filter((n) => !pinnedNodeIds.has(n.id)),
+    [graphFeatures, pinnedNodeIds]
+  )
 
   const filtered = useMemo(() =>
     statusFilter === 'all' ? milestones : milestones.filter((m) => m.status === statusFilter),
     [milestones, statusFilter]
   )
+
+  /** Promote an unscheduled graph feature onto a milestone */
+  function handleScheduleFeature(nodeId: string, milestoneId: string) {
+    const node = graphFeatures.find((n) => n.id === nodeId)
+    if (!node) return
+    const item: RoadmapItem = {
+      id: crypto.randomUUID(),
+      title: node.label,
+      description: (node.data?.description as string | undefined) ?? '',
+      status: 'todo',
+      priority: 'medium',
+      type: 'feature',
+      nodeId: node.id,
+    }
+    setMilestones((prev) => prev.map((m) => m.id === milestoneId ? { ...m, items: [...m.items, item] } : m))
+  }
 
   function toggleExpand(id: string) {
     setExpandedIds((prev) => {
@@ -684,15 +937,18 @@ export default function RoadmapPage() {
         <div className="flex items-center gap-2">
           {/* View toggle */}
           <div className="flex items-center gap-1 p-1 rounded-xl border border-[var(--border-subtle)]" style={{ background: 'var(--bg-subtle)' }}>
-            {(['list', 'timeline'] as ViewMode[]).map((v) => (
-              <button key={v} onClick={() => setViewMode(v)}
-                className="px-3 py-1.5 text-xs rounded-lg font-medium capitalize transition-all"
+            {([
+              { key: 'list', icon: Layers, title: 'List' },
+              { key: 'gantt', icon: Calendar, title: 'Gantt' },
+            ] as { key: ViewMode; icon: React.ElementType; title: string }[]).map(({ key, icon: Icon, title }) => (
+              <button key={key} onClick={() => setViewMode(key)}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg font-medium transition-all"
                 style={{
-                  background: viewMode === v ? 'var(--bg-card)' : 'transparent',
-                  color: viewMode === v ? 'var(--text-primary)' : 'var(--text-tertiary)',
-                  boxShadow: viewMode === v ? '0 1px 3px rgba(0,0,0,0.2)' : 'none',
+                  background: viewMode === key ? 'var(--bg-card)' : 'transparent',
+                  color: viewMode === key ? 'var(--text-primary)' : 'var(--text-tertiary)',
+                  boxShadow: viewMode === key ? '0 1px 3px rgba(0,0,0,0.2)' : 'none',
                 }}>
-                {v === 'list' ? <Layers className="w-3.5 h-3.5" /> : <Calendar className="w-3.5 h-3.5" />}
+                <Icon className="w-3.5 h-3.5" />{title}
               </button>
             ))}
           </div>
@@ -711,8 +967,12 @@ export default function RoadmapPage() {
         {/* Stats */}
         <SummaryStats milestones={milestones} />
 
-        {/* Timeline view */}
-        {viewMode === 'timeline' && <TimelineBar milestones={milestones} />}
+        {/* Gantt view */}
+        {viewMode === 'gantt' && (
+          <div className="relative">
+            <GanttChart milestones={filtered} />
+          </div>
+        )}
 
         {/* AI Insight */}
         {showAI && <AISuggestions milestones={milestones} onDismiss={() => setShowAI(false)} />}
@@ -760,6 +1020,47 @@ export default function RoadmapPage() {
                 onDelete={handleDeleteMilestone}
               />
             ))}
+          </div>
+        )}
+
+        {/* Unscheduled Graph Features Backlog */}
+        {unscheduledFeatures.length > 0 && (
+          <div className="rounded-2xl border border-dashed border-[var(--border-subtle)] overflow-hidden" style={{ background: 'var(--bg-subtle)' }}>
+            <div className="flex items-center gap-2 px-4 py-2.5 border-b border-[var(--border-subtle)]">
+              <Zap size={12} className="text-[var(--text-tertiary)]" />
+              <span className="text-[11px] font-semibold text-[var(--text-secondary)]">
+                Unscheduled from Planner
+              </span>
+              <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-[var(--bg-card)] text-[var(--text-tertiary)] border border-[var(--border-subtle)]">
+                {unscheduledFeatures.length}
+              </span>
+              <span className="text-[10px] text-[var(--text-tertiary)] ml-1">
+                — drag to a milestone or click to assign
+              </span>
+            </div>
+            <div className="p-3 flex flex-wrap gap-2">
+              {unscheduledFeatures.map((node) => (
+                <div
+                  key={node.id}
+                  className="group flex items-center gap-2 px-3 py-1.5 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-card)] hover:border-[var(--accent)] transition-all cursor-pointer"
+                >
+                  <div className="w-1.5 h-1.5 rounded-full bg-[#3B82F6]" />
+                  <span className="text-[11px] text-[var(--text-primary)] font-medium">{node.label}</span>
+                  {/* Quick-assign dropdown */}
+                  <div className="hidden group-hover:flex items-center gap-1 ml-1">
+                    {milestones.slice(0, 4).map((m) => (
+                      <button
+                        key={m.id}
+                        title={`Add to ${m.title}`}
+                        onClick={() => handleScheduleFeature(node.id, m.id)}
+                        className="w-4 h-4 rounded-full border-2 transition-transform hover:scale-125"
+                        style={{ borderColor: m.color, background: `${m.color}30` }}
+                      />
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         )}
       </div>
