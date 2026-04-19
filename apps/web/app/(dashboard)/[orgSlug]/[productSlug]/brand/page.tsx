@@ -3,7 +3,7 @@
 import { useState, useCallback, useMemo } from 'react'
 import { useParams } from 'next/navigation'
 import { useProduct } from '../layout'
-import { Palette, Save, Paintbrush, Type, Ruler, Layers, Eye, Check, Code2 } from 'lucide-react'
+import { Palette, Save, Paintbrush, Type, Ruler, Layers, Eye, Check, Code2, Download, Copy } from 'lucide-react'
 import { defaultBrandConfig } from './_data/default-brand'
 import type { BrandConfig, ColorGroup, TypographyConfig, SpacingConfig, EffectsConfig } from './_data/default-brand'
 import { useGraphStore } from '../../../../lib/graph-store'
@@ -29,9 +29,130 @@ const tabs = [
   { id: 'spacing', label: 'Spacing', icon: Ruler },
   { id: 'effects', label: 'Effects', icon: Layers },
   { id: 'preview', label: 'Preview', icon: Eye },
+  { id: 'export', label: 'Export', icon: Download },
 ] as const
 
 type TabId = (typeof tabs)[number]['id']
+
+// ---------------------------------------------------------------------------
+// Token Export Tab
+// ---------------------------------------------------------------------------
+
+type ExportFormat = 'css' | 'tailwind' | 'json'
+
+interface TokenExportTabProps {
+  brandData: BrandConfig
+  toCSSVariables: () => string
+}
+
+function TokenExportTab({ brandData, toCSSVariables }: TokenExportTabProps) {
+  const [format, setFormat] = useState<ExportFormat>('css')
+  const [copied, setCopied] = useState(false)
+
+  const cssOutput = useMemo(() => toCSSVariables(), [toCSSVariables])
+
+  const tailwindOutput = useMemo(() => {
+    const varLines = cssOutput.split('\n').filter((l) => l.trim().startsWith('--'))
+    const entries = varLines.map((l) => {
+      const [key] = l.trim().replace(';', '').split(':')
+      const name = key.replace(/^--/, '')
+      return `    '${name}': 'var(${key})'`
+    })
+    return `// tailwind.config.js — extend.colors\nmodule.exports = {\n  theme: {\n    extend: {\n      colors: {\n${entries.slice(0, 30).join(',\n')}\n      },\n    },\n  },\n}`
+  }, [cssOutput])
+
+  const jsonOutput = useMemo(() => {
+    const colorMap: Record<string, string[]> = {}
+    brandData.colorGroups?.forEach((g) => {
+      const typedG = g as unknown as { name: string; colors?: { name: string; value: string }[] }
+      colorMap[typedG.name] = typedG.colors?.map((c) => `${c.name}: ${c.value}`) ?? []
+    })
+    return JSON.stringify({ colors: colorMap }, null, 2)
+  }, [brandData])
+
+  const output = format === 'css' ? cssOutput : format === 'tailwind' ? tailwindOutput : jsonOutput
+
+  const handleCopy = async () => {
+    await navigator.clipboard.writeText(output).catch(() => {})
+    setCopied(true)
+    setTimeout(() => setCopied(false), 1800)
+  }
+
+  const handleDownload = () => {
+    const ext = format === 'tailwind' ? 'js' : format
+    const blob = new Blob([output], { type: 'text/plain' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `brand-tokens.${ext}`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
+  const formats: { key: ExportFormat; label: string; desc: string }[] = [
+    { key: 'css',      label: 'CSS Variables',    desc: ':root { --color-primary: ... }' },
+    { key: 'tailwind', label: 'Tailwind Config',   desc: "extend.colors: { 'brand-primary': 'var(--...)' }" },
+    { key: 'json',     label: 'JSON Tokens',       desc: '{ "colors": { "primary": ["#6398ff", ...] } }' },
+  ]
+
+  return (
+    <div className="flex flex-col h-full overflow-hidden p-4 gap-4">
+      {/* Format picker */}
+      <div>
+        <p className="text-[11px] font-semibold text-[var(--text-secondary)] mb-2 uppercase tracking-wider">Format</p>
+        <div className="space-y-1.5">
+          {formats.map((f) => (
+            <button
+              key={f.key}
+              onClick={() => setFormat(f.key)}
+              className="w-full flex flex-col gap-0.5 px-3 py-2 rounded-xl text-left transition-all border"
+              style={{
+                background: format === f.key ? 'var(--accent-muted)' : 'var(--bg-card)',
+                borderColor: format === f.key ? 'var(--accent-text)' : 'var(--border-subtle)',
+              }}
+            >
+              <span className="text-[11px] font-semibold" style={{ color: format === f.key ? 'var(--accent-text)' : 'var(--text-primary)' }}>
+                {f.label}
+              </span>
+              <span className="text-[9px] font-mono text-[var(--text-tertiary)] truncate">{f.desc}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Output preview */}
+      <div className="flex-1 min-h-0 flex flex-col gap-2">
+        <div className="flex items-center justify-between">
+          <p className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider">Output</p>
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={handleCopy}
+              className="flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-medium transition-all"
+              style={{ background: 'var(--bg-inset)', color: copied ? 'var(--color-success)' : 'var(--text-secondary)' }}
+            >
+              {copied ? <Check size={10} /> : <Copy size={10} />}
+              {copied ? 'Copied!' : 'Copy'}
+            </button>
+            <button
+              onClick={handleDownload}
+              className="flex items-center gap-1 px-2 py-0.5 rounded-lg text-[10px] font-medium transition-all"
+              style={{ background: 'var(--bg-inset)', color: 'var(--text-secondary)' }}
+            >
+              <Download size={10} />
+              Download
+            </button>
+          </div>
+        </div>
+        <pre
+          className="flex-1 overflow-auto rounded-xl p-3 text-[10px] font-mono text-[var(--text-secondary)] leading-relaxed"
+          style={{ background: 'var(--bg-inset)', border: '1px solid var(--border-subtle)' }}
+        >
+          {output || '// No tokens defined yet'}
+        </pre>
+      </div>
+    </div>
+  )
+}
 
 export default function BrandBuilderPage() {
   const params = useParams<{ productSlug: string }>()
@@ -218,6 +339,8 @@ export default function BrandBuilderPage() {
         )
       case 'preview':
         return <BrandPreview brandData={brandData} />
+      case 'export':
+        return <TokenExportTab brandData={brandData} toCSSVariables={() => brandTokens.toCSSVariables()} />
       default:
         return null
     }

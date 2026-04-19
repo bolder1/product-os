@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useCallback } from 'react'
 import { useParams } from 'next/navigation'
-import { Code2, Play, Download, Search } from 'lucide-react'
+import { Code2, Play, Download, Search, Sparkles, PanelRight } from 'lucide-react'
 import { mockFiles, buildFolderTree, type FileNode } from './_data/mock-files'
 import { FileTree } from './_components/file-tree'
 import { CodeViewer } from './_components/code-viewer'
@@ -13,6 +13,7 @@ import { eventBus, makeActor } from '../../../../lib/event-bus'
 import { outputPipeline } from '../../../../lib/output-pipeline'
 import { AIActionBar } from '../../../../components/primitives/ai-action-bar'
 import { ExportMenu } from '../../../../components/primitives/export-menu'
+import { ScaffoldPanel } from './_components/scaffold-panel'
 
 export default function CodeStudioPage() {
   const params = useParams<{ productSlug: string }>()
@@ -52,6 +53,7 @@ export default function CodeStudioPage() {
 
   const [selectedPath, setSelectedPath] = useState<string | null>(null)
   const [openPaths, setOpenPaths] = useState<string[]>([])
+  const [showScaffold, setShowScaffold] = useState(true)
 
   const folderTree = useMemo(() => buildFolderTree(files), [files])
 
@@ -137,6 +139,14 @@ export default function CodeStudioPage() {
             <span className="text-[11px]">Generate All</span>
           </button>
           <ExportMenu formats={['tsx', 'markdown']} onExport={handleExport} compact />
+          <button
+            onClick={() => setShowScaffold((v) => !v)}
+            className={`tool-btn flex items-center gap-1.5 ${showScaffold ? 'text-[var(--accent-text)]' : 'text-[var(--text-secondary)]'}`}
+            title="Toggle scaffold panel"
+          >
+            <Sparkles className="w-3 h-3" />
+            <span className="text-[11px]">Scaffold</span>
+          </button>
           <AIActionBar workspace="engineer" productId={productId} compact />
         </div>
       </div>
@@ -185,7 +195,7 @@ export default function CodeStudioPage() {
           </div>
         </div>
 
-        {/* Right panel — Code viewer */}
+        {/* Center panel — Code viewer */}
         <div className="flex-1 flex min-w-0 bg-[var(--bg-workspace)]">
           <CodeViewer
             openFiles={openFiles}
@@ -194,6 +204,16 @@ export default function CodeStudioPage() {
             onCloseFile={handleCloseFile}
           />
         </div>
+
+        {/* Right panel — Scaffold */}
+        {showScaffold && (
+          <div
+            className="w-[220px] shrink-0 border-l border-[var(--border-default)] bg-[var(--bg-surface)] flex flex-col overflow-hidden"
+            style={{ animation: 'slideInRight 150ms cubic-bezier(0.16, 1, 0.3, 1)' }}
+          >
+            <ScaffoldPanel productId={productId} />
+          </div>
+        )}
       </div>
     </div>
   )
