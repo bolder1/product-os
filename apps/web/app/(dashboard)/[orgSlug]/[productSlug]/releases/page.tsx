@@ -191,7 +191,7 @@ export default function ReleasesPage() {
         {/* Right: Detail */}
         <div className="flex-1 min-w-0 overflow-y-auto bg-[var(--bg-workspace)]">
           {selectedRelease ? (
-            <ReleaseDetail release={selectedRelease} onDeploy={handleDeploy} />
+            <ReleaseDetail release={selectedRelease} productId={productId} onDeploy={handleDeploy} />
           ) : (
             <div className="flex items-center justify-center h-full">
               <div className="text-center">

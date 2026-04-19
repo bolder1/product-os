@@ -5,37 +5,27 @@ import { motion } from 'framer-motion'
 import {
   Tag,
   Sparkles,
-  CheckSquare,
-  Square,
   Rocket,
   FileText,
   Plus,
   Minus,
   Pencil,
-  ChevronDown,
 } from 'lucide-react'
 import { type Release, statusConfig, changeTypeConfig } from '../_data/mock-releases'
+import { ReleaseReadinessPanel } from './release-readiness-panel'
+import { StudioChangeSummary } from './studio-change-summary'
 
 interface ReleaseDetailProps {
   release: Release
+  productId: string
   onDeploy?: (releaseId: string, env: string) => void
 }
 
-const environments = ['Development', 'Staging', 'Production']
+const environments = ['Draft', 'Staging', 'Production']
 
-export function ReleaseDetail({ release, onDeploy }: ReleaseDetailProps) {
-  const [selectedEnv, setSelectedEnv] = useState('Staging')
-  const [envOpen, setEnvOpen] = useState(false)
+export function ReleaseDetail({ release, productId, onDeploy }: ReleaseDetailProps) {
+  const [activeEnv, setActiveEnv] = useState('Staging')
   const status = statusConfig[release.status]
-
-  const checklistItems = [
-    { key: 'qa', label: 'QA Passed', done: release.checklist.qa },
-    { key: 'stakeholder', label: 'Stakeholder Approved', done: release.checklist.stakeholder },
-    { key: 'docs', label: 'Docs Updated', done: release.checklist.docs },
-    { key: 'migration', label: 'Migration Tested', done: release.checklist.migration },
-  ]
-
-  const completedChecks = checklistItems.filter((c) => c.done).length
 
   const changeIcon = (changeType: string) => {
     switch (changeType) {
@@ -161,93 +151,43 @@ export function ReleaseDetail({ release, onDeploy }: ReleaseDetailProps) {
         </div>
       </div>
 
-      {/* Checklist */}
-      <div>
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="text-xs font-medium text-[#94A3B8] uppercase tracking-wider">
-            Release Checklist
-          </h3>
-          <span className="text-[10px] text-[#64748B]">
-            {completedChecks}/{checklistItems.length} completed
-          </span>
-        </div>
-        <div className="space-y-1.5">
-          {checklistItems.map((item, i) => (
-            <motion.div
-              key={item.key}
-              initial={{ opacity: 0, x: -8 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: i * 0.05 }}
-              className="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-white/[0.02] border border-white/[0.06]"
-            >
-              {item.done ? (
-                <CheckSquare className="w-4 h-4 text-[#10B981]" />
-              ) : (
-                <Square className="w-4 h-4 text-[#64748B]" />
-              )}
-              <span
-                className={`text-xs ${
-                  item.done ? 'text-[#94A3B8]' : 'text-[#F1F5F9]'
-                }`}
-              >
-                {item.label}
-              </span>
-            </motion.div>
-          ))}
-        </div>
-      </div>
+      {/* Release Readiness — replaces static checklist */}
+      <ReleaseReadinessPanel
+        productId={productId}
+        releaseId={release.id}
+        onDeploy={(env) => onDeploy?.(release.id, env)}
+      />
 
-      {/* Deployment */}
+      {/* Deployment environment tabs + log */}
       <div>
         <h3 className="text-xs font-medium text-[#94A3B8] uppercase tracking-wider mb-3">
           Deployment
         </h3>
         <div className="rounded-xl bg-white/[0.02] border border-white/[0.06] p-4">
-          <div className="flex items-center gap-3 mb-4">
-            {/* Environment selector */}
-            <div className="relative flex-1">
+          {/* Env tabs */}
+          <div className="flex gap-1 mb-4 p-0.5 rounded-lg bg-white/[0.03] border border-white/[0.06]">
+            {environments.map((env) => (
               <button
-                onClick={() => setEnvOpen(!envOpen)}
-                className="w-full flex items-center justify-between px-3 py-2 rounded-lg border border-white/[0.08] bg-white/[0.03] text-xs text-[#F1F5F9] hover:border-white/[0.15] transition-colors"
+                key={env}
+                onClick={() => {
+                  setActiveEnv(env)
+                  onDeploy?.(release.id, env)
+                }}
+                className="flex-1 py-1.5 rounded-md text-[11px] font-medium transition-all"
+                style={
+                  activeEnv === env
+                    ? { background: 'rgba(16,185,129,0.15)', color: '#10B981', border: '1px solid rgba(16,185,129,0.3)' }
+                    : { color: '#64748B', border: '1px solid transparent' }
+                }
               >
-                <span>{selectedEnv}</span>
-                <ChevronDown className={`w-3.5 h-3.5 text-[#64748B] transition-transform ${envOpen ? 'rotate-180' : ''}`} />
+                {env}
               </button>
-              {envOpen && (
-                <div className="absolute top-full left-0 right-0 mt-1 py-1 rounded-lg border border-white/[0.08] bg-[#0a0f1e] z-10">
-                  {environments.map((env) => (
-                    <button
-                      key={env}
-                      onClick={() => {
-                        setSelectedEnv(env)
-                        setEnvOpen(false)
-                      }}
-                      className={`w-full text-left px-3 py-1.5 text-xs transition-colors ${
-                        selectedEnv === env
-                          ? 'text-[#10B981] bg-[#10B981]/10'
-                          : 'text-[#94A3B8] hover:text-[#F1F5F9] hover:bg-white/[0.03]'
-                      }`}
-                    >
-                      {env}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            <button
-              onClick={() => onDeploy?.(release.id, selectedEnv)}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-medium text-white bg-[#10B981] hover:bg-[#059669] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              disabled={release.status === 'production' || release.status === 'rolled-back'}
-            >
-              <Rocket className="w-3.5 h-3.5" />
-              Deploy
-            </button>
+            ))}
           </div>
 
-          {/* Deployment log placeholder */}
+          {/* Deployment log */}
           <div className="rounded-lg bg-[#060918] border border-white/[0.06] p-3 font-mono text-[10px] text-[#64748B] leading-5">
-            <p>$ deploy --version {release.version} --env {selectedEnv.toLowerCase()}</p>
+            <p>$ deploy --version {release.version} --env {activeEnv.toLowerCase()}</p>
             {release.status === 'production' && (
               <>
                 <p className="text-[#10B981]">[OK] Build passed</p>
@@ -274,6 +214,12 @@ export function ReleaseDetail({ release, onDeploy }: ReleaseDetailProps) {
           </div>
         </div>
       </div>
+
+      {/* What Changed — studio-level summary */}
+      <StudioChangeSummary
+        productId={productId}
+        sinceDate={release.date || '2026-01-01'}
+      />
     </motion.div>
   )
 }
