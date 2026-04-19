@@ -3,6 +3,7 @@ export type OrgRole = 'Manager' | 'Business Analyst' | 'Product Designer' | 'Fro
 export interface GeneratedTask {
   id: string
   title: string
+  description?: string
   role: OrgRole
   feature: string
   priority: 'critical' | 'high' | 'medium' | 'low'

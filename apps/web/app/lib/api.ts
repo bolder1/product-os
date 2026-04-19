@@ -25,6 +25,10 @@ export async function trpcMutate<T>(procedure: string, input: unknown): Promise<
     headers: getHeaders(),
     body: JSON.stringify({ json: input }),
   })
+  if (!res.ok && res.status !== 400) {
+    // 400 may still carry a tRPC error payload — only throw early on network-level failures
+    throw new Error(`HTTP ${res.status} ${res.statusText} — ${procedure}`)
+  }
   const json = await res.json()
   if (json.error) {
     const msg = json.error.json?.message ?? json.error.message ?? 'Request failed'
@@ -43,6 +47,9 @@ export async function trpcQuery<T>(procedure: string, input: unknown): Promise<T
     method: 'GET',
     headers: getHeaders(),
   })
+  if (!res.ok && res.status !== 400) {
+    throw new Error(`HTTP ${res.status} ${res.statusText} — ${procedure}`)
+  }
   const json = await res.json()
   if (json.error) {
     const msg = json.error.json?.message ?? json.error.message ?? 'Request failed'

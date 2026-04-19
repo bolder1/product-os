@@ -23,7 +23,7 @@ export type EdgeKind =
   | 'inherits' | 'triggers' | 'routes_to' | 'uses_token'
   | 'uses_component' | 'assigned_to' | 'approves' | 'blocks'
   // Phase 19 — remaining studios
-  | 'has_handoff' | 'has_run'
+  | 'has_handoff' | 'has_run' | 'requires'
 
 export interface GraphNode {
   id: string

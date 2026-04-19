@@ -1,9 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useParams } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { Inbox, Settings, Trash2, CheckCircle2, Clock, MessageSquare, Bell } from 'lucide-react'
+import { Inbox, Settings, Trash2, CheckCircle2, Clock, MessageSquare, Bell, CheckCheck } from 'lucide-react'
 import { trpc } from '../../../../lib/trpc'
 import { useNotificationStore } from '../../../../lib/notification-store'
 import { PreferencesModal } from './_components/preferences-modal'
@@ -41,15 +41,20 @@ export default function NotificationsPage() {
 
   const notifications = useNotificationStore((s) => s.notifications)
   const markRead = useNotificationStore((s) => s.markRead)
+  const markAllRead = useNotificationStore((s) => s.markAllRead)
   const deleteNotification = useNotificationStore((s) => s.deleteNotification)
-  const { data: unreadCount } = trpc.notification.getUnreadCount.useQuery()
+  const storeUnread = useNotificationStore((s) => s.unreadCount)
+  const { data: remoteUnread } = trpc.notification.getUnreadCount.useQuery()
+  const unreadCount = remoteUnread ?? storeUnread
 
-  const filteredNotifications = filterType
-    ? notifications.filter((n) => n.type === filterType)
-    : notifications
+  const filteredNotifications = useMemo(
+    () => (filterType ? notifications.filter((n) => n.type === filterType) : notifications),
+    [notifications, filterType],
+  )
 
-  const typeOptions = Object.keys(TYPE_CONFIG).filter((type) =>
-    notifications.some((n) => n.type === type as any)
+  const typeOptions = useMemo(
+    () => Object.keys(TYPE_CONFIG).filter((type) => notifications.some((n) => n.type === (type as any))),
+    [notifications],
   )
 
   return (
@@ -61,13 +66,25 @@ export default function NotificationsPage() {
             {unreadCount || 0} unread
           </p>
         </div>
-        <button
-          onClick={() => setShowPreferences(true)}
-          className="flex items-center gap-2 px-3 py-2 rounded-lg bg-[var(--accent)]/10 text-[var(--accent-text)] hover:bg-[var(--accent)]/20 transition-colors text-[11px] font-medium"
-        >
-          <Settings size={12} />
-          Preferences
-        </button>
+        <div className="flex items-center gap-2">
+          {unreadCount > 0 && (
+            <button
+              onClick={markAllRead}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--bg-inset)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors text-[11px] font-medium"
+              aria-label="Mark all notifications as read"
+            >
+              <CheckCheck size={12} />
+              Mark all read
+            </button>
+          )}
+          <button
+            onClick={() => setShowPreferences(true)}
+            className="flex items-center gap-2 px-3 py-2 rounded-lg bg-[var(--accent)]/10 text-[var(--accent-text)] hover:bg-[var(--accent)]/20 transition-colors text-[11px] font-medium"
+          >
+            <Settings size={12} />
+            Preferences
+          </button>
+        </div>
       </div>
 
       <div className="px-6 py-3 border-b border-[var(--border-default)] flex items-center gap-2 overflow-x-auto">

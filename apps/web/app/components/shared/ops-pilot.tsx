@@ -378,10 +378,12 @@ export function OpsPilot({ productId, currentStudio, orgSlug, productSlug }: Ops
     setMessages((prev) => [...prev, userMsg, pendingMsg])
 
     // Build history for API
-    const history = [...messages, userMsg].map((m) => ({
-      role: m.role as 'user' | 'assistant',
-      content: m.content,
-    })).filter((m) => m.role !== 'system' && m.content)
+    const history = [...messages, userMsg]
+      .filter((m) => (m.role as string) !== 'system' && m.content)
+      .map((m) => ({
+        role: m.role as 'user' | 'assistant',
+        content: m.content,
+      }))
 
     try {
       const result = await chatMutation.mutateAsync({

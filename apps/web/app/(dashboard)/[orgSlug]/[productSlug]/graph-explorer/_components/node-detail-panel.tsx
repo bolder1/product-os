@@ -7,6 +7,7 @@ import { ExternalLink, Sparkles, ArrowRight, ArrowLeft, X, Pencil, Trash2, Link2
 import {
   type GraphNode,
   type GraphEdge,
+  type EdgeKind,
   NODE_KIND_COLORS,
   NODE_KIND_LABELS,
 } from '../_data/mock-graph'
@@ -24,7 +25,7 @@ interface NodeDetailPanelProps {
   onDelete: (nodeId: string) => void
   onConnect: (node: GraphNode) => void
   onDeleteEdge: (edgeId: string) => void
-  onCreateEdge: (sourceId: string, targetId: string, edgeKind: string) => void
+  onCreateEdge: (sourceId: string, targetId: string, edgeKind: EdgeKind) => void
 }
 
 export function NodeDetailPanel({
@@ -116,7 +117,7 @@ export function NodeDetailPanel({
                 productId={productId}
                 onClose={() => setAiOpen(false)}
                 onConnect={(sourceId, targetId, edgeKind) => {
-                  onCreateEdge(sourceId, targetId, edgeKind)
+                  onCreateEdge(sourceId, targetId, edgeKind as EdgeKind)
                   setAiOpen(false)
                 }}
               />

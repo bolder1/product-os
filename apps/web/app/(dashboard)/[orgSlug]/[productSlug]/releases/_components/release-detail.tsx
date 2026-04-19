@@ -18,11 +18,12 @@ import { type Release, statusConfig, changeTypeConfig } from '../_data/mock-rele
 
 interface ReleaseDetailProps {
   release: Release
+  onDeploy?: (releaseId: string, env: string) => void
 }
 
 const environments = ['Development', 'Staging', 'Production']
 
-export function ReleaseDetail({ release }: ReleaseDetailProps) {
+export function ReleaseDetail({ release, onDeploy }: ReleaseDetailProps) {
   const [selectedEnv, setSelectedEnv] = useState('Staging')
   const [envOpen, setEnvOpen] = useState(false)
   const status = statusConfig[release.status]
@@ -235,6 +236,7 @@ export function ReleaseDetail({ release }: ReleaseDetailProps) {
             </div>
 
             <button
+              onClick={() => onDeploy?.(release.id, selectedEnv)}
               className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-medium text-white bg-[#10B981] hover:bg-[#059669] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={release.status === 'production' || release.status === 'rolled-back'}
             >

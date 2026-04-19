@@ -223,8 +223,8 @@ export function NodeAISuggestPanel({
   const suggestions: Suggestion[] = result?.suggestions ?? []
 
   // Parse raw text result if suggestions array isn't present
-  const rawText = typeof (mutation.data as Record<string, unknown>)?.content === 'string'
-    ? (mutation.data as Record<string, unknown>).content as string
+  const rawText = typeof (mutation.data as unknown as Record<string, unknown>)?.content === 'string'
+    ? (mutation.data as unknown as Record<string, unknown>).content as string
     : null
 
   const color = NODE_KIND_COLORS[node.kind]

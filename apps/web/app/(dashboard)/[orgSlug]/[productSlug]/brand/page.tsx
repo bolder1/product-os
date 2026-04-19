@@ -3,7 +3,7 @@
 import { useState, useCallback, useMemo } from 'react'
 import { useParams } from 'next/navigation'
 import { useProduct } from '../layout'
-import { Palette, Sparkles, Save, Paintbrush, Type, Ruler, Layers, Eye, Check, Code2 } from 'lucide-react'
+import { Palette, Save, Paintbrush, Type, Ruler, Layers, Eye, Check, Code2 } from 'lucide-react'
 import { defaultBrandConfig } from './_data/default-brand'
 import type { BrandConfig, ColorGroup, TypographyConfig, SpacingConfig, EffectsConfig } from './_data/default-brand'
 import { useGraphStore } from '../../../../lib/graph-store'
@@ -17,6 +17,9 @@ import EffectsSystem from './_components/effects-system'
 import BrandPreview from './_components/brand-preview'
 import AIBrandPanel from './_components/ai-brand-panel'
 import { StudioHealthBadge } from '../../../../components/shared/studio-health-badge'
+import { AIActionBar } from '../../../../components/primitives/ai-action-bar'
+import { ExportMenu } from '../../../../components/primitives/export-menu'
+import { outputPipeline } from '../../../../lib/output-pipeline'
 
 // ── Tab definitions ──
 
@@ -241,13 +244,12 @@ export default function BrandBuilderPage() {
               <Code2 className="w-3 h-3" />
               Export CSS
             </button>
-            <button
-              onClick={() => setAiPanelOpen(!aiPanelOpen)}
-              className="tool-btn flex items-center gap-1.5 px-2.5 h-6 rounded text-[11px] font-medium bg-[var(--accent-muted)] text-[var(--accent-text)] border border-[var(--border-accent)] hover:bg-[var(--surface-selected-strong)] transition-colors"
-            >
-              <Sparkles className="w-3 h-3" />
-              AI Generate
-            </button>
+            <AIActionBar workspace="design" productId={productId} compact />
+            <ExportMenu
+              formats={['markdown']}
+              onExport={(fmt) => outputPipeline.download(fmt, { label: 'brand' })}
+              compact
+            />
             <button
               onClick={handleSaveBrand}
               disabled={saveState === 'saving'}

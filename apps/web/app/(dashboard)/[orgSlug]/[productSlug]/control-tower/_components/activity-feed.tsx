@@ -69,10 +69,10 @@ export function ActivityFeed() {
   const activities = useMemo(() => {
     if (storeActivities.length > 0) {
       return storeActivities.slice(0, 10).map((a) => ({
-        actor: a.userName,
+        actor: a.actor?.name ?? 'Unknown',
         action: a.title,
         time: timeAgo(a.timestamp),
-        studio: a.studio.charAt(0).toUpperCase() + a.studio.slice(1),
+        studio: a.studio ? a.studio.charAt(0).toUpperCase() + a.studio.slice(1) : 'General',
       }))
     }
     return fallbackActivities

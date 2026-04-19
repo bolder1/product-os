@@ -1,14 +1,18 @@
 'use client'
 
+import { useMemo } from 'react'
 import { motion } from 'framer-motion'
 import { Monitor, Tablet, Smartphone, Plus } from 'lucide-react'
 import type { ScreenDef } from '../_data/mock-screens'
+import { FrameThumbnail } from '../../../../../lib/frame-renderer'
+import { useDesignCanvasStore } from '../../../../../lib/design-canvas-store'
 
 interface ScreenListProps {
   screens: ScreenDef[]
   selectedScreenId: string | null
   onSelectScreen: (id: string) => void
   onAddScreen: () => void
+  productId?: string
 }
 
 const categoryConfig = {
@@ -35,7 +39,10 @@ function elementColor(type: string): string {
   }
 }
 
-export default function ScreenList({ screens, selectedScreenId, onSelectScreen, onAddScreen }: ScreenListProps) {
+export default function ScreenList({ screens, selectedScreenId, onSelectScreen, onAddScreen, productId = '' }: ScreenListProps) {
+  // Check which screen ids have real canvas frames (for live thumbnail rendering)
+  const rawFrames = useDesignCanvasStore((s) => s.frames)
+  const frameIds = useMemo(() => new Set(rawFrames.map((f) => f.id)), [rawFrames])
   const grouped = categoryOrder.map((cat) => ({
     category: cat,
     screens: screens.filter((s) => s.category === cat),
@@ -81,13 +88,20 @@ export default function ScreenList({ screens, selectedScreenId, onSelectScreen, 
                           : 'bg-transparent hover:bg-white/[0.03] border-l-2 border-transparent'
                       }`}
                     >
-                      {/* Mini Thumbnail */}
+                      {/* Mini Thumbnail — live render if canvas frame exists, else placeholder */}
                       <div
-                        className="relative rounded-md overflow-hidden border border-white/[0.06] mb-2 mx-auto"
+                        className="relative rounded-md overflow-hidden border border-white/[0.06] mb-2 mx-auto bg-[#080c20]"
                         style={{ width: thumbW, height: Math.min(thumbH, 90) }}
                       >
-                        <div className="absolute inset-0 bg-[#080c20]">
-                          {screen.elements.map((el) => (
+                        {frameIds.has(screen.id) && productId ? (
+                          <FrameThumbnail
+                            frameId={screen.id}
+                            productId={productId}
+                            maxWidth={thumbW}
+                            maxHeight={90}
+                          />
+                        ) : (
+                          screen.elements.map((el) => (
                             <div
                               key={el.id}
                               className="absolute"
@@ -100,8 +114,8 @@ export default function ScreenList({ screens, selectedScreenId, onSelectScreen, 
                                 borderRadius: 2,
                               }}
                             />
-                          ))}
-                        </div>
+                          ))
+                        )}
                       </div>
 
                       <div className="flex items-center justify-between">

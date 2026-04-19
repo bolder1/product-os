@@ -2,7 +2,8 @@
 
 import { useMemo, useState } from 'react'
 import { useParams } from 'next/navigation'
-import { Image, Upload, Sparkles, Search, LayoutGrid, List } from 'lucide-react'
+import { Image, Upload, Search, LayoutGrid, List } from 'lucide-react'
+import { AIActionBar } from '../../../../components/primitives/ai-action-bar'
 import { type GraphicAsset as MockAsset, mockAssets } from './_data/mock-assets'
 import { AssetGrid } from './_components/asset-grid'
 import { AssetDetail } from './_components/asset-detail'
@@ -177,10 +178,7 @@ export default function GraphicsStudioPage() {
         </div>
 
         <div className="flex items-center gap-1">
-          <button className="tool-btn flex items-center gap-1.5 text-[var(--accent-text)]">
-            <Sparkles className="w-3 h-3" />
-            <span className="text-[11px]">AI Generate</span>
-          </button>
+          <AIActionBar workspace="design" productId={productId} compact />
           <button
             onClick={() => setUploadOpen(true)}
             disabled={createMutation.isPending}

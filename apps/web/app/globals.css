@@ -18,9 +18,9 @@
   --surface-selected: rgba(99, 152, 255, 0.07);
   --surface-selected-strong: rgba(99, 152, 255, 0.12);
 
-  --border-default: rgba(255, 255, 255, 0.06);
-  --border-strong: rgba(255, 255, 255, 0.1);
-  --border-subtle: rgba(255, 255, 255, 0.03);
+  --border-default: rgba(255, 255, 255, 0.10);
+  --border-strong: rgba(255, 255, 255, 0.17);
+  --border-subtle: rgba(255, 255, 255, 0.06);
   --border-focus: rgba(99, 152, 255, 0.5);
   --border-accent: rgba(99, 152, 255, 0.25);
 
@@ -40,18 +40,18 @@
 
   --text-primary: #e4e4e7;
   --text-secondary: #8b8b8e;
-  --text-tertiary: #525255;
+  --text-tertiary: #72727a;
   --text-accent: #6398ff;
   --text-inverse: #0a0a0a;
 
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', 'Consolas', monospace;
 
-  --activity-bar-w: 46px;
+  --activity-bar-w: 48px;
   --sidebar-w: 220px;
   --topbar-h: 40px;
-  --toolbar-h: 34px;
-  --statusbar-h: 26px;
+  --toolbar-h: 36px;
+  --statusbar-h: 28px;
 
   --radius-sm: 4px;
   --radius-md: 6px;
@@ -133,8 +133,8 @@ body {
 /* ── Focus Ring ── */
 :focus-visible {
   outline: 1.5px solid var(--accent);
-  outline-offset: -1.5px;
-  border-radius: 2px;
+  outline-offset: 2px;
+  border-radius: 3px;
 }
 
 /* ── Keyframes ── */
@@ -254,7 +254,8 @@ body {
   display: flex;
   align-items: center;
   gap: 7px;
-  padding: 5px 8px;
+  padding: 6px 8px;
+  min-height: 32px;
   font-size: 12px;
   color: var(--text-secondary);
   border-radius: var(--radius-sm);
@@ -307,7 +308,7 @@ body {
   display: inline-flex;
   align-items: center;
   padding: 1px 6px;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 500;
   letter-spacing: 0.01em;
   border-radius: 3px;
@@ -341,7 +342,8 @@ body {
   background: var(--bg-inset);
   border: 1px solid var(--border-default);
   border-radius: var(--radius-sm);
-  padding: 5px 8px;
+  padding: 6px 9px;
+  min-height: 30px;
   font-size: 12px;
   font-family: var(--font-sans);
   color: var(--text-primary);
@@ -365,7 +367,8 @@ body {
   align-items: center;
   justify-content: center;
   gap: 5px;
-  padding: 4px 10px;
+  padding: 5px 10px;
+  min-height: 28px;
   font-size: 12px;
   font-weight: 500;
   font-family: var(--font-sans);
@@ -428,9 +431,9 @@ body {
 }
 
 .tool-btn-icon {
-  padding: 4px;
-  width: 26px;
-  height: 26px;
+  padding: 6px;
+  width: 32px;
+  height: 32px;
   flex-shrink: 0;
 }
 
@@ -446,7 +449,7 @@ body {
   padding: 7px 12px;
   font-size: 11px;
   font-weight: 500;
-  color: var(--text-tertiary);
+  color: var(--text-secondary);
   border-bottom: 2px solid transparent;
   transition: color var(--duration-fast), border-color var(--duration-fast);
   cursor: pointer;
@@ -478,7 +481,7 @@ body {
   padding: 3px 10px;
   font-size: 11px;
   font-weight: 500;
-  color: var(--text-tertiary);
+  color: var(--text-secondary);
   border-radius: 3px;
   transition: all var(--duration-fast);
   cursor: pointer;
@@ -497,11 +500,11 @@ body {
 
 /* ── Section label ── */
 .tool-section-label {
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 600;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
-  color: var(--text-tertiary);
+  color: var(--text-secondary);
   padding: 10px 8px 5px;
   user-select: none;
 }
@@ -548,11 +551,11 @@ body {
 
 .tool-table th {
   padding: 6px 10px;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  color: var(--text-tertiary);
+  color: var(--text-secondary);
   text-align: left;
   border-bottom: 1px solid var(--border-default);
   position: sticky;
@@ -583,7 +586,7 @@ body {
   font-size: 10px;
   font-family: var(--font-sans);
   font-weight: 500;
-  color: var(--text-tertiary);
+  color: var(--text-secondary);
   background: var(--bg-inset);
   border: 1px solid var(--border-default);
   border-radius: 3px;
@@ -598,21 +601,22 @@ body {
 .tool-tooltip::after {
   content: attr(data-tooltip);
   position: absolute;
-  left: calc(100% + 8px);
+  left: calc(100% + 10px);
   top: 50%;
   transform: translateY(-50%);
-  padding: 4px 8px;
-  font-size: 11px;
+  padding: 5px 9px;
+  font-size: 12px;
   font-weight: 500;
   color: var(--text-primary);
   background: var(--bg-overlay);
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-dropdown);
   white-space: nowrap;
   opacity: 0;
   pointer-events: none;
-  transition: opacity var(--duration-fast);
-  z-index: 100;
+  transition: opacity var(--duration-fast) 80ms;
+  z-index: 200;
 }
 
 .tool-tooltip:hover::after {

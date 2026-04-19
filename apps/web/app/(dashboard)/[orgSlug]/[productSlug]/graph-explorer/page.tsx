@@ -3,7 +3,8 @@
 import { useState, useCallback, useMemo, useEffect } from 'react'
 import { useParams, useSearchParams } from 'next/navigation'
 import { AnimatePresence } from 'framer-motion'
-import { Sparkles, Share2, X, RefreshCw, CheckCircle2, Plus } from 'lucide-react'
+import { Share2, X, RefreshCw, CheckCircle2, Plus, Layers } from 'lucide-react'
+import { AIActionBar } from '../../../../components/primitives/ai-action-bar'
 import { useProduct } from '../layout'
 import {
   mockGraphData,
@@ -31,6 +32,16 @@ const ALL_NODE_KINDS: NodeKind[] = [
   'token',
   'journey',
 ]
+
+/** Workspace → relevant node kinds for quick-filter presets */
+const WORKSPACE_NODE_KINDS: Record<string, NodeKind[]> = {
+  all:        ALL_NODE_KINDS,
+  plan:       ['module', 'feature', 'journey'],
+  design:     ['page', 'component', 'token'],
+  engineer:   ['component', 'entity', 'workflow'],
+  operate:    ['workflow', 'feature'],
+  system:     ALL_NODE_KINDS,
+}
 
 const ALL_EDGE_KINDS: EdgeKind[] = [
   'contains',
@@ -235,6 +246,7 @@ export default function GraphExplorerPage() {
     return positions
   }, [graphNodes])
 
+  const [workspaceFilter, setWorkspaceFilter] = useState<string>('all')
   const [activeNodeKinds, setActiveNodeKinds] = useState<Set<NodeKind>>(new Set(ALL_NODE_KINDS))
   const [activeEdgeKinds, setActiveEdgeKinds] = useState<Set<EdgeKind>>(new Set(ALL_EDGE_KINDS))
   const [searchQuery, setSearchQuery] = useState('')
@@ -297,7 +309,14 @@ export default function GraphExplorerPage() {
     setActiveEdgeKinds(new Set(ALL_EDGE_KINDS))
     setSearchQuery('')
     setSelectedNodeId(null)
+    setWorkspaceFilter('all')
   }, [buildInitialPositions])
+
+  const handleWorkspaceFilter = useCallback((ws: string) => {
+    setWorkspaceFilter(ws)
+    const kinds = WORKSPACE_NODE_KINDS[ws] ?? ALL_NODE_KINDS
+    setActiveNodeKinds(new Set(kinds))
+  }, [])
 
   const selectedNode = useMemo(
     () => (selectedNodeId ? graphNodes.find((n) => n.id === selectedNodeId) ?? null : null),
@@ -405,6 +424,24 @@ export default function GraphExplorerPage() {
         </div>
 
         <div className="flex items-center gap-1">
+          {/* Workspace quick-filter pills */}
+          <div className="flex items-center gap-0.5 mr-1 border border-[var(--border-default)] rounded-[var(--radius-sm)] bg-[var(--bg-workspace)] px-1 py-0.5">
+            <Layers size={10} className="text-[var(--text-tertiary)] mr-0.5" />
+            {Object.keys(WORKSPACE_NODE_KINDS).map((ws) => (
+              <button
+                key={ws}
+                onClick={() => handleWorkspaceFilter(ws)}
+                className={`px-1.5 py-0.5 text-[10px] rounded font-medium capitalize transition-colors ${
+                  workspaceFilter === ws
+                    ? 'bg-[var(--bg-elevated)] text-[var(--text-primary)]'
+                    : 'text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]'
+                }`}
+              >
+                {ws}
+              </button>
+            ))}
+          </div>
+
           <button
             onClick={handleRefresh}
             disabled={isRefreshing}
@@ -427,16 +464,16 @@ export default function GraphExplorerPage() {
             className="tool-btn text-[var(--accent-text)]"
             title="Generate graph from description"
           >
-            <Sparkles size={12} />
-            AI: Generate
+            <span className="text-[10px]">Scaffold</span>
           </button>
           <button
             onClick={() => setAiPanelOpen((v) => !v)}
             className={`tool-btn transition-colors ${aiPanelOpen ? 'text-[#A78BFA] bg-[#8B5CF6]/10' : 'text-[var(--accent-text)]'}`}
+            title="AI graph analysis"
           >
-            <Sparkles size={12} />
-            AI: Analyze
+            <span className="text-[10px]">Analyze</span>
           </button>
+          <AIActionBar workspace="system" productId={productId} compact />
         </div>
       </div>
 

@@ -27,6 +27,7 @@ export function TopBar({ extraRight }: TopBarProps = {}) {
   const openPalette = useCommandPaletteStore((s) => s.open)
   const openVersionPanel = useVersionStore((s) => s.openPanel)
   const notifications = useNotificationStore((s) => s.notifications)
+  // unreadNotifs is memoized from the stable `notifications` array reference
   const unreadNotifs = useMemo(() => notifications.filter((n) => !n.read), [notifications])
   const markRead = useNotificationStore((s) => s.markRead)
   const markAllRead = useNotificationStore((s) => s.markAllRead)
@@ -78,7 +79,8 @@ export function TopBar({ extraRight }: TopBarProps = {}) {
       {/* Center: Search */}
       <button
         onClick={openPalette}
-        className="flex items-center gap-2 h-[26px] px-3 rounded-md bg-[var(--bg-inset)] border border-[var(--border-default)] text-[11px] text-[var(--text-tertiary)] hover:border-[var(--border-strong)] hover:text-[var(--text-secondary)] transition-all cursor-pointer min-w-[200px] max-w-[320px]"
+        className="flex items-center gap-2 h-[30px] px-3 rounded-md bg-[var(--bg-inset)] border border-[var(--border-default)] text-[11px] text-[var(--text-secondary)] hover:border-[var(--border-strong)] hover:text-[var(--text-primary)] transition-all cursor-pointer min-w-[200px] max-w-[320px]"
+        aria-label="Search or open command palette"
       >
         <Search size={12} className="shrink-0 opacity-60" />
         <span className="flex-1 text-left">Search or jump to...</span>
@@ -97,6 +99,7 @@ export function TopBar({ extraRight }: TopBarProps = {}) {
           onClick={openVersionPanel}
           className="tool-btn-ghost tool-btn-icon"
           title="Version History"
+          aria-label="Version History"
         >
           <GitBranch size={14} />
         </button>
@@ -105,6 +108,7 @@ export function TopBar({ extraRight }: TopBarProps = {}) {
         <button
           className="tool-btn-ghost tool-btn-icon hover:text-[var(--accent-text)]"
           title="AI Assistant"
+          aria-label="AI Assistant"
         >
           <Sparkles size={14} />
         </button>
@@ -115,6 +119,9 @@ export function TopBar({ extraRight }: TopBarProps = {}) {
             onClick={() => setShowNotifs(!showNotifs)}
             className="tool-btn-ghost tool-btn-icon relative"
             title="Notifications"
+            aria-label={unreadNotifs.length > 0 ? `Notifications — ${unreadNotifs.length} unread` : 'Notifications'}
+            aria-haspopup="true"
+            aria-expanded={showNotifs}
           >
             <Bell size={14} />
             {unreadNotifs.length > 0 && (
@@ -129,37 +136,40 @@ export function TopBar({ extraRight }: TopBarProps = {}) {
                 {unreadNotifs.length > 0 && (
                   <button
                     onClick={() => markAllRead()}
-                    className="text-[10px] text-[var(--accent-text)] hover:text-[var(--accent-hover)] transition-colors"
+                    className="text-[11px] text-[var(--accent-text)] hover:text-[var(--accent-hover)] transition-colors"
                   >
                     Mark all read
                   </button>
                 )}
               </div>
               <div className="max-h-[320px] overflow-y-auto">
-                {notifications.slice(0, 12).length === 0 ? (
-                  <div className="tool-empty py-8">
-                    <p className="text-[11px]">No notifications</p>
-                  </div>
-                ) : (
-                  notifications.slice(0, 12).map((n) => (
-                    <div
-                      key={n.id}
-                      className={`tool-dropdown-item py-2.5 px-3 border-b border-[var(--border-subtle)] ${
-                        !n.read ? 'bg-[var(--accent-subtle)]' : ''
-                      }`}
-                      onClick={() => { if (!n.read) markRead(n.id) }}
-                    >
-                      <div className={`w-[5px] h-[5px] rounded-full shrink-0 ${n.read ? 'bg-transparent' : 'bg-[var(--accent)]'}`} />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-[11px] text-[var(--text-primary)] line-clamp-1">{n.title}</p>
-                        {n.message && (
-                          <p className="text-[10px] text-[var(--text-tertiary)] mt-0.5 line-clamp-1">{n.message}</p>
-                        )}
-                        <p className="text-[9px] text-[var(--text-tertiary)] opacity-60 mt-0.5">{timeAgo(n.createdAt)}</p>
-                      </div>
+                {(() => {
+                  const visible = notifications.slice(0, 12)
+                  return visible.length === 0 ? (
+                    <div className="tool-empty py-8">
+                      <p className="text-[11px]">No notifications</p>
                     </div>
-                  ))
-                )}
+                  ) : (
+                    visible.map((n) => (
+                      <div
+                        key={n.id}
+                        className={`tool-dropdown-item py-2.5 px-3 border-b border-[var(--border-subtle)] ${
+                          !n.read ? 'bg-[var(--accent-subtle)]' : ''
+                        }`}
+                        onClick={() => { if (!n.read) markRead(n.id) }}
+                      >
+                        <div className={`w-[5px] h-[5px] rounded-full shrink-0 ${n.read ? 'bg-transparent' : 'bg-[var(--accent)]'}`} />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[11px] text-[var(--text-primary)] line-clamp-1">{n.title}</p>
+                          {n.body && (
+                            <p className="text-[11px] text-[var(--text-secondary)] mt-0.5 line-clamp-1">{n.body}</p>
+                          )}
+                          <p className="text-[10px] text-[var(--text-tertiary)] mt-0.5">{timeAgo(n.timestamp)}</p>
+                        </div>
+                      </div>
+                    ))
+                  )
+                })()}
               </div>
             </div>
           )}

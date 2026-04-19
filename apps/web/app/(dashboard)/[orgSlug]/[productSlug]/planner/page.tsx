@@ -9,11 +9,14 @@ import StepArchitecture from './_components/steps/step-architecture'
 import StepReviewLaunch from './_components/steps/step-review-launch'
 import TemplateStartModal from './_components/template-start-modal'
 import AISuggestPanel from './_components/ai-suggest-panel'
+import { AIActionBar } from '../../../../components/primitives/ai-action-bar'
 import { generateTasksFromPlan, type GeneratedTask } from './_lib/task-generator'
 import { useTaskStore } from '../../../../lib/task-store'
 import { useGraphStore } from '../../../../lib/graph-store'
 import { useActivityStore } from '../../../../lib/activity-store'
 import { useNotificationStore } from '../../../../lib/notification-store'
+import { useAuthStore } from '../../../../lib/auth-store'
+import { eventBus, makeActor } from '../../../../lib/event-bus'
 import { useParams, useRouter } from 'next/navigation'
 import { useProduct } from '../layout'
 import { trpcMutate } from '../../../../lib/api'
@@ -55,6 +58,8 @@ export default function ProductPlannerPage() {
   const { scaffoldProduct, bulkAddNodes, addEdge, addNode } = useGraphStore()
   const { addActivity } = useActivityStore()
   const { addNotification } = useNotificationStore()
+  const userId = useAuthStore((s) => s.user?.id ?? 'anon')
+  const userName = useAuthStore((s) => s.user?.name ?? 'Unknown')
   const productId = currentProduct?.id ?? `${params.orgSlug}-${params.productSlug}`
 
   const markStepCompleted = useCallback((step: number) => {
@@ -184,6 +189,17 @@ export default function ProductPlannerPage() {
         productId,
         studio: 'planner',
         actionUrl: `/${orgSlug}/${params.productSlug}/tasks`,
+      })
+
+      // ── Emit to event bus → auto-seeds Design frames + tasks for each feature ──
+      planData.features.slice(0, 5).forEach((f) => {
+        eventBus.emit({
+          type: 'plan.spec.approved',
+          productId,
+          specId: `spec-${f.id}`,
+          specTitle: f.name,
+          actor: makeActor(userId, userName),
+        })
       })
 
       // ── 2. Write to real backend (DB) ──
@@ -384,6 +400,7 @@ export default function ProductPlannerPage() {
               Start from Template
             </button>
           )}
+          <AIActionBar workspace="plan" productId={productId} compact />
           <span className="text-[10px] text-[var(--text-tertiary)] tabular-nums">
             Step {currentStep}/{TOTAL_STEPS}
           </span>

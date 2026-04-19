@@ -23,6 +23,9 @@ import {
   Network,
   ListChecks,
   Home,
+  Plug,
+  Sparkles,
+  Map,
   type LucideIcon,
 } from 'lucide-react'
 
@@ -52,6 +55,10 @@ const studioIconMap: Record<string, LucideIcon> = {
   'control-tower': Gauge,
   graphExplorer: Network,
   'graph-explorer': Network,
+  connectors: Plug,
+  roadmap: Map,
+  'ai-skills': Sparkles,
+  'brand-compliance': ShieldCheck,
 }
 
 const ACTIVE_COLOR = '#6398ff'

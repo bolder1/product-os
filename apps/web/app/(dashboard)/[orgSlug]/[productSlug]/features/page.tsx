@@ -19,6 +19,9 @@ import {
 import { trpc } from '../../../../lib/trpc'
 import { useProduct } from '../layout'
 import { ViewInGraphLink } from '../../../../components/shared/view-in-graph-link'
+import { AIActionBar } from '../../../../components/primitives/ai-action-bar'
+import { ExportMenu } from '../../../../components/primitives/export-menu'
+import { outputPipeline } from '../../../../lib/output-pipeline'
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                               */
@@ -530,7 +533,7 @@ function AISuggestPanel({ productId, existingLabels, onClose, onAddFeature }: AI
 
   const suggestions: string[] = useMemo(() => {
     if (!suggestMutation.data) return []
-    const raw = suggestMutation.data
+    const raw: unknown = suggestMutation.data
     if (Array.isArray(raw)) return raw.map((r: unknown) => String(r))
     if (typeof raw === 'string') {
       return raw
@@ -595,7 +598,7 @@ export default function FeaturesPage() {
   const orgSlug = params.orgSlug ?? ''
   const productSlug = params.productSlug ?? ''
   const searchParams = useSearchParams()
-  const { product } = useProduct()
+  const product = useProduct()
   const productId = product?.id ?? ''
 
   const [search, setSearch] = useState('')
@@ -754,20 +757,13 @@ export default function FeaturesPage() {
 
         <div className="ml-auto flex items-center gap-2">
           {/* AI Suggest */}
+          <AIActionBar workspace="plan" productId={productId} compact />
+          <ExportMenu
+            formats={['markdown']}
+            onExport={(fmt) => outputPipeline.download(fmt, { label: 'features' })}
+            compact
+          />
           <div className="relative" ref={aiButtonRef}>
-            <button
-              onClick={() => setShowAISuggest((v) => !v)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium border transition-colors"
-              style={
-                showAISuggest
-                  ? { backgroundColor: 'var(--accent-bg)', color: 'var(--accent-text)', borderColor: 'var(--accent-text)' }
-                  : { backgroundColor: 'transparent', color: 'var(--text-secondary)', borderColor: 'var(--border-default)' }
-              }
-            >
-              <Sparkles size={11} />
-              AI: Suggest
-            </button>
-
             <AnimatePresence>
               {showAISuggest && (
                 <AISuggestPanel

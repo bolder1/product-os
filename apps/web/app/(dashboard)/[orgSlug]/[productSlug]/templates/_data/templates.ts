@@ -9,6 +9,12 @@ export interface TemplateNode {
   label: string
 }
 
+export interface TemplateEdge {
+  kind: string
+  sourceIndex: number
+  targetIndex: number
+}
+
 export interface Template {
   id: string
   name: string
@@ -19,6 +25,7 @@ export interface Template {
   edgeCount: number
   variables: TemplateVariable[]
   nodes: TemplateNode[]
+  edges: TemplateEdge[]
 }
 
 export const templates: Template[] = [
@@ -53,6 +60,7 @@ export const templates: Template[] = [
       { kind: 'entity', label: 'Subscription' },
       { kind: 'entity', label: 'Invoice' },
     ],
+    edges: [],
   },
   {
     id: 'ops-pilot',
@@ -86,6 +94,7 @@ export const templates: Template[] = [
       { kind: 'feature', label: 'Bulk Import' },
       { kind: 'feature', label: 'Auto-provisioning' },
     ],
+    edges: [],
   },
   {
     id: 'landing-page',
@@ -113,6 +122,7 @@ export const templates: Template[] = [
       { kind: 'token', label: 'Typography Scale' },
       { kind: 'asset', label: 'Hero Illustration' },
     ],
+    edges: [],
   },
   {
     id: 'mobile-app',
@@ -143,6 +153,7 @@ export const templates: Template[] = [
       { kind: 'entity', label: 'Notification' },
       { kind: 'journey', label: 'First-time User Flow' },
     ],
+    edges: [],
   },
   {
     id: 'design-system',
@@ -170,5 +181,6 @@ export const templates: Template[] = [
       { kind: 'variant', label: 'Input Default' },
       { kind: 'variant', label: 'Input Error' },
     ],
+    edges: [],
   },
 ]

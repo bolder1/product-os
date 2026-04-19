@@ -8,6 +8,7 @@ import {
   Zap, Box, Loader2, CheckCircle2, FileText, Sparkles, ArrowRight,
   Hash, Type, ToggleLeft, ChevronRight, Plus, Minus, Save, Tag,
 } from 'lucide-react'
+import { AIActionBar } from '../../../../components/primitives/ai-action-bar'
 import { trpcMutate, trpcQuery } from '../../../../lib/api'
 import { trpc } from '../../../../lib/trpc'
 import { useProduct } from '../layout'
@@ -734,6 +735,8 @@ export default function TemplateGalleryPage() {
             Save as Template
           </button>
         )}
+
+        <AIActionBar workspace="plan" productId={productId} compact />
 
         {/* Basket */}
         <TemplateBasket

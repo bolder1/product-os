@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useCallback } from 'react'
 import { useParams } from 'next/navigation'
 import { Rocket, Plus, Filter } from 'lucide-react'
 import {
@@ -14,6 +14,11 @@ import { ReleaseDetail } from './_components/release-detail'
 import { ReleaseCreateModal } from './_components/release-create-modal'
 import { useProduct } from '../layout'
 import { useReleaseStore, type Release as StoreRelease } from '../../../../lib/release-store'
+import { useAuthStore } from '../../../../lib/auth-store'
+import { eventBus, makeActor } from '../../../../lib/event-bus'
+import { outputPipeline } from '../../../../lib/output-pipeline'
+import { AIActionBar } from '../../../../components/primitives/ai-action-bar'
+import { ExportMenu } from '../../../../components/primitives/export-menu'
 
 type StatusFilter = 'all' | ReleaseStatus
 
@@ -51,6 +56,9 @@ export default function ReleasesPage() {
   const product = useProduct()
   const productId = product?.id ?? params.productSlug
 
+  const userId = useAuthStore((s) => s.user?.id ?? 'anon')
+  const userName = useAuthStore((s) => s.user?.name ?? 'Unknown')
+
   const storeReleases = useReleaseStore((s) => s.releases)
   const statusFilter = useReleaseStore((s) => s.statusFilter) as StatusFilter
   const setStoreStatusFilter = useReleaseStore((s) => s.setStatusFilter)
@@ -79,6 +87,30 @@ export default function ReleasesPage() {
     () => allReleases.find((r) => r.id === selectedId) ?? allReleases[0],
     [allReleases, selectedId],
   )
+
+  const handleDeploy = useCallback((releaseId: string, env: string) => {
+    const release = allReleases.find((r) => r.id === releaseId)
+    if (!release) return
+    eventBus.emit({
+      type: 'release.deployed',
+      productId,
+      releaseId,
+      releaseLabel: `${release.version} → ${env}`,
+      environment: env.toLowerCase(),
+      actor: makeActor(userId, userName),
+    })
+  }, [allReleases, productId, userId, userName])
+
+  const handleExport = useCallback(async (format: string) => {
+    const release = selectedRelease
+    if (!release) return
+    await outputPipeline.download(format as any, {
+      label: `${release.version} — ${release.title}`,
+      markdownContent: release.notes,
+      nodeData: { version: release.version, status: release.status, changes: release.changes },
+      productId,
+    })
+  }, [selectedRelease, productId])
 
   const latestVersion = allReleases[0]?.version ?? 'v0.1.0'
 
@@ -128,6 +160,12 @@ export default function ReleasesPage() {
             ))}
           </div>
 
+          <AIActionBar workspace="ship" productId={productId} compact />
+          <ExportMenu
+            formats={['release-manifest', 'markdown']}
+            onExport={handleExport}
+            compact
+          />
           <button
             onClick={() => setModalOpen(true)}
             className="tool-btn tool-btn-primary"
@@ -153,7 +191,7 @@ export default function ReleasesPage() {
         {/* Right: Detail */}
         <div className="flex-1 min-w-0 overflow-y-auto bg-[var(--bg-workspace)]">
           {selectedRelease ? (
-            <ReleaseDetail release={selectedRelease} />
+            <ReleaseDetail release={selectedRelease} onDeploy={handleDeploy} />
           ) : (
             <div className="flex items-center justify-center h-full">
               <div className="text-center">

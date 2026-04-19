@@ -2,9 +2,12 @@
 
 import { useMemo, useState } from 'react'
 import { useParams } from 'next/navigation'
+import { Bell } from 'lucide-react'
 import { useProduct } from '../layout'
 import { useAuth } from '../../../../lib/auth-context'
 import { roleConfigs, type OrgRole } from '../../../../lib/role-config'
+import { useNotificationStore } from '../../../../lib/notification-store'
+import { AIActionBar } from '../../../../components/primitives/ai-action-bar'
 
 // Shared widgets (reused from control-tower)
 import { HealthScore }       from '../control-tower/_components/health-score'
@@ -185,6 +188,9 @@ export default function HomeDashboardPage() {
   const effectiveRole = previewRole ?? ((user?.role ?? 'admin') as OrgRole)
   const isAdmin = (user?.role ?? 'admin') === 'admin'
 
+  const unreadCount = useNotificationStore((s) => s.unreadCount)
+  const markAllRead = useNotificationStore((s) => s.markAllRead)
+
   const config     = roleConfigs[effectiveRole] ?? roleConfigs.admin
   const roleGroup  = getRoleGroup(effectiveRole)
 
@@ -194,6 +200,22 @@ export default function HomeDashboardPage() {
       <div className="flex items-center gap-2 px-3 h-[var(--toolbar-h)] border-b border-[var(--border-default)] bg-[var(--bg-surface)] flex-shrink-0">
         <span className="text-[10px] font-medium text-[var(--text-tertiary)] uppercase tracking-wider">Home</span>
         <div className="ml-auto flex items-center gap-2">
+          <AIActionBar workspace="plan" productId={productId} compact />
+
+          {/* Notification bell with live unread count */}
+          <button
+            onClick={() => markAllRead()}
+            className="relative tool-btn"
+            aria-label={`${unreadCount} unread notifications`}
+          >
+            <Bell className="w-3.5 h-3.5" />
+            {unreadCount > 0 && (
+              <span className="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-[#F43F5E] text-white text-[8px] font-bold flex items-center justify-center leading-none">
+                {unreadCount > 9 ? '9+' : unreadCount}
+              </span>
+            )}
+          </button>
+
           {/* Admins can preview any role */}
           {isAdmin && (
             <RoleSwitcher currentRole={effectiveRole} onChange={setPreviewRole} />

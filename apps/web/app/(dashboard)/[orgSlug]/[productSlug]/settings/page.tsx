@@ -9,6 +9,7 @@ import {
   Clock,
   Plug,
   AlertTriangle,
+  LayoutGrid,
 } from 'lucide-react'
 import { GeneralSettings } from './_components/general-settings'
 import { TeamSettings } from './_components/team-settings'
@@ -16,8 +17,9 @@ import { RolesAccess } from './_components/roles-access'
 import { Changelog } from './_components/changelog'
 import { IntegrationsSettings } from './_components/integrations-settings'
 import { DangerZone } from './_components/danger-zone'
+import { WorkspacesSettings } from './_components/workspaces-settings'
 
-type SettingsTab = 'general' | 'team' | 'roles' | 'changelog' | 'integrations' | 'danger'
+type SettingsTab = 'general' | 'team' | 'roles' | 'changelog' | 'integrations' | 'workspaces' | 'danger'
 
 interface TabConfig {
   key: SettingsTab
@@ -32,6 +34,7 @@ const TABS: TabConfig[] = [
   { key: 'roles', label: 'Roles & Access', icon: ShieldCheck },
   { key: 'changelog', label: 'Changelog', icon: Clock },
   { key: 'integrations', label: 'Integrations', icon: Plug },
+  { key: 'workspaces', label: 'Workspaces', icon: LayoutGrid },
   { key: 'danger', label: 'Danger Zone', icon: AlertTriangle, color: 'var(--color-error)' },
 ]
 
@@ -41,6 +44,7 @@ const TAB_COMPONENTS: Record<SettingsTab, React.FC> = {
   roles: RolesAccess,
   changelog: Changelog,
   integrations: IntegrationsSettings,
+  workspaces: WorkspacesSettings,
   danger: DangerZone,
 }
 

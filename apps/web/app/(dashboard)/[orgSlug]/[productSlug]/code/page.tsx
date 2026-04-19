@@ -2,12 +2,17 @@
 
 import { useState, useMemo, useCallback } from 'react'
 import { useParams } from 'next/navigation'
-import { Code2, Play, Download, Sparkles, Search } from 'lucide-react'
+import { Code2, Play, Download, Search } from 'lucide-react'
 import { mockFiles, buildFolderTree, type FileNode } from './_data/mock-files'
 import { FileTree } from './_components/file-tree'
 import { CodeViewer } from './_components/code-viewer'
 import { useProduct } from '../layout'
 import { useCodeStore } from '../../../../lib/code-store'
+import { useAuthStore } from '../../../../lib/auth-store'
+import { eventBus, makeActor } from '../../../../lib/event-bus'
+import { outputPipeline } from '../../../../lib/output-pipeline'
+import { AIActionBar } from '../../../../components/primitives/ai-action-bar'
+import { ExportMenu } from '../../../../components/primitives/export-menu'
 
 export default function CodeStudioPage() {
   const params = useParams<{ productSlug: string }>()
@@ -83,6 +88,28 @@ export default function CodeStudioPage() {
 
   const isLive = productModules.length > 0
 
+  const userId = useAuthStore((s) => s.user?.id ?? 'anon')
+  const userName = useAuthStore((s) => s.user?.name ?? 'Unknown')
+
+  const handleGenerateAll = useCallback(() => {
+    eventBus.emit({
+      type: 'engineer.code.generated',
+      productId,
+      componentId: 'all',
+      filePath: 'generated/',
+      actor: makeActor(userId, userName),
+    })
+  }, [productId, userId, userName])
+
+  const handleExport = useCallback(async (format: string) => {
+    const content = activeFile?.content ?? files.map((f) => `// ${f.path}\n${f.content}`).join('\n\n')
+    await outputPipeline.download(format as any, {
+      label: activeFile?.name ?? `${productId}-code`,
+      markdownContent: content,
+      productId,
+    })
+  }, [activeFile, files, productId])
+
   return (
     <div className="flex flex-col h-full bg-[var(--bg-workspace)]">
       {/* Toolbar */}
@@ -105,18 +132,12 @@ export default function CodeStudioPage() {
         </div>
 
         <div className="flex items-center gap-1">
-          <button className="tool-btn flex items-center gap-1.5 text-[var(--accent-text)]">
+          <button onClick={handleGenerateAll} className="tool-btn flex items-center gap-1.5 text-[var(--accent-text)]">
             <Play className="w-3 h-3" />
             <span className="text-[11px]">Generate All</span>
           </button>
-          <button className="tool-btn flex items-center gap-1.5">
-            <Download className="w-3 h-3" />
-            <span className="text-[11px]">Export</span>
-          </button>
-          <button className="tool-btn-primary flex items-center gap-1.5">
-            <Sparkles className="w-3 h-3" />
-            <span className="text-[11px]">AI: Write Code</span>
-          </button>
+          <ExportMenu formats={['tsx', 'markdown']} onExport={handleExport} compact />
+          <AIActionBar workspace="engineer" productId={productId} compact />
         </div>
       </div>
 

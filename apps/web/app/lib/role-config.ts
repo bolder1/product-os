@@ -29,7 +29,7 @@ export const roleConfigs: Record<OrgRole, RoleConfig> = {
       'brand', 'components', 'design', 'workflow', 'pages', 'graphics',
       'code', 'handoff', 'releases', 'testing',
       'tasks', 'approvals', 'decisions', 'notifications', 'analytics',
-      'control-tower', 'graph-explorer',
+      'roadmap', 'control-tower', 'graph-explorer', 'connectors', 'ai-skills', 'brand-compliance',
       'admin',
     ],
     dashboardWidgets: ['overview', 'analytics', 'tasks', 'approvals', 'releases', 'team', 'settings'],
@@ -39,7 +39,7 @@ export const roleConfigs: Record<OrgRole, RoleConfig> = {
     description: 'Oversee planning, templates, tasks, approvals, and releases',
     icon: 'Briefcase',
     color: '#3B82F6',
-    studios: ['home', 'planner', 'templates', 'control-tower', 'tasks', 'approvals', 'decisions', 'analytics', 'releases'],
+    studios: ['home', 'planner', 'roadmap', 'templates', 'control-tower', 'tasks', 'approvals', 'decisions', 'analytics', 'releases', 'connectors'],
     dashboardWidgets: ['overview', 'analytics', 'tasks', 'approvals', 'releases'],
   },
   business_analyst: {
@@ -47,7 +47,7 @@ export const roleConfigs: Record<OrgRole, RoleConfig> = {
     description: 'Analyze requirements, build canvases, and review templates',
     icon: 'BarChart3',
     color: '#8B5CF6',
-    studios: ['home', 'planner', 'templates', 'canvas', 'analytics', 'tasks', 'approvals', 'decisions'],
+    studios: ['home', 'planner', 'roadmap', 'templates', 'canvas', 'analytics', 'tasks', 'approvals', 'decisions'],
     dashboardWidgets: ['overview', 'analytics', 'tasks', 'approvals'],
   },
   qa: {
@@ -63,7 +63,7 @@ export const roleConfigs: Record<OrgRole, RoleConfig> = {
     description: 'Design brand, components, pages, and graphics',
     icon: 'Palette',
     color: '#EC4899',
-    studios: ['home', 'brand', 'components', 'design', 'graphics', 'pages', 'tasks'],
+    studios: ['home', 'brand', 'components', 'design', 'graphics', 'pages', 'tasks', 'brand-compliance'],
     dashboardWidgets: ['design', 'components', 'tasks', 'brand'],
   },
   frontend_dev: {

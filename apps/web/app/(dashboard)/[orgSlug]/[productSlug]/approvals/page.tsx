@@ -22,6 +22,7 @@ import {
   type ApprovalType,
   type ApprovalStep,
 } from '../../../../lib/approval-store'
+import { AIActionBar } from '../../../../components/primitives/ai-action-bar'
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -597,6 +598,8 @@ export default function ApprovalsPage() {
             className="tool-input pl-6 pr-2 py-0.5 w-[140px] text-[11px]"
           />
         </div>
+
+        <AIActionBar workspace="operate" productId={productId} compact />
 
         {/* New request */}
         <button

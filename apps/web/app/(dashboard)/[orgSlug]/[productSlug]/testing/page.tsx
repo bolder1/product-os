@@ -2,7 +2,8 @@
 
 import { useState, useMemo } from 'react'
 import { useParams } from 'next/navigation'
-import { Plus, Play, Sparkles, FlaskConical } from 'lucide-react'
+import { Plus, Play, FlaskConical } from 'lucide-react'
+import { AIActionBar } from '../../../../components/primitives/ai-action-bar'
 import { mockTestData, type TestSuite as MockSuite, type TestRun as MockRun } from './_data/mock-tests'
 import { TestSuites } from './_components/test-suites'
 import { TestRuns } from './_components/test-runs'
@@ -117,10 +118,7 @@ export default function TestingPage() {
         </div>
 
         <div className="flex items-center gap-1">
-          <button className="tool-btn text-[var(--accent-text)]">
-            <Sparkles size={12} />
-            AI: Generate Tests
-          </button>
+          <AIActionBar workspace="ship" productId={productId} compact />
           <button className="tool-btn">
             <Play size={12} />
             Run All

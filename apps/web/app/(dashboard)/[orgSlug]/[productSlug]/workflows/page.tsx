@@ -3,7 +3,8 @@
 import { useState, useCallback, useMemo, useEffect } from "react";
 import { useParams, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
-import { Database, GitBranch, Plus, Sparkles, Zap, FileInput, Trash2 } from "lucide-react";
+import { Database, GitBranch, Plus, Zap, FileInput, Trash2 } from "lucide-react";
+import { AIActionBar } from "../../../../components/primitives/ai-action-bar";
 import { useProduct } from "../layout";
 import {
   INITIAL_ENTITIES,
@@ -288,13 +289,7 @@ export default function WorkflowBuilderPage() {
             <Plus className="w-3 h-3" />
             Automation
           </button>
-          <button
-            onClick={aiGenerate}
-            className="tool-btn flex items-center gap-1 px-2 h-[22px] bg-[var(--accent)]/10 border border-[var(--accent)]/20 text-[var(--accent-text)] text-[11px] font-medium hover:bg-[var(--accent)]/20"
-          >
-            <Sparkles className="w-3 h-3" />
-            AI Generate
-          </button>
+          <AIActionBar workspace="engineer" productId={productId} compact />
         </div>
       </div>
 

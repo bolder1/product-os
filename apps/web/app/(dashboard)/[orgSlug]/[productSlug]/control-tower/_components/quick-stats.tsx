@@ -16,13 +16,16 @@ function useLiveStats() {
     ? `${params.orgSlug}-${params.productSlug}`
     : '')
 
-  const graphNodes = useGraphStore((s) => s.nodes).filter((n) => n.productId === productId)
-  const allTasks = useTaskStore((s) => s.tasks).filter((t) => t.productId === productId)
-  const openTasks = allTasks.filter((t) => t.status !== 'done')
-  const inReview = allTasks.filter((t) => t.status === 'in_review')
+  const rawNodes = useGraphStore((s) => s.nodes)
+  const rawTasks = useTaskStore((s) => s.tasks)
+
+  const graphNodes = useMemo(() => rawNodes.filter((n) => n.productId === productId), [rawNodes, productId])
+  const productTasks = useMemo(() => rawTasks.filter((t) => t.productId === productId), [rawTasks, productId])
+  const openTasks = useMemo(() => productTasks.filter((t) => t.status !== 'done'), [productTasks])
+  const inReview = useMemo(() => productTasks.filter((t) => t.status === 'in_review'), [productTasks])
   const { warningCount } = useValidation(productId)
 
-  const hasRealData = graphNodes.length > 0 || allTasks.length > 0
+  const hasRealData = graphNodes.length > 0 || productTasks.length > 0
 
   return hasRealData
     ? [

@@ -21,6 +21,7 @@ import {
   PanelRightClose,
 } from 'lucide-react'
 import { AnalyticsOverlay } from '../../../../components/shared/analytics-overlay'
+import { AIActionBar } from '../../../../components/primitives/ai-action-bar'
 import { type CanvasItem, mockCanvasItems } from './_data/mock-canvas'
 import { CanvasToolbar, type ToolType } from './_components/canvas-toolbar'
 import { CanvasBoard } from './_components/canvas-board'
@@ -154,6 +155,8 @@ export default function CanvasPage() {
         <span className="text-[10px] text-[var(--text-tertiary)] mr-2 select-none">
           {items.length} object{items.length !== 1 ? 's' : ''}
         </span>
+
+        <AIActionBar workspace="plan" productId={productId} compact />
 
         <button
           onClick={() => setPropertiesOpen(!propertiesOpen)}

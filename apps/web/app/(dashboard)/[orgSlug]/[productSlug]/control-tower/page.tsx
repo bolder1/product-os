@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react'
 import { useParams } from 'next/navigation'
 import { useProduct } from '../layout'
 import { Wand2, Shield, GitCompare, Store, Brain, Plug } from 'lucide-react'
+import { AIActionBar } from '../../../../components/primitives/ai-action-bar'
 import { HealthScore }        from './_components/health-score'
 import { QuickStats }         from './_components/quick-stats'
 import { ActivityFeed }       from './_components/activity-feed'
@@ -124,11 +125,14 @@ export default function ControlTowerPage() {
             </button>
           ))
         )}
-        {user && (
-          <span className="ml-auto text-[10px] text-[var(--text-tertiary)]">
-            Viewing as <span className="text-[var(--text-secondary)]">{roleConfigs[role]?.label ?? role}</span>
-          </span>
-        )}
+        <div className="ml-auto flex items-center gap-2">
+          <AIActionBar workspace="system" productId={productId} compact />
+          {user && (
+            <span className="text-[10px] text-[var(--text-tertiary)]">
+              Viewing as <span className="text-[var(--text-secondary)]">{roleConfigs[role]?.label ?? role}</span>
+            </span>
+          )}
+        </div>
       </div>
 
       {/* ── Content grid ── */}

@@ -3,7 +3,8 @@
 import { useState, useCallback, useMemo, useEffect } from 'react'
 import { useParams, useSearchParams } from 'next/navigation'
 import { useProduct } from '../layout'
-import { Plus, Eye, Sparkles, FileText, Rocket, Search, Database, Menu } from 'lucide-react'
+import { Plus, Eye, FileText, Rocket, Search, Database, Menu } from 'lucide-react'
+import { AIActionBar } from '../../../../components/primitives/ai-action-bar'
 import { mockPages, type PageDef, type SectionDef } from './_data/mock-pages'
 import { useGraphStore } from '../../../../lib/graph-store'
 import { PageTree } from './_components/page-tree'
@@ -321,12 +322,7 @@ export default function PageBuilderPage() {
         </div>
 
         <div className="flex items-center gap-0.5">
-          <button
-            className="tool-btn flex items-center gap-1 h-[24px] px-2 text-[10px] font-medium text-[var(--accent-text)] bg-transparent hover:bg-[var(--accent)]/10 border border-transparent hover:border-[var(--accent)]/20"
-          >
-            <Sparkles className="w-3 h-3" />
-            AI Generate
-          </button>
+          <AIActionBar workspace="design" productId={productId} compact />
 
           <button
             onClick={() => selectedPage && setPreviewOpen(true)}

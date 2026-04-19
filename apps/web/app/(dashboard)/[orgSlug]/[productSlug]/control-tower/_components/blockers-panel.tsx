@@ -33,11 +33,13 @@ export function BlockersPanel({ productId }: Props) {
   const warnings = blockers.filter((b) => b.severity === 'warning')
   const infos    = blockers.filter((b) => b.severity === 'info')
 
-  const groups: Array<{ severity: Severity; items: typeof blockers }> = [
-    { severity: 'error',   items: errors   },
-    { severity: 'warning', items: warnings },
-    { severity: 'info',    items: infos    },
-  ].filter((g) => g.items.length > 0)
+  const groups: Array<{ severity: Severity; items: typeof blockers }> = (
+    [
+      { severity: 'error' as Severity,   items: errors   },
+      { severity: 'warning' as Severity, items: warnings },
+      { severity: 'info' as Severity,    items: infos    },
+    ] as Array<{ severity: Severity; items: typeof blockers }>
+  ).filter((g) => g.items.length > 0)
 
   const isEmpty = data?.isEmpty ?? false
   const allClear = !isLoading && !isEmpty && blockers.length === 0

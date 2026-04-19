@@ -65,7 +65,7 @@ export function AnalyticsOverlay({ productId, context }: AnalyticsOverlayProps) 
     const keywords = contextInsightFilter[context]
     return allInsights
       .filter((i) => i.productId === productId && i.status === 'active')
-      .filter((i) => keywords.some((kw) => i.text.toLowerCase().includes(kw) || i.source === context))
+      .filter((i) => keywords.some((kw) => i.text.toLowerCase().includes(kw) || (i.source as string) === context))
       .slice(0, 3)
   }, [allInsights, productId, context])
 

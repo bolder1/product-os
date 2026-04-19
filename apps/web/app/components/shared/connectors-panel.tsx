@@ -89,6 +89,7 @@ export function ConnectorsPanel({ productId, open, onClose }: ConnectorsPanelPro
       productId,
       status: 'connected',
       syncDirection: def.defaultSyncDirection,
+      syncInterval: 0,
       config: {},
     })
     setShowAddPanel(false)

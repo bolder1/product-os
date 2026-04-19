@@ -99,7 +99,7 @@ export function GeneralSettings() {
               }`}
               style={{
                 backgroundColor: color,
-                ringColor: selectedColor === color ? color : undefined,
+                ...( selectedColor === color ? { '--ring-color': color } as React.CSSProperties : {} ),
               }}
             />
           ))}

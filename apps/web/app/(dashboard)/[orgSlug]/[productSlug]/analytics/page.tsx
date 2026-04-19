@@ -1,9 +1,11 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import { useProduct } from '../layout'
-import { Download, BarChart3, Zap } from 'lucide-react'
+import { BarChart3, Zap } from 'lucide-react'
+import { outputPipeline } from '../../../../lib/output-pipeline'
+import { AIActionBar } from '../../../../components/primitives/ai-action-bar'
 import { mockAnalyticsData } from './_data/mock-analytics'
 import { MetricCards } from './_components/metric-cards'
 import { TrafficChart } from './_components/traffic-chart'
@@ -16,7 +18,6 @@ import { GraphImpactAnalysis } from '../../../../components/shared/graph-impact-
 import { useInsightStore } from '../../../../lib/insight-store'
 import { StudioHealthBadge } from '../../../../components/shared/studio-health-badge'
 import { useAnalyticsStore } from '../../../../lib/analytics-store'
-import { useState } from 'react'
 
 type DateRange = '7d' | '30d' | '90d'
 
@@ -111,8 +112,17 @@ export default function AnalyticsPage() {
             <span className="text-[10px]">Impact</span>
           </button>
 
-          <button className="tool-btn">
-            <Download className="w-3 h-3" />
+          <AIActionBar workspace="operate" productId={productId} compact />
+          <button
+            onClick={() =>
+              outputPipeline.download('markdown', {
+                label: `analytics-${productId}-${dateRange}`,
+                markdownContent: `# Analytics Report — ${dateRange}\n\n${metrics.map((m: any) => `- **${m.label}**: ${m.value}`).join('\n')}`,
+                productId,
+              })
+            }
+            className="tool-btn"
+          >
             <span className="text-[10px]">Export</span>
           </button>
         </div>

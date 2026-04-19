@@ -2,7 +2,8 @@
 
 import { useState, useMemo } from 'react'
 import { useParams } from 'next/navigation'
-import { FileOutput, Sparkles, Filter } from 'lucide-react'
+import { FileOutput, Filter } from 'lucide-react'
+import { AIActionBar } from '../../../../components/primitives/ai-action-bar'
 import {
   mockHandoffs,
   type HandoffItem as MockItem,
@@ -102,10 +103,7 @@ export default function DevHandoffPage() {
         </div>
 
         <div className="flex items-center gap-1">
-          <button className="tool-btn-primary flex items-center gap-1.5">
-            <Sparkles className="w-3 h-3" />
-            <span className="text-[11px]">Generate Specs</span>
-          </button>
+          <AIActionBar workspace="engineer" productId={productId} compact />
         </div>
       </div>
 
