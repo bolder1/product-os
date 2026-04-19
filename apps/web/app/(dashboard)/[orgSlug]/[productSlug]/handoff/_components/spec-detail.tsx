@@ -1,14 +1,15 @@
 'use client'
 
-import { motion, AnimatePresence } from 'framer-motion'
-import { X, Copy, Sparkles, CheckSquare, Square, ArrowLeft } from 'lucide-react'
 import { useState } from 'react'
+import { Copy, Check, Sparkles, CheckSquare, Square, ChevronRight } from 'lucide-react'
 import { type HandoffItem } from '../_data/mock-handoffs'
 
 interface SpecDetailProps {
   item: HandoffItem | null
-  onClose: () => void
+  onClose?: () => void
 }
+
+type InspectTab = 'css' | 'tokens' | 'props' | 'criteria'
 
 const typeConfig: Record<string, { label: string; color: string }> = {
   component: { label: 'Component', color: '#3B82F6' },
@@ -16,262 +17,460 @@ const typeConfig: Record<string, { label: string; color: string }> = {
   token: { label: 'Token', color: '#F59E0B' },
 }
 
-export function SpecDetail({ item, onClose }: SpecDetailProps) {
+// Group specs into CSS sections
+function groupSpecsForCSS(specs: HandoffItem['specs']) {
+  const layout: typeof specs = []
+  const typography: typeof specs = []
+  const colors: typeof specs = []
+  const effects: typeof specs = []
+
+  for (const s of specs) {
+    const p = s.property.toLowerCase()
+    const t = s.type.toLowerCase()
+    if (t === 'color' || p.includes('color') || p.includes('background') || p.includes('border') || p.includes('fill')) {
+      colors.push(s)
+    } else if (t === 'typography' || p.includes('font') || p.includes('line-height') || p.includes('letter')) {
+      typography.push(s)
+    } else if (p.includes('radius') || p.includes('shadow') || p.includes('opacity') || p.includes('blur') || t === 'radius') {
+      effects.push(s)
+    } else {
+      layout.push(s)
+    }
+  }
+  return { layout, typography, colors, effects }
+}
+
+function CopyRow({ label, value }: { label: string; value: string }) {
+  const [copied, setCopied] = useState(false)
+  const handleCopy = () => {
+    navigator.clipboard.writeText(`${label}: ${value};`)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 1500)
+  }
+  return (
+    <div className="group flex items-center justify-between py-1.5 px-2 rounded hover:bg-white/[0.04] transition-colors">
+      <span className="font-mono text-[11px] text-[var(--text-secondary)]">{label}</span>
+      <div className="flex items-center gap-1.5">
+        <span className="font-mono text-[11px] text-[#06B6D4]">{value}</span>
+        <button
+          onClick={handleCopy}
+          className="opacity-0 group-hover:opacity-100 transition-opacity p-0.5 rounded hover:bg-white/[0.08]"
+        >
+          {copied ? (
+            <Check className="w-3 h-3 text-[var(--color-success)]" />
+          ) : (
+            <Copy className="w-3 h-3 text-[var(--text-tertiary)]" />
+          )}
+        </button>
+      </div>
+    </div>
+  )
+}
+
+function CSSTab({ item }: { item: HandoffItem }) {
+  const { layout, typography, colors, effects } = groupSpecsForCSS(item.specs)
   const [copied, setCopied] = useState(false)
 
-  if (!item) return null
+  const allCSS = item.specs.map((s) => `  ${s.property}: ${s.value};`).join('\n')
+  const cssBlock = `.${item.name.toLowerCase().replace(/\s+/g, '-')} {\n${allCSS}\n}`
 
-  const typeInfo = typeConfig[item.type]
-
-  const handleCopySpec = () => {
-    const specText = [
-      `# ${item.name} (${typeInfo.label})`,
-      '',
-      '## Specifications',
-      ...item.specs.map((s) => `- ${s.property}: ${s.value} (${s.description})`),
-      '',
-      '## Design Tokens',
-      ...item.tokens.map((t) => `- ${t.name}: ${t.value}`),
-      '',
-      '## Acceptance Criteria',
-      ...item.criteria.map((c) => `- [${c.done ? 'x' : ' '}] ${c.text}`),
-    ].join('\n')
-
-    navigator.clipboard.writeText(specText)
+  const handleCopyAll = () => {
+    navigator.clipboard.writeText(cssBlock)
     setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
+    setTimeout(() => setCopied(false), 1500)
   }
 
   return (
-    <AnimatePresence>
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
-        onClick={onClose}
-      >
-        <motion.div
-          initial={{ scale: 0.95, opacity: 0, y: 12 }}
-          animate={{ scale: 1, opacity: 1, y: 0 }}
-          exit={{ scale: 0.95, opacity: 0, y: 12 }}
-          transition={{ duration: 0.25 }}
-          onClick={(e) => e.stopPropagation()}
-          className="w-full max-w-3xl max-h-[85vh] overflow-auto bg-[#0a0f1e] rounded-2xl border border-white/[0.08] shadow-2xl"
+    <div className="flex flex-col h-full overflow-auto">
+      {/* Copy CSS button */}
+      <div className="flex items-center justify-between px-3 py-2 border-b border-[var(--border-subtle)] shrink-0">
+        <span className="text-[10px] text-[var(--text-tertiary)] font-mono">.{item.name.toLowerCase().replace(/\s+/g, '-')}</span>
+        <button
+          onClick={handleCopyAll}
+          className="flex items-center gap-1 px-2 py-1 rounded text-[10px] bg-[var(--bg-inset)] hover:bg-white/[0.08] text-[var(--text-secondary)] border border-[var(--border-subtle)] transition-colors"
         >
-          {/* Header */}
-          <div className="sticky top-0 z-10 flex items-center justify-between p-5 border-b border-white/[0.08] bg-[#0a0f1e]/95 backdrop-blur-sm">
-            <div className="flex items-center gap-3">
-              <button
-                onClick={onClose}
-                className="p-1.5 rounded-lg hover:bg-white/[0.05] transition-colors"
-              >
-                <ArrowLeft className="w-4 h-4 text-[#64748B]" />
-              </button>
-              <div>
-                <div className="flex items-center gap-2">
-                  <h2 className="text-lg font-semibold text-[#F1F5F9]">{item.name}</h2>
-                  <span
-                    className="text-[10px] font-medium px-2 py-0.5 rounded-full"
-                    style={{
-                      color: typeInfo.color,
-                      backgroundColor: `${typeInfo.color}15`,
-                    }}
-                  >
-                    {typeInfo.label}
-                  </span>
-                </div>
-                <p className="text-xs text-[#64748B] mt-0.5">{item.completeness}% complete</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={handleCopySpec}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-[#94A3B8] bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.08] transition-colors"
-              >
-                <Copy className="w-3.5 h-3.5" />
-                {copied ? 'Copied!' : 'Copy Spec'}
-              </button>
-              <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-[#8B5CF6] bg-[#8B5CF6]/10 hover:bg-[#8B5CF6]/20 border border-[#8B5CF6]/20 transition-colors">
-                <Sparkles className="w-3.5 h-3.5" />
-                AI: Generate criteria
-              </button>
-              <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-white/[0.05] transition-colors">
-                <X className="w-4 h-4 text-[#64748B]" />
-              </button>
-            </div>
-          </div>
+          {copied ? <Check className="w-3 h-3 text-[var(--color-success)]" /> : <Copy className="w-3 h-3" />}
+          {copied ? 'Copied!' : 'Copy CSS'}
+        </button>
+      </div>
 
-          <div className="p-5 space-y-6">
-            {/* Visual preview */}
-            <div>
-              <h3 className="text-xs font-medium text-[#94A3B8] uppercase tracking-wider mb-3">
-                Preview
-              </h3>
-              <div
-                className="h-32 rounded-xl flex items-center justify-center border border-white/[0.08]"
-                style={{ backgroundColor: `${item.previewColor}08` }}
-              >
-                <div
-                  className="px-8 py-4 rounded-xl border-2 border-dashed"
-                  style={{
-                    borderColor: `${item.previewColor}30`,
-                    backgroundColor: `${item.previewColor}10`,
-                  }}
+      <div className="flex-1 overflow-auto px-1 py-2 space-y-3">
+        {layout.length > 0 && (
+          <section>
+            <p className="text-[9px] uppercase tracking-widest text-[var(--text-tertiary)] font-medium px-2 mb-1">Layout</p>
+            {layout.map((s) => <CopyRow key={s.property} label={s.property} value={s.value} />)}
+          </section>
+        )}
+        {typography.length > 0 && (
+          <section>
+            <p className="text-[9px] uppercase tracking-widest text-[var(--text-tertiary)] font-medium px-2 mb-1">Typography</p>
+            {typography.map((s) => <CopyRow key={s.property} label={s.property} value={s.value} />)}
+          </section>
+        )}
+        {colors.length > 0 && (
+          <section>
+            <p className="text-[9px] uppercase tracking-widest text-[var(--text-tertiary)] font-medium px-2 mb-1">Colors</p>
+            {colors.map((s) => (
+              <div key={s.property} className="group flex items-center justify-between py-1.5 px-2 rounded hover:bg-white/[0.04] transition-colors">
+                <span className="font-mono text-[11px] text-[var(--text-secondary)]">{s.property}</span>
+                <div className="flex items-center gap-1.5">
+                  <div
+                    className="w-3 h-3 rounded-sm border border-white/[0.15]"
+                    style={{ backgroundColor: s.value.startsWith('#') || s.value.startsWith('rgb') ? s.value : undefined }}
+                  />
+                  <span className="font-mono text-[11px] text-[#06B6D4]">{s.value}</span>
+                </div>
+              </div>
+            ))}
+          </section>
+        )}
+        {effects.length > 0 && (
+          <section>
+            <p className="text-[9px] uppercase tracking-widest text-[var(--text-tertiary)] font-medium px-2 mb-1">Effects</p>
+            {effects.map((s) => <CopyRow key={s.property} label={s.property} value={s.value} />)}
+          </section>
+        )}
+        {item.specs.length === 0 && (
+          <p className="text-[11px] text-[var(--text-tertiary)] px-2 py-4">No CSS specs available</p>
+        )}
+      </div>
+    </div>
+  )
+}
+
+function TokensTab({ item }: { item: HandoffItem }) {
+  const groups: Record<string, typeof item.tokens> = {}
+  for (const t of item.tokens) {
+    if (!groups[t.type]) groups[t.type] = []
+    groups[t.type].push(t)
+  }
+  return (
+    <div className="flex-1 overflow-auto px-1 py-2 space-y-3">
+      {Object.entries(groups).map(([type, tokens]) => (
+        <section key={type}>
+          <p className="text-[9px] uppercase tracking-widest text-[var(--text-tertiary)] font-medium px-2 mb-1">{type}</p>
+          <div className="space-y-0.5">
+            {tokens.map((t) => (
+              <div key={t.name} className="flex items-center gap-2 py-1.5 px-2 rounded hover:bg-white/[0.04] transition-colors">
+                {t.type === 'color' ? (
+                  <div
+                    className="w-4 h-4 rounded border border-white/[0.15] flex-shrink-0"
+                    style={{ backgroundColor: t.value }}
+                  />
+                ) : (
+                  <div className="w-4 h-4 rounded bg-[var(--bg-inset)] border border-[var(--border-subtle)] flex items-center justify-center flex-shrink-0">
+                    <span className="text-[8px] text-[var(--text-tertiary)]">{t.type[0].toUpperCase()}</span>
+                  </div>
+                )}
+                <span className="font-mono text-[11px] text-[var(--text-primary)] flex-1 truncate">{t.name}</span>
+                <span className="font-mono text-[10px] text-[#06B6D4]">{t.value}</span>
+              </div>
+            ))}
+          </div>
+        </section>
+      ))}
+      {item.tokens.length === 0 && (
+        <p className="text-[11px] text-[var(--text-tertiary)] px-2 py-4">No design tokens linked</p>
+      )}
+      <div className="px-2 pt-1">
+        <div className="flex items-center gap-1 px-2 py-1 rounded bg-[var(--bg-inset)] border border-[var(--border-subtle)] w-fit">
+          <span className="text-[10px] text-[var(--accent-text)]">Brand source</span>
+          <ChevronRight className="w-3 h-3 text-[var(--accent-text)]" />
+        </div>
+      </div>
+    </div>
+  )
+}
+
+const SAMPLE_PROPS = [
+  { name: 'variant', type: 'string', defaultVal: '"primary"', required: false, description: 'Visual variant' },
+  { name: 'size', type: '"sm" | "md" | "lg"', defaultVal: '"md"', required: false, description: 'Size scale' },
+  { name: 'disabled', type: 'boolean', defaultVal: 'false', required: false, description: 'Disabled state' },
+  { name: 'onClick', type: '() => void', defaultVal: '—', required: false, description: 'Click handler' },
+]
+
+function PropsTab({ item }: { item: HandoffItem }) {
+  const props = item.type === 'component' ? SAMPLE_PROPS : []
+  return (
+    <div className="flex-1 overflow-auto px-1 py-2">
+      {props.length > 0 ? (
+        <div className="rounded-lg border border-[var(--border-subtle)] overflow-hidden">
+          <table className="w-full text-[11px]">
+            <thead>
+              <tr className="border-b border-[var(--border-subtle)] bg-[var(--bg-inset)]">
+                <th className="text-left px-2.5 py-2 text-[var(--text-tertiary)] font-medium">Prop</th>
+                <th className="text-left px-2.5 py-2 text-[var(--text-tertiary)] font-medium">Type</th>
+                <th className="text-left px-2.5 py-2 text-[var(--text-tertiary)] font-medium">Default</th>
+                <th className="text-left px-2.5 py-2 text-[var(--text-tertiary)] font-medium">Req</th>
+              </tr>
+            </thead>
+            <tbody>
+              {props.map((p, i) => (
+                <tr
+                  key={p.name}
+                  className={`border-b border-[var(--border-subtle)] last:border-0 ${i % 2 === 0 ? '' : 'bg-white/[0.01]'}`}
                 >
-                  <span className="text-sm font-medium" style={{ color: item.previewColor }}>
-                    {item.name} Preview
-                  </span>
-                </div>
-              </div>
-            </div>
+                  <td className="px-2.5 py-2 font-mono text-[var(--text-primary)]">{p.name}</td>
+                  <td className="px-2.5 py-2 font-mono text-[#8B5CF6] text-[10px]">{p.type}</td>
+                  <td className="px-2.5 py-2 font-mono text-[var(--text-secondary)]">{p.defaultVal}</td>
+                  <td className="px-2.5 py-2 text-[var(--text-tertiary)]">{p.required ? '✓' : '—'}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        <p className="text-[11px] text-[var(--text-tertiary)] px-2 py-4">
+          Props only available for component types
+        </p>
+      )}
+    </div>
+  )
+}
 
-            {/* Specs table */}
-            <div>
-              <h3 className="text-xs font-medium text-[#94A3B8] uppercase tracking-wider mb-3">
-                Specifications
-              </h3>
-              <div className="rounded-xl border border-white/[0.08] overflow-hidden">
-                <table className="w-full text-xs">
-                  <thead>
-                    <tr className="border-b border-white/[0.08]">
-                      <th className="text-left px-4 py-2.5 text-[#64748B] font-medium">Property</th>
-                      <th className="text-left px-4 py-2.5 text-[#64748B] font-medium">Type</th>
-                      <th className="text-left px-4 py-2.5 text-[#64748B] font-medium">Value</th>
-                      <th className="text-left px-4 py-2.5 text-[#64748B] font-medium">Description</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {item.specs.map((spec, i) => (
-                      <motion.tr
-                        key={spec.property}
-                        initial={{ opacity: 0, x: -8 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: i * 0.04 }}
-                        className={i % 2 === 0 ? 'bg-white/[0.01]' : 'bg-white/[0.03]'}
-                      >
-                        <td className="px-4 py-2.5 text-[#F1F5F9] font-mono">{spec.property}</td>
-                        <td className="px-4 py-2.5">
-                          <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#F59E0B]/10 text-[#F59E0B]">
-                            {spec.type}
-                          </span>
-                        </td>
-                        <td className="px-4 py-2.5 text-[#06B6D4] font-mono">{spec.value}</td>
-                        <td className="px-4 py-2.5 text-[#94A3B8]">{spec.description}</td>
-                      </motion.tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
+function CriteriaTab({
+  item,
+  criteriaState,
+  onToggle,
+  onMarkAll,
+}: {
+  item: HandoffItem
+  criteriaState: boolean[]
+  onToggle: (i: number) => void
+  onMarkAll: () => void
+}) {
+  const done = criteriaState.filter(Boolean).length
+  const total = criteriaState.length
+  const pct = total > 0 ? Math.round((done / total) * 100) : 0
 
-            {/* CSS Tokens */}
-            <div>
-              <h3 className="text-xs font-medium text-[#94A3B8] uppercase tracking-wider mb-3">
-                Design Tokens
-              </h3>
-              <div className="grid grid-cols-2 gap-2">
-                {item.tokens.map((token, i) => (
-                  <motion.div
-                    key={token.name}
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: i * 0.05 }}
-                    className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-white/[0.02] border border-white/[0.06]"
-                  >
-                    {token.type === 'color' ? (
-                      <div
-                        className="w-6 h-6 rounded-lg border border-white/[0.1] flex-shrink-0"
-                        style={{ backgroundColor: token.value }}
-                      />
-                    ) : (
-                      <div className="w-6 h-6 rounded-lg bg-white/[0.05] border border-white/[0.1] flex items-center justify-center flex-shrink-0">
-                        <span className="text-[8px] text-[#64748B]">{token.type[0].toUpperCase()}</span>
-                      </div>
-                    )}
-                    <div className="min-w-0">
-                      <p className="text-[11px] font-mono text-[#F1F5F9] truncate">{token.name}</p>
-                      <p className="text-[10px] text-[#64748B] font-mono">{token.value}</p>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-            </div>
+  const readiness =
+    pct === 100 ? 'ready' : pct >= 60 ? 'in-review' : 'draft'
 
-            {/* Spacing annotations */}
-            <div>
-              <h3 className="text-xs font-medium text-[#94A3B8] uppercase tracking-wider mb-3">
-                Spacing Annotations
-              </h3>
-              <div className="flex items-center justify-center p-6 rounded-xl bg-white/[0.02] border border-white/[0.06]">
-                <div className="relative">
-                  {/* Margin area */}
-                  <div className="border-2 border-dashed border-[#F59E0B]/20 rounded-xl p-4">
-                    <span className="absolute -top-2.5 left-3 text-[9px] text-[#F59E0B] bg-[#0a0f1e] px-1">
-                      margin
-                    </span>
-                    {/* Padding area */}
-                    <div className="border-2 border-dashed border-[#06B6D4]/20 rounded-lg p-4">
-                      <span className="absolute top-5 left-7 text-[9px] text-[#06B6D4] bg-[#0a0f1e] px-1">
-                        padding
-                      </span>
-                      {/* Content */}
-                      <div
-                        className="w-32 h-12 rounded-lg flex items-center justify-center"
-                        style={{ backgroundColor: `${item.previewColor}15` }}
-                      >
-                        <span className="text-[10px] text-[#94A3B8]">Content</span>
-                      </div>
-                    </div>
-                  </div>
-                  {/* Spacing values */}
-                  <div className="flex justify-between mt-2 text-[9px] text-[#64748B] font-mono">
-                    {item.specs
-                      .filter((s) => s.type === 'spacing')
-                      .slice(0, 3)
-                      .map((s) => (
-                        <span key={s.property}>
-                          {s.property}: {s.value}
-                        </span>
-                      ))}
-                  </div>
-                </div>
-              </div>
-            </div>
+  const readinessColor =
+    readiness === 'ready'
+      ? 'var(--color-success)'
+      : readiness === 'in-review'
+      ? 'var(--color-warning)'
+      : 'var(--text-tertiary)'
 
-            {/* Acceptance criteria */}
-            <div>
-              <h3 className="text-xs font-medium text-[#94A3B8] uppercase tracking-wider mb-3">
-                Acceptance Criteria
-              </h3>
-              <div className="space-y-2">
-                {item.criteria.map((criterion, i) => (
-                  <motion.div
-                    key={i}
-                    initial={{ opacity: 0, x: -8 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: i * 0.05 }}
-                    className="flex items-start gap-3 px-3 py-2.5 rounded-xl bg-white/[0.02] border border-white/[0.06]"
-                  >
-                    {criterion.done ? (
-                      <CheckSquare className="w-4 h-4 text-[#10B981] flex-shrink-0 mt-0.5" />
-                    ) : (
-                      <Square className="w-4 h-4 text-[#64748B] flex-shrink-0 mt-0.5" />
-                    )}
-                    <span
-                      className={`text-xs ${
-                        criterion.done ? 'text-[#94A3B8]' : 'text-[#F1F5F9]'
-                      }`}
-                    >
-                      {criterion.text}
-                    </span>
-                  </motion.div>
-                ))}
-              </div>
-            </div>
+  return (
+    <div className="flex flex-col h-full overflow-auto">
+      {/* Header */}
+      <div className="px-3 py-2 border-b border-[var(--border-subtle)] shrink-0 space-y-2">
+        <div className="flex items-center justify-between">
+          <span className="text-[10px] text-[var(--text-secondary)]">{done}/{total} done</span>
+          <span
+            className="text-[10px] px-1.5 py-0.5 rounded border"
+            style={{ color: readinessColor, borderColor: readinessColor, backgroundColor: `${readinessColor}15` }}
+          >
+            {readiness}
+          </span>
+        </div>
+        <div className="h-1 rounded-full bg-[var(--bg-inset)] overflow-hidden">
+          <div
+            className="h-full rounded-full transition-all duration-500"
+            style={{ width: `${pct}%`, backgroundColor: readinessColor }}
+          />
+        </div>
+        <button
+          onClick={onMarkAll}
+          className="text-[10px] text-[var(--accent-text)] hover:underline"
+        >
+          Mark all done
+        </button>
+      </div>
+
+      <div className="flex-1 overflow-auto px-2 py-2 space-y-1">
+        {item.criteria.map((c, i) => (
+          <button
+            key={i}
+            onClick={() => onToggle(i)}
+            className="w-full flex items-start gap-2.5 px-2 py-2 rounded-lg hover:bg-white/[0.04] transition-colors text-left"
+          >
+            {criteriaState[i] ? (
+              <CheckSquare className="w-3.5 h-3.5 text-[var(--color-success)] flex-shrink-0 mt-0.5" />
+            ) : (
+              <Square className="w-3.5 h-3.5 text-[var(--text-tertiary)] flex-shrink-0 mt-0.5" />
+            )}
+            <span
+              className={`text-[11px] leading-snug ${
+                criteriaState[i] ? 'text-[var(--text-tertiary)] line-through' : 'text-[var(--text-primary)]'
+              }`}
+            >
+              {c.text}
+            </span>
+          </button>
+        ))}
+        {item.criteria.length === 0 && (
+          <p className="text-[11px] text-[var(--text-tertiary)] px-2 py-4">No criteria defined</p>
+        )}
+      </div>
+    </div>
+  )
+}
+
+export function SpecDetail({ item }: SpecDetailProps) {
+  const [activeTab, setActiveTab] = useState<InspectTab>('css')
+  const [criteriaState, setCriteriaState] = useState<boolean[]>(
+    () => (item?.criteria ?? []).map((c) => c.done)
+  )
+  const [copiedMd, setCopiedMd] = useState(false)
+  const [copiedJsx, setCopiedJsx] = useState(false)
+  const [markedReady, setMarkedReady] = useState(false)
+
+  // Reset criteria state when item changes
+  const prevItemId = item?.id
+  if (item && item.id !== prevItemId && criteriaState.length !== item.criteria.length) {
+    setCriteriaState(item.criteria.map((c) => c.done))
+  }
+
+  if (!item) return null
+
+  const typeInfo = typeConfig[item.type] ?? typeConfig.component
+
+  const tabs: { key: InspectTab; label: string }[] = [
+    { key: 'css', label: 'CSS' },
+    { key: 'tokens', label: 'Tokens' },
+    { key: 'props', label: 'Props' },
+    { key: 'criteria', label: 'Criteria' },
+  ]
+
+  const handleToggle = (i: number) => {
+    setCriteriaState((prev) => {
+      const next = [...prev]
+      next[i] = !next[i]
+      return next
+    })
+  }
+
+  const handleMarkAll = () => {
+    setCriteriaState(item.criteria.map(() => true))
+  }
+
+  const handleCopyMd = () => {
+    const md = [
+      `# ${item.name} (${typeInfo.label})`,
+      '',
+      '## CSS Specs',
+      ...item.specs.map((s) => `- \`${s.property}: ${s.value};\` — ${s.description}`),
+      '',
+      '## Design Tokens',
+      ...item.tokens.map((t) => `- \`${t.name}\`: ${t.value}`),
+      '',
+      '## Acceptance Criteria',
+      ...item.criteria.map((c, i) => `- [${criteriaState[i] ? 'x' : ' '}] ${c.text}`),
+    ].join('\n')
+    navigator.clipboard.writeText(md)
+    setCopiedMd(true)
+    setTimeout(() => setCopiedMd(false), 1500)
+  }
+
+  const handleCopyJsx = () => {
+    const compName = item.name.replace(/\s+/g, '')
+    const jsx = `import { ${compName} } from '@/components/${compName}'\n\nexport default function Example() {\n  return (\n    <${compName}\n      // add props here\n    />\n  )\n}`
+    navigator.clipboard.writeText(jsx)
+    setCopiedJsx(true)
+    setTimeout(() => setCopiedJsx(false), 1500)
+  }
+
+  const handleMarkReady = () => {
+    setMarkedReady(true)
+  }
+
+  return (
+    <div className="flex flex-col h-full bg-[var(--bg-surface)]">
+      {/* Item header */}
+      <div className="px-3 py-2.5 border-b border-[var(--border-default)] shrink-0">
+        <div className="flex items-center gap-2">
+          <span className="text-[13px] font-semibold text-[var(--text-primary)] truncate flex-1">{item.name}</span>
+          <span
+            className="text-[10px] font-medium px-1.5 py-0.5 rounded-full flex-shrink-0"
+            style={{ color: typeInfo.color, backgroundColor: `${typeInfo.color}15` }}
+          >
+            {typeInfo.label}
+          </span>
+        </div>
+        <div className="flex items-center gap-2 mt-1">
+          <div className="flex-1 h-1 rounded-full bg-[var(--bg-inset)] overflow-hidden">
+            <div
+              className="h-full rounded-full"
+              style={{
+                width: `${item.completeness}%`,
+                backgroundColor:
+                  item.completeness >= 90 ? 'var(--color-success)'
+                  : item.completeness >= 70 ? 'var(--color-warning)'
+                  : '#F43F5E',
+              }}
+            />
           </div>
-        </motion.div>
-      </motion.div>
-    </AnimatePresence>
+          <span className="text-[10px] text-[var(--text-tertiary)] flex-shrink-0">{item.completeness}%</span>
+        </div>
+      </div>
+
+      {/* Tab bar */}
+      <div className="flex items-center gap-0.5 px-2 py-1.5 border-b border-[var(--border-default)] shrink-0">
+        {tabs.map((t) => (
+          <button
+            key={t.key}
+            onClick={() => setActiveTab(t.key)}
+            className={`px-2.5 py-1 rounded text-[11px] font-medium transition-colors ${
+              activeTab === t.key
+                ? 'bg-[var(--accent-bg,rgba(99,102,241,0.15))] text-[var(--accent-text)]'
+                : 'text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] hover:bg-white/[0.04]'
+            }`}
+          >
+            {t.label}
+          </button>
+        ))}
+        <button className="ml-auto flex items-center gap-1 px-2 py-1 rounded text-[10px] text-[#8B5CF6] hover:bg-[#8B5CF6]/10 transition-colors">
+          <Sparkles className="w-3 h-3" />
+          AI
+        </button>
+      </div>
+
+      {/* Tab content */}
+      <div className="flex-1 min-h-0 overflow-hidden">
+        {activeTab === 'css' && <CSSTab item={item} />}
+        {activeTab === 'tokens' && <TokensTab item={item} />}
+        {activeTab === 'props' && <PropsTab item={item} />}
+        {activeTab === 'criteria' && (
+          <CriteriaTab
+            item={item}
+            criteriaState={criteriaState}
+            onToggle={handleToggle}
+            onMarkAll={handleMarkAll}
+          />
+        )}
+      </div>
+
+      {/* Export bar */}
+      <div className="border-t border-[var(--border-default)] px-2 py-2 flex items-center gap-1 shrink-0 bg-[var(--bg-inset)]">
+        <button
+          onClick={handleCopyMd}
+          className="flex items-center gap-1 px-2 py-1 rounded text-[10px] bg-[var(--bg-surface)] hover:bg-white/[0.06] text-[var(--text-secondary)] border border-[var(--border-subtle)] transition-colors"
+        >
+          {copiedMd ? <Check className="w-3 h-3 text-[var(--color-success)]" /> : <Copy className="w-3 h-3" />}
+          {copiedMd ? 'Copied!' : 'Copy MD'}
+        </button>
+        <button
+          onClick={handleCopyJsx}
+          className="flex items-center gap-1 px-2 py-1 rounded text-[10px] bg-[var(--bg-surface)] hover:bg-white/[0.06] text-[var(--text-secondary)] border border-[var(--border-subtle)] transition-colors"
+        >
+          {copiedJsx ? <Check className="w-3 h-3 text-[var(--color-success)]" /> : <Copy className="w-3 h-3" />}
+          {copiedJsx ? 'Copied!' : 'Copy JSX'}
+        </button>
+        <button
+          onClick={handleMarkReady}
+          className={`flex items-center gap-1 px-2 py-1 rounded text-[10px] border transition-colors ml-auto ${
+            markedReady
+              ? 'bg-[var(--color-success)]/10 text-[var(--color-success)] border-[var(--color-success)]/30'
+              : 'bg-[var(--bg-surface)] hover:bg-white/[0.06] text-[var(--text-secondary)] border-[var(--border-subtle)]'
+          }`}
+        >
+          {markedReady ? <Check className="w-3 h-3" /> : null}
+          {markedReady ? 'Ready!' : 'Mark Ready'}
+        </button>
+      </div>
+    </div>
   )
 }
