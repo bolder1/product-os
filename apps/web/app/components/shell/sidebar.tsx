@@ -67,6 +67,7 @@ const workspaces: Workspace[] = [
     items: [
       { key: 'design', label: 'Design Studio', href: 'design' },
       { key: 'brand', label: 'Brand', href: 'brand' },
+      { key: 'brand-voice', label: 'Brand Voice', href: 'brand/voice' },
       { key: 'components', label: 'Components', href: 'components' },
       { key: 'pages', label: 'Pages', href: 'pages' },
       { key: 'graphics', label: 'Graphics', href: 'graphics' },
