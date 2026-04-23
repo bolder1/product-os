@@ -14,6 +14,7 @@ import { outputPipeline } from '../../../../lib/output-pipeline'
 import { AIActionBar } from '../../../../components/primitives/ai-action-bar'
 import { ExportMenu } from '../../../../components/primitives/export-menu'
 import { ScaffoldPanel } from './_components/scaffold-panel'
+import { ContextBanner } from '../../../../components/shared/upstream-empty-state'
 
 export default function CodeStudioPage() {
   const params = useParams<{ productSlug: string }>()
@@ -114,6 +115,14 @@ export default function CodeStudioPage() {
 
   return (
     <div className="flex flex-col h-full bg-[var(--bg-workspace)]">
+      <ContextBanner
+        chips={[
+          { label: 'Dev Handoff', source: 'handoff', color: '#F59E0B' },
+          { label: 'Components', source: 'components', color: '#6366F1' },
+          { label: 'Brand Tokens', source: 'brand', color: '#EC4899' },
+        ]}
+        missing={[]}
+      />
       {/* Toolbar */}
       <div className="h-[var(--toolbar-h)] flex items-center justify-between px-3 border-b border-[var(--border-default)] bg-[var(--bg-surface)] shrink-0">
         <div className="flex items-center gap-2">

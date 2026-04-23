@@ -16,6 +16,7 @@ import {
   CheckCircle2,
 } from 'lucide-react'
 import { AIActionBar } from '../../../../components/primitives/ai-action-bar'
+import { ContextBanner } from '../../../../components/shared/upstream-empty-state'
 import {
   mockHandoffs,
   type HandoffItem as MockItem,
@@ -334,6 +335,14 @@ export default function DevHandoffPage() {
 
   return (
     <div className="flex flex-col h-full bg-[var(--bg-workspace)] overflow-hidden">
+      <ContextBanner
+        chips={[
+          { label: 'Design Screens', source: 'design', color: '#3B82F6' },
+          { label: 'Components', source: 'components', color: '#6366F1' },
+          { label: 'Brand Tokens', source: 'brand', color: '#EC4899' },
+        ]}
+        missing={[]}
+      />
       {/* ── Toolbar ── */}
       <div className="h-[var(--toolbar-h)] flex items-center justify-between px-3 border-b border-[var(--border-default)] bg-[var(--bg-surface)] shrink-0">
         <div className="flex items-center gap-2">

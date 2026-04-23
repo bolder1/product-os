@@ -28,6 +28,7 @@ import { useParams } from 'next/navigation'
 import { useProduct } from '../layout'
 import { useGraphStore } from '../../../../lib/graph-store'
 import { AIActionBar } from '../../../../components/primitives/ai-action-bar'
+import { ContextBanner } from '../../../../components/shared/upstream-empty-state'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -505,7 +506,16 @@ export default function BrandCompliancePage() {
   ]
 
   return (
-    <div className="flex h-full overflow-hidden" style={{ background: 'var(--bg-base)' }}>
+    <div className="flex flex-col h-full overflow-hidden" style={{ background: 'var(--bg-base)' }}>
+      <ContextBanner
+        chips={[
+          { label: 'Brand Tokens', source: 'brand', color: '#EC4899' },
+          { label: 'Brand Voice', source: 'brand-voice', color: '#8B5CF6' },
+          { label: 'Components', source: 'components', color: '#6366F1' },
+        ]}
+        missing={[]}
+      />
+      <div className="flex flex-1 overflow-hidden">
       {/* Main column */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
@@ -709,6 +719,7 @@ export default function BrandCompliancePage() {
             </div>
           </div>
         </div>
+      </div>
       </div>
     </div>
   )
