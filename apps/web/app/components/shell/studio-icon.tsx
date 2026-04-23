@@ -28,6 +28,7 @@ import {
   Map,
   CalendarDays,
   Database,
+  Activity,
   type LucideIcon,
 } from 'lucide-react'
 
@@ -63,6 +64,7 @@ const studioIconMap: Record<string, LucideIcon> = {
   'brand-compliance': ShieldCheck,
   agenda: CalendarDays,
   memory: Database,
+  graph: Activity,
 }
 
 const ACTIVE_COLOR = '#6398ff'

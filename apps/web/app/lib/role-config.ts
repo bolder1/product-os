@@ -29,7 +29,7 @@ export const roleConfigs: Record<OrgRole, RoleConfig> = {
       'brand', 'components', 'design', 'workflow', 'pages', 'graphics',
       'code', 'handoff', 'releases', 'testing',
       'tasks', 'approvals', 'decisions', 'notifications', 'analytics',
-      'control-tower', 'graph-explorer', 'connectors', 'ai-skills', 'brand-compliance',
+      'control-tower', 'graph-explorer', 'graph', 'connectors', 'ai-skills', 'brand-compliance',
       'admin',
     ],
     dashboardWidgets: ['overview', 'analytics', 'tasks', 'approvals', 'releases', 'team', 'settings'],
@@ -39,7 +39,7 @@ export const roleConfigs: Record<OrgRole, RoleConfig> = {
     description: 'Oversee planning, templates, tasks, approvals, and releases',
     icon: 'Briefcase',
     color: '#3B82F6',
-    studios: ['home', 'agenda', 'planner', 'roadmap', 'memory', 'templates', 'control-tower', 'tasks', 'approvals', 'decisions', 'analytics', 'releases', 'connectors'],
+    studios: ['home', 'agenda', 'planner', 'roadmap', 'memory', 'templates', 'control-tower', 'graph', 'tasks', 'approvals', 'decisions', 'analytics', 'releases', 'connectors'],
     dashboardWidgets: ['overview', 'analytics', 'tasks', 'approvals', 'releases'],
   },
   business_analyst: {

@@ -122,7 +122,8 @@ const workspaces: Workspace[] = [
     defaultHref: 'connectors',
     items: [
       { key: 'connectors', label: 'Connectors', href: 'connectors' },
-      { key: 'graph-explorer', label: 'Graph', href: 'graph-explorer' },
+      { key: 'graph-explorer', label: 'Graph Explorer', href: 'graph-explorer' },
+      { key: 'graph', label: 'Living Graph', href: 'graph' },
     ],
   },
 ]
