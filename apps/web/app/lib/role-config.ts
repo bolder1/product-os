@@ -25,11 +25,11 @@ export const roleConfigs: Record<OrgRole, RoleConfig> = {
     color: '#EF4444',
     studios: [
       'home', 'agenda',
-      'planner', 'templates', 'canvas',
+      'planner', 'roadmap', 'memory', 'templates', 'canvas',
       'brand', 'components', 'design', 'workflow', 'pages', 'graphics',
       'code', 'handoff', 'releases', 'testing',
       'tasks', 'approvals', 'decisions', 'notifications', 'analytics',
-      'roadmap', 'control-tower', 'graph-explorer', 'connectors', 'ai-skills', 'brand-compliance',
+      'control-tower', 'graph-explorer', 'connectors', 'ai-skills', 'brand-compliance',
       'admin',
     ],
     dashboardWidgets: ['overview', 'analytics', 'tasks', 'approvals', 'releases', 'team', 'settings'],
@@ -39,7 +39,7 @@ export const roleConfigs: Record<OrgRole, RoleConfig> = {
     description: 'Oversee planning, templates, tasks, approvals, and releases',
     icon: 'Briefcase',
     color: '#3B82F6',
-    studios: ['home', 'agenda', 'planner', 'roadmap', 'templates', 'control-tower', 'tasks', 'approvals', 'decisions', 'analytics', 'releases', 'connectors'],
+    studios: ['home', 'agenda', 'planner', 'roadmap', 'memory', 'templates', 'control-tower', 'tasks', 'approvals', 'decisions', 'analytics', 'releases', 'connectors'],
     dashboardWidgets: ['overview', 'analytics', 'tasks', 'approvals', 'releases'],
   },
   business_analyst: {
@@ -47,7 +47,7 @@ export const roleConfigs: Record<OrgRole, RoleConfig> = {
     description: 'Analyze requirements, build canvases, and review templates',
     icon: 'BarChart3',
     color: '#8B5CF6',
-    studios: ['home', 'agenda', 'planner', 'roadmap', 'templates', 'canvas', 'analytics', 'tasks', 'approvals', 'decisions'],
+    studios: ['home', 'agenda', 'planner', 'roadmap', 'memory', 'templates', 'canvas', 'analytics', 'tasks', 'approvals', 'decisions'],
     dashboardWidgets: ['overview', 'analytics', 'tasks', 'approvals'],
   },
   qa: {
@@ -63,7 +63,7 @@ export const roleConfigs: Record<OrgRole, RoleConfig> = {
     description: 'Design brand, components, pages, and graphics',
     icon: 'Palette',
     color: '#EC4899',
-    studios: ['home', 'agenda', 'brand', 'components', 'design', 'graphics', 'pages', 'tasks', 'brand-compliance'],
+    studios: ['home', 'agenda', 'memory', 'brand', 'components', 'design', 'graphics', 'pages', 'tasks', 'brand-compliance'],
     dashboardWidgets: ['design', 'components', 'tasks', 'brand'],
   },
   frontend_dev: {

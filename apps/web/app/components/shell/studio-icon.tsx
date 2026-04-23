@@ -27,6 +27,7 @@ import {
   Sparkles,
   Map,
   CalendarDays,
+  Database,
   type LucideIcon,
 } from 'lucide-react'
 
@@ -61,6 +62,7 @@ const studioIconMap: Record<string, LucideIcon> = {
   'ai-skills': Sparkles,
   'brand-compliance': ShieldCheck,
   agenda: CalendarDays,
+  memory: Database,
 }
 
 const ACTIVE_COLOR = '#6398ff'

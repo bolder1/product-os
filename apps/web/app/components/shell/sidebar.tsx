@@ -52,6 +52,7 @@ const workspaces: Workspace[] = [
       { key: 'agenda', label: 'Agenda', href: 'agenda' },
       { key: 'planner', label: 'Planner', href: 'planner' },
       { key: 'roadmap', label: 'Roadmap', href: 'roadmap' },
+      { key: 'memory', label: 'Memory', href: 'memory' },
       { key: 'features', label: 'Features', href: 'features' },
       { key: 'templates', label: 'Templates', href: 'templates' },
       { key: 'canvas', label: 'Canvas', href: 'canvas' },
