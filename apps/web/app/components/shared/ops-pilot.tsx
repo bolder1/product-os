@@ -269,7 +269,7 @@ function WelcomeScreen({
       </div>
 
       <div className="text-center">
-        <p className="text-[14px] font-semibold text-[#F1F5F9]">OpsPilot</p>
+        <p className="text-[14px] font-semibold text-[#F1F5F9]">Cortex</p>
         <p className="text-[11px] text-[#64748B] mt-1 max-w-[200px]">
           Your AI copilot across every studio. Ask anything, create tasks, navigate, or scaffold nodes.
         </p>
@@ -439,7 +439,7 @@ export function OpsPilot({ productId, currentStudio, orgSlug, productSlug }: Ops
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0, opacity: 0 }}
             onClick={() => setOpen(true)}
-            title="OpsPilot (⌘⇧O)"
+            title="Cortex (⌘⇧O)"
             className="fixed bottom-6 right-6 z-[60] w-12 h-12 rounded-2xl bg-gradient-to-br from-[#7C3AED] to-[#2563EB] shadow-xl flex items-center justify-center hover:shadow-[0_0_24px_rgba(139,92,246,0.5)] transition-shadow group"
           >
             <Sparkles size={20} className="text-white group-hover:scale-110 transition-transform" />
@@ -468,7 +468,7 @@ export function OpsPilot({ productId, currentStudio, orgSlug, productSlug }: Ops
                   <Sparkles size={13} className="text-[#A78BFA]" />
                 </div>
                 <div>
-                  <p className="text-[12px] font-semibold text-[#F1F5F9] leading-none">OpsPilot</p>
+                  <p className="text-[12px] font-semibold text-[#F1F5F9] leading-none">Cortex</p>
                   <p className="text-[9px] text-[#475569] mt-0.5">{currentStudio} · {productSlug}</p>
                 </div>
                 <div className="ml-1 w-1.5 h-1.5 rounded-full bg-[#10B981] animate-pulse" />

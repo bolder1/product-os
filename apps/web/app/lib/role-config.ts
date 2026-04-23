@@ -29,7 +29,7 @@ export const roleConfigs: Record<OrgRole, RoleConfig> = {
       'brand', 'components', 'design', 'workflow', 'pages', 'graphics',
       'code', 'handoff', 'releases', 'testing',
       'tasks', 'approvals', 'decisions', 'notifications', 'analytics',
-      'control-tower', 'graph-explorer', 'graph', 'connectors', 'ai-skills', 'brand-compliance',
+      'control-tower', 'graph-explorer', 'graph', 'connectors', 'cortex', 'ai-skills', 'brand-compliance',
       'admin',
     ],
     dashboardWidgets: ['overview', 'analytics', 'tasks', 'approvals', 'releases', 'team', 'settings'],

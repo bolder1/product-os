@@ -29,6 +29,7 @@ import {
   CalendarDays,
   Database,
   Activity,
+  BrainCircuit,
   type LucideIcon,
 } from 'lucide-react'
 
@@ -65,6 +66,7 @@ const studioIconMap: Record<string, LucideIcon> = {
   agenda: CalendarDays,
   memory: Database,
   graph: Activity,
+  cortex: BrainCircuit,
 }
 
 const ACTIVE_COLOR = '#6398ff'
