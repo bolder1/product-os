@@ -2,10 +2,12 @@
 
 import React, { useState, useMemo, useCallback } from 'react'
 import { AIActionBar } from '../../../../components/primitives/ai-action-bar'
+import { SprintPlanner } from './_components/sprint-planner'
 import {
   Map,
   Plus,
   Sparkles,
+  Kanban,
   ChevronDown,
   ChevronRight,
   CheckCircle2,
@@ -822,7 +824,7 @@ function SummaryStats({ milestones }: { milestones: Milestone[] }) {
 // Main page
 // ---------------------------------------------------------------------------
 
-type ViewMode = 'list' | 'gantt'
+type ViewMode = 'list' | 'gantt' | 'sprint'
 
 export default function RoadmapPage() {
   const params = useParams()
@@ -938,8 +940,9 @@ export default function RoadmapPage() {
           {/* View toggle */}
           <div className="flex items-center gap-1 p-1 rounded-xl border border-[var(--border-subtle)]" style={{ background: 'var(--bg-subtle)' }}>
             {([
-              { key: 'list', icon: Layers, title: 'List' },
-              { key: 'gantt', icon: Calendar, title: 'Gantt' },
+              { key: 'list',   icon: Layers,   title: 'List'   },
+              { key: 'gantt',  icon: Calendar,  title: 'Gantt'  },
+              { key: 'sprint', icon: Kanban,    title: 'Sprints' },
             ] as { key: ViewMode; icon: React.ElementType; title: string }[]).map(({ key, icon: Icon, title }) => (
               <button key={key} onClick={() => setViewMode(key)}
                 className="flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg font-medium transition-all"
@@ -962,7 +965,15 @@ export default function RoadmapPage() {
         </div>
       </div>
 
-      {/* Body */}
+      {/* Sprint view — full bleed, no padding */}
+      {viewMode === 'sprint' && (
+        <div className="flex-1 overflow-hidden">
+          <SprintPlanner />
+        </div>
+      )}
+
+      {/* Body — list + gantt */}
+      {viewMode !== 'sprint' && (
       <div className="flex-1 overflow-y-auto px-6 py-5 space-y-4">
         {/* Stats */}
         <SummaryStats milestones={milestones} />
@@ -1064,6 +1075,7 @@ export default function RoadmapPage() {
           </div>
         )}
       </div>
+      )}
 
       {/* Modals */}
       {showAddMilestone && (
