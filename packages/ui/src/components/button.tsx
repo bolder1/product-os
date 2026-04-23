@@ -6,26 +6,37 @@ import { cva, type VariantProps } from 'class-variance-authority'
 import { Loader2 } from 'lucide-react'
 import { cn } from '../lib/utils'
 
+/**
+ * Editorial/spatial Button.
+ * Consumes CSS vars from globals.css so theme shifts propagate globally.
+ * Aligns visually with `.tool-btn` utility classes.
+ */
 const buttonVariants = cva(
-  'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/50 focus-visible:ring-offset-2 focus-visible:ring-offset-[#060918] disabled:pointer-events-none disabled:opacity-50 cursor-pointer',
+  [
+    'inline-flex items-center justify-center gap-2 whitespace-nowrap',
+    'font-medium transition-[background-color,border-color,color,box-shadow]',
+    'duration-[180ms] ease-[cubic-bezier(0.22,1,0.36,1)]',
+    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--border-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg-base)]',
+    'disabled:pointer-events-none disabled:opacity-50 cursor-pointer select-none',
+  ].join(' '),
   {
     variants: {
       variant: {
         primary:
-          'bg-indigo-600 text-white hover:bg-indigo-500 shadow-md shadow-indigo-500/20 hover:shadow-lg hover:shadow-indigo-500/30 active:scale-[0.97]',
+          'bg-[var(--accent)] text-white border border-[var(--accent)] hover:bg-[var(--accent-hover)] hover:border-[var(--accent-hover)]',
         secondary:
-          'bg-white/[0.05] text-slate-200 border border-white/[0.08] hover:bg-white/[0.08] hover:border-white/[0.12] active:scale-[0.97]',
+          'bg-[var(--bg-elevated)] text-[var(--text-primary)] border border-[var(--border-default)] hover:bg-[var(--surface-hover)] hover:border-[var(--border-strong)]',
         ghost:
-          'text-slate-300 hover:bg-white/[0.05] hover:text-slate-100 active:scale-[0.97]',
+          'bg-transparent text-[var(--text-secondary)] border border-transparent hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)]',
         danger:
-          'bg-rose-600/90 text-white hover:bg-rose-500 shadow-md shadow-rose-500/20 active:scale-[0.97]',
+          'bg-transparent text-[var(--color-error)] border border-[var(--border-default)] hover:bg-[var(--color-error-muted)]',
         outline:
-          'border border-white/[0.12] text-slate-200 hover:bg-white/[0.05] hover:border-white/[0.18] active:scale-[0.97]',
+          'bg-transparent text-[var(--text-primary)] border border-[var(--border-strong)] hover:bg-[var(--surface-hover)]',
       },
       size: {
-        sm: 'h-8 px-3 text-xs rounded-md',
-        md: 'h-9 px-4 text-sm',
-        lg: 'h-11 px-6 text-base rounded-xl',
+        sm: 'h-8 px-3 text-[var(--font-size-caption)] rounded-[var(--radius-xs)]',
+        md: 'h-9 px-4 text-[var(--font-size-label)] rounded-[var(--radius-sm)]',
+        lg: 'h-11 px-6 text-[var(--font-size-body)] rounded-[var(--radius-md)]',
       },
     },
     defaultVariants: {

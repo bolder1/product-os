@@ -3,12 +3,17 @@
 import * as React from 'react'
 import { cn } from '../lib/utils'
 
+/**
+ * Editorial Card — unified with .tool-card utility class.
+ * Consumes CSS vars so theme changes propagate.
+ */
 const Card = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
   ({ className, ...props }, ref) => (
     <div
       ref={ref}
       className={cn(
-        'rounded-xl border border-white/[0.08] bg-white/[0.03] backdrop-blur-xl shadow-lg shadow-black/20',
+        'rounded-[var(--radius-md)] border border-[var(--border-default)] bg-[var(--bg-surface)]',
+        'transition-[border-color,background-color,box-shadow] duration-[180ms] ease-[cubic-bezier(0.22,1,0.36,1)]',
         className
       )}
       {...props}
@@ -21,7 +26,7 @@ const CardHeader = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDiv
   ({ className, ...props }, ref) => (
     <div
       ref={ref}
-      className={cn('flex flex-col gap-1.5 p-5 pb-0', className)}
+      className={cn('flex flex-col gap-2 p-6 pb-0', className)}
       {...props}
     />
   )
@@ -32,7 +37,10 @@ const CardTitle = React.forwardRef<HTMLHeadingElement, React.HTMLAttributes<HTML
   ({ className, ...props }, ref) => (
     <h3
       ref={ref}
-      className={cn('text-base font-semibold text-[#F1F5F9] leading-tight', className)}
+      className={cn(
+        'text-[var(--font-size-h3)] leading-[var(--line-height-h3)] font-semibold tracking-[-0.01em] text-[var(--text-primary)]',
+        className
+      )}
       {...props}
     />
   )
@@ -43,7 +51,10 @@ const CardDescription = React.forwardRef<HTMLParagraphElement, React.HTMLAttribu
   ({ className, ...props }, ref) => (
     <p
       ref={ref}
-      className={cn('text-sm text-[#94A3B8]', className)}
+      className={cn(
+        'text-[var(--font-size-body)] leading-[var(--line-height-body)] text-[var(--text-secondary)]',
+        className
+      )}
       {...props}
     />
   )
@@ -54,7 +65,7 @@ const CardContent = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDi
   ({ className, ...props }, ref) => (
     <div
       ref={ref}
-      className={cn('p-5', className)}
+      className={cn('p-6', className)}
       {...props}
     />
   )
@@ -65,7 +76,7 @@ const CardFooter = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDiv
   ({ className, ...props }, ref) => (
     <div
       ref={ref}
-      className={cn('flex items-center p-5 pt-0', className)}
+      className={cn('flex items-center p-6 pt-0', className)}
       {...props}
     />
   )

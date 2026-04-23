@@ -88,6 +88,23 @@ export { Skeleton, SkeletonText, SkeletonCard, type SkeletonProps } from './skel
 
 export { EmptyState, type EmptyStateProps } from './empty-state'
 
+export { PageHeader, type PageHeaderProps } from './page-header'
+
+export {
+  TokenEstimate,
+  type TokenEstimateProps,
+  type TokenEstimateStep,
+  type TokenEstimateAlternative,
+  type TokenEstimateBudget,
+} from './token-estimate'
+
+export {
+  PromptGate,
+  type PromptGateProps,
+  type PromptGateVariable,
+  type PromptGateDiffSegment,
+} from './prompt-gate'
+
 export {
   DataTable,
   type DataTableColumn,

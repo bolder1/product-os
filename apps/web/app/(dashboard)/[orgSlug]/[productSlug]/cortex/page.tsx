@@ -17,6 +17,10 @@ import {
   type ActionKind,
 } from '../../../../lib/computer-mode-store'
 import { useAISkillsStore, type AISkill } from '../../../../lib/ai-skills-store'
+import { useBudgetStore } from '../../../../lib/budget-store'
+import { submitPromptThroughGate } from '../../../../lib/prompt-gate-store'
+import { estimate, getPricing, type ExecutionPlan } from '@product-os/ai'
+import { TokenEstimate } from '@product-os/ui'
 
 // ---------------------------------------------------------------------------
 // Mode config
@@ -360,6 +364,138 @@ function useSeedDemoActions(productId: string) {
 }
 
 // ---------------------------------------------------------------------------
+// Cortex prompt box — entry point into the prompt gate
+// ---------------------------------------------------------------------------
+
+function CortexPromptBox({ mode }: { mode: CMMode }) {
+  const [value, setValue] = useState('')
+  const [busy, setBusy] = useState(false)
+  const addAction = useComputerModeStore((s) => s.addAction)
+
+  async function submit() {
+    const raw = value.trim()
+    if (!raw) return
+    setBusy(true)
+    try {
+      const result = await submitPromptThroughGate(raw, {
+        entryPoint: 'cortex',
+        studioKey: 'cortex',
+        computerMode: mode === 'auto' ? 'autopilot' : (mode as 'suggest' | 'assist'),
+      })
+      if (!result) return
+      setValue('')
+      addAction({
+        kind: 'suggest',
+        status: 'pending',
+        studio: 'cortex',
+        label: `Prompt: ${result.prompt.slice(0, 80)}${result.prompt.length > 80 ? '…' : ''}`,
+        detail: result.usedEnhancement ? 'Enhanced before submit.' : 'Sent as-is.',
+        confirmRequired: mode !== 'auto',
+      })
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  return (
+    <div className="px-5 py-3 border-b border-white/[0.06] bg-black/20">
+      <div className="flex items-center gap-2">
+        <Sparkles size={12} className="text-[#8B5CF6] shrink-0" />
+        <input
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+              e.preventDefault()
+              void submit()
+            }
+          }}
+          placeholder="Ask Cortex — vague prompts get rewritten before they run…"
+          disabled={busy}
+          className="flex-1 h-[32px] bg-transparent text-[12px] text-[#F1F5F9] placeholder:text-[#64748B] focus:outline-none"
+          aria-label="Cortex prompt"
+        />
+        <kbd className="text-[9px] px-1.5 py-0.5 rounded border border-white/10 text-[#64748B] font-mono">↵</kbd>
+        <button
+          type="button"
+          onClick={() => void submit()}
+          disabled={busy || value.trim().length === 0}
+          className="h-[28px] px-3 rounded-md text-[11px] font-medium text-white transition-opacity disabled:opacity-40"
+          style={{ background: 'linear-gradient(135deg, #7C3AED 0%, #2563EB 100%)' }}
+        >
+          Submit
+        </button>
+      </div>
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// Estimate panel — token / cost preview for a representative plan
+// ---------------------------------------------------------------------------
+
+const DEMO_PLAN: ExecutionPlan = {
+  skillId: 'cortex.demo-refine',
+  steps: [
+    { id: 'plan',   label: 'Planner',   role: 'planner',   model: 'claude-opus-4-7',    approxInputChars: 3200, toolCount: 4 },
+    { id: 'gen',    label: 'Generator', role: 'generator', model: 'claude-sonnet-4-6',  approxInputChars: 12800, toolCount: 6 },
+    { id: 'critic', label: 'Critic',    role: 'critic',    model: 'claude-haiku-4-5',   approxInputChars: 5200, toolCount: 2 },
+    { id: 'embed',  label: 'Embedding', role: 'embedding', model: 'voyage-3',           approxInputChars: 2400, toolCount: 0 },
+  ],
+}
+
+function EstimatePanel() {
+  const capToday = useBudgetStore((s) => s.capToday)
+  const capThisMonth = useBudgetStore((s) => s.capThisMonth)
+  const runs = useBudgetStore((s) => s.runs)
+
+  const budgetSnapshot = useMemo(() => {
+    const dayCutoff = Date.now() - 24 * 60 * 60 * 1000
+    const now = new Date()
+    const usedToday = runs
+      .filter((r) => new Date(r.at).getTime() >= dayCutoff)
+      .reduce((a, r) => a + r.cost, 0)
+    const usedThisMonth = runs
+      .filter((r) => {
+        const d = new Date(r.at)
+        return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth()
+      })
+      .reduce((a, r) => a + r.cost, 0)
+    return { usedToday, capToday, usedThisMonth, capThisMonth }
+  }, [runs, capToday, capThisMonth])
+
+  const est = useMemo(() => estimate(DEMO_PLAN, { budget: budgetSnapshot }), [budgetSnapshot])
+
+  return (
+    <TokenEstimate
+      title="Estimate — refine skill"
+      steps={est.steps.map((s) => ({
+        stepId: s.stepId,
+        label: s.label,
+        modelDisplay: getPricing(s.model).displayName,
+        tokensP50: s.inputTokens.p50 + s.outputTokens.p50,
+        costP50: s.cost.p50,
+      }))}
+      totalTokensP50={est.total.tokens.p50}
+      totalCostP50={est.total.cost.p50}
+      budget={{
+        usedToday: est.budget.usedToday,
+        capToday: est.budget.capToday,
+        projectedAfter: est.budget.projectedAfter,
+      }}
+      alternatives={est.alternatives.map((a) => ({
+        label: a.label,
+        description: a.description,
+        savingsPct: a.savingsPct,
+        qualityDeltaPct: a.qualityDeltaPct,
+        costP50: a.cost.p50,
+      }))}
+      confidence={est.confidence}
+    />
+  )
+}
+
+// ---------------------------------------------------------------------------
 // Page
 // ---------------------------------------------------------------------------
 
@@ -426,6 +562,9 @@ export default function CortexPage() {
         </div>
         <ModeSwitcher />
       </div>
+
+      {/* ── Prompt box ── */}
+      <CortexPromptBox mode={mode} />
 
       {/* ── Mode banner ── */}
       <div
@@ -531,6 +670,7 @@ export default function CortexPage() {
             {/* Right column — plan + skills */}
             <div className="col-span-12 lg:col-span-4 flex flex-col gap-5">
               <ActivePlanPanel />
+              <EstimatePanel />
               <SkillLauncher productId={productId} />
             </div>
           </div>

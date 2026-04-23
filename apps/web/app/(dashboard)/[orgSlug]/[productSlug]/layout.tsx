@@ -16,13 +16,18 @@ import { usePhase19Sync } from '../../../lib/use-phase19-sync'
 import { CollaborationProvider, useCollaborationContext } from '../../../lib/collaboration-context'
 import { PresenceAvatars, ConnectionBadge } from '../../_components/presence-avatars'
 import { ComputerModePanel } from '../../../components/shared/computer-mode-panel'
+import { ComputerModeStrip } from '../../../components/shared/computer-mode-strip'
+import { GraphInspector } from '../../../components/shared/graph-inspector'
+import { Copilot } from '../../../components/shared/copilot'
 import { CommandPalette } from '../../../components/shared/command-palette'
 import { OpsPilot } from '../../../components/shared/ops-pilot'
+import { PromptGateHost } from '../../../components/shared/prompt-gate-host'
 import { useCommandPaletteStore } from '../../../lib/command-palette-store'
 import { createContext, useContext } from 'react'
 import { usePathname } from 'next/navigation'
 import { GitBranch, MessageSquare, X, CircleDot, Search } from 'lucide-react'
 import { FirstRunBanner } from './_components/first-run-banner'
+import { ModesTour } from './_components/modes-tour'
 
 export const ProductContext = createContext<Product | null>(null)
 
@@ -148,10 +153,12 @@ function ProductLayoutInner({
               </div>
             }
           />
+          <ComputerModeStrip />
 
           <main className="flex-1 min-h-0 overflow-auto bg-[var(--bg-workspace)]">
             <div className="min-h-full flex flex-col">
               <FirstRunBanner productId={productId} />
+              <ModesTour />
               {children}
             </div>
           </main>
@@ -249,6 +256,17 @@ function ProductLayoutInner({
           studio={currentStudio}
           productId={dbProductId}
         />
+        <GraphInspector
+          productId={productId}
+          orgSlug={orgSlug}
+          productSlug={productSlug}
+        />
+        <Copilot
+          productId={productId}
+          orgSlug={orgSlug}
+          productSlug={productSlug}
+          studio={currentStudio}
+        />
         <CommandPalette
           isOpen={paletteOpen}
           onClose={closePalette}
@@ -267,6 +285,9 @@ function ProductLayoutInner({
             productSlug={productSlug}
           />
         )}
+
+        {/* ── Prompt gate (pre-flight surface for every prompt entry) ── */}
+        <PromptGateHost />
       </div>
   )
 }

@@ -2,12 +2,17 @@
 
 import { useState, useRef, useEffect, useMemo } from 'react'
 import { usePathname } from 'next/navigation'
-import { Search, Bell, ChevronRight, GitBranch, Sparkles, Command } from 'lucide-react'
+import { Search, Bell, ChevronRight, GitBranch, Sparkles, Command, Coins, Network } from 'lucide-react'
 import { useCommandPaletteStore } from '../../lib/command-palette-store'
+import { useInspectorStore } from '../../lib/inspector-store'
+import { useCopilotStore } from '../../lib/copilot-store'
 import { useVersionStore } from '../../lib/version-store'
 import { useNotificationStore } from '../../lib/notification-store'
 import { useAuthStore } from '../../lib/auth-store'
+import { useBudgetStore } from '../../lib/budget-store'
 import { UserMenu } from './user-menu'
+import { ModeSwitcher } from './mode-switcher'
+import { RoleSelector } from './role-selector'
 
 function timeAgo(dateStr: string): string {
   const seconds = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000)
@@ -32,7 +37,18 @@ export function TopBar({ extraRight }: TopBarProps = {}) {
   const unreadNotifs = useMemo(() => notifications.filter((n) => !n.read), [notifications])
   const markRead = useNotificationStore((s) => s.markRead)
   const markAllRead = useNotificationStore((s) => s.markAllRead)
+  const inspectorOpen = useInspectorStore((s) => s.open)
+  const toggleInspector = useInspectorStore((s) => s.toggleInspector)
+  const copilotOpen = useCopilotStore((s) => s.open)
+  const toggleCopilot = useCopilotStore((s) => s.togglePanel)
   const user = useAuthStore((s) => s.user)
+  const capToday = useBudgetStore((s) => s.capToday)
+  const budgetRuns = useBudgetStore((s) => s.runs)
+  const usedToday = useMemo(() => {
+    const cutoff = Date.now() - 24 * 60 * 60 * 1000
+    return budgetRuns.filter((r) => new Date(r.at).getTime() >= cutoff).reduce((a, r) => a + r.cost, 0)
+  }, [budgetRuns])
+  const budgetPct = Math.min(100, Math.round((usedToday / Math.max(capToday, 0.0001)) * 100))
   const [showNotifs, setShowNotifs] = useState(false)
   const notifRef = useRef<HTMLDivElement>(null)
 
@@ -57,25 +73,24 @@ export function TopBar({ extraRight }: TopBarProps = {}) {
     .join(' ')
 
   return (
-    <header className="h-[var(--topbar-h)] flex items-center justify-between px-3 bg-[var(--bg-surface)] border-b border-[var(--border-default)] z-30 flex-shrink-0 select-none">
-      {/* Breadcrumb */}
-      <nav className="flex items-center gap-1.5 text-[11px] min-w-0">
-        {orgSlug && (
-          <span className="text-[var(--text-tertiary)] truncate max-w-[90px] hover:text-[var(--text-secondary)] cursor-default transition-colors">{orgSlug}</span>
-        )}
-        {productSlug && (
-          <>
-            <ChevronRight size={10} className="text-[var(--text-tertiary)] opacity-50 shrink-0" />
-            <span className="text-[var(--text-secondary)] truncate max-w-[110px] hover:text-[var(--text-primary)] cursor-default transition-colors">{productSlug}</span>
-          </>
-        )}
-        {studioLabel && (
-          <>
-            <ChevronRight size={10} className="text-[var(--text-tertiary)] opacity-50 shrink-0" />
-            <span className="text-[var(--text-primary)] font-medium">{studioLabel}</span>
-          </>
-        )}
-      </nav>
+    <header className="h-[var(--topbar-h)] flex items-center justify-between px-4 bg-[var(--bg-surface)] border-b border-[var(--border-default)] z-30 flex-shrink-0 select-none">
+      {/* Left: Breadcrumb + Mode + Role */}
+      <div className="flex items-center gap-3 min-w-0">
+        <nav className="flex items-center gap-1.5 text-[var(--font-size-label)] min-w-0">
+          {orgSlug && (
+            <span className="text-[var(--text-tertiary)] truncate max-w-[90px] hover:text-[var(--text-secondary)] cursor-default transition-colors">{orgSlug}</span>
+          )}
+          {productSlug && (
+            <>
+              <ChevronRight size={10} className="text-[var(--text-tertiary)] opacity-50 shrink-0" />
+              <span className="text-[var(--text-secondary)] truncate max-w-[110px] hover:text-[var(--text-primary)] cursor-default transition-colors">{productSlug}</span>
+            </>
+          )}
+        </nav>
+        <div className="h-5 w-px bg-[var(--border-default)]" aria-hidden />
+        <ModeSwitcher />
+        <RoleSelector />
+      </div>
 
       {/* Center: Search */}
       <button
@@ -94,6 +109,19 @@ export function TopBar({ extraRight }: TopBarProps = {}) {
       {/* Actions */}
       <div className="flex items-center gap-2">
         {extraRight}
+        {/* Budget pill */}
+        <button
+          type="button"
+          className="flex items-center gap-1.5 h-[24px] px-2 rounded-[var(--radius-sm)] text-[11px] tabular-nums border border-[var(--border-subtle)] hover:border-[var(--border-default)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
+          title={`AI spend today: $${usedToday.toFixed(2)} of $${capToday.toFixed(2)} (${budgetPct}%)`}
+          aria-label="AI budget"
+        >
+          <Coins size={11} className={budgetPct >= 80 ? 'text-[var(--color-error)]' : 'opacity-60'} />
+          <span>
+            ${usedToday < 1 ? usedToday.toFixed(3) : usedToday.toFixed(2)}
+            <span className="text-[var(--text-tertiary)]"> / ${capToday.toFixed(0)}</span>
+          </span>
+        </button>
       <div className="flex items-center gap-0.5">
         {/* Version */}
         <button
@@ -105,13 +133,28 @@ export function TopBar({ extraRight }: TopBarProps = {}) {
           <GitBranch size={14} />
         </button>
 
-        {/* AI */}
+        {/* Copilot */}
         <button
+          onClick={toggleCopilot}
           className="tool-btn-ghost tool-btn-icon hover:text-[var(--accent-text)]"
-          title="AI Assistant"
-          aria-label="AI Assistant"
+          title="Copilot"
+          aria-label="Toggle copilot"
+          aria-pressed={copilotOpen}
+          style={{ color: copilotOpen ? 'var(--accent-text)' : undefined }}
         >
           <Sparkles size={14} />
+        </button>
+
+        {/* Graph Inspector */}
+        <button
+          onClick={toggleInspector}
+          className="tool-btn-ghost tool-btn-icon"
+          title="Graph Inspector"
+          aria-label="Toggle graph inspector"
+          aria-pressed={inspectorOpen}
+          style={{ color: inspectorOpen ? 'var(--accent-text)' : undefined }}
+        >
+          <Network size={14} />
         </button>
 
         {/* Notifications */}
