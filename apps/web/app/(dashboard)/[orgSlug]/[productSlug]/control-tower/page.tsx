@@ -12,8 +12,10 @@ import { DependencyGraphMini } from './_components/dependency-graph-mini'
 import { OpenTasks }          from './_components/open-tasks'
 import { PendingApprovals }   from './_components/pending-approvals'
 import { AiInsights }         from './_components/ai-insights'
-import { ModuleReadiness }    from './_components/module-readiness'
-import { BlockersPanel }      from './_components/blockers-panel'
+import { ModuleReadiness }          from './_components/module-readiness'
+import { BlockersPanel }            from './_components/blockers-panel'
+import { StudioReadinessMatrix }    from './_components/studio-readiness-matrix'
+import { ConnectorStatusInline }    from './_components/connector-status-inline'
 import { AIRemixEngine, type RemixRequest } from '../../../../components/shared/ai-remix-engine'
 import { GraphConflictResolver } from '../../../../components/shared/graph-conflict-resolver'
 import { BrandComplianceChecker } from '../../../../components/shared/brand-compliance-checker'
@@ -151,7 +153,12 @@ export default function ControlTowerPage() {
             </div>
           )}
 
-          {/* ── Row 2: Module Readiness (left) + Blockers (right) ── */}
+          {/* ── Row 2: Studio Readiness Matrix (full width) ── */}
+          <div className="col-span-12">
+            <StudioReadinessMatrix productId={productId} />
+          </div>
+
+          {/* ── Row 3: Module Readiness (left) + Blockers (right) ── */}
           {showModules && (
             <div className={showBlockers ? 'col-span-7' : 'col-span-12'}>
               <ModuleReadiness productId={productId} />
@@ -174,6 +181,11 @@ export default function ControlTowerPage() {
               <DependencyGraphMini />
             </div>
           )}
+
+          {/* ── Connector Status inline (full width) ── */}
+          <div className="col-span-12">
+            <ConnectorStatusInline />
+          </div>
 
           {/* ── Row 4: Tasks + Approvals + AI Insights ── */}
           {(() => {

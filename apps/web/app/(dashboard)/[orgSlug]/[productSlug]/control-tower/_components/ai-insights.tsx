@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useParams, useRouter } from 'next/navigation'
 import { Sparkles, ArrowRight, RefreshCw, AlertCircle } from 'lucide-react'
@@ -49,6 +49,12 @@ export function AiInsights({ productId }: Props) {
     if (!productId) return
     recsMutation.mutate({ productId })
   }, [productId, recsMutation])
+
+  // Auto-surface on mount — no click required
+  useEffect(() => {
+    if (productId && !hasGenerated) handleGenerate()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [productId])
 
   const handleAction = useCallback((studio: string) => {
     router.push(`/${params.orgSlug}/${params.productSlug}/${studio}`)
