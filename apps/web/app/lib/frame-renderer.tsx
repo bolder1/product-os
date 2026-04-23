@@ -101,13 +101,13 @@ function PlaceholderComponent({ label, width, height }: { label: string; width: 
 function resolveComponent(componentId: string, graphLabel: string): React.ComponentType<any> {
   if (_componentCache.has(componentId)) return _componentCache.get(componentId)!
 
-  // In production, generated modules live at /generated/components/<id>.tsx
-  // We attempt a dynamic import; on failure we cache and return the placeholder.
+  // Generated component modules are loaded at runtime only (not statically analysed by webpack).
+  // We always return a Suspense-wrapped placeholder; real codegen is handled server-side.
   try {
     const Loaded = lazy(() =>
-      import(`/generated/components/${componentId}`).catch(() => ({
+      Promise.resolve({
         default: (props: any) => <PlaceholderComponent label={graphLabel} width={props.width ?? 100} height={props.height ?? 40} />,
-      }))
+      })
     )
     _componentCache.set(componentId, Loaded)
     return Loaded
