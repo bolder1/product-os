@@ -9,3 +9,6 @@ const queryClient = postgres(connectionString)
 export const db = drizzle(queryClient, { schema })
 
 export type Database = typeof db
+
+/** Raw postgres client — used by packages that need pgvector / raw SQL. */
+export const sql = queryClient

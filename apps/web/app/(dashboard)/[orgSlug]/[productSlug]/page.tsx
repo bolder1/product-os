@@ -138,7 +138,7 @@ export default function ProductOverview({
   const { orgSlug, productSlug } = use(params)
   const allProducts = useProductStore((s) => s.products)
   const product = useMemo(
-    () => allProducts.find((p) => p.orgSlug === orgSlug && p.slug === productSlug) ?? null,
+    () => allProducts.find((p) => p.slug === productSlug && (p.orgSlug === orgSlug || p.orgSlug === '')) ?? null,
     [allProducts, orgSlug, productSlug]
   )
 

@@ -7,6 +7,7 @@ import { useCommandPaletteStore } from '../../lib/command-palette-store'
 import { useVersionStore } from '../../lib/version-store'
 import { useNotificationStore } from '../../lib/notification-store'
 import { useAuthStore } from '../../lib/auth-store'
+import { UserMenu } from './user-menu'
 
 function timeAgo(dateStr: string): string {
   const seconds = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000)
@@ -175,6 +176,12 @@ export function TopBar({ extraRight }: TopBarProps = {}) {
           )}
         </div>
       </div>
+
+        {/* Separator */}
+        <div className="w-px h-4 bg-[var(--border-default)] mx-1" />
+
+        {/* User avatar + menu */}
+        <UserMenu />
       </div>
     </header>
   )

@@ -21,21 +21,29 @@ export function useDataSync(productId: string | undefined) {
   const synced = useRef(false)
 
   // --- Products ---
+  // product.list only needs the user to be authenticated — it doesn't need a productId.
+  // Fetching this unconditionally lets the product layout resolve a product when
+  // navigating directly to /{orgSlug}/{productSlug} without visiting the dashboard home first.
   const productsQuery = trpc.product.list.useQuery(
     {},
-    { enabled: !!user && !!productId },
+    { enabled: !!user },
   )
 
   useEffect(() => {
     if (!productsQuery.data || !user) return
     const store = useProductStore.getState()
     // Replace store products with real DB data
+    const resolvedOrgSlug =
+      user.orgSlug ||
+      user.email?.split('@')[0]?.toLowerCase().replace(/[^a-z0-9]/g, '-') ||
+      'my-org'
+
     const dbProducts = productsQuery.data.map((p: any) => ({
       id: p.id,
       name: p.name,
       description: p.description ?? '',
       slug: p.slug,
-      orgSlug: user.orgSlug,
+      orgSlug: resolvedOrgSlug,
       color: '#3B82F6',
       icon: p.icon ?? '🚀',
       status: p.status as 'draft' | 'active' | 'archived',

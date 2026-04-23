@@ -187,19 +187,23 @@ function EmptyStateIllustration() {
         <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse">
           <path d="M 32 0 L 0 0 0 32" fill="none" stroke="rgba(59,130,246,0.06)" strokeWidth="0.5" />
         </pattern>
+        <radialGradient id="centerGrad" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stopColor="#6398ff" />
+          <stop offset="100%" stopColor="#8b5cf6" />
+        </radialGradient>
       </defs>
       <rect width="320" height="240" fill="url(#grid)" />
 
       {/* Central node cluster */}
       <motion.circle
         cx="160" cy="100" r="24"
-        fill="rgba(59,130,246,0.1)" stroke="rgba(59,130,246,0.3)" strokeWidth="1.5"
+        fill="rgba(99,152,255,0.12)" stroke="rgba(99,152,255,0.35)" strokeWidth="1.5"
         initial={{ scale: 0 }} animate={{ scale: 1 }}
         transition={{ delay: 0.3, type: 'spring', stiffness: 200 }}
       />
       <motion.circle
         cx="160" cy="100" r="8"
-        fill="#3B82F6"
+        fill="url(#centerGrad)"
         initial={{ scale: 0 }} animate={{ scale: 1 }}
         transition={{ delay: 0.5, type: 'spring', stiffness: 300 }}
       />
@@ -234,13 +238,21 @@ function EmptyStateIllustration() {
         </g>
       ))}
 
-      {/* Pulse on center */}
+      {/* Pulse ring 1 */}
       <motion.circle
         cx="160" cy="100" r="24"
-        fill="none" stroke="rgba(59,130,246,0.2)" strokeWidth="1"
+        fill="none" stroke="rgba(99,152,255,0.2)" strokeWidth="1"
         initial={{ scale: 1, opacity: 0.5 }}
         animate={{ scale: 2, opacity: 0 }}
         transition={{ duration: 2, repeat: Infinity, ease: 'easeOut' }}
+      />
+      {/* Pulse ring 2 — larger, slower, purple tint */}
+      <motion.circle
+        cx="160" cy="100" r="24"
+        fill="none" stroke="rgba(139,92,246,0.15)" strokeWidth="1"
+        initial={{ scale: 1.2, opacity: 0.4 }}
+        animate={{ scale: 3, opacity: 0 }}
+        transition={{ duration: 3, repeat: Infinity, ease: 'easeOut', delay: 1 }}
       />
     </motion.svg>
   )
@@ -266,19 +278,35 @@ export default function DashboardHome() {
   const [modalOpen, setModalOpen] = useState(false)
   const openCommandPalette = useCommandPaletteStore((s) => s.open)
   const { user } = useAuth()
-  const orgSlug = user?.orgSlug || 'my-org'
+  const orgSlug = user?.orgSlug ||
+    user?.email?.split('@')[0]?.toLowerCase().replace(/[^a-z0-9]/g, '-') ||
+    'my-org'
   const allProducts = useProductStore((s) => s.products)
 
   // Hydrate product store from DB on dashboard load
   const productsQuery = trpc.product.list.useQuery({}, { enabled: !!user })
   useEffect(() => {
-    if (!productsQuery.data || !user) return
+    if (!user) return
+
+    const resolvedOrgSlug = user.orgSlug ||
+      user.email?.split('@')[0]?.toLowerCase().replace(/[^a-z0-9]/g, '-') ||
+      'my-org'
+
+    // Patch any legacy products in localStorage that have empty orgSlug
+    useProductStore.setState((state) => ({
+      products: state.products.map((p) =>
+        p.orgSlug === '' ? { ...p, orgSlug: resolvedOrgSlug } : p
+      ),
+    }))
+
+    if (!productsQuery.data) return
+
     const dbProducts = productsQuery.data.map((p: any) => ({
       id: p.id,
       name: p.name,
       description: p.description ?? '',
       slug: p.slug,
-      orgSlug: user.orgSlug,
+      orgSlug: resolvedOrgSlug,
       color: '#3B82F6',
       icon: p.icon ?? '🚀',
       status: p.status as 'draft' | 'active' | 'archived',
@@ -288,7 +316,11 @@ export default function DashboardHome() {
     useProductStore.setState({ products: dbProducts })
   }, [productsQuery.data, user])
 
-  const storeProducts = useMemo(() => allProducts.filter((p) => p.orgSlug === orgSlug), [allProducts, orgSlug])
+  // Match on orgSlug OR on products with empty orgSlug (legacy products before org fix)
+  const storeProducts = useMemo(
+    () => allProducts.filter((p) => p.orgSlug === orgSlug || p.orgSlug === ''),
+    [allProducts, orgSlug],
+  )
   const hasProducts = storeProducts.length > 0
 
   // Real store data — use stable selectors that return primitives or stable references
@@ -395,7 +427,17 @@ export default function DashboardHome() {
           <div>
             <div className="flex items-center gap-3">
               <h1 className="text-2xl font-semibold text-[#F1F5F9]">
-                {user ? `Welcome back, ${user.name}` : 'Welcome back'}
+                {(() => {
+                  const h = new Date().getHours()
+                  const greeting = h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening'
+                  if (!user) return greeting
+                  return (
+                    <>
+                      {greeting},{' '}
+                      <span className="gradient-text">{user.name}</span>
+                    </>
+                  )
+                })()}
               </h1>
               {user && (
                 <span
@@ -441,21 +483,33 @@ export default function DashboardHome() {
               return (
                 <motion.div
                   key={stat.label}
-                  className="p-4 rounded-xl border border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.04] hover:border-white/[0.1] transition-all group"
+                  className="relative p-4 rounded-xl border border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.04] hover:border-white/[0.1] transition-all group overflow-hidden"
                   variants={fadeUp}
                   custom={i + 2}
+                  style={{ borderTop: `1px solid ${stat.color}40` }}
                 >
-                  <div className="flex items-center gap-3">
+                  {/* Background glow on hover */}
+                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                    style={{ background: `radial-gradient(circle at 80% 20%, ${stat.color}06 0%, transparent 70%)` }} />
+
+                  <div className="relative flex items-center gap-3">
                     <div
                       className="w-9 h-9 rounded-lg flex items-center justify-center"
                       style={{ backgroundColor: `${stat.color}10` }}
                     >
                       <Icon className="w-4 h-4" style={{ color: stat.color }} />
                     </div>
-                    <div>
+                    <div className="flex-1 min-w-0">
                       <div className="text-xl font-semibold text-[#F1F5F9]">{stat.value}</div>
                       <div className="text-xs text-[#64748B]">{stat.label}</div>
                     </div>
+                    {/* Decorative sparkline SVG */}
+                    <svg width="36" height="20" viewBox="0 0 36 20" fill="none" className="opacity-40 group-hover:opacity-70 transition-opacity flex-shrink-0">
+                      <polyline
+                        points="0,16 6,12 12,14 18,8 24,10 30,4 36,6"
+                        stroke={stat.color} strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"
+                      />
+                    </svg>
                   </div>
                 </motion.div>
               )
@@ -484,12 +538,22 @@ export default function DashboardHome() {
           {hasProducts ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {storeProducts.map((product) => (
-                <a
+                <motion.a
                   key={product.id}
-                  href={`/${product.orgSlug}/${product.slug}/planner`}
-                  className="group p-5 rounded-xl border border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.04] hover:border-white/[0.12] transition-all"
+                  href={`/${product.orgSlug || orgSlug}/${product.slug}/planner`}
+                  className="group relative p-5 rounded-xl border border-white/[0.06] bg-white/[0.02] overflow-hidden block"
+                  whileHover={{
+                    borderColor: 'rgba(255,255,255,0.12)',
+                    backgroundColor: 'rgba(255,255,255,0.035)',
+                    boxShadow: `0 8px 32px ${product.color}18`,
+                  }}
+                  transition={{ duration: 0.2 }}
                 >
-                  <div className="flex items-start justify-between mb-3">
+                  {/* Subtle colour bleed on hover */}
+                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                    style={{ background: `radial-gradient(circle at 90% 10%, ${product.color}09 0%, transparent 60%)` }} />
+
+                  <div className="relative flex items-start justify-between mb-3">
                     <div
                       className="w-10 h-10 rounded-lg flex items-center justify-center text-lg"
                       style={{ backgroundColor: `${product.color}15` }}
@@ -508,11 +572,11 @@ export default function DashboardHome() {
                   {product.description && (
                     <p className="text-xs text-[#64748B] mt-1 line-clamp-2">{product.description}</p>
                   )}
-                  <div className="flex items-center gap-1 mt-3 text-xs text-[#4A5568]">
+                  <div className="relative flex items-center gap-1 mt-3 text-xs text-[#4A5568]">
                     <Clock className="w-3 h-3" />
                     {new Date(product.createdAt).toLocaleDateString()}
                   </div>
-                </a>
+                </motion.a>
               ))}
 
               {/* New product card */}
@@ -573,12 +637,14 @@ export default function DashboardHome() {
                   />
 
                   <div className="relative">
-                    <div
+                    <motion.div
                       className="w-10 h-10 rounded-lg flex items-center justify-center mb-3"
                       style={{ backgroundColor: `${link.color}12` }}
+                      whileHover={{ rotate: 6, scale: 1.1, backgroundColor: `${link.color}20` }}
+                      transition={{ type: 'spring', stiffness: 300, damping: 15 }}
                     >
                       <Icon className="w-5 h-5" style={{ color: link.color }} />
-                    </div>
+                    </motion.div>
                     <h3 className="font-medium text-[#F1F5F9] mb-1">{link.label}</h3>
                     <p className="text-xs text-[#64748B] leading-relaxed mb-3">{link.description}</p>
                     <div className="flex flex-wrap gap-1">
@@ -605,8 +671,8 @@ export default function DashboardHome() {
           <motion.section className="mb-10" variants={fadeUp} custom={7}>
             <StudioShortcuts
               role={userRole}
-              orgSlug={user.orgSlug || 'my-org'}
-              productSlug="my-product"
+              orgSlug={orgSlug}
+              productSlug={storeProducts[0]?.slug ?? 'my-product'}
             />
           </motion.section>
         )}
@@ -658,9 +724,25 @@ export default function DashboardHome() {
 
             {/* Getting Started / Tips */}
             <div className="p-5 rounded-xl border border-white/[0.06] bg-white/[0.02]">
-              <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center justify-between mb-3">
                 <h2 className="text-xs font-medium text-[#64748B] uppercase tracking-wider">Getting Started</h2>
                 <Zap className="w-3.5 h-3.5 text-[#F59E0B]" />
+              </div>
+              {/* Progress bar */}
+              <div className="mb-4">
+                <div className="flex justify-between text-[10px] text-[#64748B] mb-1">
+                  <span>0 of 4 steps complete</span>
+                  <span>0%</span>
+                </div>
+                <div className="h-1 rounded-full bg-white/[0.06] overflow-hidden">
+                  <motion.div
+                    className="h-full rounded-full"
+                    style={{ background: 'linear-gradient(90deg, #6398ff, #8b5cf6)' }}
+                    initial={{ width: '0%' }}
+                    animate={{ width: '0%' }}
+                    transition={{ duration: 0.5, ease: 'easeOut' }}
+                  />
+                </div>
               </div>
               <div className="flex flex-col gap-3">
                 {[

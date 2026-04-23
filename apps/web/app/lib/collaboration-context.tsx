@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useContext, type ReactNode } from 'react'
+import { createContext, useContext, useMemo, type ReactNode } from 'react'
 import {
   useCollaboration,
   usePresence,
@@ -64,8 +64,16 @@ export function CollaborationProvider({ roomName, children }: CollaborationProvi
   const collab = useCollaboration(roomName, collabUser)
   const presence = usePresence(collab.awareness)
 
+  // Memoize context value so consumers don't re-render on every CollaborationProvider render
+  const contextValue = useMemo(
+    () => ({ ...collab, ...presence }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [collab.status, collab.peers, collab.doc, collab.provider, collab.awareness, collab.localClientId,
+     presence.setCursor, presence.setSelectedNode, presence.setActiveStudio]
+  )
+
   return (
-    <CollaborationContext.Provider value={{ ...collab, ...presence }}>
+    <CollaborationContext.Provider value={contextValue}>
       {children}
     </CollaborationContext.Provider>
   )

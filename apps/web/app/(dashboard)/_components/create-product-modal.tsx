@@ -141,7 +141,9 @@ export default function CreateProductModal({
     }
   }, [open])
 
-  const orgSlug = user?.orgSlug || 'my-org'
+  const orgSlug = user?.orgSlug ||
+    user?.email?.split('@')[0]?.toLowerCase().replace(/[^a-z0-9]/g, '-') ||
+    'my-org'
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
@@ -169,8 +171,8 @@ export default function CreateProductModal({
 
         onClose()
         router.push(`/${orgSlug}/${product.slug}/planner`)
-      } catch {
-        setError('Failed to create product. Please try again.')
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to create product. Please try again.')
         setIsSubmitting(false)
       }
     },

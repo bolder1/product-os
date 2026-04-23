@@ -1,6 +1,13 @@
 import postgres from 'postgres'
 import { drizzle } from 'drizzle-orm/postgres-js'
 import * as schema from './schema/index'
+import { randomBytes, scryptSync } from 'crypto'
+
+function hashPassword(plain: string): string {
+  const salt = randomBytes(32).toString('hex')
+  const hash = scryptSync(plain, salt, 64, { N: 16384, r: 8, p: 1 })
+  return `scrypt:${salt}:${hash.toString('hex')}`
+}
 
 const connectionString = process.env.DATABASE_URL ?? 'postgresql://postgres:postgres@localhost:5433/product_os'
 const queryClient = postgres(connectionString)
@@ -15,6 +22,7 @@ async function seed() {
     .values({
       email: 'demo@productos.dev',
       name: 'Demo User',
+      passwordHash: hashPassword('demo123'),
       emailVerified: true,
     })
     .returning()

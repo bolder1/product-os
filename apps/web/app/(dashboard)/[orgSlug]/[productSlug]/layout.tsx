@@ -39,7 +39,12 @@ export default function ProductLayout({
 }) {
   const { orgSlug, productSlug } = use(params)
   const allProducts = useProductStore((s) => s.products)
-  const product = useMemo(() => allProducts.find((p) => p.orgSlug === orgSlug && p.slug === productSlug) ?? null, [allProducts, orgSlug, productSlug])
+  // Match by orgSlug+slug, or fall back to slug-only for legacy products with empty orgSlug
+  const product = useMemo(
+    () =>
+      allProducts.find((p) => p.slug === productSlug && (p.orgSlug === orgSlug || p.orgSlug === '')) ?? null,
+    [allProducts, orgSlug, productSlug],
+  )
   const pathname = usePathname()
   const openVersionPanel = useVersionStore((s) => s.openPanel)
   const activeBranches = useVersionStore((s) => s.activeBranches)
@@ -119,6 +124,12 @@ function ProductLayoutInner({
 
   const commentEntityId = `${productId}-${currentStudio}`
   const dbProductId = product?.id
+
+  // Memoize contextHints so AIAssistantPanel doesn't get a new array ref every render
+  const contextHints = useMemo(
+    () => [product?.slug ?? productId, currentStudio],
+    [product?.slug, productId, currentStudio]
+  )
 
   // Update active studio in presence
   useEffect(() => {
@@ -232,7 +243,7 @@ function ProductLayoutInner({
         <AIAssistantPanel
           studio={currentStudio}
           productId={productId}
-          contextHints={[product?.slug ?? productId, currentStudio]}
+          contextHints={contextHints}
         />
         <ComputerModePanel
           studio={currentStudio}

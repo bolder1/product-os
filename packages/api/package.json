@@ -14,7 +14,9 @@
     "@product-os/graph": "workspace:*",
     "@product-os/events": "workspace:*",
     "@product-os/ai": "workspace:*",
-    "@product-os/templates": "workspace:*"
+    "@product-os/templates": "workspace:*",
+    "@product-os/memory": "workspace:*",
+    "drizzle-orm": "^0.39.0"
   },
   "devDependencies": {
     "typescript": "^5.7.0",

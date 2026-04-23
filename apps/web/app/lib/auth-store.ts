@@ -3,6 +3,7 @@
 import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
 import type { OrgRole } from './role-config'
+import { saveAccount, removeAccount } from './accounts-store'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -30,6 +31,7 @@ interface AuthState {
   login: (email: string, password: string) => Promise<void>
   signup: (data: { name: string; email: string; password: string }) => Promise<void>
   logout: () => void
+  logoutAndForget: () => void
   updateProfile: (partial: Partial<AuthUser>) => void
   setRole: (role: OrgRole) => void
   setHydrated: () => void
@@ -59,7 +61,8 @@ async function apiCall<T>(procedure: string, input: unknown): Promise<T> {
   const json = await res.json()
 
   if (json.error) {
-    const msg = json.error.json?.message ?? json.error.message ?? 'Request failed'
+    // Use || not ?? so empty strings also fall through to the generic message
+    const msg = json.error.json?.message || json.error.message || 'Request failed. Please try again.'
     throw new Error(msg)
   }
 
@@ -111,8 +114,24 @@ export const useAuthStore = create<AuthState>()(
           org: { id: string; name: string; slug: string; role: string } | null
         }>('auth.login', { json: { email, password } })
 
+        // Always store the session token
+        localStorage.setItem('product-os-session-token', result.token)
+
         if (!result.org) {
-          throw new Error('User has no organization membership')
+          // User authenticated but has no org yet — route to onboarding
+          const authUser: AuthUser = {
+            id: result.user.id,
+            name: result.user.name,
+            email: result.user.email,
+            avatar: result.user.avatarUrl ?? undefined,
+            role: 'admin',
+            orgId: '',
+            orgName: '',
+            orgSlug: '',
+            onboarded: false,
+          }
+          set({ user: authUser, isAuthenticated: true, isLoading: false })
+          return
         }
 
         setSessionTokens(result.token, result.org.id)
@@ -128,6 +147,23 @@ export const useAuthStore = create<AuthState>()(
           orgSlug: result.org.slug,
           onboarded: true,
         }
+
+        // Persist to the saved-accounts list so the account switcher can show it
+        saveAccount({
+          token: result.token,
+          orgId: result.org.id,
+          user: {
+            id: authUser.id,
+            name: authUser.name,
+            email: authUser.email,
+            role: authUser.role,
+            orgId: authUser.orgId,
+            orgName: authUser.orgName,
+            orgSlug: authUser.orgSlug,
+            avatar: authUser.avatar,
+          },
+          savedAt: new Date().toISOString(),
+        })
 
         set({
           user: authUser,
@@ -174,10 +210,32 @@ export const useAuthStore = create<AuthState>()(
         })
       },
 
+      /**
+       * Remove this account from the saved-accounts list AND log out.
+       * Use when the user explicitly wants to "remove" an account.
+       */
+      logoutAndForget: () => {
+        const userId = get().user?.id
+        apiCall('auth.logout', { json: {} }).catch(() => {})
+        clearSessionTokens()
+        if (userId) removeAccount(userId)
+        set({
+          user: null,
+          isAuthenticated: false,
+          isLoading: false,
+        })
+      },
+
       updateProfile: (partial: Partial<AuthUser>) => {
         const current = get().user
         if (!current) return
         set({ user: { ...current, ...partial } })
+        // Keep localStorage in sync so API headers always reflect the latest org
+        if (typeof window !== 'undefined') {
+          if (partial.orgId) {
+            localStorage.setItem('product-os-org-id', partial.orgId)
+          }
+        }
       },
 
       setRole: (role: OrgRole) => {
@@ -203,7 +261,14 @@ export const useAuthStore = create<AuthState>()(
         isAuthenticated: state.isAuthenticated,
       }),
       onRehydrateStorage: () => (state) => {
-        queueMicrotask(() => state?.setHydrated())
+        queueMicrotask(() => {
+          if (state) {
+            state.setHydrated()
+          } else {
+            // No stored state — still unblock the auth guards
+            useAuthStore.setState({ _hydrated: true, isLoading: false })
+          }
+        })
       },
     },
   ),

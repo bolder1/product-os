@@ -194,11 +194,13 @@ export function CommandPalette({ isOpen, onClose, orgSlug, productSlug, currentS
 
   const tasks = useTaskStore((s) => s.tasks)
 
-  // Graph nodes for live search
-  const graphNodes = useGraphStore((s) =>
-    productId
-      ? s.nodes.filter((n) => n.productId === productId && !['product', 'plan', 'connector_binding', 'mcp_binding', 'computer_action'].includes(n.kind))
-      : []
+  // Graph nodes for live search — selector returns stable array reference, filter in useMemo
+  const allGraphNodes = useGraphStore((s) => s.nodes)
+  const graphNodes = useMemo(
+    () => productId
+      ? allGraphNodes.filter((n) => n.productId === productId && !['product', 'plan', 'connector_binding', 'mcp_binding', 'computer_action'].includes(n.kind))
+      : [],
+    [allGraphNodes, productId]
   )
 
   /* Focus input when opened */

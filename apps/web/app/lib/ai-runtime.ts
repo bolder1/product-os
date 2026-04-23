@@ -202,6 +202,71 @@ const skillHandlers: Record<string, SkillHandler> = {
       tokensUsed: 180,
     }
   },
+
+  // ── Plan Mode / Memory-aware skills ────────────────────────────────────
+
+  'sk-voice-extract': async (input) => {
+    // Reads `memoryExcerpts: string[]` + optional MCQ `vibe`/`voice` and
+    // returns a BrandVoice suggestion. Mock: crafts adjectives + sample phrases.
+    const vibe = String(input.vibe ?? 'professional')
+    const voice = String(input.voice ?? 'friendly')
+    const adjectives = {
+      playful: ['Warm', 'Witty', 'Inviting'],
+      professional: ['Clear', 'Confident', 'Precise'],
+      technical: ['Direct', 'Accurate', 'Efficient'],
+      minimal: ['Quiet', 'Essential', 'Calm'],
+      bold: ['Decisive', 'Bold', 'Punchy'],
+    }[vibe] ?? ['Clear', 'Confident', 'Human']
+    return {
+      summary: `Extracted voice: ${adjectives.join(', ')} (${voice}).`,
+      data: {
+        personality: adjectives,
+        tonePairs: [
+          { axis: 'formal↔casual', value: voice === 'casual' ? 75 : 45 },
+          { axis: 'serious↔playful', value: vibe === 'playful' ? 75 : 35 },
+          { axis: 'reserved↔bold', value: vibe === 'bold' ? 80 : 45 },
+          { axis: 'technical↔plain', value: vibe === 'technical' ? 25 : 65 },
+        ],
+        samplePhrases: [
+          { context: 'welcome', text: 'Welcome — let’s get you set up in about a minute.' },
+          { context: 'error', text: 'Something didn’t go through. Here’s what to try next.' },
+          { context: 'success', text: 'All set. You’re good to go.' },
+        ],
+      },
+      artifactsCreated: 1,
+      tokensUsed: 320,
+    }
+  },
+
+  'sk-comp-from-image': async (input) => {
+    const filename = String(input.filename ?? 'screenshot.png')
+    return {
+      summary: `Extracted component structure from ${filename}.`,
+      data: {
+        detected: [
+          { kind: 'button', confidence: 0.92 },
+          { kind: 'input', confidence: 0.88 },
+          { kind: 'card', confidence: 0.8 },
+        ],
+      },
+      artifactsCreated: 3,
+      tokensUsed: 640,
+    }
+  },
+
+  'sk-task-estimate': async (input) => {
+    const tasks = (input.tasks as Array<{ id: string; title: string }>) ?? []
+    const estimates = tasks.map((t) => ({
+      id: t.id,
+      estimate: Math.max(1, Math.round((t.title.length / 10) * (Math.random() * 0.6 + 0.7))),
+    }))
+    return {
+      summary: `Estimated ${estimates.length} tasks.`,
+      data: { estimates },
+      artifactsCreated: 0,
+      tokensUsed: 180,
+    }
+  },
 }
 
 // Default handler for skills without a specific handler

@@ -158,6 +158,11 @@ body {
   to { transform: translateX(0); opacity: 1; }
 }
 
+@keyframes slideInDown {
+  from { opacity: 0; transform: translateY(-6px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
 @keyframes scaleIn {
   from { opacity: 0; transform: scale(0.97); }
   to { opacity: 1; transform: scale(1); }
@@ -733,4 +738,125 @@ body {
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+/* ── Design Refresh: The Agenda ─────────────────────────────── */
+
+/* Mesh gradient background for auth pages */
+.mesh-bg {
+  position: relative;
+}
+.mesh-bg::before {
+  content: '';
+  position: fixed;
+  top: -20%;
+  left: -10%;
+  width: 700px;
+  height: 700px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(99, 152, 255, 0.10) 0%, transparent 70%);
+  filter: blur(60px);
+  pointer-events: none;
+  animation: gradient-drift-1 25s ease-in-out infinite;
+  z-index: 0;
+}
+.mesh-bg::after {
+  content: '';
+  position: fixed;
+  bottom: -10%;
+  right: -5%;
+  width: 500px;
+  height: 500px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(139, 92, 246, 0.07) 0%, transparent 70%);
+  filter: blur(80px);
+  pointer-events: none;
+  animation: gradient-drift-2 30s ease-in-out infinite;
+  z-index: 0;
+}
+.mesh-bg > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Animated gradient border */
+@property --border-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+.gradient-border {
+  position: relative;
+  border: 1px solid transparent;
+  background-clip: padding-box;
+}
+.gradient-border::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  background: conic-gradient(from var(--border-angle), #6398ff, #8b5cf6, #06b6d4, #6398ff);
+  z-index: -1;
+  animation: border-rotate 4s linear infinite;
+}
+
+/* Shimmer highlight */
+.shimmer-text {
+  background: linear-gradient(
+    90deg,
+    rgba(255,255,255,0.5) 0%,
+    rgba(255,255,255,0.9) 40%,
+    rgba(255,255,255,0.5) 100%
+  );
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmer-slide 3s ease-in-out infinite;
+}
+
+/* Gradient text */
+.gradient-text {
+  background: linear-gradient(135deg, #6398ff 0%, #8b5cf6 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* New keyframes */
+@keyframes gradient-drift-1 {
+  0%, 100% { transform: translate(-5%, -10%) scale(1); }
+  33%       { transform: translate(5%, 5%) scale(1.08); }
+  66%       { transform: translate(-8%, 8%) scale(0.95); }
+}
+
+@keyframes gradient-drift-2 {
+  0%, 100% { transform: translate(5%, 5%) scale(1); }
+  33%       { transform: translate(-5%, -8%) scale(1.1); }
+  66%       { transform: translate(8%, -3%) scale(0.93); }
+}
+
+@keyframes border-rotate {
+  from { --border-angle: 0deg; }
+  to   { --border-angle: 360deg; }
+}
+
+@keyframes shimmer-slide {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-6px); }
+}
+
+@keyframes glow-pulse {
+  0%, 100% { filter: drop-shadow(0 0 8px rgba(99, 152, 255, 0.2)); }
+  50%       { filter: drop-shadow(0 0 20px rgba(99, 152, 255, 0.5)); }
+}
+
+@keyframes node-pulse {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50%       { opacity: 0.9; transform: scale(1.15); }
 }

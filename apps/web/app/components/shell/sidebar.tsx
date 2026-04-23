@@ -49,6 +49,7 @@ const workspaces: Workspace[] = [
     icon: 'planner',
     defaultHref: 'planner',
     items: [
+      { key: 'agenda', label: 'Agenda', href: 'agenda' },
       { key: 'planner', label: 'Planner', href: 'planner' },
       { key: 'roadmap', label: 'Roadmap', href: 'roadmap' },
       { key: 'features', label: 'Features', href: 'features' },
@@ -219,13 +220,15 @@ export function Sidebar() {
   return (
     <div className="flex h-screen flex-shrink-0">
       {/* ── Activity Bar ── */}
-      <div className="w-[var(--activity-bar-w)] flex flex-col bg-[#0f0f0f] border-r border-[var(--border-default)] z-50">
+      <div className="w-[var(--activity-bar-w)] flex flex-col border-r border-[var(--border-default)] z-50"
+        style={{ background: 'linear-gradient(180deg, #0f0f0f 0%, #0a0a0f 100%)' }}>
         {/* Logo */}
         <div className="h-[var(--topbar-h)] flex items-center justify-center">
           <Link
             href="/"
             className="flex items-center justify-center opacity-90 hover:opacity-100 transition-opacity"
             aria-label="Product OS Home"
+            style={{ animation: 'glow-pulse 4s ease-in-out infinite' }}
           >
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
               <rect x="2" y="2" width="7" height="7" rx="2" fill="#6398ff" />
@@ -262,7 +265,10 @@ export function Sidebar() {
                 aria-current={isActive ? 'page' : undefined}
               >
                 {isActive && (
-                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[2px] h-[18px] rounded-r-sm bg-[var(--accent)]" />
+                  <>
+                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[2px] h-[18px] rounded-r-sm bg-[var(--accent)]" />
+                    <div className="absolute inset-0 rounded-md" style={{ boxShadow: '0 0 12px rgba(99,152,255,0.2)' }} />
+                  </>
                 )}
                 <StudioIcon studio={ws.icon} size={16} useColor={isActive} />
                 {badge > 0 && (
