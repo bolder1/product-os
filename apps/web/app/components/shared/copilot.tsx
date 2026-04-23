@@ -18,6 +18,7 @@ import { MessageSquare, X, Send, Sparkles, Trash2, Network, Brain } from 'lucide
 import { useCopilotStore, type CopilotMessage } from '../../lib/copilot-store'
 import { useInspectorStore } from '../../lib/inspector-store'
 import { useGraphStore } from '../../lib/graph-store'
+import { submitPromptThroughGate } from '../../lib/prompt-gate-store'
 
 interface CopilotProps {
   productId: string
@@ -56,13 +57,22 @@ export function Copilot({ productId, orgSlug, productSlug, studio }: CopilotProp
   async function handleSend() {
     const text = input.trim()
     if (!text || busy) return
-    addMessage({ role: 'user', content: text, studio })
+    const submission = await submitPromptThroughGate(text, {
+      entryPoint: 'copilot',
+      studio,
+      productId,
+      orgSlug,
+      productSlug,
+    })
+    if (!submission) return
+    const finalText = submission.prompt
     setInput('')
+    addMessage({ role: 'user', content: finalText, studio })
     setBusy(true)
     // Simulated reply — real wire-up to aiRuntime in R10/R11
     const placeholderId = addMessage({ role: 'assistant', content: '…thinking', studio })
     await new Promise((r) => setTimeout(r, 650))
-    const reply = composeStubReply(text, { studio, nodesCount, selectedNodeId })
+    const reply = composeStubReply(finalText, { studio, nodesCount, selectedNodeId })
     updateMessage(placeholderId, { content: reply })
     setBusy(false)
   }

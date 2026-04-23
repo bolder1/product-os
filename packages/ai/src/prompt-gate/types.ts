@@ -37,11 +37,18 @@ export type GraphNodeRef = z.infer<typeof GraphNodeRefSchema>
 
 export const PromptContextSchema = z.object({
   entryPoint: EntryPointSchema,
+  /** Studio the prompt originated from (e.g. 'cortex', 'design'). */
+  studio: z.string().optional(),
+  /** Alias for studio — used internally by the enhancer. */
   studioKey: z.string().optional(),
   selection: z.array(GraphNodeRefSchema).optional(),
   activePlanId: z.string().optional(),
   recentArtifacts: z.array(GraphNodeRefSchema).optional(),
-  computerMode: ComputerModeSchema,
+  computerMode: ComputerModeSchema.optional(),
+  /** Product context — used to scope graph queries. */
+  productId: z.string().optional(),
+  orgSlug: z.string().optional(),
+  productSlug: z.string().optional(),
 })
 export type PromptContext = z.infer<typeof PromptContextSchema>
 

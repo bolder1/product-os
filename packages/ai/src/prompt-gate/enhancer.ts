@@ -188,6 +188,8 @@ export function enhance(
   context: PromptContext,
   opts: EnhanceOptions = {},
 ): EnhancedPrompt {
+  // Normalise: callers may pass `studio` or `studioKey` interchangeably.
+  const normContext = { ...context, studioKey: context.studioKey ?? context.studio }
   const allowed = new Set(opts.strategies ?? STRATEGIES.map((s) => s.key))
   const applied: StrategyKey[] = []
   const variables: TemplateVariable[] = []
@@ -195,7 +197,7 @@ export function enhance(
   let current = raw.trim()
   for (const s of STRATEGIES) {
     if (!allowed.has(s.key)) continue
-    const result = s.run({ prompt: current, context, variables })
+    const result = s.run({ prompt: current, context: normContext, variables })
     if (result.applied) {
       applied.push(s.key)
       current = result.prompt

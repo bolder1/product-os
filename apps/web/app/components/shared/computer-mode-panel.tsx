@@ -29,6 +29,7 @@ import {
   type ActionStatus,
 } from '../../lib/computer-mode-store'
 import { trpcMutate } from '../../lib/api'
+import { submitPromptThroughGate } from '../../lib/prompt-gate-store'
 
 /* ------------------------------------------------------------------ */
 /*  Constants                                                          */
@@ -212,8 +213,17 @@ export function ComputerModePanel({ studio, productId }: ComputerModePanelProps)
 
   /* ── Execute a command ─────────────────────────────────────────── */
   const handleExecute = async () => {
-    const goal = commandInput.trim()
-    if (!goal || isExecuting || !productId) return
+    const raw = commandInput.trim()
+    if (!raw || isExecuting || !productId) return
+
+    const submission = await submitPromptThroughGate(raw, {
+      entryPoint: 'computer-mode',
+      studio,
+      productId,
+    })
+    if (!submission) return
+
+    const goal = submission.prompt
     setCommandInput('')
     setIsExecuting(true)
     setActiveTab('log')

@@ -25,6 +25,7 @@ import { useTaskStore } from '../../lib/task-store'
 import { useComputerModeStore } from '../../lib/computer-mode-store'
 import { useGraphStore } from '../../lib/graph-store'
 import type { NodeKind } from '../../lib/graph-store'
+import { submitPromptThroughGate } from '../../lib/prompt-gate-store'
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -343,6 +344,22 @@ export function CommandPalette({ isOpen, onClose, orgSlug, productSlug, currentS
     setSelectedIndex(0)
   }, [filteredCommands.length])
 
+  const showAskAI = query.trim().length >= 3 && !query.trim().startsWith('/')
+
+  const handleAskAI = async () => {
+    const q = query.trim()
+    if (!q) return
+    onClose()
+    const submission = await submitPromptThroughGate(q, {
+      entryPoint: 'palette',
+      studio: currentStudio,
+      productId,
+    })
+    if (!submission) return
+    openComputerMode()
+    setCommandInput(submission.prompt)
+  }
+
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'ArrowDown') {
       e.preventDefault()
@@ -352,7 +369,12 @@ export function CommandPalette({ isOpen, onClose, orgSlug, productSlug, currentS
       setSelectedIndex((i) => Math.max(i - 1, 0))
     } else if (e.key === 'Enter') {
       e.preventDefault()
-      filteredCommands[selectedIndex]?.action()
+      // If the query looks like a natural-language instruction and nothing is highlighted, gate it
+      if (showAskAI && selectedIndex === 0 && filteredCommands.length === 0) {
+        handleAskAI()
+      } else {
+        filteredCommands[selectedIndex]?.action()
+      }
     } else if (e.key === 'Escape') {
       onClose()
     }
@@ -406,12 +428,31 @@ export function CommandPalette({ isOpen, onClose, orgSlug, productSlug, currentS
 
             {/* Results */}
             <div className="max-h-[360px] overflow-y-auto py-1.5">
-              {filteredCommands.length === 0 ? (
+              {/* Ask AI row — shown when query looks like a natural-language instruction */}
+              {showAskAI && (
+                <button
+                  onClick={handleAskAI}
+                  className="w-full flex items-center gap-3 px-4 py-2.5 text-left border-b border-white/[0.06] hover:bg-[var(--accent)]/10 transition-colors"
+                >
+                  <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 bg-[var(--accent)]/20">
+                    <Sparkles size={14} style={{ color: 'var(--accent-text)' }} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[13px] font-medium text-[#F1F5F9] truncate">Ask AI: &ldquo;{query}&rdquo;</span>
+                      <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-[var(--accent)]/20 text-[var(--accent-text)] shrink-0">AI</span>
+                    </div>
+                    <p className="text-[11px] text-[#64748B] mt-0.5">Gate → enhance → run in Computer Mode</p>
+                  </div>
+                  <ArrowRight size={12} className="text-[#475569] shrink-0" />
+                </button>
+              )}
+              {filteredCommands.length === 0 && !showAskAI ? (
                 <div className="flex flex-col items-center justify-center py-10 text-center">
                   <Search size={18} className="text-[#475569] mb-2" />
                   <p className="text-[12px] text-[#64748B]">No results for &ldquo;{query}&rdquo;</p>
                 </div>
-              ) : (
+              ) : filteredCommands.length === 0 ? null : (
                 filteredCommands.map((cmd, i) => {
                   const Icon = cmd.icon
                   const catStyle = CATEGORY_STYLES[cmd.category]
