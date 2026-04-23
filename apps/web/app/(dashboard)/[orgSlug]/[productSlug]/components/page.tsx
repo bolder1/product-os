@@ -1,16 +1,20 @@
 'use client'
 
-import { useState, useCallback, useMemo } from 'react'
-import { useParams } from 'next/navigation'
+import { useState, useCallback, useMemo, useEffect } from 'react'
+import { useParams, useSearchParams } from 'next/navigation'
 import { useProduct } from '../layout'
-import { Box, Plus, Sparkles, Search, Trash2, LayoutTemplate, FormInput, Database, AlertCircle, Navigation as NavIcon } from 'lucide-react'
+import { Box, Plus, Search, Trash2, LayoutTemplate, FormInput, Database, AlertCircle, Navigation as NavIcon } from 'lucide-react'
 import { type ComponentDef, type Category, categories, mockComponents } from './_data/mock-components'
 import { useGraphStore } from '../../../../lib/graph-store'
 import { useBrandTokens } from '../../../../lib/use-brand-tokens'
 import { ComponentDetail } from './_components/component-detail'
 import { ComponentCreateModal } from './_components/component-create-modal'
 import { StudioHealthBadge } from '../../../../components/shared/studio-health-badge'
+import { ContextBanner } from '../../../../components/shared/upstream-empty-state'
 import { StudioEmptyState } from '../../../../components/shared/studio-empty-state'
+import { AIActionBar } from '../../../../components/primitives/ai-action-bar'
+import { ExportMenu } from '../../../../components/primitives/export-menu'
+import { outputPipeline } from '../../../../lib/output-pipeline'
 
 /* ------------------------------------------------------------------ */
 /*  Graph-node → local ComponentDef converter                         */
@@ -48,6 +52,7 @@ const catIcon: Record<string, React.ReactNode> = {
 /* ------------------------------------------------------------------ */
 export default function ComponentBuilderPage() {
   const params = useParams<{ productSlug: string }>()
+  const searchParams = useSearchParams()
   const product = useProduct()
   const productId = product?.id ?? params.productSlug
 
@@ -76,6 +81,14 @@ export default function ComponentBuilderPage() {
   const [selectedId, setSelectedId] = useState<string | null>(components[0]?.id ?? null)
   const [modalOpen, setModalOpen]   = useState(false)
   const [search, setSearch]         = useState('')
+
+  // Auto-select component when navigated from Graph Explorer via ?nodeId
+  useEffect(() => {
+    const nodeId = searchParams.get('nodeId')
+    if (!nodeId || components.length === 0) return
+    const match = components.find((c) => c.id === nodeId)
+    if (match) setSelectedId(match.id)
+  }, [searchParams, components])
   const [catFilter, setCatFilter]   = useState<Category>('All')
 
   const selectedComponent = components.find((c) => c.id === selectedId) ?? null
@@ -155,6 +168,11 @@ export default function ComponentBuilderPage() {
   /* ---------------------------------------------------------------- */
   return (
     <div className="flex flex-col h-full bg-[var(--bg-workspace)]">
+      {/* ---- context banner ---------------------------------------- */}
+      <ContextBanner
+        chips={[{ label: 'Brand Tokens', source: 'brand', color: '#EC4899' }]}
+        missing={[]}
+      />
 
       {/* ---- top toolbar ------------------------------------------ */}
       <div className="h-[var(--toolbar-h)] flex items-center justify-between px-3 bg-[var(--bg-surface)] border-b border-[var(--border-default)]">
@@ -170,10 +188,12 @@ export default function ComponentBuilderPage() {
 
         {/* right cluster */}
         <div className="flex items-center gap-1">
-          <button className="tool-btn flex items-center gap-1 px-2 h-6 rounded text-[11px] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] transition-colors">
-            <Sparkles className="w-3 h-3" />
-            AI Generate
-          </button>
+          <AIActionBar workspace="design" productId={productId} compact />
+          <ExportMenu
+            formats={['markdown']}
+            onExport={(fmt) => outputPipeline.download(fmt, { label: 'components' })}
+            compact
+          />
           <button
             onClick={() => setModalOpen(true)}
             className="tool-btn flex items-center gap-1 px-2 h-6 rounded text-[11px] text-[var(--text-primary)] bg-[var(--accent)] hover:bg-[var(--accent)]/80 transition-colors"

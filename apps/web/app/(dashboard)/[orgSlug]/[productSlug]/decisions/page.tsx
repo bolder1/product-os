@@ -14,8 +14,8 @@ import {
   Trash2,
   Link2,
   Tag,
-  Sparkles,
 } from 'lucide-react'
+import { AIActionBar } from '../../../../components/primitives/ai-action-bar'
 import { useParams } from 'next/navigation'
 import { useProduct } from '../layout'
 import {
@@ -646,10 +646,7 @@ export default function DecisionsPage() {
         </div>
 
         <div className="flex items-center gap-1">
-          <button className="tool-btn" style={{ color: 'var(--accent-text)' }}>
-            <Sparkles size={12} />
-            AI: Suggest
-          </button>
+          <AIActionBar workspace="plan" productId={productId} compact />
           <button
             onClick={() => setCreateOpen(true)}
             className="tool-btn tool-btn-primary"

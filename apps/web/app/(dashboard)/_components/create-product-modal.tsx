@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence, type Variants } from 'framer-motion'
 import {
   X,
   Sparkles,
@@ -80,7 +80,7 @@ const overlayVariants = {
   exit: { opacity: 0 },
 }
 
-const panelVariants = {
+const panelVariants: Variants = {
   hidden: { opacity: 0, scale: 0.95, y: 20 },
   visible: {
     opacity: 1,
@@ -141,7 +141,9 @@ export default function CreateProductModal({
     }
   }, [open])
 
-  const orgSlug = user?.orgSlug || 'my-org'
+  const orgSlug = user?.orgSlug ||
+    user?.email?.split('@')[0]?.toLowerCase().replace(/[^a-z0-9]/g, '-') ||
+    'my-org'
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
@@ -169,8 +171,8 @@ export default function CreateProductModal({
 
         onClose()
         router.push(`/${orgSlug}/${product.slug}/planner`)
-      } catch {
-        setError('Failed to create product. Please try again.')
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to create product. Please try again.')
         setIsSubmitting(false)
       }
     },

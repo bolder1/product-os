@@ -1,18 +1,22 @@
 'use client'
 
 import { useState, useCallback, useEffect } from 'react'
-import { ChevronLeft, ChevronRight, SkipForward, Check, LayoutTemplate } from 'lucide-react'
+import { AnimatePresence, motion } from 'framer-motion'
+import { ChevronLeft, ChevronRight, SkipForward, Check, LayoutTemplate, Network, Layers, GitBranch, CheckSquare } from 'lucide-react'
 import StepVision from './_components/steps/step-vision'
 import StepUsersFeatures from './_components/steps/step-users-features'
 import StepArchitecture from './_components/steps/step-architecture'
 import StepReviewLaunch from './_components/steps/step-review-launch'
 import TemplateStartModal from './_components/template-start-modal'
 import AISuggestPanel from './_components/ai-suggest-panel'
+import { AIActionBar } from '../../../../components/primitives/ai-action-bar'
 import { generateTasksFromPlan, type GeneratedTask } from './_lib/task-generator'
 import { useTaskStore } from '../../../../lib/task-store'
 import { useGraphStore } from '../../../../lib/graph-store'
 import { useActivityStore } from '../../../../lib/activity-store'
 import { useNotificationStore } from '../../../../lib/notification-store'
+import { useAuthStore } from '../../../../lib/auth-store'
+import { eventBus, makeActor } from '../../../../lib/event-bus'
 import { useParams, useRouter } from 'next/navigation'
 import { useProduct } from '../layout'
 import { trpcMutate } from '../../../../lib/api'
@@ -54,6 +58,8 @@ export default function ProductPlannerPage() {
   const { scaffoldProduct, bulkAddNodes, addEdge, addNode } = useGraphStore()
   const { addActivity } = useActivityStore()
   const { addNotification } = useNotificationStore()
+  const userId = useAuthStore((s) => s.user?.id ?? 'anon')
+  const userName = useAuthStore((s) => s.user?.name ?? 'Unknown')
   const productId = currentProduct?.id ?? `${params.orgSlug}-${params.productSlug}`
 
   const markStepCompleted = useCallback((step: number) => {
@@ -103,6 +109,7 @@ export default function ProductPlannerPage() {
   }, [])
 
   const [isLaunching, setIsLaunching] = useState(false)
+  const [launchPhase, setLaunchPhase] = useState<string>('')
 
   const handleLaunch = useCallback(async () => {
     if (isLaunching) return
@@ -184,7 +191,19 @@ export default function ProductPlannerPage() {
         actionUrl: `/${orgSlug}/${params.productSlug}/tasks`,
       })
 
+      // ── Emit to event bus → auto-seeds Design frames + tasks for each feature ──
+      planData.features.slice(0, 5).forEach((f) => {
+        eventBus.emit({
+          type: 'plan.spec.approved',
+          productId,
+          specId: `spec-${f.id}`,
+          specTitle: f.name,
+          actor: makeActor(userId, userName),
+        })
+      })
+
       // ── 2. Write to real backend (DB) ──
+      setLaunchPhase('Creating plan node…')
       // Create plan node in DB
       const planNode = await trpcMutate<{ id: string }>('graph.createNode', {
         productId,
@@ -198,6 +217,7 @@ export default function ProductPlannerPage() {
         },
       }).catch(() => null)
 
+      setLaunchPhase(`Writing ${planData.features.length} features…`)
       // Create feature nodes in DB and collect IDs
       const featureNodeIds: string[] = []
       for (const f of planData.features) {
@@ -210,6 +230,7 @@ export default function ProductPlannerPage() {
         if (node) featureNodeIds.push(node.id)
       }
 
+      setLaunchPhase(`Writing ${planData.entities.length} entities…`)
       // Create entity nodes in DB
       const entityNodeIds: string[] = []
       for (const e of planData.entities) {
@@ -234,6 +255,7 @@ export default function ProductPlannerPage() {
         }
       }
 
+      setLaunchPhase(`Generating ${generatedTasks.length} tasks…`)
       // Create tasks in DB for each generated task
       for (const gt of generatedTasks) {
         await trpcMutate('task.create', {
@@ -261,7 +283,7 @@ export default function ProductPlannerPage() {
       setIsLaunching(false)
     }
 
-    router.push(`/${orgSlug}/${params.productSlug}/control-tower`)
+    router.push(`/${orgSlug}/${params.productSlug}/graph-explorer?from=planner`)
   }, [isLaunching, params, planData, generatedTasks, productId, currentProduct, scaffoldProduct, bulkAddNodes, addNode, bulkAddTasks, addActivity, addNotification, router])
 
   const updatePlanData = useCallback(<K extends keyof PlanData>(key: K, value: PlanData[K]) => {
@@ -313,6 +335,7 @@ export default function ProductPlannerPage() {
             planData={planData}
             onEditStep={goToStep}
             onLaunch={handleLaunch}
+            isLaunching={isLaunching}
             generatedTasks={generatedTasks}
             onTasksChange={setGeneratedTasks}
           />
@@ -377,6 +400,7 @@ export default function ProductPlannerPage() {
               Start from Template
             </button>
           )}
+          <AIActionBar workspace="plan" productId={productId} compact />
           <span className="text-[10px] text-[var(--text-tertiary)] tabular-nums">
             Step {currentStep}/{TOTAL_STEPS}
           </span>
@@ -435,6 +459,67 @@ export default function ProductPlannerPage() {
           </div>
         </div>
       </div>
+
+      {/* ── Launching overlay ── */}
+      <AnimatePresence>
+        {isLaunching && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[200] flex items-center justify-center bg-black/70 backdrop-blur-md"
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              transition={{ type: 'spring', damping: 20 }}
+              className="flex flex-col items-center gap-6 max-w-sm text-center px-8"
+            >
+              {/* Animated orbit rings */}
+              <div className="relative w-20 h-20">
+                <svg className="absolute inset-0 animate-spin" style={{ animationDuration: '2s' }} viewBox="0 0 80 80">
+                  <circle cx="40" cy="40" r="35" stroke="#8B5CF6" strokeWidth="2" strokeOpacity="0.15" fill="none" />
+                  <path d="M40 5 A35 35 0 0 1 75 40" stroke="#8B5CF6" strokeWidth="2.5" strokeLinecap="round" fill="none" />
+                </svg>
+                <svg className="absolute inset-0 animate-spin" style={{ animationDuration: '3s', animationDirection: 'reverse' }} viewBox="0 0 80 80">
+                  <circle cx="40" cy="40" r="26" stroke="#6366f1" strokeWidth="1.5" strokeOpacity="0.12" fill="none" />
+                  <path d="M40 14 A26 26 0 0 0 14 40" stroke="#6366f1" strokeWidth="2" strokeLinecap="round" fill="none" />
+                </svg>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <Network size={22} className="text-[#8B5CF6]" />
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <p className="text-base font-semibold text-white">Launching Product</p>
+                <p className="text-[13px] text-[#94A3B8] min-h-[20px] transition-all duration-300">
+                  {launchPhase || 'Preparing…'}
+                </p>
+              </div>
+
+              {/* Progress steps */}
+              <div className="flex flex-col gap-1.5 w-full text-left">
+                {[
+                  { icon: Layers, label: 'Graph nodes', done: launchPhase.includes('feature') || launchPhase.includes('entit') || launchPhase.includes('task') },
+                  { icon: GitBranch, label: 'Graph edges', done: launchPhase.includes('entit') || launchPhase.includes('task') },
+                  { icon: CheckSquare, label: 'Task generation', done: launchPhase.includes('task') },
+                ].map(({ icon: Icon, label, done }) => (
+                  <div key={label} className="flex items-center gap-2.5 px-3 py-1.5 rounded-lg bg-white/[0.04] border border-white/[0.06]">
+                    <div className={`w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0 transition-colors duration-500 ${done ? 'bg-[#8B5CF6]/30' : 'bg-white/10'}`}>
+                      {done
+                        ? <Check size={9} className="text-[#8B5CF6]" />
+                        : <Icon size={9} className="text-white/30" />
+                      }
+                    </div>
+                    <span className={`text-[11px] transition-colors duration-500 ${done ? 'text-[#C4B5FD]' : 'text-white/30'}`}>{label}</span>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <TemplateStartModal
         open={templateModalOpen}

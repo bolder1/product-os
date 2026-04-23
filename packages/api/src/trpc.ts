@@ -54,7 +54,7 @@ export async function createTRPCContext(opts: {
   // Resolve org from x-org-id header
   const orgId = opts.headers.get('x-org-id')
   if (!orgId) {
-    return { db, session: null }
+    return { db, session: null, eventBus }
   }
 
   // Look up the user's membership in the org

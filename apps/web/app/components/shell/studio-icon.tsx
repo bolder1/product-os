@@ -21,11 +21,21 @@ import {
   FlaskConical,
   Gauge,
   Network,
+  ListChecks,
+  Home,
+  Plug,
+  Sparkles,
+  Map,
+  CalendarDays,
+  Database,
+  Activity,
   type LucideIcon,
 } from 'lucide-react'
 
 const studioIconMap: Record<string, LucideIcon> = {
+  home: Home,
   planner: Compass,
+  features: ListChecks,
   templates: LayoutGrid,
   canvas: Paintbrush,
   brand: Palette,
@@ -48,6 +58,13 @@ const studioIconMap: Record<string, LucideIcon> = {
   'control-tower': Gauge,
   graphExplorer: Network,
   'graph-explorer': Network,
+  connectors: Plug,
+  roadmap: Map,
+  'ai-skills': Sparkles,
+  'brand-compliance': ShieldCheck,
+  agenda: CalendarDays,
+  memory: Database,
+  graph: Activity,
 }
 
 const ACTIVE_COLOR = '#6398ff'

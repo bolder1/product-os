@@ -15,6 +15,7 @@ import {
 } from 'lucide-react'
 import { type PanelTask, panelTasks } from './tasks-panel-data'
 import { useTaskStore } from '../../lib/task-store'
+import { useAuthStore } from '../../lib/auth-store'
 import { useParams, useRouter, usePathname } from 'next/navigation'
 
 type FilterTab = 'all' | 'mine' | 'overdue' | 'by_studio' | 'this_studio'
@@ -53,7 +54,6 @@ const STUDIO_COLORS: Record<string, string> = {
 }
 
 const STORAGE_KEY = 'tasks-panel-open'
-const CURRENT_USER = 'Alice Chen'
 
 export function TasksPanel() {
   const [isOpen, setIsOpen] = useState(false)
@@ -70,7 +70,11 @@ export function TasksPanel() {
   const orgSlug = params?.orgSlug as string | undefined
   const productSlug = params?.productSlug as string | undefined
   const currentStudio = pathname?.split('/')[3] || ''
-  const { tasks: storeTasks, moveTask } = useTaskStore()
+  // Targeted selectors — avoid subscribing to the full store object
+  const storeTasks = useTaskStore((s) => s.tasks)
+  const moveTask = useTaskStore((s) => s.moveTask)
+  const currentUserId = useAuthStore((s) => s.user?.id)
+  const currentUserName = useAuthStore((s) => s.user?.name)
 
   const tasks: PanelTask[] = useMemo(() => {
     const realTasks: PanelTask[] = storeTasks
@@ -78,7 +82,7 @@ export function TasksPanel() {
       .map((t) => ({
         id: t.id,
         title: t.title,
-        status: t.status === 'blocked' ? 'todo' as const : t.status,
+        status: (t.status === 'blocked' || t.status === 'cancelled') ? 'todo' as const : t.status,
         priority: t.priority,
         assignee: { name: t.assignee.name, initials: t.assignee.initials },
         dueDate: t.dueDate,
@@ -114,7 +118,11 @@ export function TasksPanel() {
     const now = new Date()
     switch (activeFilter) {
       case 'mine':
-        return activeTasks.filter((t) => t.assignee.name === CURRENT_USER)
+        return activeTasks.filter((t) =>
+          currentUserId
+            ? t.assignee.name === currentUserName
+            : false
+        )
       case 'overdue':
         return activeTasks.filter((t) => new Date(t.dueDate) < now)
       case 'by_studio':
@@ -124,7 +132,7 @@ export function TasksPanel() {
       default:
         return activeTasks
     }
-  }, [activeTasks, activeFilter, currentStudio])
+  }, [activeTasks, activeFilter, currentStudio, currentUserId, currentUserName])
 
   const grouped = useMemo(() => {
     const map: Record<StatusGroup, PanelTask[]> = {
@@ -342,7 +350,11 @@ export function TasksPanel() {
                                 <Check size={10} />
                                 Done
                               </button>
-                              <button className="tool-btn text-[10px]">
+                              <button
+                                className="tool-btn text-[10px]"
+                                onClick={(e) => { e.stopPropagation(); alert('Reassign coming soon') }}
+                                title="Reassign task"
+                              >
                                 <User size={10} />
                                 Reassign
                               </button>

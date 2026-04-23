@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useMemo } from 'react'
 import { useParams } from 'next/navigation'
-import { Plus, LayoutGrid, List, Sparkles, Filter, GanttChart } from 'lucide-react'
+import { Plus, LayoutGrid, List, Filter, GanttChart } from 'lucide-react'
 import { useProduct } from '../layout'
 import { type Task, mockTasks } from './_data/mock-tasks'
 import { TaskBoard } from './_components/task-board'
@@ -12,6 +12,9 @@ import { TaskFiltersBar, type TaskFilters } from './_components/task-filters'
 import { TaskCreateModal } from './_components/task-create-modal'
 import { useTaskStore } from '../../../../lib/task-store'
 import { useActivityStore } from '../../../../lib/activity-store'
+import { useAuthStore } from '../../../../lib/auth-store'
+import { eventBus, makeActor } from '../../../../lib/event-bus'
+import { AIActionBar } from '../../../../components/primitives/ai-action-bar'
 
 type ViewMode = 'board' | 'list' | 'timeline'
 
@@ -21,7 +24,7 @@ function storeTaskToLocal(t: ReturnType<typeof useTaskStore.getState>['tasks'][n
     id: t.id,
     title: t.title,
     description: t.description ?? '',
-    status: t.status === 'blocked' ? 'todo' : t.status,
+    status: (t.status === 'blocked' || t.status === 'cancelled') ? 'todo' : t.status,
     priority: t.priority,
     assignee: { name: t.assignee.name, initials: t.assignee.initials, color: '#6366F1' },
     dueDate: t.dueDate,
@@ -42,6 +45,8 @@ export default function TasksPage() {
   const storeMoveTask = useTaskStore((s) => s.moveTask)
   const storeUpdateTask = useTaskStore((s) => s.updateTask)
   const addActivity = useActivityStore((s) => s.addActivity)
+  const userId = useAuthStore((s) => s.user?.id ?? 'anon')
+  const userName = useAuthStore((s) => s.user?.name ?? 'Unknown')
 
   // Merge store tasks with mock fallback — store tasks take priority
   const allTasks = useMemo(() => {
@@ -90,14 +95,29 @@ export default function TasksPage() {
   const handleUpdateTask = useCallback((taskId: string, updates: Partial<Task>) => {
     // Sync status changes to store
     if (updates.status) {
-      const storeStatus = updates.status === 'blocked' ? 'todo' : updates.status
+      const validStatuses = ['todo', 'in_progress', 'in_review', 'done'] as const
+      const storeStatus = validStatuses.includes(updates.status as any) ? updates.status : 'todo'
       storeMoveTask(taskId, storeStatus as any)
+
+      // Emit task.completed when moved to done
+      if (updates.status === 'done') {
+        const task = allTasks.find((t) => t.id === taskId)
+        if (task) {
+          eventBus.emit({
+            type: 'task.completed',
+            productId,
+            taskId,
+            taskTitle: task.title,
+            actor: makeActor(userId, userName),
+          })
+        }
+      }
     }
     if (Object.keys(updates).some((k) => k !== 'status')) {
       storeUpdateTask(taskId, updates as any)
     }
     setLocalUpdates((prev) => ({ ...prev, [taskId]: { ...prev[taskId], ...updates } }))
-  }, [storeMoveTask, storeUpdateTask])
+  }, [storeMoveTask, storeUpdateTask, allTasks, productId, userId, userName])
 
   // Create a new task
   const handleCreateTask = useCallback((data: Omit<Task, 'id' | 'createdAt'>) => {
@@ -117,8 +137,7 @@ export default function TasksPage() {
       description: `New ${data.priority} priority task`,
       studio: 'tasks',
       productId,
-      userId: 'user-1',
-      userName: 'You',
+      actor: { id: 'user-1', name: 'You', initials: 'YO' },
     })
   }, [storeAddTask, addActivity, productId])
 
@@ -137,11 +156,7 @@ export default function TasksPage() {
 
         {/* Right: actions */}
         <div className="flex items-center gap-1">
-          {/* AI suggest */}
-          <button className="tool-btn text-[11px] text-[var(--accent-text)] border-transparent bg-transparent hover:bg-[var(--accent)]/10">
-            <Sparkles className="w-3 h-3" />
-            <span>AI Suggest</span>
-          </button>
+          <AIActionBar workspace="operate" productId={productId} compact />
 
           {/* Filter toggle */}
           <button

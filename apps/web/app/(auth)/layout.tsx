@@ -1,6 +1,36 @@
+'use client'
+
+import { useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import { useAuthStore } from '../lib/auth-store'
+
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
+  const router = useRouter()
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
+  const onboarded = useAuthStore((s) => s.user?.onboarded)
+  const hydrated = useAuthStore((s) => s._hydrated)
+
+  // Only redirect fully-onboarded users away from auth pages.
+  // Users who are authenticated but haven't completed onboarding (no org yet)
+  // must be able to reach /onboarding, which lives in this route group.
+  const fullyAuthenticated = isAuthenticated && onboarded
+
+  useEffect(() => {
+    if (hydrated && fullyAuthenticated) {
+      router.replace('/')
+    }
+  }, [hydrated, fullyAuthenticated, router])
+
+  if (!hydrated) {
+    return <div style={{ minHeight: '100vh', backgroundColor: '#060918' }} />
+  }
+
+  if (fullyAuthenticated) {
+    return <div style={{ minHeight: '100vh', backgroundColor: '#060918' }} />
+  }
+
   return (
-    <div className="min-h-screen flex items-center justify-center p-6">
+    <div className="mesh-bg min-h-screen flex items-center justify-center p-6 bg-[#060918]">
       {children}
     </div>
   )

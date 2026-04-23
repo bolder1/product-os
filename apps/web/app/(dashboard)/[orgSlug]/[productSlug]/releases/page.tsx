@@ -1,30 +1,118 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useCallback } from 'react'
+import { useParams } from 'next/navigation'
 import { Rocket, Plus, Filter } from 'lucide-react'
-import { mockReleases, type ReleaseStatus } from './_data/mock-releases'
+import {
+  mockReleases,
+  type Release as MockRelease,
+  type ReleaseStatus,
+  type ReleaseChange as MockChange,
+} from './_data/mock-releases'
 import { ReleaseTimeline } from './_components/release-timeline'
 import { ReleaseDetail } from './_components/release-detail'
 import { ReleaseCreateModal } from './_components/release-create-modal'
+import { useProduct } from '../layout'
+import { useReleaseStore, type Release as StoreRelease } from '../../../../lib/release-store'
+import { useAuthStore } from '../../../../lib/auth-store'
+import { eventBus, makeActor } from '../../../../lib/event-bus'
+import { outputPipeline } from '../../../../lib/output-pipeline'
+import { AIActionBar } from '../../../../components/primitives/ai-action-bar'
+import { ExportMenu } from '../../../../components/primitives/export-menu'
 
 type StatusFilter = 'all' | ReleaseStatus
 
+function formatDate(iso?: string): string {
+  if (!iso) return ''
+  const d = new Date(iso)
+  return isNaN(d.valueOf()) ? iso : d.toISOString().slice(0, 10)
+}
+
+/** Reduce store-level change types into the subset the UI understands. */
+function toMockChangeType(t: StoreRelease['changes'][number]['type']): MockChange['type'] {
+  if (t === 'entity' || t === 'workflow') return 'api'
+  return t
+}
+
+function toMockRelease(r: StoreRelease): MockRelease {
+  return {
+    id: r.id,
+    version: r.version || 'v0.0.0',
+    title: r.title,
+    status: r.status,
+    date: formatDate(r.deployedAt ?? r.updatedAt ?? r.createdAt),
+    notes: r.notes,
+    changes: r.changes.map((c) => ({
+      name: c.name,
+      type: toMockChangeType(c.type),
+      changeType: c.changeType,
+    })),
+    checklist: r.checklist,
+  }
+}
+
 export default function ReleasesPage() {
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
-  const [selectedId, setSelectedId] = useState<string>(mockReleases[0].id)
-  const [modalOpen, setModalOpen] = useState(false)
+  const params = useParams<{ productSlug: string }>()
+  const product = useProduct()
+  const productId = product?.id ?? params.productSlug
+
+  const userId = useAuthStore((s) => s.user?.id ?? 'anon')
+  const userName = useAuthStore((s) => s.user?.name ?? 'Unknown')
+
+  const storeReleases = useReleaseStore((s) => s.releases)
+  const statusFilter = useReleaseStore((s) => s.statusFilter) as StatusFilter
+  const setStoreStatusFilter = useReleaseStore((s) => s.setStatusFilter)
+  const selectedStoreId = useReleaseStore((s) => s.selectedId)
+  const selectStore = useReleaseStore((s) => s.select)
+
+  const productReleases = useMemo(
+    () => storeReleases.filter((r) => r.productId === productId),
+    [storeReleases, productId],
+  )
+  const isLive = productReleases.length > 0
+
+  const allReleases: MockRelease[] = isLive
+    ? productReleases.map(toMockRelease)
+    : mockReleases
 
   const filteredReleases = useMemo(() => {
-    if (statusFilter === 'all') return mockReleases
-    return mockReleases.filter((r) => r.status === statusFilter)
-  }, [statusFilter])
+    if (statusFilter === 'all') return allReleases
+    return allReleases.filter((r) => r.status === statusFilter)
+  }, [allReleases, statusFilter])
 
+  const [modalOpen, setModalOpen] = useState(false)
+
+  const selectedId = selectedStoreId ?? filteredReleases[0]?.id ?? allReleases[0]?.id ?? ''
   const selectedRelease = useMemo(
-    () => mockReleases.find((r) => r.id === selectedId) ?? mockReleases[0],
-    [selectedId]
+    () => allReleases.find((r) => r.id === selectedId) ?? allReleases[0],
+    [allReleases, selectedId],
   )
 
-  const latestVersion = mockReleases[0].version
+  const handleDeploy = useCallback((releaseId: string, env: string) => {
+    const release = allReleases.find((r) => r.id === releaseId)
+    if (!release) return
+    eventBus.emit({
+      type: 'release.deployed',
+      productId,
+      releaseId,
+      releaseLabel: `${release.version} → ${env}`,
+      environment: env.toLowerCase(),
+      actor: makeActor(userId, userName),
+    })
+  }, [allReleases, productId, userId, userName])
+
+  const handleExport = useCallback(async (format: string) => {
+    const release = selectedRelease
+    if (!release) return
+    await outputPipeline.download(format as any, {
+      label: `${release.version} — ${release.title}`,
+      markdownContent: release.notes,
+      nodeData: { version: release.version, status: release.status, changes: release.changes },
+      productId,
+    })
+  }, [selectedRelease, productId])
+
+  const latestVersion = allReleases[0]?.version ?? 'v0.1.0'
 
   const filters: { key: StatusFilter; label: string }[] = [
     { key: 'all', label: 'All' },
@@ -45,6 +133,15 @@ export default function ReleasesPage() {
           <span className="text-[11px] text-[var(--text-tertiary)]">
             {filteredReleases.length} release{filteredReleases.length !== 1 ? 's' : ''} / Latest: {latestVersion}
           </span>
+          {isLive ? (
+            <span className="text-[10px] px-1.5 py-0.5 rounded bg-[var(--accent-bg)] text-[var(--accent-text)]">
+              live
+            </span>
+          ) : (
+            <span className="text-[10px] px-1.5 py-0.5 rounded bg-[var(--bg-inset)] text-[var(--text-tertiary)]">
+              sample
+            </span>
+          )}
         </div>
 
         <div className="flex items-center gap-2">
@@ -54,7 +151,7 @@ export default function ReleasesPage() {
             {filters.map((f) => (
               <button
                 key={f.key}
-                onClick={() => setStatusFilter(f.key)}
+                onClick={() => setStoreStatusFilter(f.key)}
                 className={`tool-tab ${statusFilter === f.key ? 'active' : ''}`}
                 style={{ borderBottom: 'none' }}
               >
@@ -63,6 +160,12 @@ export default function ReleasesPage() {
             ))}
           </div>
 
+          <AIActionBar workspace="ship" productId={productId} compact />
+          <ExportMenu
+            formats={['release-manifest', 'markdown']}
+            onExport={handleExport}
+            compact
+          />
           <button
             onClick={() => setModalOpen(true)}
             className="tool-btn tool-btn-primary"
@@ -80,7 +183,7 @@ export default function ReleasesPage() {
           <ReleaseTimeline
             releases={filteredReleases}
             selectedId={selectedId}
-            onSelect={setSelectedId}
+            onSelect={selectStore}
             onNewRelease={() => setModalOpen(true)}
           />
         </div>
@@ -88,7 +191,7 @@ export default function ReleasesPage() {
         {/* Right: Detail */}
         <div className="flex-1 min-w-0 overflow-y-auto bg-[var(--bg-workspace)]">
           {selectedRelease ? (
-            <ReleaseDetail release={selectedRelease} />
+            <ReleaseDetail release={selectedRelease} productId={productId} onDeploy={handleDeploy} />
           ) : (
             <div className="flex items-center justify-center h-full">
               <div className="text-center">

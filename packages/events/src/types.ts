@@ -93,6 +93,29 @@ export const EVENT_TYPES = [
   'workflow.updated',
   'workflow.deleted',
   'workflow.automation.created',
+
+  // Code Studio
+  'code.module.created',
+  'code.module.updated',
+  'code.module.deleted',
+
+  // Handoff
+  'handoff.created',
+  'handoff.updated',
+  'handoff.deleted',
+
+  // Analytics
+  'analytics.insight.created',
+  'analytics.experiment.created',
+
+  // Testing
+  'testing.suite.created',
+  'testing.run.completed',
+
+  // Graphics
+  'graphics.asset.created',
+  'graphics.asset.updated',
+  'graphics.asset.deleted',
 ] as const;
 
 export type EventType = (typeof EVENT_TYPES)[number];
@@ -439,6 +462,94 @@ export const WorkflowAutomationCreatedPayload = z.object({
   userId: z.string(),
 });
 
+// Code Studio (Phase 19)
+export const CodeModuleCreatedPayload = z.object({
+  nodeId: z.string(),
+  productId: z.string(),
+  label: z.string(),
+  userId: z.string(),
+});
+export const CodeModuleUpdatedPayload = z.object({
+  nodeId: z.string(),
+  productId: z.string(),
+  label: z.string(),
+  userId: z.string(),
+});
+export const CodeModuleDeletedPayload = z.object({
+  nodeId: z.string(),
+  productId: z.string(),
+  userId: z.string(),
+});
+
+// Handoff (Phase 19)
+export const HandoffCreatedPayload = z.object({
+  nodeId: z.string(),
+  productId: z.string(),
+  label: z.string(),
+  type: z.string(),
+  userId: z.string(),
+});
+export const HandoffUpdatedPayload = z.object({
+  nodeId: z.string(),
+  productId: z.string(),
+  userId: z.string(),
+});
+export const HandoffDeletedPayload = z.object({
+  nodeId: z.string(),
+  productId: z.string(),
+  userId: z.string(),
+});
+
+// Analytics (Phase 19)
+export const AnalyticsInsightCreatedPayload = z.object({
+  nodeId: z.string(),
+  productId: z.string(),
+  severity: z.string(),
+  userId: z.string(),
+});
+export const AnalyticsExperimentCreatedPayload = z.object({
+  nodeId: z.string(),
+  productId: z.string(),
+  label: z.string(),
+  userId: z.string(),
+});
+
+// Testing (Phase 19)
+export const TestingSuiteCreatedPayload = z.object({
+  nodeId: z.string(),
+  productId: z.string(),
+  label: z.string(),
+  testCount: z.number(),
+  userId: z.string(),
+});
+export const TestingRunCompletedPayload = z.object({
+  nodeId: z.string(),
+  productId: z.string(),
+  passed: z.number(),
+  failed: z.number(),
+  status: z.string(),
+  userId: z.string(),
+});
+
+// Graphics (Phase 19)
+export const GraphicsAssetCreatedPayload = z.object({
+  nodeId: z.string(),
+  productId: z.string(),
+  label: z.string(),
+  assetType: z.string(),
+  userId: z.string(),
+});
+export const GraphicsAssetUpdatedPayload = z.object({
+  nodeId: z.string(),
+  productId: z.string(),
+  userId: z.string(),
+});
+export const GraphicsAssetDeletedPayload = z.object({
+  nodeId: z.string(),
+  productId: z.string(),
+  userId: z.string(),
+});
+
 // ---------------------------------------------------------------------------
 // Payload map — maps each EventType to its Zod schema
 // ---------------------------------------------------------------------------
@@ -495,6 +606,19 @@ export const PayloadSchemas = {
   'workflow.updated': WorkflowUpdatedPayload,
   'workflow.deleted': WorkflowDeletedPayload,
   'workflow.automation.created': WorkflowAutomationCreatedPayload,
+  'code.module.created': CodeModuleCreatedPayload,
+  'code.module.updated': CodeModuleUpdatedPayload,
+  'code.module.deleted': CodeModuleDeletedPayload,
+  'handoff.created': HandoffCreatedPayload,
+  'handoff.updated': HandoffUpdatedPayload,
+  'handoff.deleted': HandoffDeletedPayload,
+  'analytics.insight.created': AnalyticsInsightCreatedPayload,
+  'analytics.experiment.created': AnalyticsExperimentCreatedPayload,
+  'testing.suite.created': TestingSuiteCreatedPayload,
+  'testing.run.completed': TestingRunCompletedPayload,
+  'graphics.asset.created': GraphicsAssetCreatedPayload,
+  'graphics.asset.updated': GraphicsAssetUpdatedPayload,
+  'graphics.asset.deleted': GraphicsAssetDeletedPayload,
 } as const satisfies Record<EventType, z.ZodTypeAny>;
 
 // ---------------------------------------------------------------------------

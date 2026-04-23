@@ -209,20 +209,14 @@ export const useVersionStore = create<VersionState>()(
         // Clear current product graph and replace with snapshot
         graphStore.clearProduct(version.productId)
 
-        // Restore nodes
+        // Restore nodes and edges in a single setState call to avoid
+        // N separate store notifications (one per node/edge)
         const now = new Date().toISOString()
-        for (const node of version.snapshot.nodes) {
-          // Re-add through direct state mutation to preserve original IDs
-          useGraphStore.setState((s) => ({
-            nodes: [...s.nodes, { ...node, updatedAt: now }],
-          }))
-        }
-        // Restore edges
-        for (const edge of version.snapshot.edges) {
-          useGraphStore.setState((s) => ({
-            edges: [...s.edges, edge],
-          }))
-        }
+        const restoredNodes = version.snapshot.nodes.map((node) => ({ ...node, updatedAt: now }))
+        useGraphStore.setState((s) => ({
+          nodes: [...s.nodes, ...restoredNodes],
+          edges: [...s.edges, ...version.snapshot.edges],
+        }))
       },
 
       // -- Branch operations --

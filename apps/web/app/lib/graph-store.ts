@@ -14,11 +14,16 @@ export type NodeKind =
   | 'component' | 'variant' | 'token' | 'asset' | 'task' | 'approval'
   | 'insight' | 'release' | 'connector_binding' | 'mcp_binding'
   | 'skill_action' | 'computer_action'
+  // Phase 19 — remaining studios
+  | 'handoff_item' | 'analytics_dashboard' | 'analytics_event' | 'experiment'
+  | 'test_suite' | 'test_run' | 'test_coverage'
 
 export type EdgeKind =
   | 'contains' | 'depends_on' | 'references' | 'implements'
   | 'inherits' | 'triggers' | 'routes_to' | 'uses_token'
   | 'uses_component' | 'assigned_to' | 'approves' | 'blocks'
+  // Phase 19 — remaining studios
+  | 'has_handoff' | 'has_run' | 'requires'
 
 export interface GraphNode {
   id: string

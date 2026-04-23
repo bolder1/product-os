@@ -17,6 +17,17 @@ import { componentRouter } from './routers/component'
 import { designRouter } from './routers/design'
 import { pageRouter } from './routers/page'
 import { workflowRouter } from './routers/workflow'
+import { codeRouter } from './routers/code'
+import { handoffRouter } from './routers/handoff'
+import { analyticsRouter } from './routers/analytics'
+import { releaseRouter } from './routers/release'
+import { testingRouter } from './routers/testing'
+import { graphicsRouter } from './routers/graphics'
+import { controlTowerRouter } from './routers/control-tower'
+import { opsPilotRouter } from './routers/ops-pilot'
+import { memoryRouter } from './routers/memory'
+import { planModeRouter } from './routers/plan-mode'
+import { graphSnapshotRouter } from './routers/graph-snapshot'
 
 export const appRouter = router({
   auth: authRouter,
@@ -37,6 +48,17 @@ export const appRouter = router({
   design: designRouter,
   page: pageRouter,
   workflow: workflowRouter,
+  code: codeRouter,
+  handoff: handoffRouter,
+  analytics: analyticsRouter,
+  release: releaseRouter,
+  testing: testingRouter,
+  graphics: graphicsRouter,
+  controlTower: controlTowerRouter,
+  opsPilot: opsPilotRouter,
+  memory: memoryRouter,
+  planMode: planModeRouter,
+  graphSnapshot: graphSnapshotRouter,
 })
 
 export type AppRouter = typeof appRouter

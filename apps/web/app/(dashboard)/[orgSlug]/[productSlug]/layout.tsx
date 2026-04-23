@@ -12,11 +12,17 @@ import { useProductStore, type Product } from '../../../lib/product-store'
 import { useVersionStore } from '../../../lib/version-store'
 import { useCommentStore } from '../../../lib/comment-store'
 import { useDataSync } from '../../../lib/use-data-sync'
+import { usePhase19Sync } from '../../../lib/use-phase19-sync'
 import { CollaborationProvider, useCollaborationContext } from '../../../lib/collaboration-context'
 import { PresenceAvatars, ConnectionBadge } from '../../_components/presence-avatars'
+import { ComputerModePanel } from '../../../components/shared/computer-mode-panel'
+import { CommandPalette } from '../../../components/shared/command-palette'
+import { OpsPilot } from '../../../components/shared/ops-pilot'
+import { useCommandPaletteStore } from '../../../lib/command-palette-store'
 import { createContext, useContext } from 'react'
 import { usePathname } from 'next/navigation'
-import { GitBranch, MessageSquare, X, CircleDot } from 'lucide-react'
+import { GitBranch, MessageSquare, X, CircleDot, Search } from 'lucide-react'
+import { FirstRunBanner } from './_components/first-run-banner'
 
 export const ProductContext = createContext<Product | null>(null)
 
@@ -33,7 +39,12 @@ export default function ProductLayout({
 }) {
   const { orgSlug, productSlug } = use(params)
   const allProducts = useProductStore((s) => s.products)
-  const product = useMemo(() => allProducts.find((p) => p.orgSlug === orgSlug && p.slug === productSlug) ?? null, [allProducts, orgSlug, productSlug])
+  // Match by orgSlug+slug, or fall back to slug-only for legacy products with empty orgSlug
+  const product = useMemo(
+    () =>
+      allProducts.find((p) => p.slug === productSlug && (p.orgSlug === orgSlug || p.orgSlug === '')) ?? null,
+    [allProducts, orgSlug, productSlug],
+  )
   const pathname = usePathname()
   const openVersionPanel = useVersionStore((s) => s.openPanel)
   const activeBranches = useVersionStore((s) => s.activeBranches)
@@ -46,14 +57,15 @@ export default function ProductLayout({
 
   // Resolve real DB product ID for data sync; fall back to composite slug
   const dbProductId = product?.id ?? undefined
-  const { isLoading: isSyncing } = useDataSync(dbProductId)
+  useDataSync(dbProductId)
+  usePhase19Sync(dbProductId)
+
+  // Cmd+K / Ctrl+K is handled by the CommandPaletteStore directly via TopBar
 
   const segments = pathname.split('/')
   const currentStudio = segments[3] || 'planner'
   const productId = product?.id ?? `${orgSlug}-${productSlug}`
   const activeBranch = activeBranches[productId] ?? 'main'
-  const commentEntityId = `${productId}-${currentStudio}`
-
   const collabRoom = dbProductId ? `product:${dbProductId}` : null
 
   return (
@@ -68,6 +80,8 @@ export default function ProductLayout({
           commentsOpen={commentsOpen}
           setCommentsOpen={setCommentsOpen}
           unresolvedCount={unresolvedCount}
+          orgSlug={orgSlug}
+          productSlug={productSlug}
         >
           {children}
         </ProductLayoutInner>
@@ -87,6 +101,8 @@ function ProductLayoutInner({
   commentsOpen,
   setCommentsOpen,
   unresolvedCount,
+  orgSlug,
+  productSlug,
 }: {
   children: React.ReactNode
   product: Product | null
@@ -97,10 +113,23 @@ function ProductLayoutInner({
   commentsOpen: boolean
   setCommentsOpen: (v: boolean) => void
   unresolvedCount: number
+  orgSlug: string
+  productSlug: string
 }) {
   const { status, peers, setActiveStudio } = useCollaborationContext()
+  // Drive palette from the store — single source of truth (TopBar also uses this)
+  const paletteOpen = useCommandPaletteStore((s) => s.isOpen)
+  const openPalette = useCommandPaletteStore((s) => s.open)
+  const closePalette = useCommandPaletteStore((s) => s.close)
 
   const commentEntityId = `${productId}-${currentStudio}`
+  const dbProductId = product?.id
+
+  // Memoize contextHints so AIAssistantPanel doesn't get a new array ref every render
+  const contextHints = useMemo(
+    () => [product?.slug ?? productId, currentStudio],
+    [product?.slug, productId, currentStudio]
+  )
 
   // Update active studio in presence
   useEffect(() => {
@@ -121,17 +150,20 @@ function ProductLayoutInner({
           />
 
           <main className="flex-1 min-h-0 overflow-auto bg-[var(--bg-workspace)]">
-            <div className="min-h-full">
+            <div className="min-h-full flex flex-col">
+              <FirstRunBanner productId={productId} />
               {children}
             </div>
           </main>
 
           {/* ── Status Bar ── */}
-          <div className="h-[var(--statusbar-h)] flex items-center justify-between px-3 bg-[var(--bg-surface)] border-t border-[var(--border-default)] flex-shrink-0 text-[10px] select-none">
+          <div className="h-[var(--statusbar-h)] flex items-center justify-between px-3 bg-[var(--bg-surface)] border-t border-[var(--border-default)] flex-shrink-0 text-[11px] select-none" role="status" aria-label="Product status bar">
+
             <div className="flex items-center gap-4">
               <button
                 onClick={openVersionPanel}
-                className="flex items-center gap-1.5 text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] transition-colors"
+                className="flex items-center gap-1.5 text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
+                aria-label={`Branch: ${activeBranch}`}
               >
                 <GitBranch size={11} strokeWidth={1.75} />
                 <span className="font-medium">{activeBranch}</span>
@@ -141,19 +173,30 @@ function ProductLayoutInner({
 
               <button
                 onClick={() => setCommentsOpen(!commentsOpen)}
-                className="flex items-center gap-1.5 text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] transition-colors"
+                className="flex items-center gap-1.5 text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
+                aria-label={unresolvedCount > 0 ? `${unresolvedCount} open comments` : 'Comments'}
               >
                 <MessageSquare size={11} strokeWidth={1.75} />
                 <span>{unresolvedCount > 0 ? `${unresolvedCount} open` : 'Comments'}</span>
               </button>
             </div>
 
-            <div className="flex items-center gap-4 text-[var(--text-tertiary)]">
+            <div className="flex items-center gap-4 text-[var(--text-secondary)]">
               {peers.length > 0 && (
                 <span className="text-[var(--accent)]">{peers.length} collaborator{peers.length !== 1 ? 's' : ''}</span>
               )}
+              {/* Cmd+K trigger */}
+              <button
+                onClick={openPalette}
+                className="flex items-center gap-1.5 text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
+                aria-label="Search — Command K"
+              >
+                <Search size={10} />
+                <span>Search</span>
+                <kbd className="ml-0.5 px-1 py-px rounded bg-white/[0.08] text-[10px] font-mono">⌘K</kbd>
+              </button>
               <div className="flex items-center gap-1.5">
-                <CircleDot size={9} className="text-[var(--color-success)]" />
+                <CircleDot size={10} className="text-[var(--color-success)]" />
                 <span>Ready</span>
               </div>
               <span className="opacity-50">{currentStudio}</span>
@@ -172,12 +215,13 @@ function ProductLayoutInner({
                 <MessageSquare size={13} className="text-[var(--accent)]" />
                 <span className="text-[11px] font-semibold text-[var(--text-primary)]">Comments</span>
                 {unresolvedCount > 0 && (
-                  <span className="tool-badge-accent text-[9px]">{unresolvedCount}</span>
+                  <span className="tool-badge-accent text-[10px]">{unresolvedCount}</span>
                 )}
               </div>
               <button
                 onClick={() => setCommentsOpen(false)}
                 className="tool-btn-ghost tool-btn-icon"
+                aria-label="Close comments"
               >
                 <X size={14} />
               </button>
@@ -199,8 +243,30 @@ function ProductLayoutInner({
         <AIAssistantPanel
           studio={currentStudio}
           productId={productId}
-          contextHints={[product?.slug ?? productId, currentStudio]}
+          contextHints={contextHints}
         />
+        <ComputerModePanel
+          studio={currentStudio}
+          productId={dbProductId}
+        />
+        <CommandPalette
+          isOpen={paletteOpen}
+          onClose={closePalette}
+          orgSlug={orgSlug}
+          productSlug={productSlug}
+          currentStudio={currentStudio}
+          productId={dbProductId}
+        />
+
+        {/* ── OpsPilot AI Copilot ── */}
+        {dbProductId && (
+          <OpsPilot
+            productId={dbProductId}
+            currentStudio={currentStudio}
+            orgSlug={orgSlug}
+            productSlug={productSlug}
+          />
+        )}
       </div>
   )
 }

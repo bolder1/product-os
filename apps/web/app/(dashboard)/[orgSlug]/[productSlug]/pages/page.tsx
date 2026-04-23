@@ -1,9 +1,10 @@
 'use client'
 
 import { useState, useCallback, useMemo, useEffect } from 'react'
-import { useParams } from 'next/navigation'
+import { useParams, useSearchParams } from 'next/navigation'
 import { useProduct } from '../layout'
-import { Plus, Eye, Sparkles, FileText, Rocket, Search, Database, Menu } from 'lucide-react'
+import { Plus, Eye, FileText, Rocket, Search, Database, Menu } from 'lucide-react'
+import { AIActionBar } from '../../../../components/primitives/ai-action-bar'
 import { mockPages, type PageDef, type SectionDef } from './_data/mock-pages'
 import { useGraphStore } from '../../../../lib/graph-store'
 import { PageTree } from './_components/page-tree'
@@ -17,12 +18,14 @@ import { PublishModal } from './_components/publish-modal'
 import { StudioHealthBadge } from '../../../../components/shared/studio-health-badge'
 import { AnalyticsOverlay } from '../../../../components/shared/analytics-overlay'
 import { StudioEmptyState } from '../../../../components/shared/studio-empty-state'
+import { ViewInGraphLink } from '../../../../components/shared/view-in-graph-link'
 import { ContextBanner } from '../../../../components/shared/upstream-empty-state'
 
 type RightPanelTab = 'properties' | 'seo' | 'data' | 'nav'
 
 export default function PageBuilderPage() {
   const params = useParams<{ productSlug: string }>()
+  const searchParams = useSearchParams()
   const product = useProduct()
   const productId = product?.id ?? params.productSlug
 
@@ -63,6 +66,14 @@ export default function PageBuilderPage() {
   const [selectedPageId, setSelectedPageId] = useState<string | null>(
     pages[0]?.id ?? 'page-home'
   )
+
+  // Auto-select page when navigated from Graph Explorer via ?nodeId
+  useEffect(() => {
+    const nodeId = searchParams.get('nodeId')
+    if (!nodeId || pages.length === 0) return
+    const match = pages.find((p) => p.id === nodeId)
+    if (match) setSelectedPageId(match.id)
+  }, [searchParams, pages])
 
   // Sync pages to graph store
   useEffect(() => {
@@ -314,15 +325,13 @@ export default function PageBuilderPage() {
             {pages.length} pages
             {selectedPage ? ` / ${selectedPage.name}` : ''}
           </span>
+          {selectedPage && (
+            <ViewInGraphLink nodeId={selectedPage.id} className="ml-1" />
+          )}
         </div>
 
         <div className="flex items-center gap-0.5">
-          <button
-            className="tool-btn flex items-center gap-1 h-[24px] px-2 text-[10px] font-medium text-[var(--accent-text)] bg-transparent hover:bg-[var(--accent)]/10 border border-transparent hover:border-[var(--accent)]/20"
-          >
-            <Sparkles className="w-3 h-3" />
-            AI Generate
-          </button>
+          <AIActionBar workspace="design" productId={productId} compact />
 
           <button
             onClick={() => selectedPage && setPreviewOpen(true)}

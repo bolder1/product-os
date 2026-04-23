@@ -1,17 +1,83 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { Plus, Play, Sparkles, FlaskConical } from 'lucide-react'
-import { mockTestData } from './_data/mock-tests'
+import { useParams } from 'next/navigation'
+import { Plus, Play, FlaskConical } from 'lucide-react'
+import { AIActionBar } from '../../../../components/primitives/ai-action-bar'
+import { mockTestData, type TestSuite as MockSuite, type TestRun as MockRun } from './_data/mock-tests'
 import { TestSuites } from './_components/test-suites'
 import { TestRuns } from './_components/test-runs'
 import { CoverageReport } from './_components/coverage-report'
+import { useProduct } from '../layout'
+import {
+  useTestingStore,
+  type TestSuite as StoreSuite,
+  type TestRun as StoreRun,
+  type TestTab,
+} from '../../../../lib/testing-store'
 
-type Tab = 'suites' | 'runs' | 'coverage'
+/** Normalize store suite into the shape TestSuites expects. */
+function toMockSuite(s: StoreSuite): MockSuite {
+  return {
+    id: s.id,
+    name: s.name || s.label,
+    lastRun: s.lastRun ?? (s.updatedAt ? new Date(s.updatedAt).toLocaleString() : 'never'),
+    status: (s.status === 'pending' ? 'partial' : s.status) as MockSuite['status'],
+    tests: s.tests.map((t) => ({
+      id: t.id,
+      name: t.name,
+      status: (t.status === 'pending' ? 'skipped' : t.status) as MockSuite['tests'][number]['status'],
+      duration: t.duration,
+    })),
+  }
+}
+
+/** Normalize store run into the shape TestRuns expects. */
+function toMockRun(r: StoreRun): MockRun {
+  return {
+    id: r.id,
+    runNumber: r.runNumber,
+    date: r.date,
+    duration: r.duration,
+    passed: r.passed,
+    failed: r.failed,
+    skipped: r.skipped,
+    trigger: r.trigger,
+    status: r.status,
+  }
+}
 
 export default function TestingPage() {
-  const [activeTab, setActiveTab] = useState<Tab>('suites')
-  const { suites, runs, coverage } = mockTestData
+  const params = useParams<{ productSlug: string }>()
+  const product = useProduct()
+  const productId = product?.id ?? params.productSlug
+
+  const storeSuites = useTestingStore((s) => s.suites)
+  const storeRuns = useTestingStore((s) => s.runs)
+  const storeCoverage = useTestingStore((s) => s.coverage)
+  const activeTab = useTestingStore((s) => s.activeTab)
+  const setTab = useTestingStore((s) => s.setTab)
+
+  const productSuites = useMemo(
+    () => storeSuites.filter((s) => s.productId === productId),
+    [storeSuites, productId],
+  )
+  const productRuns = useMemo(
+    () => storeRuns.filter((r) => r.productId === productId),
+    [storeRuns, productId],
+  )
+
+  const isLive = productSuites.length > 0 || productRuns.length > 0
+
+  // Prefer live data; fall back to the seeded mock project when empty.
+  const suites: MockSuite[] = isLive
+    ? productSuites.map(toMockSuite)
+    : mockTestData.suites
+  const runs: MockRun[] = productRuns.length > 0
+    ? productRuns.map(toMockRun)
+    : mockTestData.runs
+  const coverage =
+    storeCoverage.categories.length > 0 ? storeCoverage : mockTestData.coverage
 
   const stats = useMemo(() => {
     const allTests = suites.flatMap((s) => s.tests)
@@ -22,7 +88,7 @@ export default function TestingPage() {
     return { total, passed, failed, skipped, coverage: coverage.overall }
   }, [suites, coverage])
 
-  const tabs: { key: Tab; label: string; count?: number }[] = [
+  const tabs: { key: TestTab; label: string; count?: number }[] = [
     { key: 'suites', label: 'Test Suites', count: suites.length },
     { key: 'runs', label: 'Test Runs', count: runs.length },
     { key: 'coverage', label: 'Coverage' },
@@ -40,13 +106,19 @@ export default function TestingPage() {
           <span className="text-[11px] text-[var(--text-tertiary)]">
             Quality assurance &amp; test management
           </span>
+          {isLive ? (
+            <span className="text-[10px] px-1.5 py-0.5 rounded bg-[var(--accent-bg)] text-[var(--accent-text)]">
+              live
+            </span>
+          ) : (
+            <span className="text-[10px] px-1.5 py-0.5 rounded bg-[var(--bg-inset)] text-[var(--text-tertiary)]">
+              sample
+            </span>
+          )}
         </div>
 
         <div className="flex items-center gap-1">
-          <button className="tool-btn text-[var(--accent-text)]">
-            <Sparkles size={12} />
-            AI: Generate Tests
-          </button>
+          <AIActionBar workspace="ship" productId={productId} compact />
           <button className="tool-btn">
             <Play size={12} />
             Run All
@@ -83,7 +155,7 @@ export default function TestingPage() {
         {tabs.map((tab) => (
           <button
             key={tab.key}
-            onClick={() => setActiveTab(tab.key)}
+            onClick={() => setTab(tab.key)}
             className={`tool-tab ${activeTab === tab.key ? 'active' : ''}`}
           >
             {tab.label}

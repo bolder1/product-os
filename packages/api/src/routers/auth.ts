@@ -4,6 +4,7 @@ import { TRPCError } from '@trpc/server'
 import { eq, and } from 'drizzle-orm'
 import { users, sessions, memberships, organizations } from '@product-os/db'
 import crypto from 'crypto'
+import { hashPassword, verifyPassword } from '../utils/password'
 
 export const authRouter = router({
   /**
@@ -33,8 +34,13 @@ export const authRouter = router({
         })
       }
 
-      // In dev mode, accept any password for seeded users
-      // TODO: Implement proper password hashing with Better-Auth in production
+      // Verify password when hash is present; fall through for legacy seed users without a hash
+      if (user.passwordHash) {
+        const valid = verifyPassword(input.password, user.passwordHash)
+        if (!valid) {
+          throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Incorrect password' })
+        }
+      }
 
       // Create a session token
       const token = crypto.randomUUID()
@@ -108,13 +114,14 @@ export const authRouter = router({
         })
       }
 
-      // Create user
-      // TODO: Hash password with Better-Auth in production
+      const passwordHash = hashPassword(input.password)
+
       const [user] = await ctx.db
         .insert(users)
         .values({
           name: input.name,
           email: input.email,
+          passwordHash,
           emailVerified: false,
         })
         .returning()
@@ -190,6 +197,67 @@ export const authRouter = router({
         : null,
     }
   }),
+
+  /**
+   * Create an organization for the current user.
+   * Called after signup/onboarding to provision a real org in the DB.
+   * If the user already belongs to an org, returns that org instead.
+   */
+  createOrg: publicProcedure
+    .input(
+      z.object({
+        token: z.string(),
+        name: z.string().min(1).max(200),
+        slug: z.string().min(1).max(100),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      // Resolve the session from the provided token
+      const [sessionRow] = await ctx.db
+        .select({ userId: sessions.userId })
+        .from(sessions)
+        .where(eq(sessions.token, input.token))
+        .limit(1)
+
+      if (!sessionRow) {
+        throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Invalid session token' })
+      }
+
+      // Check if user already has an org (idempotency)
+      const [existingMembership] = await ctx.db
+        .select({
+          orgId: memberships.orgId,
+          orgName: organizations.name,
+          orgSlug: organizations.slug,
+          role: memberships.role,
+        })
+        .from(memberships)
+        .innerJoin(organizations, eq(memberships.orgId, organizations.id))
+        .where(eq(memberships.userId, sessionRow.userId))
+        .limit(1)
+
+      if (existingMembership) {
+        return {
+          id: existingMembership.orgId,
+          name: existingMembership.orgName,
+          slug: existingMembership.orgSlug,
+          role: existingMembership.role,
+        }
+      }
+
+      // Create the org
+      const [org] = await ctx.db
+        .insert(organizations)
+        .values({ name: input.name, slug: input.slug })
+        .returning()
+
+      // Create owner membership
+      await ctx.db
+        .insert(memberships)
+        .values({ userId: sessionRow.userId, orgId: org.id, role: 'owner' })
+
+      return { id: org.id, name: org.name, slug: org.slug, role: 'owner' }
+    }),
 
   /**
    * Logout — delete the current session.

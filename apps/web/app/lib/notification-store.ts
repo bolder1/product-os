@@ -123,6 +123,13 @@ export const useNotificationStore = create<NotificationState>()(
     }),
     {
       name: 'product-os-notifications',
+      // Re-derive unreadCount from the notifications array after rehydration
+      // to prevent the counter drifting from reality (e.g. after partial failures)
+      onRehydrateStorage: () => (state) => {
+        if (state) {
+          state.unreadCount = state.notifications.filter((n) => !n.read).length
+        }
+      },
     }
   )
 )

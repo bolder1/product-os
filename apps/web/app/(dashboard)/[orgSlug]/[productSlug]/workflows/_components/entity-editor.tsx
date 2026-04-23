@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { Plus, Trash2, Save, AlertTriangle } from "lucide-react";
 import type { Entity, Field, FieldType, Relation, Cardinality } from "../_data/mock-data";
 import { uid } from "../_data/mock-data";
+import { ViewInGraphLink } from "../../../../../components/shared/view-in-graph-link";
 
 interface EntityEditorProps {
   entity: Entity;
@@ -67,12 +68,15 @@ export default function EntityEditor({ entity, allEntities, onChange, onDelete }
     >
       {/* Header */}
       <div className="flex flex-col gap-3">
-        <input
-          value={entity.name}
-          onChange={(e) => update({ name: e.target.value })}
-          className="text-xl font-semibold bg-transparent text-[#F1F5F9] outline-none border-b border-transparent focus:border-emerald-500/40 pb-1 transition-colors"
-          placeholder="Entity name"
-        />
+        <div className="flex items-center gap-2">
+          <input
+            value={entity.name}
+            onChange={(e) => update({ name: e.target.value })}
+            className="flex-1 text-xl font-semibold bg-transparent text-[#F1F5F9] outline-none border-b border-transparent focus:border-emerald-500/40 pb-1 transition-colors"
+            placeholder="Entity name"
+          />
+          <ViewInGraphLink nodeId={entity.id} />
+        </div>
         <textarea
           value={entity.description}
           onChange={(e) => update({ description: e.target.value })}

@@ -8,6 +8,7 @@ import { ComponentPreview } from './component-preview'
 import { VariantGrid } from './variant-grid'
 import { TokenBindingPanel } from './token-binding-panel'
 import type { BrandTokens } from '../../../../../lib/use-brand-tokens'
+import { ViewInGraphLink } from '../../../../../components/shared/view-in-graph-link'
 
 type Tab = 'preview' | 'props' | 'variants' | 'tokens' | 'versions'
 
@@ -133,6 +134,8 @@ export function ComponentDetail({ component, onUpdate, brandTokens, versionHisto
                 {component.name}
               </h2>
             )}
+
+            <ViewInGraphLink nodeId={component.id} />
 
             {/* Category dropdown */}
             <div className="relative">

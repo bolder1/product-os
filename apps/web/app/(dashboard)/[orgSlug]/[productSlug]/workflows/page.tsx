@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useCallback, useMemo, useEffect } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
-import { Database, GitBranch, Plus, Sparkles, Zap, FileInput, Trash2 } from "lucide-react";
+import { Database, GitBranch, Plus, Zap, FileInput, Trash2 } from "lucide-react";
+import { AIActionBar } from "../../../../components/primitives/ai-action-bar";
 import { useProduct } from "../layout";
 import {
   INITIAL_ENTITIES,
@@ -48,6 +49,7 @@ interface FormDef {
 
 export default function WorkflowBuilderPage() {
   const params = useParams<{ productSlug: string }>();
+  const searchParams = useSearchParams();
   const product = useProduct();
   const productId = product?.id ?? params.productSlug;
 
@@ -84,6 +86,16 @@ export default function WorkflowBuilderPage() {
     } catch { return INITIAL_WORKFLOWS; }
   });
   const [selection, setSelection] = useState<Selection>(null);
+
+  // Auto-select entity or workflow when navigated from Graph Explorer via ?nodeId
+  useEffect(() => {
+    const nodeId = searchParams.get("nodeId");
+    if (!nodeId) return;
+    const matchEntity = entities.find((e) => e.id === nodeId);
+    if (matchEntity) { setTab("entities"); setSelection({ kind: "entity", id: nodeId }); return; }
+    const matchWorkflow = workflows.find((w) => w.id === nodeId);
+    if (matchWorkflow) { setTab("workflows"); setSelection({ kind: "workflow", id: nodeId }); }
+  }, [searchParams, entities, workflows]);
 
   // ── Automations & Forms (mock data — wired to graph store) ──────────
   const [automations, setAutomations] = useState<AutomationDef[]>([
@@ -277,13 +289,7 @@ export default function WorkflowBuilderPage() {
             <Plus className="w-3 h-3" />
             Automation
           </button>
-          <button
-            onClick={aiGenerate}
-            className="tool-btn flex items-center gap-1 px-2 h-[22px] bg-[var(--accent)]/10 border border-[var(--accent)]/20 text-[var(--accent-text)] text-[11px] font-medium hover:bg-[var(--accent)]/20"
-          >
-            <Sparkles className="w-3 h-3" />
-            AI Generate
-          </button>
+          <AIActionBar workspace="engineer" productId={productId} compact />
         </div>
       </div>
 

@@ -6,6 +6,7 @@ import { Plus, Trash2, Save, ArrowRight, Shield, Zap, ChevronDown, ChevronUp, Lo
 import type { Workflow, WorkflowState, WorkflowTransition, Entity } from "../_data/mock-data";
 import { uid } from "../_data/mock-data";
 import StateDiagram from "./state-diagram";
+import { ViewInGraphLink } from "../../../../../components/shared/view-in-graph-link";
 
 /* ------------------------------------------------------------------ */
 /*  Guard / Action types for enhanced transitions                      */
@@ -245,12 +246,15 @@ export default function WorkflowEditor({ workflow, entities, onChange, onDelete 
     >
       {/* Header */}
       <div className="flex items-center gap-4">
-        <input
-          value={workflow.name}
-          onChange={(e) => update({ name: e.target.value })}
-          className="text-xl font-semibold bg-transparent text-[#F1F5F9] outline-none border-b border-transparent focus:border-emerald-500/40 pb-1 transition-colors flex-1"
-          placeholder="Workflow name"
-        />
+        <div className="flex items-center gap-2 flex-1 min-w-0">
+          <input
+            value={workflow.name}
+            onChange={(e) => update({ name: e.target.value })}
+            className="text-xl font-semibold bg-transparent text-[#F1F5F9] outline-none border-b border-transparent focus:border-emerald-500/40 pb-1 transition-colors flex-1 min-w-0"
+            placeholder="Workflow name"
+          />
+          <ViewInGraphLink nodeId={workflow.id} />
+        </div>
         <div className="flex items-center gap-2">
           <span className="text-xs text-[#64748B]">Entity:</span>
           <select

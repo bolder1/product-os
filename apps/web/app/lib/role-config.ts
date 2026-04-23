@@ -24,11 +24,12 @@ export const roleConfigs: Record<OrgRole, RoleConfig> = {
     icon: 'Shield',
     color: '#EF4444',
     studios: [
-      'planner', 'templates', 'canvas',
+      'home', 'agenda',
+      'planner', 'roadmap', 'memory', 'templates', 'canvas',
       'brand', 'components', 'design', 'workflow', 'pages', 'graphics',
       'code', 'handoff', 'releases', 'testing',
       'tasks', 'approvals', 'decisions', 'notifications', 'analytics',
-      'control-tower', 'graph-explorer',
+      'control-tower', 'graph-explorer', 'graph', 'connectors', 'ai-skills', 'brand-compliance',
       'admin',
     ],
     dashboardWidgets: ['overview', 'analytics', 'tasks', 'approvals', 'releases', 'team', 'settings'],
@@ -38,7 +39,7 @@ export const roleConfigs: Record<OrgRole, RoleConfig> = {
     description: 'Oversee planning, templates, tasks, approvals, and releases',
     icon: 'Briefcase',
     color: '#3B82F6',
-    studios: ['planner', 'templates', 'control-tower', 'tasks', 'approvals', 'decisions', 'analytics', 'releases'],
+    studios: ['home', 'agenda', 'planner', 'roadmap', 'memory', 'templates', 'control-tower', 'graph', 'tasks', 'approvals', 'decisions', 'analytics', 'releases', 'connectors'],
     dashboardWidgets: ['overview', 'analytics', 'tasks', 'approvals', 'releases'],
   },
   business_analyst: {
@@ -46,7 +47,7 @@ export const roleConfigs: Record<OrgRole, RoleConfig> = {
     description: 'Analyze requirements, build canvases, and review templates',
     icon: 'BarChart3',
     color: '#8B5CF6',
-    studios: ['planner', 'templates', 'canvas', 'analytics', 'tasks', 'approvals', 'decisions'],
+    studios: ['home', 'agenda', 'planner', 'roadmap', 'memory', 'templates', 'canvas', 'analytics', 'tasks', 'approvals', 'decisions'],
     dashboardWidgets: ['overview', 'analytics', 'tasks', 'approvals'],
   },
   qa: {
@@ -54,7 +55,7 @@ export const roleConfigs: Record<OrgRole, RoleConfig> = {
     description: 'Manage testing, track bugs, and verify releases',
     icon: 'Bug',
     color: '#F59E0B',
-    studios: ['testing', 'tasks', 'approvals', 'releases'],
+    studios: ['home', 'agenda', 'testing', 'tasks', 'approvals', 'releases'],
     dashboardWidgets: ['testing', 'tasks', 'approvals', 'releases'],
   },
   product_designer: {
@@ -62,7 +63,7 @@ export const roleConfigs: Record<OrgRole, RoleConfig> = {
     description: 'Design brand, components, pages, and graphics',
     icon: 'Palette',
     color: '#EC4899',
-    studios: ['brand', 'components', 'design', 'graphics', 'pages', 'tasks'],
+    studios: ['home', 'agenda', 'memory', 'brand', 'components', 'design', 'graphics', 'pages', 'tasks', 'brand-compliance'],
     dashboardWidgets: ['design', 'components', 'tasks', 'brand'],
   },
   frontend_dev: {
@@ -70,7 +71,7 @@ export const roleConfigs: Record<OrgRole, RoleConfig> = {
     description: 'Build components, pages, and implement handoff specs',
     icon: 'Code2',
     color: '#06B6D4',
-    studios: ['components', 'pages', 'code', 'handoff', 'tasks'],
+    studios: ['home', 'agenda', 'components', 'pages', 'code', 'handoff', 'tasks'],
     dashboardWidgets: ['code', 'components', 'tasks', 'handoff'],
   },
   backend_dev: {
@@ -78,7 +79,7 @@ export const roleConfigs: Record<OrgRole, RoleConfig> = {
     description: 'Build workflows, APIs, and implement handoff specs',
     icon: 'Server',
     color: '#10B981',
-    studios: ['workflow', 'code', 'handoff', 'tasks'],
+    studios: ['home', 'agenda', 'workflow', 'code', 'handoff', 'tasks'],
     dashboardWidgets: ['code', 'workflows', 'tasks', 'handoff'],
   },
   viewer: {
@@ -86,7 +87,7 @@ export const roleConfigs: Record<OrgRole, RoleConfig> = {
     description: 'Read-only access to dashboards and analytics',
     icon: 'Eye',
     color: '#64748B',
-    studios: ['control-tower', 'analytics'],
+    studios: ['home', 'agenda', 'control-tower', 'analytics'],
     dashboardWidgets: ['overview', 'analytics'],
   },
 }
