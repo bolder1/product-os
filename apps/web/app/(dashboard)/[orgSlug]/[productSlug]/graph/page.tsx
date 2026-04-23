@@ -34,10 +34,84 @@ import {
   Zap,
   Play,
   Pause,
+  AlertTriangle,
+  ArrowRight,
+  ArrowLeft,
+  Link2Off,
 } from 'lucide-react'
 import { useLivingGraphStore, ROLE_PRESETS, type GraphSnapshot } from '../../../../lib/living-graph-store'
 import { useAuth } from '../../../../lib/auth-context'
 import type { OrgRole } from '../../../../lib/role-config'
+
+// ---------------------------------------------------------------------------
+// Graph analysis helpers
+// ---------------------------------------------------------------------------
+
+/** Returns node IDs that have no edges (source or target). */
+function findOrphans(nodes: LivingNode[], edges: typeof MOCK_EDGES): Set<string> {
+  const connected = new Set<string>()
+  for (const e of edges) { connected.add(e.source); connected.add(e.target) }
+  return new Set(nodes.filter((n) => !connected.has(n.id)).map((n) => n.id))
+}
+
+/** Detects nodes involved in dependency cycles (DFS). */
+function findCycleNodes(edges: typeof MOCK_EDGES): Set<string> {
+  const adj = new Map<string, string[]>()
+  for (const e of edges) {
+    if (!adj.has(e.source)) adj.set(e.source, [])
+    adj.get(e.source)!.push(e.target)
+  }
+  const visited = new Set<string>()
+  const inStack = new Set<string>()
+  const cycleNodes = new Set<string>()
+
+  function dfs(nodeId: string) {
+    visited.add(nodeId)
+    inStack.add(nodeId)
+    for (const neighbor of adj.get(nodeId) ?? []) {
+      if (inStack.has(neighbor)) {
+        cycleNodes.add(neighbor)
+        cycleNodes.add(nodeId)
+      } else if (!visited.has(neighbor)) {
+        dfs(neighbor)
+        if (cycleNodes.has(neighbor)) cycleNodes.add(nodeId)
+      }
+    }
+    inStack.delete(nodeId)
+  }
+
+  for (const e of edges) { if (!visited.has(e.source)) dfs(e.source) }
+  return cycleNodes
+}
+
+/** What breaks if an edge is removed: downstream nodes that become disconnected. */
+function impactOfRemoval(
+  edgeId: string,
+  edges: typeof MOCK_EDGES,
+): { sourceLabel: string; targetLabel: string; affectedCount: number } {
+  const edge = edges.find((e) => e.id === edgeId)
+  if (!edge) return { sourceLabel: '?', targetLabel: '?', affectedCount: 0 }
+  const srcNode = MOCK_LIVING_NODES.find((n) => n.id === edge.source)
+  const tgtNode = MOCK_LIVING_NODES.find((n) => n.id === edge.target)
+  // Count how many nodes depend on the target transitively
+  const adj = new Map<string, string[]>()
+  for (const e of edges) {
+    if (!adj.has(e.source)) adj.set(e.source, [])
+    adj.get(e.source)!.push(e.target)
+  }
+  const reachable = new Set<string>()
+  function reach(id: string) {
+    for (const n of adj.get(id) ?? []) {
+      if (!reachable.has(n)) { reachable.add(n); reach(n) }
+    }
+  }
+  reach(edge.target)
+  return {
+    sourceLabel: srcNode?.label ?? edge.source,
+    targetLabel: tgtNode?.label ?? edge.target,
+    affectedCount: reachable.size,
+  }
+}
 
 // ---------------------------------------------------------------------------
 // Role view presets
@@ -193,9 +267,15 @@ const STATUS_CONFIG = {
 function LivingGraphNode({ data }: { data: Record<string, unknown> }) {
   const node = data.node as LivingNode
   const dimmed = data.dimmed as boolean
+  const isOrphan = data.orphan as boolean
+  const inCycle = data.inCycle as boolean
   const color = NODE_STUDIO_COLORS[node.studio] ?? '#64748B'
   const status = STATUS_CONFIG[node.status]
   const size = 36 + node.importance * 8 // 44..76px
+
+  // Orphan → orange dashed ring; cycle → red dashed ring
+  const ringColor = inCycle ? '#EF4444' : isOrphan ? '#F97316' : color
+  const borderStyle = (inCycle || isOrphan) ? 'dashed' : 'solid'
 
   return (
     <div
@@ -203,7 +283,8 @@ function LivingGraphNode({ data }: { data: Record<string, unknown> }) {
       style={{
         width: size,
         height: size,
-        borderColor: dimmed ? 'rgba(255,255,255,0.06)' : color,
+        borderColor: dimmed ? 'rgba(255,255,255,0.06)' : ringColor,
+        borderStyle,
         backgroundColor: dimmed ? 'rgba(255,255,255,0.02)' : `${color}18`,
         opacity: dimmed ? 0.3 : 1,
         boxShadow: dimmed ? 'none' : (node.recentActivity ? `0 0 16px ${color}40` : 'none'),
@@ -217,6 +298,20 @@ function LivingGraphNode({ data }: { data: Record<string, unknown> }) {
         className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-[#080C14]"
         style={{ backgroundColor: status.color }}
       />
+
+      {/* Orphan badge */}
+      {isOrphan && !dimmed && (
+        <div className="absolute -bottom-0.5 -left-0.5 w-3.5 h-3.5 rounded-full bg-[#F97316] border-2 border-[#080C14] flex items-center justify-center">
+          <Link2Off size={7} color="#fff" />
+        </div>
+      )}
+
+      {/* Cycle badge */}
+      {inCycle && !dimmed && (
+        <div className="absolute -bottom-0.5 -left-0.5 w-3.5 h-3.5 rounded-full bg-[#EF4444] border-2 border-[#080C14] flex items-center justify-center">
+          <AlertTriangle size={7} color="#fff" />
+        </div>
+      )}
 
       {/* Activity pulse ring */}
       {status.pulse && !dimmed && (
@@ -232,6 +327,8 @@ function LivingGraphNode({ data }: { data: Record<string, unknown> }) {
         style={{ color: dimmed ? '#475569' : '#94A3B8' }}
       >
         {node.label}
+        {isOrphan && <span className="ml-1 text-[#F97316]">·orphan</span>}
+        {inCycle && <span className="ml-1 text-[#EF4444]">·cycle</span>}
       </div>
     </div>
   )
@@ -304,11 +401,15 @@ function NodeDetail({
   onClose,
   orgSlug,
   productSlug,
+  orphanIds,
+  cycleNodeIds,
 }: {
   node: LivingNode
   onClose: () => void
   orgSlug: string
   productSlug: string
+  orphanIds: Set<string>
+  cycleNodeIds: Set<string>
 }) {
   const color = NODE_STUDIO_COLORS[node.studio] ?? '#64748B'
   const status = STATUS_CONFIG[node.status]
@@ -385,6 +486,71 @@ function NodeDetail({
           </div>
         </div>
 
+        {/* Dependencies */}
+        {(() => {
+          const deps = MOCK_EDGES.filter((e) => e.source === node.id)
+            .map((e) => MOCK_LIVING_NODES.find((n) => n.id === e.target))
+            .filter(Boolean) as LivingNode[]
+          const backlinks = MOCK_EDGES.filter((e) => e.target === node.id)
+            .map((e) => MOCK_LIVING_NODES.find((n) => n.id === e.source))
+            .filter(Boolean) as LivingNode[]
+
+          return (
+            <>
+              {deps.length > 0 && (
+                <div>
+                  <p className="text-[10px] text-[#64748B] mb-2 uppercase tracking-wide font-semibold flex items-center gap-1.5">
+                    <ArrowRight size={10} />
+                    Dependencies ({deps.length})
+                  </p>
+                  <div className="flex flex-col gap-1">
+                    {deps.map((d) => (
+                      <div key={d.id} className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-white/[0.02] border border-white/[0.04]">
+                        <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: NODE_STUDIO_COLORS[d.studio] ?? '#64748B' }} />
+                        <span className="text-xs text-[#94A3B8] flex-1 truncate">{d.label}</span>
+                        <span className="text-[9px] text-[#475569] capitalize">{d.studio}</span>
+                        {cycleNodeIds.has(d.id) && <AlertTriangle size={9} className="text-[#EF4444] shrink-0" />}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {backlinks.length > 0 && (
+                <div>
+                  <p className="text-[10px] text-[#64748B] mb-2 uppercase tracking-wide font-semibold flex items-center gap-1.5">
+                    <ArrowLeft size={10} />
+                    Used by ({backlinks.length})
+                  </p>
+                  <div className="flex flex-col gap-1">
+                    {backlinks.map((b) => (
+                      <div key={b.id} className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-white/[0.02] border border-white/[0.04]">
+                        <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: NODE_STUDIO_COLORS[b.studio] ?? '#64748B' }} />
+                        <span className="text-xs text-[#94A3B8] flex-1 truncate">{b.label}</span>
+                        <span className="text-[9px] text-[#475569] capitalize">{b.studio}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {orphanIds.has(node.id) && (
+                <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl border border-[#F97316]/30 bg-[#F97316]/08">
+                  <Link2Off size={12} className="text-[#F97316] shrink-0" />
+                  <p className="text-xs text-[#F97316]">Orphan node — no edges connect to or from this node.</p>
+                </div>
+              )}
+
+              {cycleNodeIds.has(node.id) && (
+                <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl border border-[#EF4444]/30 bg-[#EF4444]/08">
+                  <AlertTriangle size={12} className="text-[#EF4444] shrink-0" />
+                  <p className="text-xs text-[#EF4444]">Cycle detected — this node is part of a circular dependency.</p>
+                </div>
+              )}
+            </>
+          )
+        })()}
+
         {/* Open in studio */}
         <a
           href={`/${orgSlug}/${productSlug}/${studioHref}`}
@@ -426,11 +592,16 @@ export default function LivingGraphPage({
           id: n.id,
           type: 'living',
           position: { x: n.x, y: n.y },
-          data: { node: n, dimmed: isDimmed },
+          data: {
+            node: n,
+            dimmed: isDimmed,
+            orphan: orphanIds.has(n.id),
+            inCycle: cycleNodeIds.has(n.id),
+          },
           draggable: true,
         }
       }),
-    [allowedStudios],
+    [allowedStudios, orphanIds, cycleNodeIds],
   )
 
   const buildEdges = useCallback((): Edge[] =>
@@ -455,6 +626,12 @@ export default function LivingGraphPage({
   const [selectedNode, setSelectedNode] = useState<LivingNode | null>(null)
   const [roleRailOpen, setRoleRailOpen] = useState(true)
   const [playing, setPlaying] = useState(false)
+  const [hoveredEdgeId, setHoveredEdgeId] = useState<string | null>(null)
+  const [edgeTooltipPos, setEdgeTooltipPos] = useState<{ x: number; y: number } | null>(null)
+
+  // Derived graph health metrics
+  const orphanIds = useMemo(() => findOrphans(MOCK_LIVING_NODES, MOCK_EDGES), [])
+  const cycleNodeIds = useMemo(() => findCycleNodes(MOCK_EDGES), [])
 
   const productSnapshots = snapshotsByProduct['current'] ?? []
 
@@ -500,10 +677,12 @@ export default function LivingGraphPage({
           {/* Health pills */}
           <div className="flex items-center gap-1.5 text-[10px]">
             {[
-              { label: `${healthy} healthy`, color: '#10B981' },
-              { label: `${active} active`,   color: '#3B82F6' },
-              { label: `${warning} warning`, color: '#F59E0B' },
-              { label: `${stale} stale`,     color: '#64748B' },
+              { label: `${healthy} healthy`,        color: '#10B981' },
+              { label: `${active} active`,           color: '#3B82F6' },
+              { label: `${warning} warning`,         color: '#F59E0B' },
+              { label: `${stale} stale`,             color: '#64748B' },
+              ...(orphanIds.size > 0   ? [{ label: `${orphanIds.size} orphan`,   color: '#F97316' }] : []),
+              ...(cycleNodeIds.size > 0 ? [{ label: `${cycleNodeIds.size} cycle`, color: '#EF4444' }] : []),
             ].map(({ label, color }) => (
               <span
                 key={label}
@@ -624,6 +803,17 @@ export default function LivingGraphPage({
             onEdgesChange={onEdgesChange}
             onConnect={onConnect}
             onNodeClick={onNodeClick}
+            onEdgeMouseEnter={(_evt, edge) => {
+              setHoveredEdgeId(edge.id)
+              setEdgeTooltipPos({ x: _evt.clientX, y: _evt.clientY })
+            }}
+            onEdgeMouseLeave={() => {
+              setHoveredEdgeId(null)
+              setEdgeTooltipPos(null)
+            }}
+            onEdgeMouseMove={(_evt) => {
+              if (hoveredEdgeId) setEdgeTooltipPos({ x: _evt.clientX, y: _evt.clientY })
+            }}
             nodeTypes={nodeTypes}
             fitView
             fitViewOptions={{ padding: 0.15 }}
@@ -658,6 +848,38 @@ export default function LivingGraphPage({
             ))}
           </div>
 
+          {/* Edge impact tooltip */}
+          <AnimatePresence>
+            {hoveredEdgeId && edgeTooltipPos && (() => {
+              const impact = impactOfRemoval(hoveredEdgeId, MOCK_EDGES)
+              return (
+                <motion.div
+                  key={hoveredEdgeId}
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.12 }}
+                  className="fixed z-50 pointer-events-none"
+                  style={{ left: edgeTooltipPos.x + 12, top: edgeTooltipPos.y - 48 }}
+                >
+                  <div className="rounded-xl border border-white/[0.12] bg-[#0B0F1A]/95 backdrop-blur-sm px-3 py-2.5 shadow-2xl max-w-[240px]">
+                    <p className="text-[10px] text-[#64748B] mb-1 uppercase tracking-wide font-semibold">Impact if removed</p>
+                    <p className="text-xs text-[#F1F5F9] font-medium leading-snug">
+                      {impact.sourceLabel} → {impact.targetLabel}
+                    </p>
+                    {impact.affectedCount > 0 ? (
+                      <p className="text-[11px] text-[#F59E0B] mt-1">
+                        ⚠ {impact.affectedCount} downstream node{impact.affectedCount !== 1 ? 's' : ''} affected
+                      </p>
+                    ) : (
+                      <p className="text-[11px] text-[#10B981] mt-1">✓ No downstream dependencies</p>
+                    )}
+                  </div>
+                </motion.div>
+              )
+            })()}
+          </AnimatePresence>
+
           {/* Current snapshot banner */}
           {currentSnapshotId && (
             <div className="absolute top-3 left-1/2 -translate-x-1/2 flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#F59E0B]/15 border border-[#F59E0B]/30">
@@ -685,6 +907,8 @@ export default function LivingGraphPage({
               onClose={() => setSelectedNode(null)}
               orgSlug={params.orgSlug}
               productSlug={params.productSlug}
+              orphanIds={orphanIds}
+              cycleNodeIds={cycleNodeIds}
             />
           )}
         </AnimatePresence>
