@@ -5,6 +5,7 @@ import { Code2, Play, Download, Sparkles, Search } from 'lucide-react'
 import { mockFiles, buildFolderTree, type FileNode } from './_data/mock-files'
 import { FileTree } from './_components/file-tree'
 import { CodeViewer } from './_components/code-viewer'
+import { ContextBanner } from '../../../../components/shared/upstream-empty-state'
 
 export default function CodeStudioPage() {
   const [selectedPath, setSelectedPath] = useState<string | null>(null)
@@ -43,6 +44,14 @@ export default function CodeStudioPage() {
 
   return (
     <div className="flex flex-col h-full bg-[var(--bg-workspace)]">
+      <ContextBanner
+        chips={[
+          { label: 'Dev Handoff', source: 'handoff', color: '#F59E0B' },
+          { label: 'Components', source: 'components', color: '#6366F1' },
+          { label: 'Brand Tokens', source: 'brand', color: '#EC4899' },
+        ]}
+        missing={[]}
+      />
       {/* Toolbar */}
       <div className="h-[var(--toolbar-h)] flex items-center justify-between px-3 border-b border-[var(--border-default)] bg-[var(--bg-surface)] shrink-0">
         <div className="flex items-center gap-2">

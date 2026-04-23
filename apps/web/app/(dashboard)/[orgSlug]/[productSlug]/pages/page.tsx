@@ -17,6 +17,7 @@ import { PublishModal } from './_components/publish-modal'
 import { StudioHealthBadge } from '../../../../components/shared/studio-health-badge'
 import { AnalyticsOverlay } from '../../../../components/shared/analytics-overlay'
 import { StudioEmptyState } from '../../../../components/shared/studio-empty-state'
+import { ContextBanner } from '../../../../components/shared/upstream-empty-state'
 
 type RightPanelTab = 'properties' | 'seo' | 'data' | 'nav'
 
@@ -293,6 +294,14 @@ export default function PageBuilderPage() {
 
   return (
     <div className="flex flex-col h-full" style={{ margin: 0 }}>
+      <ContextBanner
+        chips={[
+          { label: 'Design Screens', source: 'design', color: '#3B82F6' },
+          { label: 'Components', source: 'components', color: '#6366F1' },
+          { label: 'Brand Tokens', source: 'brand', color: '#EC4899' },
+        ]}
+        missing={[]}
+      />
       {/* Top toolbar — 32px, dense */}
       <div className="flex items-center justify-between h-[var(--toolbar-h)] min-h-[32px] px-2 bg-[var(--bg-surface)] border-b border-[var(--border-default)]">
         <div className="flex items-center gap-2">

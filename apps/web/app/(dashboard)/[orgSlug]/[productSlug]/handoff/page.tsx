@@ -3,6 +3,7 @@
 import { useState, useMemo } from 'react'
 import { FileOutput, Sparkles, Filter } from 'lucide-react'
 import { mockHandoffs } from './_data/mock-handoffs'
+import { ContextBanner } from '../../../../components/shared/upstream-empty-state'
 import { HandoffCard } from './_components/handoff-card'
 import { SpecDetail } from './_components/spec-detail'
 
@@ -38,6 +39,14 @@ export default function DevHandoffPage() {
 
   return (
     <div className="flex flex-col h-full bg-[var(--bg-workspace)]">
+      <ContextBanner
+        chips={[
+          { label: 'Design Screens', source: 'design', color: '#3B82F6' },
+          { label: 'Components', source: 'components', color: '#6366F1' },
+          { label: 'Brand Tokens', source: 'brand', color: '#EC4899' },
+        ]}
+        missing={[]}
+      />
       {/* Toolbar */}
       <div className="h-[var(--toolbar-h)] flex items-center justify-between px-3 border-b border-[var(--border-default)] bg-[var(--bg-surface)] shrink-0">
         <div className="flex items-center gap-2">
