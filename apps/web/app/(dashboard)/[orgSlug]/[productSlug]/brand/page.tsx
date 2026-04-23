@@ -3,7 +3,8 @@
 import { useState, useCallback, useMemo } from 'react'
 import { useParams } from 'next/navigation'
 import { useProduct } from '../layout'
-import { Palette, Save, Paintbrush, Type, Ruler, Layers, Eye, Check, Code2, Download, Copy } from 'lucide-react'
+import { Palette, Save, Paintbrush, Type, Ruler, Layers, Eye, Check, Code2, Download, Copy, Volume2, ArrowRight } from 'lucide-react'
+import Link from 'next/link'
 import { defaultBrandConfig } from './_data/default-brand'
 import type { BrandConfig, ColorGroup, TypographyConfig, SpacingConfig, EffectsConfig } from './_data/default-brand'
 import { useGraphStore } from '../../../../lib/graph-store'
@@ -155,7 +156,7 @@ function TokenExportTab({ brandData, toCSSVariables }: TokenExportTabProps) {
 }
 
 export default function BrandBuilderPage() {
-  const params = useParams<{ productSlug: string }>()
+  const params = useParams<{ orgSlug: string; productSlug: string }>()
   const product = useProduct()
   const productId = product?.id ?? params.productSlug
 
@@ -356,6 +357,14 @@ export default function BrandBuilderPage() {
             <Palette className="w-3.5 h-3.5 text-[var(--text-secondary)]" />
             <span className="text-[13px] font-medium text-[var(--text-primary)]">Brand</span>
             <StudioHealthBadge productId={productId} studio="brand" />
+            <Link
+              href={`/${params.orgSlug}/${params.productSlug}/brand/voice`}
+              className="flex items-center gap-1 px-2 py-0.5 rounded-lg text-[11px] font-medium bg-[#8B5CF6]/10 text-[#8B5CF6] border border-[#8B5CF6]/20 hover:bg-[#8B5CF6]/20 transition-colors"
+            >
+              <Volume2 size={10} />
+              Voice
+              <ArrowRight size={10} />
+            </Link>
           </div>
 
           <div className="flex items-center gap-1">

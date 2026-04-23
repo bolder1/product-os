@@ -15,6 +15,7 @@ import InspectPanel from './_components/inspect-panel'
 import { ComponentPalette } from './_components/component-palette'
 import { ExtractComponentModal } from './_components/extract-component-modal'
 import { StudioHealthBadge } from '../../../../components/shared/studio-health-badge'
+import { ContextBanner, brandDep, componentsDep, brandVoiceDep } from '../../../../components/shared/upstream-empty-state'
 import { AnalyticsOverlay } from '../../../../components/shared/analytics-overlay'
 import { AIActionBar } from '../../../../components/primitives/ai-action-bar'
 import { ExportMenu } from '../../../../components/primitives/export-menu'
@@ -71,7 +72,7 @@ function layerToElement(layer: ReturnType<typeof useDesignCanvasStore.getState>[
 // ---------------------------------------------------------------------------
 
 export default function DesignStudioPage() {
-  const params = useParams<{ productSlug: string }>()
+  const params = useParams<{ orgSlug: string; productSlug: string }>()
   const product = useProduct()
   const productId = product?.id ?? params.productSlug
 
@@ -356,8 +357,20 @@ export default function DesignStudioPage() {
   }, [selectedScreenId, frames, screens, layers, productId, userId, userName])
 
   // ── Render ──
+  const org = params.orgSlug ?? ''
+  const slug = params.productSlug ?? ''
+
   return (
     <div className="flex flex-col h-full overflow-hidden bg-[var(--bg-workspace)]">
+      {/* ── Context banner ── */}
+      <ContextBanner
+        chips={[
+          { label: 'Brand Tokens', source: 'brand', color: '#EC4899' },
+          { label: 'Brand Voice', source: 'brand-voice', color: '#8B5CF6' },
+          { label: 'Components', source: 'components', color: '#6366F1' },
+        ]}
+        missing={[]}
+      />
       {/* ── Top Toolbar ── */}
       <div className="shrink-0 h-[var(--toolbar-h)] flex items-center justify-between px-2 border-b border-[var(--border-default)] bg-[var(--bg-surface)]">
         {/* Left */}

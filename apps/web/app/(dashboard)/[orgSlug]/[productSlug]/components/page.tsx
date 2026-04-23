@@ -10,6 +10,7 @@ import { useBrandTokens } from '../../../../lib/use-brand-tokens'
 import { ComponentDetail } from './_components/component-detail'
 import { ComponentCreateModal } from './_components/component-create-modal'
 import { StudioHealthBadge } from '../../../../components/shared/studio-health-badge'
+import { ContextBanner } from '../../../../components/shared/upstream-empty-state'
 import { StudioEmptyState } from '../../../../components/shared/studio-empty-state'
 import { AIActionBar } from '../../../../components/primitives/ai-action-bar'
 import { ExportMenu } from '../../../../components/primitives/export-menu'
@@ -167,6 +168,11 @@ export default function ComponentBuilderPage() {
   /* ---------------------------------------------------------------- */
   return (
     <div className="flex flex-col h-full bg-[var(--bg-workspace)]">
+      {/* ---- context banner ---------------------------------------- */}
+      <ContextBanner
+        chips={[{ label: 'Brand Tokens', source: 'brand', color: '#EC4899' }]}
+        missing={[]}
+      />
 
       {/* ---- top toolbar ------------------------------------------ */}
       <div className="h-[var(--toolbar-h)] flex items-center justify-between px-3 bg-[var(--bg-surface)] border-b border-[var(--border-default)]">
