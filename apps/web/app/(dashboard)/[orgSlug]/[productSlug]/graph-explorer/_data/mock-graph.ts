@@ -36,14 +36,27 @@ export interface MockGraphData {
   edges: GraphEdge[]
 }
 
+// R20: kind palette — each node kind gets a distinct swatch for
+// the graph explorer canvas. These are *functional* identity tints
+// that let a user distinguish kinds at a glance across hundreds of
+// nodes, not chrome. Left literal and per-line eslint-disabled
+// pending a future kind-palette token centralization.
 export const NODE_KIND_COLORS: Record<NodeKind, string> = {
+  // eslint-disable-next-line no-hardcoded-hex -- kind palette: module
   module: '#3B82F6',
+  // eslint-disable-next-line no-hardcoded-hex -- kind palette: feature
   feature: '#8B5CF6',
+  // eslint-disable-next-line no-hardcoded-hex -- kind palette: page
   page: '#06B6D4',
+  // eslint-disable-next-line no-hardcoded-hex -- kind palette: entity
   entity: '#10B981',
+  // eslint-disable-next-line no-hardcoded-hex -- kind palette: component
   component: '#EC4899',
+  // eslint-disable-next-line no-hardcoded-hex -- kind palette: workflow
   workflow: '#F59E0B',
+  // eslint-disable-next-line no-hardcoded-hex -- kind palette: token
   token: '#64748B',
+  // eslint-disable-next-line no-hardcoded-hex -- kind palette: journey
   journey: '#F97316',
 }
 
