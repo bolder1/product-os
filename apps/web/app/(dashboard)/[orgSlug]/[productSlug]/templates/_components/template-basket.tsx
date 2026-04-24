@@ -18,13 +18,24 @@ interface Props {
   disabled?: boolean
 }
 
+// R20: kind palette — each template category gets a distinct swatch for
+// the basket item dot. These are *functional* identity tints for
+// distinguishing categories at a glance in a dense list, not chrome.
+// Left literal and eslint-disabled pending a future kind-palette token.
 const CATEGORY_COLORS: Record<string, string> = {
+  // eslint-disable-next-line no-hardcoded-hex -- kind palette: saas
   saas:         '#3B82F6',
+  // eslint-disable-next-line no-hardcoded-hex -- kind palette: mobile
   mobile:       '#10B981',
+  // eslint-disable-next-line no-hardcoded-hex -- kind palette: design_system
   design_system:'#EC4899',
+  // eslint-disable-next-line no-hardcoded-hex -- kind palette: internal_ops
   internal_ops: '#F59E0B',
+  // eslint-disable-next-line no-hardcoded-hex -- kind palette: marketing
   marketing:    '#06B6D4',
+  // eslint-disable-next-line no-hardcoded-hex -- kind palette: ecommerce
   ecommerce:    '#8B5CF6',
+  // eslint-disable-next-line no-hardcoded-hex -- kind palette: custom/fallback
   custom:       '#64748B',
 }
 
@@ -58,7 +69,7 @@ export function TemplateBasket({ items, onRemove, onApplyAll, disabled }: Props)
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -6, scale: 0.97 }}
             transition={{ duration: 0.15 }}
-            className="absolute right-0 top-full mt-1.5 w-72 bg-[#0B1120] border border-white/[0.1] rounded-xl shadow-2xl z-50 overflow-hidden"
+            className="absolute right-0 top-full mt-1.5 w-72 bg-[var(--bg-surface-raised)] border border-white/[0.1] rounded-xl shadow-2xl z-50 overflow-hidden"
             style={{ boxShadow: '0 16px 48px rgba(0,0,0,0.5)' }}
           >
             {/* Header */}
@@ -76,7 +87,7 @@ export function TemplateBasket({ items, onRemove, onApplyAll, disabled }: Props)
             {/* Items */}
             <div className="max-h-48 overflow-y-auto py-1">
               {items.map((item) => {
-                const color = CATEGORY_COLORS[item.category] ?? '#64748B'
+                const color = CATEGORY_COLORS[item.category] ?? CATEGORY_COLORS.custom
                 return (
                   <div
                     key={item.id}
@@ -89,7 +100,7 @@ export function TemplateBasket({ items, onRemove, onApplyAll, disabled }: Props)
                     </div>
                     <button
                       onClick={() => onRemove(item.id)}
-                      className="shrink-0 opacity-0 group-hover:opacity-100 text-[var(--text-tertiary)] hover:text-red-400 transition-all"
+                      className="shrink-0 opacity-0 group-hover:opacity-100 text-[var(--text-tertiary)] hover:text-[var(--color-error)] transition-all"
                     >
                       <X size={11} />
                     </button>
