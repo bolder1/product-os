@@ -43,7 +43,7 @@ function SelectField({
       </button>
 
       {open && (
-        <div className="absolute top-full left-0 right-0 mt-1 z-50 rounded-xl border border-white/[0.08] bg-[#0C1029] shadow-xl py-1">
+        <div className="absolute top-full left-0 right-0 mt-1 z-50 rounded-xl border border-white/[0.08] bg-[var(--bg-surface-raised)] shadow-xl py-1">
           {options.map((opt) => {
             const c = config[opt]
             return (
@@ -97,7 +97,24 @@ export function TaskCreateModal({ open, onClose, onCreate }: TaskCreateModalProp
       .toUpperCase()
       .slice(0, 2)
 
-    const COLORS = ['#8B5CF6', '#EC4899', '#14B8A6', '#F97316', '#06B6D4', '#3B82F6']
+    // R20: presence palette — random avatar tint for newly-created task
+    // assignees, used to distinguish authors at a glance in a list. Not
+    // chrome; functional identity colors akin to the collaboration
+    // presence palette. Left literal and eslint-disabled.
+    const COLORS = [
+      // eslint-disable-next-line no-hardcoded-hex -- presence palette
+      '#8B5CF6',
+      // eslint-disable-next-line no-hardcoded-hex -- presence palette
+      '#EC4899',
+      // eslint-disable-next-line no-hardcoded-hex -- presence palette
+      '#14B8A6',
+      // eslint-disable-next-line no-hardcoded-hex -- presence palette
+      '#F97316',
+      // eslint-disable-next-line no-hardcoded-hex -- presence palette
+      '#06B6D4',
+      // eslint-disable-next-line no-hardcoded-hex -- presence palette
+      '#3B82F6',
+    ]
     const color = COLORS[Math.floor(Math.random() * COLORS.length)]
 
     onCreate({
@@ -132,7 +149,7 @@ export function TaskCreateModal({ open, onClose, onCreate }: TaskCreateModalProp
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 10 }}
             transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-            className="relative w-full max-w-lg mx-4 rounded-2xl border border-white/[0.08] bg-[#0A0F24] shadow-2xl"
+            className="relative w-full max-w-lg mx-4 rounded-2xl border border-white/[0.08] bg-[var(--bg-surface-raised)] shadow-2xl"
           >
             {/* Header */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-white/[0.06]">
