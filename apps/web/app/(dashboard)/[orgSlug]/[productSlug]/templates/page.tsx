@@ -90,16 +90,54 @@ const CATEGORY_GRADIENTS: Record<string, string> = {
   my_templates:  'from-teal-500/20 to-cyan-500/10',
 }
 
-const KIND_COLORS: Record<string, string> = {
-  module:    '#3B82F6',
-  feature:   '#8B5CF6',
-  page:      '#10B981',
-  entity:    '#F59E0B',
-  workflow:  '#06B6D4',
-  token:     '#EC4899',
-  component: '#F97316',
-  journey:   '#64748B',
+/**
+ * Per R20 palette consolidation, node-kind identity rides the semantic tone
+ * ramp. Label still carries the meaning; color now only carries tone (is this
+ * structural / content / config / transient?) not identity.
+ */
+type Tone = 'info' | 'accent' | 'success' | 'warning' | 'neutral'
+
+const KIND_TONES: Record<string, Tone> = {
+  module:    'info',
+  feature:   'accent',
+  page:      'success',
+  entity:    'warning',
+  workflow:  'info',
+  token:     'accent',
+  component: 'warning',
+  journey:   'neutral',
 }
+
+/** Pre-composed tone → class-pair maps — CSS vars cannot survive template concat. */
+const toneBgSoft: Record<Tone, string> = {
+  info:    'bg-[var(--accent-subtle)]',
+  accent:  'bg-[var(--accent-muted)]',
+  success: 'bg-[var(--color-success-muted)]',
+  warning: 'bg-[var(--color-warning-muted)]',
+  neutral: 'bg-[var(--bg-inset)]',
+}
+const toneText: Record<Tone, string> = {
+  info:    'text-[var(--accent)]',
+  accent:  'text-[var(--accent-text)]',
+  success: 'text-[var(--color-success)]',
+  warning: 'text-[var(--color-warning)]',
+  neutral: 'text-[var(--text-tertiary)]',
+}
+const toneBgSolid: Record<Tone, string> = {
+  info:    'bg-[var(--accent)]',
+  accent:  'bg-[var(--accent-text)]',
+  success: 'bg-[var(--color-success)]',
+  warning: 'bg-[var(--color-warning)]',
+  neutral: 'bg-[var(--text-tertiary)]',
+}
+
+/**
+ * HTML `<input type="color">` requires a literal hex value, so the
+ * fallback when no `variable.default` is present is unavoidable. We stash
+ * it in one place rather than duplicating it through the picker JSX.
+ */
+// eslint-disable-next-line no-hardcoded-hex
+const COLOR_PICKER_FALLBACK = '#3B82F6'
 
 /* ------------------------------------------------------------------ */
 /*  Variable input                                                     */
@@ -139,8 +177,8 @@ function VariableField({
         </button>
       ) : variable.type === 'color' ? (
         <div className="flex items-center gap-2">
-          <input type="color" value={String(value ?? variable.default ?? '#3B82F6')} onChange={(e) => onChange(e.target.value)} className="w-8 h-8 rounded-md cursor-pointer border border-white/[0.08] bg-transparent" />
-          <input type="text" value={String(value ?? variable.default ?? '#3B82F6')} onChange={(e) => onChange(e.target.value)} className="flex-1 px-3 py-1.5 rounded-lg bg-white/[0.03] border border-white/[0.08] text-[11px] text-[var(--text-primary)] font-mono outline-none focus:border-[var(--accent)]/40" />
+          <input type="color" value={String(value ?? variable.default ?? COLOR_PICKER_FALLBACK)} onChange={(e) => onChange(e.target.value)} className="w-8 h-8 rounded-md cursor-pointer border border-white/[0.08] bg-transparent" />
+          <input type="text" value={String(value ?? variable.default ?? COLOR_PICKER_FALLBACK)} onChange={(e) => onChange(e.target.value)} className="flex-1 px-3 py-1.5 rounded-lg bg-white/[0.03] border border-white/[0.08] text-[11px] text-[var(--text-primary)] font-mono outline-none focus:border-[var(--accent)]/40" />
         </div>
       ) : variable.type === 'select' && variable.options ? (
         <select value={String(value ?? variable.default ?? '')} onChange={(e) => onChange(e.target.value)} className="w-full px-3 py-1.5 rounded-lg bg-white/[0.03] border border-white/[0.08] text-[11px] text-[var(--text-primary)] outline-none focus:border-[var(--accent)]/40">
@@ -182,7 +220,7 @@ function TemplateCard({
     >
       {/* Applied badge */}
       {isApplied && (
-        <div className="absolute top-2 right-2 z-10 flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-[var(--color-success)]/20 border border-[var(--color-success)]/30 text-[#6EE7B7] text-[9px] font-medium">
+        <div className="absolute top-2 right-2 z-10 flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-[var(--color-success)]/20 border border-[var(--color-success)]/30 text-[var(--color-success)] text-[9px] font-medium">
           <CheckCircle2 size={9} />
           Applied
         </div>
@@ -218,15 +256,17 @@ function TemplateCard({
 
         {/* Node kind pills */}
         <div className="flex items-center gap-1 flex-wrap mt-auto">
-          {bundle.nodeKinds.slice(0, 4).map((kind) => (
-            <span
-              key={kind}
-              className="text-[9px] px-1.5 py-0.5 rounded-full font-medium"
-              style={{ background: `${KIND_COLORS[kind] ?? '#64748B'}18`, color: KIND_COLORS[kind] ?? '#94A3B8' }}
-            >
-              {kind}
-            </span>
-          ))}
+          {bundle.nodeKinds.slice(0, 4).map((kind) => {
+            const tone = KIND_TONES[kind] ?? 'neutral'
+            return (
+              <span
+                key={kind}
+                className={`text-[9px] px-1.5 py-0.5 rounded-full font-medium ${toneBgSoft[tone]} ${toneText[tone]}`}
+              >
+                {kind}
+              </span>
+            )
+          })}
         </div>
 
         {/* Footer */}
@@ -354,7 +394,7 @@ function ApplyModal({
       <motion.div
         initial={{ opacity: 0, scale: 0.96, y: 8 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
-        className="w-full max-w-lg bg-[#0B1120] border border-white/[0.1] rounded-2xl overflow-hidden flex flex-col max-h-[90vh]"
+        className="w-full max-w-lg bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-2xl overflow-hidden flex flex-col max-h-[90vh]"
         style={{ boxShadow: '0 24px 80px rgba(0,0,0,0.6)' }}
       >
         {/* Header */}
@@ -398,13 +438,16 @@ function ApplyModal({
                 <div>
                   <p className="text-[10px] font-medium text-[var(--text-tertiary)] uppercase tracking-wider mb-2">What gets created</p>
                   <div className="grid grid-cols-2 gap-1.5">
-                    {bundle.nodeSample.map((n, i) => (
-                      <div key={i} className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-white/[0.03] border border-white/[0.06]">
-                        <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: KIND_COLORS[n.kind] ?? '#64748B' }} />
-                        <span className="text-[11px] text-[var(--text-primary)] truncate">{n.label}</span>
-                        <span className="text-[9px] text-[var(--text-tertiary)] ml-auto shrink-0">{n.kind}</span>
-                      </div>
-                    ))}
+                    {bundle.nodeSample.map((n, i) => {
+                      const tone = KIND_TONES[n.kind] ?? 'neutral'
+                      return (
+                        <div key={i} className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-white/[0.03] border border-white/[0.06]">
+                          <div className={`w-1.5 h-1.5 rounded-full shrink-0 ${toneBgSolid[tone]}`} />
+                          <span className="text-[11px] text-[var(--text-primary)] truncate">{n.label}</span>
+                          <span className="text-[9px] text-[var(--text-tertiary)] ml-auto shrink-0">{n.kind}</span>
+                        </div>
+                      )
+                    })}
                     {bundle.nodeCount > 8 && (
                       <div className="flex items-center justify-center px-2.5 py-1.5 rounded-lg bg-white/[0.02] border border-dashed border-white/[0.06]">
                         <span className="text-[10px] text-[var(--text-tertiary)]">+{bundle.nodeCount - 8} more nodes</span>
@@ -770,7 +813,7 @@ export default function TemplateGalleryPage() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
             onAnimationComplete={() => setTimeout(() => setSavedName(null), 3000)}
-            className="flex items-center gap-2 px-4 py-2 bg-[var(--color-success)]/10 border-b border-[var(--color-success)]/20 text-[#6EE7B7] text-[11px] shrink-0"
+            className="flex items-center gap-2 px-4 py-2 bg-[var(--color-success)]/10 border-b border-[var(--color-success)]/20 text-[var(--color-success)] text-[11px] shrink-0"
           >
             <CheckCircle2 size={13} />
             <span>Template <strong>"{savedName}"</strong> saved to My Templates.</span>
