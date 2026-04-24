@@ -12,6 +12,27 @@ interface CodeViewerProps {
   onCloseFile: (path: string) => void
 }
 
+// R20: code-viewer operates a VS-Code-style syntax highlighter. The hex
+// values below are *signature editor theme tokens* (comment / string /
+// keyword / type / number / punctuation / foreground) — analogous to
+// `editor.tokenColorCustomizations` in VS Code. They are the code-viewer's
+// signature palette, not studio chrome, and do not participate in the app
+// theme system. Left literal and eslint-disabled line-by-line.
+const SYNTAX_COLORS = {
+  // eslint-disable-next-line no-hardcoded-hex -- syntax: comment / punctuation / fallback
+  comment:     '#64748B',
+  // eslint-disable-next-line no-hardcoded-hex -- syntax: string literal
+  string:      '#10B981',
+  // eslint-disable-next-line no-hardcoded-hex -- syntax: keyword
+  keyword:     '#8B5CF6',
+  // eslint-disable-next-line no-hardcoded-hex -- syntax: type keyword
+  type:        '#06B6D4',
+  // eslint-disable-next-line no-hardcoded-hex -- syntax: numeric literal
+  number:      '#F59E0B',
+  // eslint-disable-next-line no-hardcoded-hex -- syntax: default foreground
+  foreground:  '#F1F5F9',
+} as const
+
 // Basic syntax highlighting - tokenizes code into colored spans
 function highlightCode(code: string): { text: string; color: string }[][] {
   const keywords = new Set([
@@ -30,7 +51,7 @@ function highlightCode(code: string): { text: string; color: string }[][] {
 
     // Comment line
     if (line.trimStart().startsWith('//') || line.trimStart().startsWith('/*') || line.trimStart().startsWith('*')) {
-      tokens.push({ text: line, color: '#64748B' })
+      tokens.push({ text: line, color: SYNTAX_COLORS.comment })
       return tokens
     }
 
@@ -42,22 +63,22 @@ function highlightCode(code: string): { text: string; color: string }[][] {
       const token = match[0]
 
       if (/^["'`]/.test(token)) {
-        tokens.push({ text: token, color: '#10B981' })
+        tokens.push({ text: token, color: SYNTAX_COLORS.string })
       } else if (keywords.has(token)) {
-        tokens.push({ text: token, color: '#8B5CF6' })
+        tokens.push({ text: token, color: SYNTAX_COLORS.keyword })
       } else if (typeKeywords.has(token)) {
-        tokens.push({ text: token, color: '#06B6D4' })
+        tokens.push({ text: token, color: SYNTAX_COLORS.type })
       } else if (/^\d+$/.test(token)) {
-        tokens.push({ text: token, color: '#F59E0B' })
+        tokens.push({ text: token, color: SYNTAX_COLORS.number })
       } else if (/^[{}()\[\];,.:=<>+\-*/!?&|@#]+$/.test(token)) {
-        tokens.push({ text: token, color: '#64748B' })
+        tokens.push({ text: token, color: SYNTAX_COLORS.comment })
       } else {
-        tokens.push({ text: token, color: '#F1F5F9' })
+        tokens.push({ text: token, color: SYNTAX_COLORS.foreground })
       }
     }
 
     if (tokens.length === 0) {
-      tokens.push({ text: line, color: '#F1F5F9' })
+      tokens.push({ text: line, color: SYNTAX_COLORS.foreground })
     }
 
     return tokens
@@ -130,7 +151,7 @@ export function CodeViewer({ openFiles, activeFile, onSelectFile, onCloseFile }:
                 >
                   <span
                     className="w-2 h-2 rounded-full flex-shrink-0"
-                    style={{ backgroundColor: fileLang?.color ?? '#64748B' }}
+                    style={{ backgroundColor: fileLang?.color ?? SYNTAX_COLORS.comment }}
                   />
                   <span className="truncate">{file.name}</span>
                 </button>
@@ -169,8 +190,8 @@ export function CodeViewer({ openFiles, activeFile, onSelectFile, onCloseFile }:
           <span
             className="ml-2 text-[9px] font-medium px-1.5 py-0.5 rounded"
             style={{
-              color: lang?.color ?? '#64748B',
-              backgroundColor: `${lang?.color ?? '#64748B'}15`,
+              color: lang?.color ?? SYNTAX_COLORS.comment,
+              backgroundColor: `${lang?.color ?? SYNTAX_COLORS.comment}15`,
             }}
           >
             {lang?.label ?? activeFile.language.toUpperCase()}
