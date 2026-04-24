@@ -44,7 +44,29 @@ interface WorkflowEditorProps {
 }
 
 const STATE_TYPES: WorkflowState["type"][] = ["initial", "normal", "final"];
-const PRESET_COLORS = ["#3B82F6", "#94A3B8", "#10B981", "#F59E0B", "#EF4444", "#A855F7", "#EC4899", "#06B6D4"];
+
+// R20: user-facing state-color palette picker. These are *authored*
+// swatches a user chooses from when tagging a workflow state in the
+// state diagram — functional palette, not chrome. Left literal and
+// per-line eslint-disabled.
+const PRESET_COLORS = [
+  // eslint-disable-next-line no-hardcoded-hex -- state palette: blue
+  "#3B82F6",
+  // eslint-disable-next-line no-hardcoded-hex -- state palette: slate (default)
+  "#94A3B8",
+  // eslint-disable-next-line no-hardcoded-hex -- state palette: emerald
+  "#10B981",
+  // eslint-disable-next-line no-hardcoded-hex -- state palette: amber
+  "#F59E0B",
+  // eslint-disable-next-line no-hardcoded-hex -- state palette: rose
+  "#EF4444",
+  // eslint-disable-next-line no-hardcoded-hex -- state palette: violet
+  "#A855F7",
+  // eslint-disable-next-line no-hardcoded-hex -- state palette: pink
+  "#EC4899",
+  // eslint-disable-next-line no-hardcoded-hex -- state palette: cyan
+  "#06B6D4",
+];
 
 const GUARD_TYPES = [
   { value: "field_check", label: "Field Check", icon: CheckSquare },
@@ -72,7 +94,7 @@ function GuardRow({ guard, entity, onUpdate, onRemove }: {
   const fields = entity?.fields.map((f) => f.name) ?? [];
   return (
     <div className="flex flex-wrap items-center gap-1.5 p-2 rounded-md bg-white/[0.02] border border-white/[0.06]">
-      <Shield className="w-3 h-3 text-amber-400 shrink-0" />
+      <Shield className="w-3 h-3 text-[var(--color-warning)] shrink-0" />
       <select value={guard.type} onChange={(e) => onUpdate({ ...guard, type: e.target.value as Guard["type"] })}
         className="bg-white/[0.05] text-[10px] text-[var(--text-secondary)] rounded px-1 py-0.5 outline-none border border-white/[0.08]">
         {GUARD_TYPES.map((g) => <option key={g.value} value={g.value} className="bg-[var(--bg-inset)]">{g.label}</option>)}
@@ -102,7 +124,7 @@ function GuardRow({ guard, entity, onUpdate, onRemove }: {
           className="bg-transparent text-[10px] text-[var(--text-primary)] outline-none flex-1 border-b border-white/[0.06]" placeholder="entity.status !== 'locked'" />
       )}
 
-      <button onClick={onRemove} className="ml-auto text-[var(--text-tertiary)] hover:text-red-400"><Trash2 className="w-3 h-3" /></button>
+      <button onClick={onRemove} className="ml-auto text-[var(--text-tertiary)] hover:text-[var(--color-error)]"><Trash2 className="w-3 h-3" /></button>
     </div>
   );
 }
@@ -112,7 +134,7 @@ function ActionRow({ action, onUpdate, onRemove }: {
 }) {
   return (
     <div className="flex items-center gap-1.5 p-2 rounded-md bg-white/[0.02] border border-white/[0.06]">
-      <Zap className="w-3 h-3 text-blue-400 shrink-0" />
+      <Zap className="w-3 h-3 text-[var(--accent)] shrink-0" />
       <select value={action.type} onChange={(e) => onUpdate({ ...action, type: e.target.value as Action["type"] })}
         className="bg-white/[0.05] text-[10px] text-[var(--text-secondary)] rounded px-1 py-0.5 outline-none border border-white/[0.08]">
         {ACTION_TYPES.map((a) => <option key={a.value} value={a.value} className="bg-[var(--bg-inset)]">{a.label}</option>)}
@@ -137,7 +159,7 @@ function ActionRow({ action, onUpdate, onRemove }: {
       {(action.type === "create_task" || action.type === "request_approval" || action.type === "run_ai_skill") && (
         <span className="text-[10px] text-[var(--text-tertiary)]">(configure in automation)</span>
       )}
-      <button onClick={onRemove} className="ml-auto text-[var(--text-tertiary)] hover:text-red-400"><Trash2 className="w-3 h-3" /></button>
+      <button onClick={onRemove} className="ml-auto text-[var(--text-tertiary)] hover:text-[var(--color-error)]"><Trash2 className="w-3 h-3" /></button>
     </div>
   );
 }
@@ -161,7 +183,7 @@ export default function WorkflowEditor({ workflow, entities, onChange, onDelete 
     const newState: WorkflowState = {
       id: uid(),
       name: "New State",
-      color: "#94A3B8",
+      color: PRESET_COLORS[1], // slate default
       type: "normal",
     };
     update({ states: [...workflow.states, newState] });
@@ -250,7 +272,7 @@ export default function WorkflowEditor({ workflow, entities, onChange, onDelete 
           <input
             value={workflow.name}
             onChange={(e) => update({ name: e.target.value })}
-            className="text-xl font-semibold bg-transparent text-[var(--text-primary)] outline-none border-b border-transparent focus:border-emerald-500/40 pb-1 transition-colors flex-1 min-w-0"
+            className="text-xl font-semibold bg-transparent text-[var(--text-primary)] outline-none border-b border-transparent focus:border-[var(--color-success)]/40 pb-1 transition-colors flex-1 min-w-0"
             placeholder="Workflow name"
           />
           <ViewInGraphLink nodeId={workflow.id} />
@@ -288,7 +310,7 @@ export default function WorkflowEditor({ workflow, entities, onChange, onDelete 
               key={state.id}
               className={`flex items-center gap-2 px-3 py-2 rounded-lg border transition-all cursor-pointer ${
                 selectedStateId === state.id
-                  ? "bg-white/[0.05] border-emerald-500/30"
+                  ? "bg-white/[0.05] border-[var(--color-success)]/30"
                   : "bg-white/[0.02] border-white/[0.06]"
               }`}
               onClick={() => setSelectedStateId(state.id)}
@@ -323,14 +345,14 @@ export default function WorkflowEditor({ workflow, entities, onChange, onDelete 
               </select>
 
               <button onClick={(e) => { e.stopPropagation(); removeState(state.id); }}
-                className="text-[var(--text-tertiary)] hover:text-red-400 transition-colors">
+                className="text-[var(--text-tertiary)] hover:text-[var(--color-error)] transition-colors">
                 <Trash2 className="w-3.5 h-3.5" />
               </button>
             </div>
           ))}
         </div>
         <button onClick={addState}
-          className="flex items-center gap-1.5 text-xs text-[var(--text-tertiary)] hover:text-emerald-400 transition-colors self-start mt-1">
+          className="flex items-center gap-1.5 text-xs text-[var(--text-tertiary)] hover:text-[var(--color-success)] transition-colors self-start mt-1">
           <Plus className="w-3.5 h-3.5" /> Add State
         </button>
       </div>
@@ -366,17 +388,17 @@ export default function WorkflowEditor({ workflow, entities, onChange, onDelete 
 
                   {/* Badges for guards/actions */}
                   {guardCount > 0 && (
-                    <span className="flex items-center gap-0.5 text-[9px] text-amber-400 bg-amber-500/10 px-1 py-0.5 rounded">
+                    <span className="flex items-center gap-0.5 text-[9px] text-[var(--color-warning)] bg-[var(--color-warning)]/10 px-1 py-0.5 rounded">
                       <Shield className="w-2.5 h-2.5" />{guardCount}
                     </span>
                   )}
                   {actionCount > 0 && (
-                    <span className="flex items-center gap-0.5 text-[9px] text-blue-400 bg-blue-500/10 px-1 py-0.5 rounded">
+                    <span className="flex items-center gap-0.5 text-[9px] text-[var(--accent)] bg-[var(--accent)]/10 px-1 py-0.5 rounded">
                       <Zap className="w-2.5 h-2.5" />{actionCount}
                     </span>
                   )}
                   {tr.requiresApproval && (
-                    <Lock className="w-3 h-3 text-purple-400" />
+                    <Lock className="w-3 h-3 text-[var(--accent)]" />
                   )}
 
                   <button onClick={() => setExpandedTransitionId(isExpanded ? null : tr.id)}
@@ -384,7 +406,7 @@ export default function WorkflowEditor({ workflow, entities, onChange, onDelete 
                     {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
                   </button>
                   <button onClick={() => removeTransition(tr.id)}
-                    className="text-[var(--text-tertiary)] hover:text-red-400 transition-colors">
+                    className="text-[var(--text-tertiary)] hover:text-[var(--color-error)] transition-colors">
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
                 </div>
@@ -398,11 +420,11 @@ export default function WorkflowEditor({ workflow, entities, onChange, onDelete 
                         {/* Guards */}
                         <div className="space-y-1.5">
                           <div className="flex items-center justify-between">
-                            <span className="text-[10px] font-semibold uppercase tracking-wider text-amber-400 flex items-center gap-1">
+                            <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--color-warning)] flex items-center gap-1">
                               <Shield className="w-3 h-3" /> Guards
                             </span>
                             <button onClick={() => addGuardToTransition(tr.id)}
-                              className="text-[10px] text-amber-400 hover:text-amber-300 flex items-center gap-0.5">
+                              className="text-[10px] text-[var(--color-warning)] hover:opacity-80 flex items-center gap-0.5">
                               <Plus className="w-3 h-3" /> Add
                             </button>
                           </div>
@@ -419,11 +441,11 @@ export default function WorkflowEditor({ workflow, entities, onChange, onDelete 
                         {/* Actions */}
                         <div className="space-y-1.5">
                           <div className="flex items-center justify-between">
-                            <span className="text-[10px] font-semibold uppercase tracking-wider text-blue-400 flex items-center gap-1">
+                            <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--accent)] flex items-center gap-1">
                               <Zap className="w-3 h-3" /> Actions
                             </span>
                             <button onClick={() => addActionToTransition(tr.id)}
-                              className="text-[10px] text-blue-400 hover:text-blue-300 flex items-center gap-0.5">
+                              className="text-[10px] text-[var(--accent)] hover:opacity-80 flex items-center gap-0.5">
                               <Plus className="w-3 h-3" /> Add
                             </button>
                           </div>
@@ -443,7 +465,7 @@ export default function WorkflowEditor({ workflow, entities, onChange, onDelete 
                             <Lock className="w-3 h-3" /> Requires Approval
                           </span>
                           <button onClick={() => updateTransition(tr.id, { requiresApproval: !tr.requiresApproval })}
-                            className={`relative w-7 h-4 rounded-full transition-colors ${tr.requiresApproval ? "bg-purple-500" : "bg-white/[0.1]"}`}>
+                            className={`relative w-7 h-4 rounded-full transition-colors ${tr.requiresApproval ? "bg-[var(--accent)]" : "bg-white/[0.1]"}`}>
                             <span className={`absolute top-0.5 w-3 h-3 rounded-full bg-white transition-transform ${tr.requiresApproval ? "left-3.5" : "left-0.5"}`} />
                           </button>
                         </div>
@@ -465,19 +487,19 @@ export default function WorkflowEditor({ workflow, entities, onChange, onDelete 
           })}
         </div>
         <button onClick={addTransition}
-          className="flex items-center gap-1.5 text-xs text-[var(--text-tertiary)] hover:text-emerald-400 transition-colors self-start mt-1">
+          className="flex items-center gap-1.5 text-xs text-[var(--text-tertiary)] hover:text-[var(--color-success)] transition-colors self-start mt-1">
           <Plus className="w-3.5 h-3.5" /> Add Transition
         </button>
       </div>
 
       {/* Footer */}
       <div className="mt-auto flex items-center gap-3 pt-4 border-t border-white/[0.06]">
-        <button className="flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-500/10 text-emerald-400 text-sm font-medium hover:bg-emerald-500/20 transition-colors">
+        <button className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[var(--color-success)]/10 text-[var(--color-success)] text-sm font-medium hover:bg-[var(--color-success)]/20 transition-colors">
           <Save className="w-4 h-4" /> Save Workflow
         </button>
         <button
           onClick={() => onDelete(workflow.id)}
-          className="flex items-center gap-2 px-4 py-2 rounded-lg bg-red-500/10 text-red-400 text-sm font-medium hover:bg-red-500/20 transition-colors ml-auto"
+          className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[var(--color-error)]/10 text-[var(--color-error)] text-sm font-medium hover:bg-[var(--color-error)]/20 transition-colors ml-auto"
         >
           <Trash2 className="w-4 h-4" /> Delete
         </button>
