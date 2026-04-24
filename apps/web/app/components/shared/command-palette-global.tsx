@@ -100,15 +100,33 @@ const ACTIONS: ActionDef[] = [
 ]
 
 // ---------------------------------------------------------------------------
-// Status badge colors
+// Status badge tone (R20: semantic tone, not raw hex)
 // ---------------------------------------------------------------------------
 
-const STATUS_COLORS: Record<string, string> = {
-  todo: '#64748B',
-  in_progress: '#3B82F6',
-  in_review: '#F59E0B',
-  done: '#10B981',
-  blocked: '#F43F5E',
+type StatusTone = 'accent' | 'neutral' | 'warning' | 'success' | 'error'
+
+const STATUS_TONE: Record<string, StatusTone> = {
+  todo:        'neutral',
+  in_progress: 'accent',
+  in_review:   'warning',
+  done:        'success',
+  blocked:     'error',
+}
+
+const TONE_ICON_TEXT: Record<StatusTone, string> = {
+  accent:  'text-[var(--accent)]',
+  neutral: 'text-[var(--text-tertiary)]',
+  warning: 'text-[var(--color-warning)]',
+  success: 'text-[var(--color-success)]',
+  error:   'text-[var(--color-error)]',
+}
+
+const TONE_PILL_SOFT: Record<StatusTone, string> = {
+  accent:  'bg-[var(--accent-muted)] text-[var(--accent-text)]',
+  neutral: 'bg-white/[0.05] text-[var(--text-tertiary)]',
+  warning: 'bg-[var(--color-warning-muted)] text-[var(--color-warning)]',
+  success: 'bg-[var(--color-success-muted)] text-[var(--color-success)]',
+  error:   'bg-[var(--color-error-muted)] text-[var(--color-error)]',
 }
 
 // ---------------------------------------------------------------------------
@@ -251,11 +269,9 @@ export function CommandPaletteGlobal() {
                       <div className="flex items-center gap-2">
                         <span className="truncate">{p.icon} {p.name}</span>
                         <span
-                          className="text-[10px] px-1.5 py-0.5 rounded-[var(--radius-sm)] capitalize"
-                          style={{
-                            backgroundColor: p.status === 'active' ? 'rgba(16,185,129,0.15)' : 'rgba(100,116,139,0.15)',
-                            color: p.status === 'active' ? '#10B981' : '#64748B',
-                          }}
+                          className={`text-[10px] px-1.5 py-0.5 rounded-[var(--radius-sm)] capitalize ${
+                            p.status === 'active' ? TONE_PILL_SOFT.success : TONE_PILL_SOFT.neutral
+                          }`}
                         >
                           {p.status}
                         </span>
@@ -273,38 +289,37 @@ export function CommandPaletteGlobal() {
           {displayTasks.length > 0 && (
             <>
               <CommandGroup heading="Tasks">
-                {displayTasks.map((t) => (
-                  <CommandItem
-                    key={`task-${t.id}`}
-                    value={`task ${t.title} ${t.assignee.name} ${t.status} ${t.studio}`}
-                    onSelect={() =>
-                      navigate(`/tasks`, {
-                        id: `task-${t.id}`,
-                        label: t.title,
-                        description: `${t.status} -- ${t.assignee.name}`,
-                      })
-                    }
-                  >
-                    <CheckSquare size={14} className="shrink-0" style={{ color: STATUS_COLORS[t.status] ?? '#64748B' }} />
-                    <div className="flex flex-col min-w-0 flex-1">
-                      <div className="flex items-center gap-2">
-                        <span className="truncate">{t.title}</span>
-                        <span
-                          className="text-[10px] px-1.5 py-0.5 rounded-[var(--radius-sm)] capitalize whitespace-nowrap"
-                          style={{
-                            backgroundColor: `${STATUS_COLORS[t.status] ?? '#64748B'}20`,
-                            color: STATUS_COLORS[t.status] ?? '#64748B',
-                          }}
-                        >
-                          {t.status.replace('_', ' ')}
+                {displayTasks.map((t) => {
+                  const tone: StatusTone = STATUS_TONE[t.status] ?? 'neutral'
+                  return (
+                    <CommandItem
+                      key={`task-${t.id}`}
+                      value={`task ${t.title} ${t.assignee.name} ${t.status} ${t.studio}`}
+                      onSelect={() =>
+                        navigate(`/tasks`, {
+                          id: `task-${t.id}`,
+                          label: t.title,
+                          description: `${t.status} -- ${t.assignee.name}`,
+                        })
+                      }
+                    >
+                      <CheckSquare size={14} className={`shrink-0 ${TONE_ICON_TEXT[tone]}`} />
+                      <div className="flex flex-col min-w-0 flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className="truncate">{t.title}</span>
+                          <span
+                            className={`text-[10px] px-1.5 py-0.5 rounded-[var(--radius-sm)] capitalize whitespace-nowrap ${TONE_PILL_SOFT[tone]}`}
+                          >
+                            {t.status.replace('_', ' ')}
+                          </span>
+                        </div>
+                        <span className="text-[11px] text-[var(--text-tertiary)] truncate">
+                          {t.assignee.name} &middot; {t.studio}
                         </span>
                       </div>
-                      <span className="text-[11px] text-[var(--text-tertiary)] truncate">
-                        {t.assignee.name} &middot; {t.studio}
-                      </span>
-                    </div>
-                  </CommandItem>
-                ))}
+                    </CommandItem>
+                  )
+                })}
               </CommandGroup>
               <CommandSeparator />
             </>
