@@ -35,6 +35,11 @@ import { submitPromptThroughGate } from '../../lib/prompt-gate-store'
 /*  Constants                                                          */
 /* ------------------------------------------------------------------ */
 
+/**
+ * Per R20 the mode + status pills ride the semantic tone ramp. Suggest
+ * carries 'warning' (amber = exploration), Assist 'accent-text' (blue =
+ * neutral cooperation), Auto 'success' (green = execution confirmed).
+ */
 const MODES: Array<{
   key: ComputerMode
   label: string
@@ -46,7 +51,7 @@ const MODES: Array<{
     key: 'suggest',
     label: 'Suggest',
     icon: Lightbulb,
-    color: '#F59E0B',
+    color: 'var(--color-warning)',
     description: 'AI surfaces ideas and analysis. No changes made.',
   },
   {
@@ -60,17 +65,24 @@ const MODES: Array<{
     key: 'auto',
     label: 'Auto',
     icon: Zap,
-    color: '#10B981',
+    color: 'var(--color-success)',
     description: 'AI executes approved plan autonomously. Fully logged.',
   },
 ]
 
 const STATUS_CONFIG: Record<ActionStatus, { icon: typeof CheckCircle2; color: string; label: string }> = {
-  pending:  { icon: Clock,        color: '#F59E0B', label: 'Waiting'   },
-  running:  { icon: Loader2,      color: 'var(--accent-text)', label: 'Running'  },
-  done:     { icon: CheckCircle2, color: '#10B981', label: 'Done'      },
-  rejected: { icon: XCircle,      color: '#64748B', label: 'Rejected'  },
-  failed:   { icon: AlertTriangle,color: '#EF4444', label: 'Failed'    },
+  pending:  { icon: Clock,         color: 'var(--color-warning)', label: 'Waiting'  },
+  running:  { icon: Loader2,       color: 'var(--accent-text)',   label: 'Running'  },
+  done:     { icon: CheckCircle2,  color: 'var(--color-success)', label: 'Done'     },
+  rejected: { icon: XCircle,       color: 'var(--text-tertiary)', label: 'Rejected' },
+  failed:   { icon: AlertTriangle, color: 'var(--color-error)',   label: 'Failed'   },
+}
+
+/** Toggle-button tint per mode — solid tone, no multi-stop gradient per R20. */
+const MODE_TINT: Record<ComputerMode, string> = {
+  suggest: 'var(--color-warning)',
+  assist:  'var(--accent)',
+  auto:    'var(--color-success)',
 }
 
 /* ------------------------------------------------------------------ */
@@ -306,8 +318,8 @@ export function ComputerModePanel({ studio, productId }: ComputerModePanelProps)
           onClick={open}
           className="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-2.5 rounded-full text-[12px] font-medium shadow-lg transition-all hover:scale-105"
           style={{
-            background: mode === 'auto' ? 'linear-gradient(135deg, #10B981, #059669)' : mode === 'assist' ? 'linear-gradient(135deg, var(--accent), #6ba3ff)' : 'linear-gradient(135deg, #F59E0B, #D97706)',
-            color: '#fff',
+            background: MODE_TINT[mode],
+            color: '#ffffff',
             boxShadow: '0 4px 24px rgba(0,0,0,0.4)',
           }}
         >
@@ -362,7 +374,7 @@ export function ComputerModePanel({ studio, productId }: ComputerModePanelProps)
                         key={m.key}
                         onClick={() => setMode(m.key)}
                         className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-md text-[11px] font-medium transition-all ${active ? 'bg-white/[0.08]' : 'hover:bg-white/[0.04]'}`}
-                        style={{ color: active ? m.color : '#64748B' }}
+                        style={{ color: active ? m.color : 'var(--text-tertiary)' }}
                       >
                         <MIcon size={11} />
                         {m.label}
