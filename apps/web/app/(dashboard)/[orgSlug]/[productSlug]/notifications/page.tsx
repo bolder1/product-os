@@ -3,20 +3,44 @@
 import { useMemo, useState } from 'react'
 import { useParams } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { Inbox, Settings, Trash2, CheckCircle2, Clock, MessageSquare, Bell, CheckCheck } from 'lucide-react'
+import { Inbox, Settings, Trash2, CheckCircle2, CheckCheck } from 'lucide-react'
 import { trpc } from '../../../../lib/trpc'
 import { useNotificationStore } from '../../../../lib/notification-store'
 import { PreferencesModal } from './_components/preferences-modal'
+import { StudioShell, StudioPageHeader, StudioBody, StudioToolbar } from '../../../../components/shared/studio-shell'
 
-const TYPE_CONFIG: Record<string, { label: string; color: string }> = {
-  task_assigned: { label: 'Task Assigned', color: '#3B82F6' },
-  task_updated: { label: 'Task Updated', color: '#F59E0B' },
-  approval_requested: { label: 'Approval Requested', color: '#EC4899' },
-  approval_decided: { label: 'Approval Decided', color: '#10B981' },
-  comment_mention: { label: 'Mentioned in Comment', color: '#8B5CF6' },
-  comment_reply: { label: 'Comment Reply', color: '#8B5CF6' },
-  release_ready: { label: 'Release Ready', color: '#10B981' },
-  system: { label: 'System', color: '#64748B' },
+/**
+ * Per R20 palette consolidation, every notification type rides the semantic
+ * tone ramp instead of a bespoke hex. Icon + label still convey the type;
+ * color is now a meaning signal, not an identity signal.
+ */
+type Tone = 'info' | 'success' | 'warning' | 'accent' | 'neutral'
+
+const TYPE_CONFIG: Record<string, { label: string; tone: Tone }> = {
+  task_assigned: { label: 'Task Assigned', tone: 'info' },
+  task_updated: { label: 'Task Updated', tone: 'warning' },
+  approval_requested: { label: 'Approval Requested', tone: 'accent' },
+  approval_decided: { label: 'Approval Decided', tone: 'success' },
+  comment_mention: { label: 'Mentioned in Comment', tone: 'accent' },
+  comment_reply: { label: 'Comment Reply', tone: 'accent' },
+  release_ready: { label: 'Release Ready', tone: 'success' },
+  system: { label: 'System', tone: 'neutral' },
+}
+
+/** Pre-composed tone → classname pairs — no template-literal concat needed. */
+const toneBg: Record<Tone, string> = {
+  info: 'bg-[var(--accent-subtle)]',
+  success: 'bg-[var(--color-success-muted)]',
+  warning: 'bg-[var(--color-warning-muted)]',
+  accent: 'bg-[var(--accent-muted)]',
+  neutral: 'bg-[var(--bg-inset)]',
+}
+const toneFg: Record<Tone, string> = {
+  info: 'text-[var(--accent)]',
+  success: 'text-[var(--color-success)]',
+  warning: 'text-[var(--color-warning)]',
+  accent: 'text-[var(--accent-text)]',
+  neutral: 'text-[var(--text-tertiary)]',
 }
 
 function formatDate(dateStr: string) {
@@ -53,46 +77,44 @@ export default function NotificationsPage() {
   )
 
   const typeOptions = useMemo(
-    () => Object.keys(TYPE_CONFIG).filter((type) => notifications.some((n) => n.type === (type as any))),
+    () => Object.keys(TYPE_CONFIG).filter((type) => notifications.some((n) => n.type === type)),
     [notifications],
   )
 
   return (
-    <div className="flex flex-col h-screen bg-[var(--bg)]">
-      <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--border-default)]">
-        <div>
-          <h1 className="text-[18px] font-semibold text-[var(--text-primary)]">Notifications</h1>
-          <p className="text-[12px] text-[var(--text-tertiary)] mt-1">
-            {unreadCount || 0} unread
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          {unreadCount > 0 && (
+    <StudioShell>
+      <StudioPageHeader
+        title="Notifications"
+        subtitle={`${unreadCount || 0} unread`}
+        actions={
+          <>
+            {unreadCount > 0 && (
+              <button
+                onClick={markAllRead}
+                className="inline-flex items-center gap-1.5 rounded-lg bg-[var(--bg-inset)] px-3 py-1.5 text-xs font-medium text-[var(--text-secondary)] transition-colors hover:text-[var(--text-primary)]"
+                aria-label="Mark all notifications as read"
+              >
+                <CheckCheck size={14} />
+                Mark all read
+              </button>
+            )}
             <button
-              onClick={markAllRead}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--bg-inset)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors text-[11px] font-medium"
-              aria-label="Mark all notifications as read"
+              onClick={() => setShowPreferences(true)}
+              className="inline-flex items-center gap-1.5 rounded-lg bg-[var(--accent-subtle)] px-3 py-1.5 text-xs font-medium text-[var(--accent-text)] transition-colors hover:bg-[var(--accent-muted)]"
             >
-              <CheckCheck size={12} />
-              Mark all read
+              <Settings size={14} />
+              Preferences
             </button>
-          )}
-          <button
-            onClick={() => setShowPreferences(true)}
-            className="flex items-center gap-2 px-3 py-2 rounded-lg bg-[var(--accent)]/10 text-[var(--accent-text)] hover:bg-[var(--accent)]/20 transition-colors text-[11px] font-medium"
-          >
-            <Settings size={12} />
-            Preferences
-          </button>
-        </div>
-      </div>
+          </>
+        }
+      />
 
-      <div className="px-6 py-3 border-b border-[var(--border-default)] flex items-center gap-2 overflow-x-auto">
+      <StudioToolbar>
         <button
           onClick={() => setFilterType(null)}
-          className={`px-2.5 py-1 rounded text-[10px] font-medium whitespace-nowrap transition-colors ${
+          className={`rounded-md px-2.5 py-1 text-xs font-medium whitespace-nowrap transition-colors ${
             filterType === null
-              ? 'bg-[var(--accent)] text-[var(--accent-text)]'
+              ? 'bg-[var(--accent)] text-[var(--color-white)]'
               : 'bg-[var(--bg-inset)] text-[var(--text-secondary)] hover:bg-[var(--border-default)]'
           }`}
         >
@@ -102,25 +124,25 @@ export default function NotificationsPage() {
           <button
             key={type}
             onClick={() => setFilterType(type)}
-            className={`px-2.5 py-1 rounded text-[10px] font-medium whitespace-nowrap transition-colors ${
+            className={`rounded-md px-2.5 py-1 text-xs font-medium whitespace-nowrap transition-colors ${
               filterType === type
-                ? 'bg-[var(--accent)] text-[var(--accent-text)]'
+                ? 'bg-[var(--accent)] text-[var(--color-white)]'
                 : 'bg-[var(--bg-inset)] text-[var(--text-secondary)] hover:bg-[var(--border-default)]'
             }`}
           >
             {TYPE_CONFIG[type].label}
           </button>
         ))}
-      </div>
+      </StudioToolbar>
 
-      <div className="flex-1 overflow-y-auto">
+      <StudioBody padded={false}>
         {filteredNotifications.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full gap-3">
+          <div className="flex h-full flex-col items-center justify-center gap-3 py-16">
             <Inbox size={32} className="text-[var(--text-tertiary)] opacity-40" />
-            <p className="text-[12px] text-[var(--text-secondary)]">No notifications</p>
+            <p className="text-sm text-[var(--text-secondary)]">No notifications</p>
           </div>
         ) : (
-          <div className="p-6 space-y-2">
+          <div className="space-y-2 px-6 py-5">
             {filteredNotifications.map((notif) => {
               const typeConfig = TYPE_CONFIG[notif.type] ?? TYPE_CONFIG.system
               return (
@@ -128,45 +150,43 @@ export default function NotificationsPage() {
                   key={notif.id}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className={`flex items-start gap-3 p-3 rounded-lg border transition-all ${
+                  className={`flex cursor-pointer items-start gap-3 rounded-lg border p-3 transition-colors ${
                     notif.read
-                      ? 'bg-[var(--bg-inset)] border-[var(--border-subtle)]'
-                      : 'bg-[var(--accent)]/5 border-[var(--accent)]/30'
+                      ? 'border-[var(--border-subtle)] bg-[var(--bg-inset)]'
+                      : 'border-[var(--border-accent)] bg-[var(--accent-subtle)]'
                   }`}
                   onClick={() => !notif.read && markRead(notif.id)}
                 >
-                  <div
-                    className="p-1.5 rounded shrink-0 mt-0.5"
-                    style={{ backgroundColor: `${typeConfig.color}18` }}
-                  >
-                    <CheckCircle2 size={14} style={{ color: typeConfig.color }} />
+                  <div className={`mt-0.5 shrink-0 rounded p-1.5 ${toneBg[typeConfig.tone]}`}>
+                    <CheckCircle2 size={14} className={toneFg[typeConfig.tone]} />
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[12px] font-medium text-[var(--text-primary)]">{notif.title}</p>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-medium text-[var(--text-primary)]">{notif.title}</p>
                     {notif.body && (
-                      <p className="text-[11px] text-[var(--text-secondary)] mt-1 line-clamp-2">{notif.body}</p>
+                      <p className="mt-1 line-clamp-2 text-xs text-[var(--text-secondary)]">{notif.body}</p>
                     )}
-                    <p className="text-[10px] text-[var(--text-tertiary)] mt-2">{formatDate(notif.timestamp)}</p>
+                    <p className="mt-2 text-xs text-[var(--text-tertiary)]">{formatDate(notif.timestamp)}</p>
                   </div>
                   <button
                     onClick={(e) => {
                       e.stopPropagation()
                       deleteNotification(notif.id)
                     }}
-                    className="text-[var(--text-tertiary)] hover:text-[var(--color-error)] transition-colors p-1"
+                    className="p-1 text-[var(--text-tertiary)] transition-colors hover:text-[var(--color-error)]"
+                    aria-label="Delete notification"
                   >
-                    <Trash2 size={12} />
+                    <Trash2 size={14} />
                   </button>
                 </motion.div>
               )
             })}
           </div>
         )}
-      </div>
+      </StudioBody>
 
       {showPreferences && (
         <PreferencesModal onClose={() => setShowPreferences(false)} productId={params.productSlug || ''} />
       )}
-    </div>
+    </StudioShell>
   )
 }

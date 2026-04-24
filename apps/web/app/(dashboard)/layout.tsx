@@ -26,12 +26,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   // While the store is rehydrating from localStorage, render nothing to avoid flash
   if (!hydrated) {
-    return <div style={{ minHeight: '100vh', backgroundColor: '#060918' }} />
+    return <div className="min-h-screen bg-[var(--bg-base)]" />
   }
 
   // Not authenticated — redirect is in-flight, render nothing
   if (!isAuthenticated) {
-    return <div style={{ minHeight: '100vh', backgroundColor: '#060918' }} />
+    return <div className="min-h-screen bg-[var(--bg-base)]" />
   }
 
   return (
