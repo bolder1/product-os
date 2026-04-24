@@ -16,9 +16,9 @@ export default function BrandPreview({ brandData }: BrandPreviewProps) {
 
   // Extract base colors
   const getColor = (id: string) =>
-    colorGroups.find((g) => g.id === id)?.token.base ?? '#888'
+    colorGroups.find((g) => g.id === id)?.token.base ?? 'var(--text-tertiary)'
   const getScale = (id: string, shade: string) =>
-    colorGroups.find((g) => g.id === id)?.token.scale[shade] ?? '#888'
+    colorGroups.find((g) => g.id === id)?.token.scale[shade] ?? 'var(--text-tertiary)'
 
   const primary = getColor('primary')
   const secondary = getColor('secondary')
@@ -27,11 +27,19 @@ export default function BrandPreview({ brandData }: BrandPreviewProps) {
   const warning = getColor('warning')
   const error = getColor('error')
 
+  // R20: preview-simulation palette — this component renders a *simulated*
+  // dark / light canvas to let a user preview their brand swatches in both
+  // modes regardless of the app's active theme. These are not chrome tokens
+  // and intentionally do not follow the active theme; they're the neutral
+  // scaffold the brand swatches sit on top of.
   const bgColor = darkMode ? '#0F172A' : '#FFFFFF'
   const surfaceColor = darkMode ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)'
   const surfaceBorder = darkMode ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)'
+  // eslint-disable-next-line no-hardcoded-hex -- preview simulation (slate-100 / slate-900)
   const textPrimary = darkMode ? '#F1F5F9' : '#0F172A'
+  // eslint-disable-next-line no-hardcoded-hex -- preview simulation (slate-400 / slate-500)
   const textSecondary = darkMode ? '#94A3B8' : '#64748B'
+  // eslint-disable-next-line no-hardcoded-hex -- preview simulation (slate-500 / slate-400)
   const textMuted = darkMode ? '#64748B' : '#94A3B8'
 
   const headingFont = typography.headingFont
