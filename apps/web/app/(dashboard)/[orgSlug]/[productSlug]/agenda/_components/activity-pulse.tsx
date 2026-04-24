@@ -4,18 +4,39 @@ import { motion } from 'framer-motion'
 import { Activity, CheckCircle2, Layers, Palette, Rocket, Sparkles, FileText, Component, ArrowRight } from 'lucide-react'
 import { useActivityStore, type ActivityType } from '../../../../../lib/activity-store'
 
-const activityMeta: Partial<Record<ActivityType, { icon: React.ElementType; color: string }>> = {
-  task_created: { icon: CheckCircle2, color: '#6398ff' },
-  task_completed: { icon: CheckCircle2, color: '#3dd68c' },
-  product_created: { icon: Layers, color: '#8b5cf6' },
-  plan_created: { icon: Sparkles, color: '#8b5cf6' },
-  brand_updated: { icon: Palette, color: '#ec4899' },
-  component_created: { icon: Component, color: '#06b6d4' },
-  page_published: { icon: FileText, color: '#3dd68c' },
-  release_created: { icon: Rocket, color: '#e8a830' },
-  ai_skill_used: { icon: Sparkles, color: '#8b5cf6' },
-  comment_added: { icon: FileText, color: '#64748b' },
-  member_joined: { icon: Activity, color: '#6398ff' },
+// R20: per-activity hex retired in favor of a 5-tone semantic ramp. Identity
+// is carried by the icon; color carries meaning (success/warning/etc.), not
+// distinguishability.
+type ActivityTone = 'accent' | 'accent-text' | 'success' | 'warning' | 'neutral'
+
+const TONE_BG_SOFT: Record<ActivityTone, string> = {
+  accent:        'bg-[var(--accent-subtle)]',
+  'accent-text': 'bg-[var(--accent-muted)]',
+  success:       'bg-[var(--color-success-muted)]',
+  warning:       'bg-[var(--color-warning-muted)]',
+  neutral:       'bg-white/[0.04]',
+}
+
+const TONE_TEXT: Record<ActivityTone, string> = {
+  accent:        'text-[var(--accent)]',
+  'accent-text': 'text-[var(--accent-text)]',
+  success:       'text-[var(--color-success)]',
+  warning:       'text-[var(--color-warning)]',
+  neutral:       'text-[var(--text-tertiary)]',
+}
+
+const activityMeta: Partial<Record<ActivityType, { icon: React.ElementType; tone: ActivityTone }>> = {
+  task_created:      { icon: CheckCircle2, tone: 'accent' },
+  task_completed:    { icon: CheckCircle2, tone: 'success' },
+  product_created:   { icon: Layers,       tone: 'accent-text' },
+  plan_created:      { icon: Sparkles,     tone: 'accent-text' },
+  brand_updated:     { icon: Palette,      tone: 'accent-text' },
+  component_created: { icon: Component,    tone: 'accent-text' },
+  page_published:    { icon: FileText,     tone: 'success' },
+  release_created:   { icon: Rocket,       tone: 'warning' },
+  ai_skill_used:     { icon: Sparkles,     tone: 'accent-text' },
+  comment_added:     { icon: FileText,     tone: 'neutral' },
+  member_joined:     { icon: Activity,     tone: 'accent' },
 }
 
 function timeAgo(timestamp: string): string {
@@ -51,7 +72,7 @@ export function ActivityPulse() {
       ) : (
         <div className="flex flex-col divide-y divide-white/[0.04]">
           {activities.map((item, i) => {
-            const meta = activityMeta[item.type] ?? { icon: Activity, color: '#64748b' }
+            const meta = activityMeta[item.type] ?? { icon: Activity, tone: 'neutral' as const }
             const Icon = meta.icon
             return (
               <motion.div
@@ -62,11 +83,8 @@ export function ActivityPulse() {
                 whileHover={{ backgroundColor: 'rgba(255,255,255,0.02)' }}
                 className="flex items-center gap-3 py-2.5 px-1 rounded-md cursor-default transition-colors"
               >
-                <div
-                  className="w-7 h-7 rounded-md flex items-center justify-center flex-shrink-0"
-                  style={{ backgroundColor: `${meta.color}15` }}
-                >
-                  <Icon size={13} style={{ color: meta.color }} />
+                <div className={`w-7 h-7 rounded-md flex items-center justify-center flex-shrink-0 ${TONE_BG_SOFT[meta.tone]}`}>
+                  <Icon size={13} className={TONE_TEXT[meta.tone]} />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-[12px] text-[var(--text-secondary)] truncate">{item.title}</p>
