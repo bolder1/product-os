@@ -44,11 +44,59 @@ const ANALYSIS_TYPES: { key: AnalysisType; label: string; desc: string }[] = [
   { key: 'impact',       label: 'Impact',        desc: 'Change blast radius' },
 ]
 
-const SEVERITY_CONFIG = {
-  critical: { color: '#EF4444', bg: '#EF444410', icon: AlertCircle,  label: 'Critical' },
-  error:    { color: '#F97316', bg: '#F9731610', icon: AlertTriangle, label: 'Error'    },
-  warning:  { color: '#F59E0B', bg: '#F59E0B10', icon: AlertTriangle, label: 'Warning'  },
-  info:     { color: '#3B82F6', bg: '#3B82F610', icon: Info,          label: 'Info'     },
+// R20: severity hex retired in favor of semantic tones. critical + error
+// both surface as --color-error (distinct icon + label carry the nuance);
+// warning stays warning; info surfaces as --color-info.
+type SeverityTone = 'error' | 'warning' | 'info'
+
+const SEVERITY_CONFIG: Record<Finding['severity'], {
+  tone: SeverityTone
+  color: string
+  icon: typeof AlertCircle
+  label: string
+}> = {
+  critical: { tone: 'error',   color: 'var(--color-error)',   icon: AlertCircle,   label: 'Critical' },
+  error:    { tone: 'error',   color: 'var(--color-error)',   icon: AlertTriangle, label: 'Error'    },
+  warning:  { tone: 'warning', color: 'var(--color-warning)', icon: AlertTriangle, label: 'Warning'  },
+  info:     { tone: 'info',    color: 'var(--color-info)',    icon: Info,          label: 'Info'     },
+}
+
+// Pre-composed class maps — var() can't be concatenated into alpha-hex
+// suffixes (#RRGGBB20), so alpha tints ride Tailwind's /NN syntax here.
+const TONE_BG_FINDING: Record<SeverityTone, string> = {
+  error:   'bg-[var(--color-error)]/10',
+  warning: 'bg-[var(--color-warning)]/10',
+  info:    'bg-[var(--color-info)]/10',
+}
+const TONE_BORDER_FINDING: Record<SeverityTone, string> = {
+  error:   'border-[var(--color-error)]/25',
+  warning: 'border-[var(--color-warning)]/25',
+  info:    'border-[var(--color-info)]/25',
+}
+const TONE_BORDER_SUBTLE: Record<SeverityTone, string> = {
+  error:   'border-[var(--color-error)]/15',
+  warning: 'border-[var(--color-warning)]/15',
+  info:    'border-[var(--color-info)]/15',
+}
+const TONE_BADGE: Record<SeverityTone, string> = {
+  error:   'bg-[var(--color-error)]/20 text-[var(--color-error)]',
+  warning: 'bg-[var(--color-warning)]/20 text-[var(--color-warning)]',
+  info:    'bg-[var(--color-info)]/20 text-[var(--color-info)]',
+}
+const TONE_CALLOUT: Record<SeverityTone, string> = {
+  error:   'bg-[var(--color-error)]/5 border-[var(--color-error)]/20',
+  warning: 'bg-[var(--color-warning)]/5 border-[var(--color-warning)]/20',
+  info:    'bg-[var(--color-info)]/5 border-[var(--color-info)]/20',
+}
+const TONE_TEXT: Record<SeverityTone, string> = {
+  error:   'text-[var(--color-error)]',
+  warning: 'text-[var(--color-warning)]',
+  info:    'text-[var(--color-info)]',
+}
+const TONE_CHIP: Record<SeverityTone, string> = {
+  error:   'bg-[var(--color-error)]/15 text-[var(--color-error)]',
+  warning: 'bg-[var(--color-warning)]/15 text-[var(--color-warning)]',
+  info:    'bg-[var(--color-info)]/15 text-[var(--color-info)]',
 }
 
 // ── Score ring ────────────────────────────────────────────────────────────
@@ -56,7 +104,9 @@ function ScoreRing({ score }: { score: number }) {
   const r = 30
   const circ = 2 * Math.PI * r
   const dash = (score / 100) * circ
-  const color = score >= 75 ? '#10B981' : score >= 50 ? '#F59E0B' : '#EF4444'
+  // SVG stroke accepts var() natively; token ramp mirrors the severity tones.
+  const color =
+    score >= 75 ? 'var(--color-success)' : score >= 50 ? 'var(--color-warning)' : 'var(--color-error)'
   const label = score >= 75 ? 'Healthy' : score >= 50 ? 'Needs attention' : 'At risk'
 
   return (
@@ -107,21 +157,19 @@ function FindingCard({
     <motion.div
       initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
-      className="rounded-lg border overflow-hidden"
-      style={{ borderColor: `${cfg.color}25`, backgroundColor: cfg.bg }}
+      className={`rounded-lg border overflow-hidden ${TONE_BG_FINDING[cfg.tone]} ${TONE_BORDER_FINDING[cfg.tone]}`}
     >
       {/* Header row */}
       <button
         onClick={() => setExpanded((v) => !v)}
         className="w-full flex items-start gap-2.5 px-3 py-2.5 text-left"
       >
-        <Icon size={13} className="mt-0.5 shrink-0" style={{ color: cfg.color }} />
+        <Icon size={13} className={`mt-0.5 shrink-0 ${TONE_TEXT[cfg.tone]}`} />
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
             <span className="text-[11px] font-semibold text-[var(--text-primary)] leading-tight">{finding.title}</span>
             <span
-              className="text-[9px] font-semibold px-1.5 py-0.5 rounded-full uppercase tracking-wide shrink-0"
-              style={{ backgroundColor: `${cfg.color}20`, color: cfg.color }}
+              className={`text-[9px] font-semibold px-1.5 py-0.5 rounded-full uppercase tracking-wide shrink-0 ${TONE_BADGE[cfg.tone]}`}
             >
               {cfg.label}
             </span>
@@ -145,17 +193,14 @@ function FindingCard({
             transition={{ duration: 0.2 }}
             className="overflow-hidden"
           >
-            <div className="px-3 pb-3 flex flex-col gap-2 border-t" style={{ borderColor: `${cfg.color}15` }}>
+            <div className={`px-3 pb-3 flex flex-col gap-2 border-t ${TONE_BORDER_SUBTLE[cfg.tone]}`}>
               <p className="text-[10px] text-[var(--text-secondary)] leading-relaxed pt-2">{finding.description}</p>
 
               {finding.recommendation && (
-                <div
-                  className="rounded-md px-2.5 py-2 border"
-                  style={{ backgroundColor: `${cfg.color}08`, borderColor: `${cfg.color}20` }}
-                >
+                <div className={`rounded-md px-2.5 py-2 border ${TONE_CALLOUT[cfg.tone]}`}>
                   <div className="flex items-start gap-1.5">
-                    <Zap size={10} className="mt-0.5 shrink-0" style={{ color: cfg.color }} />
-                    <p className="text-[10px] leading-relaxed" style={{ color: cfg.color }}>
+                    <Zap size={10} className={`mt-0.5 shrink-0 ${TONE_TEXT[cfg.tone]}`} />
+                    <p className={`text-[10px] leading-relaxed ${TONE_TEXT[cfg.tone]}`}>
                       {finding.recommendation}
                     </p>
                   </div>
@@ -169,6 +214,10 @@ function FindingCard({
                     {finding.affectedNodes.map((nid) => {
                       const n = nodeMap.get(nid)
                       if (!n) return null
+                      // NODE_KIND_COLORS is kind-palette brand data (migrated in its own
+                      // phase — see mock-graph.ts). Fallback mirrors --text-tertiary
+                      // so untyped nodes tint neutrally.
+                      // eslint-disable-next-line no-hardcoded-hex -- kind-palette fallback mirrors --text-tertiary
                       const color = NODE_KIND_COLORS[n.kind] ?? '#64748B'
                       return (
                         <button
@@ -403,8 +452,7 @@ export function AIAnalysisPanel({
                     return (
                       <span
                         key={sev}
-                        className="flex items-center gap-1 text-[9px] font-semibold px-1.5 py-0.5 rounded-full"
-                        style={{ backgroundColor: `${cfg.color}15`, color: cfg.color }}
+                        className={`flex items-center gap-1 text-[9px] font-semibold px-1.5 py-0.5 rounded-full ${TONE_CHIP[cfg.tone]}`}
                       >
                         {count} {cfg.label}
                       </span>
