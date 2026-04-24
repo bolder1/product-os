@@ -52,8 +52,6 @@ export interface Sprint {
 // Mock data
 // ---------------------------------------------------------------------------
 
-const MOCK_ASSIGNEES = ['Alex', 'Sam', 'Jordan', 'Taylor', 'Morgan']
-
 const INITIAL_TASKS: SprintTask[] = [
   { id: 't1', title: 'Auth flow — login + signup screens', estimate: 8,  priority: 'high',     status: 'backlog', assignee: 'Alex',   tags: ['design', 'auth'] },
   { id: 't2', title: 'Brand token system — colors + typography', estimate: 5,  priority: 'high',     status: 'backlog', assignee: 'Sam',    tags: ['brand'] },
@@ -93,27 +91,54 @@ const INITIAL_SPRINTS: Sprint[] = [
 ]
 
 // ---------------------------------------------------------------------------
-// Constants
+// Constants — tone-based (R20 palette consolidation)
+// Icons + labels carry identity; tone carries meaning.
 // ---------------------------------------------------------------------------
 
-const PRIORITY_CONFIG: Record<TaskPriority, { label: string; color: string }> = {
-  critical: { label: 'Critical', color: '#EF4444' },
-  high:     { label: 'High',     color: '#F59E0B' },
-  medium:   { label: 'Medium',   color: '#3B82F6' },
-  low:      { label: 'Low',      color: '#64748B' },
+type Tone = 'error' | 'warning' | 'info' | 'success' | 'neutral'
+
+const PRIORITY_CONFIG: Record<TaskPriority, { label: string; tone: Tone }> = {
+  critical: { label: 'Critical', tone: 'error' },
+  high:     { label: 'High',     tone: 'warning' },
+  medium:   { label: 'Medium',   tone: 'info' },
+  low:      { label: 'Low',      tone: 'neutral' },
 }
 
-const STATUS_CONFIG: Record<TaskStatus, { label: string; color: string; icon: React.ReactNode }> = {
-  backlog:     { label: 'Backlog',     color: '#64748B', icon: <Circle size={12} /> },
-  todo:        { label: 'To Do',       color: '#94A3B8', icon: <Circle size={12} /> },
-  'in-progress': { label: 'In Progress', color: '#3B82F6', icon: <Zap size={12} /> },
-  done:        { label: 'Done',        color: '#10B981', icon: <CheckCircle2 size={12} /> },
+const STATUS_CONFIG: Record<TaskStatus, { label: string; tone: Tone; icon: React.ReactNode }> = {
+  backlog:       { label: 'Backlog',     tone: 'neutral', icon: <Circle size={12} /> },
+  todo:          { label: 'To Do',       tone: 'neutral', icon: <Circle size={12} /> },
+  'in-progress': { label: 'In Progress', tone: 'info',    icon: <Zap size={12} /> },
+  done:          { label: 'Done',        tone: 'success', icon: <CheckCircle2 size={12} /> },
 }
 
-const APPROVAL_CONFIG = {
-  pending:  { label: 'Pending approval', color: '#F59E0B', icon: <Clock size={12} /> },
-  approved: { label: 'Approved',         color: '#10B981', icon: <CheckCircle2 size={12} /> },
-  rejected: { label: 'Changes requested', color: '#EF4444', icon: <AlertTriangle size={12} /> },
+const APPROVAL_CONFIG: Record<'pending' | 'approved' | 'rejected', { label: string; tone: Tone; icon: React.ReactNode }> = {
+  pending:  { label: 'Pending approval',  tone: 'warning', icon: <Clock size={12} /> },
+  approved: { label: 'Approved',          tone: 'success', icon: <CheckCircle2 size={12} /> },
+  rejected: { label: 'Changes requested', tone: 'error',   icon: <AlertTriangle size={12} /> },
+}
+
+// Pre-composed tone → classname pairs. CSS vars don't survive template concat,
+// so we keep the pairings explicit here.
+const toneText: Record<Tone, string> = {
+  error: 'text-[var(--color-error)]',
+  warning: 'text-[var(--color-warning)]',
+  info: 'text-[var(--accent)]',
+  success: 'text-[var(--color-success)]',
+  neutral: 'text-[var(--text-tertiary)]',
+}
+const toneBgSoft: Record<Tone, string> = {
+  error: 'bg-[var(--color-error-muted)]',
+  warning: 'bg-[var(--color-warning-muted)]',
+  info: 'bg-[var(--accent-subtle)]',
+  success: 'bg-[var(--color-success-muted)]',
+  neutral: 'bg-[var(--bg-inset)]',
+}
+const toneBgSolid: Record<Tone, string> = {
+  error: 'bg-[var(--color-error)]',
+  warning: 'bg-[var(--color-warning)]',
+  info: 'bg-[var(--accent)]',
+  success: 'bg-[var(--color-success)]',
+  neutral: 'bg-[var(--text-tertiary)]',
 }
 
 // ---------------------------------------------------------------------------
@@ -130,7 +155,6 @@ function TaskCard({
   onRemove?: () => void
 }) {
   const priority = PRIORITY_CONFIG[task.priority]
-  const status = STATUS_CONFIG[task.status]
 
   return (
     <motion.div
@@ -138,45 +162,44 @@ function TaskCard({
       initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.96 }}
-      className="group flex items-start gap-2.5 p-3 rounded-xl border border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.04] hover:border-white/[0.10] transition-all cursor-grab"
+      className="group flex cursor-grab items-start gap-2.5 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-inset)] p-3 transition-all hover:border-[var(--border-default)] hover:bg-[var(--surface-hover)]"
     >
-      <GripVertical size={13} className="text-[var(--border-default)] mt-0.5 shrink-0 group-hover:text-[#64748B] transition-colors" />
+      <GripVertical size={13} className="mt-0.5 shrink-0 text-[var(--border-default)] transition-colors group-hover:text-[var(--text-tertiary)]" />
 
-      <div className="flex-1 min-w-0">
-        <p className="text-xs font-medium text-[var(--text-primary)] mb-1.5 leading-relaxed">{task.title}</p>
-        <div className="flex items-center gap-1.5 flex-wrap">
+      <div className="min-w-0 flex-1">
+        <p className="mb-1.5 text-xs font-medium leading-relaxed text-[var(--text-primary)]">{task.title}</p>
+        <div className="flex flex-wrap items-center gap-1.5">
           {/* Priority */}
-          <span
-            className="text-[10px] font-semibold px-1.5 py-0.5 rounded"
-            style={{ backgroundColor: `${priority.color}18`, color: priority.color }}
-          >
+          <span className={`rounded px-1.5 py-0.5 text-[10px] font-semibold ${toneBgSoft[priority.tone]} ${toneText[priority.tone]}`}>
             {priority.label}
           </span>
           {/* Estimate */}
-          <span className="text-[10px] text-[var(--text-tertiary)] flex items-center gap-0.5">
+          <span className="flex items-center gap-0.5 text-[10px] text-[var(--text-tertiary)]">
             <Clock size={9} />
             {task.estimate}h
           </span>
           {/* Assignee */}
           {task.assignee && (
-            <span className="text-[10px] text-[var(--text-tertiary)] flex items-center gap-0.5">
+            <span className="flex items-center gap-0.5 text-[10px] text-[var(--text-tertiary)]">
               <User size={9} />
               {task.assignee}
             </span>
           )}
           {/* Tags */}
           {task.tags.slice(0, 2).map((t) => (
-            <span key={t} className="text-[9px] px-1.5 py-0.5 rounded bg-white/[0.04] text-[var(--text-tertiary)]">{t}</span>
+            <span key={t} className="rounded bg-[var(--bg-inset)] px-1.5 py-0.5 text-[9px] text-[var(--text-tertiary)]">
+              {t}
+            </span>
           ))}
         </div>
       </div>
 
       {/* Actions */}
-      <div className="flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+      <div className="flex shrink-0 flex-col gap-1 opacity-0 transition-opacity group-hover:opacity-100">
         {onMove && (
           <button
             onClick={() => onMove(task.sprintId)}
-            className="w-6 h-6 rounded-md flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--accent)] hover:bg-[var(--accent)]/10 transition-colors"
+            className="flex h-6 w-6 items-center justify-center rounded-md text-[var(--text-tertiary)] transition-colors hover:bg-[var(--accent-subtle)] hover:text-[var(--accent)]"
             title={task.sprintId ? 'Move to backlog' : 'Add to sprint'}
           >
             {task.sprintId ? <ChevronRight size={11} className="rotate-180" /> : <ChevronRight size={11} />}
@@ -185,7 +208,7 @@ function TaskCard({
         {onRemove && (
           <button
             onClick={onRemove}
-            className="w-6 h-6 rounded-md flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--color-error)] hover:bg-[var(--color-error)]/10 transition-colors"
+            className="flex h-6 w-6 items-center justify-center rounded-md text-[var(--text-tertiary)] transition-colors hover:bg-[var(--color-error-muted)] hover:text-[var(--color-error)]"
           >
             <X size={11} />
           </button>
@@ -202,20 +225,19 @@ function TaskCard({
 function CapacityBar({ used, total, assignees }: { used: number; total: number; assignees: Record<string, number> }) {
   const pct = Math.min((used / Math.max(total, 1)) * 100, 100)
   const over = used > total
-  const color = over ? '#EF4444' : pct > 80 ? '#F59E0B' : '#10B981'
+  const tone: Tone = over ? 'error' : pct > 80 ? 'warning' : 'success'
 
   return (
-    <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
-      <div className="flex items-center justify-between mb-2">
+    <div className="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-inset)] p-4">
+      <div className="mb-2 flex items-center justify-between">
         <span className="text-xs font-medium text-[var(--text-primary)]">Sprint Capacity</span>
-        <span className="text-xs font-mono" style={{ color }}>
+        <span className={`font-mono text-xs ${toneText[tone]}`}>
           {used}h / {total}h {over && '⚠ Over capacity'}
         </span>
       </div>
-      <div className="h-2 rounded-full bg-white/[0.06] overflow-hidden mb-3">
+      <div className="mb-3 h-2 overflow-hidden rounded-full bg-[var(--bg-base)]">
         <motion.div
-          className="h-full rounded-full"
-          style={{ backgroundColor: color }}
+          className={`h-full rounded-full ${toneBgSolid[tone]}`}
           initial={{ width: 0 }}
           animate={{ width: `${pct}%` }}
           transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
@@ -225,14 +247,14 @@ function CapacityBar({ used, total, assignees }: { used: number; total: number; 
       <div className="flex flex-col gap-1.5">
         {Object.entries(assignees).map(([name, hours]) => (
           <div key={name} className="flex items-center gap-2">
-            <span className="text-[10px] text-[var(--text-tertiary)] w-14 shrink-0">{name}</span>
-            <div className="flex-1 h-1.5 rounded-full bg-white/[0.06] overflow-hidden">
+            <span className="w-14 shrink-0 text-[10px] text-[var(--text-tertiary)]">{name}</span>
+            <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-[var(--bg-base)]">
               <div
                 className="h-full rounded-full bg-[var(--accent)]"
                 style={{ width: `${Math.min((hours / (total / Object.keys(assignees).length)) * 100, 100)}%` }}
               />
             </div>
-            <span className="text-[10px] text-[var(--text-tertiary)] w-6 text-right">{hours}h</span>
+            <span className="w-6 text-right text-[10px] text-[var(--text-tertiary)]">{hours}h</span>
           </div>
         ))}
       </div>
@@ -246,7 +268,6 @@ function CapacityBar({ used, total, assignees }: { used: number; total: number; 
 
 function ApprovalGate({
   sprint,
-  onApprove,
   onRequest,
 }: {
   sprint: Sprint
@@ -266,7 +287,7 @@ function ApprovalGate({
 
   if (sprint.approvalStatus === 'approved') {
     return (
-      <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-[var(--color-success)]/10 border border-[var(--color-success)]/20">
+      <div className="flex items-center gap-2 rounded-xl border border-[var(--color-success-border)] bg-[var(--color-success-muted)] px-3 py-2">
         <CheckCircle2 size={14} className="text-[var(--color-success)]" />
         <span className="text-xs font-medium text-[var(--color-success)]">Sprint approved — committed to delivery</span>
       </div>
@@ -275,7 +296,7 @@ function ApprovalGate({
 
   if (sprint.approvalStatus === 'pending') {
     return (
-      <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-[var(--color-warning)]/10 border border-[var(--color-warning)]/20">
+      <div className="flex items-center gap-2 rounded-xl border border-[var(--color-warning-border)] bg-[var(--color-warning-muted)] px-3 py-2">
         <Clock size={14} className="text-[var(--color-warning)]" />
         <span className="text-xs font-medium text-[var(--color-warning)]">Awaiting manager approval…</span>
       </div>
@@ -283,28 +304,28 @@ function ApprovalGate({
   }
 
   return (
-    <div className="rounded-xl border border-white/[0.08] bg-white/[0.02] p-4">
-      <div className="flex items-center gap-2 mb-3">
+    <div className="rounded-xl border border-[var(--border-default)] bg-[var(--bg-inset)] p-4">
+      <div className="mb-3 flex items-center gap-2">
         <ShieldCheck size={15} className="text-[var(--accent)]" />
         <span className="text-sm font-medium text-[var(--text-primary)]">Commit Sprint for Approval</span>
       </div>
-      <p className="text-xs text-[var(--text-tertiary)] mb-3 leading-relaxed">
-        Once you commit this sprint, it will be sent to your manager for approval before tasks move to "In Progress".
+      <p className="mb-3 text-xs leading-relaxed text-[var(--text-tertiary)]">
+        Once you commit this sprint, it will be sent to your manager for approval before tasks move to &quot;In Progress&quot;.
       </p>
       <textarea
         value={comment}
         onChange={(e) => setComment(e.target.value)}
         placeholder="Add a note for your manager (optional)…"
         rows={2}
-        className="w-full px-3 py-2 rounded-lg bg-white/[0.03] border border-white/[0.08] text-xs text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:border-[var(--accent)]/50 focus:outline-none resize-none transition mb-2"
+        className="mb-2 w-full resize-none rounded-lg border border-[var(--border-default)] bg-[var(--bg-surface)] px-3 py-2 text-xs text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] transition focus:border-[var(--accent)] focus:outline-none"
       />
       <button
         onClick={submitRequest}
         disabled={requesting}
-        className={`w-full flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-medium transition-colors ${
+        className={`flex w-full items-center justify-center gap-2 rounded-lg py-2 text-xs font-medium transition-colors ${
           requesting
-            ? 'bg-white/[0.06] text-[var(--text-tertiary)] cursor-not-allowed'
-            : 'bg-[var(--accent)] text-white hover:bg-[var(--accent)]'
+            ? 'cursor-not-allowed bg-[var(--bg-inset)] text-[var(--text-tertiary)]'
+            : 'bg-[var(--accent)] text-[var(--color-white)] hover:bg-[var(--accent-hover)]'
         }`}
       >
         {requesting ? <Loader2 size={13} className="animate-spin" /> : <Send size={13} />}
@@ -349,19 +370,16 @@ function SprintColumn({
   const dateLabel = `${new Date(sprint.startDate).toLocaleDateString('en', { month: 'short', day: 'numeric' })} – ${new Date(sprint.endDate).toLocaleDateString('en', { month: 'short', day: 'numeric' })}`
 
   return (
-    <div className="flex flex-col gap-3 min-w-[340px] w-[340px]">
+    <div className="flex w-[340px] min-w-[340px] flex-col gap-3">
       {/* Sprint header */}
-      <div className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-4">
-        <div className="flex items-start justify-between mb-1">
+      <div className="rounded-2xl border border-[var(--border-default)] bg-[var(--bg-inset)] p-4">
+        <div className="mb-1 flex items-start justify-between">
           <div>
             <p className="text-sm font-semibold text-[var(--text-primary)]">{sprint.name}</p>
-            <p className="text-xs text-[var(--text-tertiary)] mt-0.5">{dateLabel}</p>
+            <p className="mt-0.5 text-xs text-[var(--text-tertiary)]">{dateLabel}</p>
           </div>
           {approvalMeta && (
-            <span
-              className="inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full"
-              style={{ backgroundColor: `${approvalMeta.color}18`, color: approvalMeta.color }}
-            >
+            <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium ${toneBgSoft[approvalMeta.tone]} ${toneText[approvalMeta.tone]}`}>
               {approvalMeta.icon}
               {approvalMeta.label}
             </span>
@@ -379,8 +397,8 @@ function SprintColumn({
         const cfg = STATUS_CONFIG[status]
         return (
           <div key={status}>
-            <div className="flex items-center gap-1.5 mb-1.5 px-1">
-              <span style={{ color: cfg.color }}>{cfg.icon}</span>
+            <div className="mb-1.5 flex items-center gap-1.5 px-1">
+              <span className={toneText[cfg.tone]}>{cfg.icon}</span>
               <span className="text-[10px] font-semibold uppercase tracking-wide text-[var(--text-tertiary)]">{cfg.label}</span>
               <span className="text-[10px] text-[var(--text-tertiary)]">({group.length})</span>
             </div>
@@ -395,7 +413,7 @@ function SprintColumn({
                 ))}
               </AnimatePresence>
               {group.length === 0 && (
-                <div className="h-10 rounded-xl border border-dashed border-white/[0.05] flex items-center justify-center">
+                <div className="flex h-10 items-center justify-center rounded-xl border border-dashed border-[var(--border-subtle)]">
                   <span className="text-[10px] text-[var(--border-default)]">Drop tasks here</span>
                 </div>
               )}
@@ -467,21 +485,21 @@ export function SprintPlanner() {
   return (
     <div className="flex h-full overflow-hidden">
       {/* Backlog */}
-      <div className="w-[300px] shrink-0 border-r border-white/[0.06] flex flex-col bg-[#080C14]">
-        <div className="px-4 py-3 border-b border-white/[0.06]">
-          <div className="flex items-center justify-between mb-2">
+      <div className="flex w-[300px] shrink-0 flex-col border-r border-[var(--border-subtle)] bg-[var(--bg-surface)]">
+        <div className="border-b border-[var(--border-subtle)] px-4 py-3">
+          <div className="mb-2 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Flag size={14} className="text-[var(--text-tertiary)]" />
               <span className="text-sm font-semibold text-[var(--text-primary)]">Backlog</span>
-              <span className="text-xs text-[var(--text-tertiary)] px-1.5 py-0.5 rounded-full bg-white/[0.06]">{backlogTasks.length}</span>
+              <span className="rounded-full bg-[var(--bg-inset)] px-1.5 py-0.5 text-xs text-[var(--text-tertiary)]">{backlogTasks.length}</span>
             </div>
             <button
               onClick={generateAITasks}
               disabled={generating}
-              className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-medium transition-colors ${
+              className={`flex items-center gap-1 rounded-lg px-2.5 py-1 text-[10px] font-medium transition-colors ${
                 generating
-                  ? 'bg-white/[0.04] text-[var(--text-tertiary)] cursor-not-allowed'
-                  : 'bg-[var(--accent)]/15 text-[var(--accent)] hover:bg-[var(--accent)]/25'
+                  ? 'cursor-not-allowed bg-[var(--bg-inset)] text-[var(--text-tertiary)]'
+                  : 'bg-[var(--accent-subtle)] text-[var(--accent)] hover:bg-[var(--accent-muted)]'
               }`}
             >
               {generating ? <Loader2 size={10} className="animate-spin" /> : <Sparkles size={10} />}
@@ -491,7 +509,7 @@ export function SprintPlanner() {
           <p className="text-[10px] text-[var(--text-tertiary)]">Drag tasks into sprints or click → to move them</p>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-3 py-3 flex flex-col gap-1.5">
+        <div className="flex flex-1 flex-col gap-1.5 overflow-y-auto px-3 py-3">
           <AnimatePresence>
             {backlogTasks.map((task) => (
               <TaskCard
@@ -505,8 +523,8 @@ export function SprintPlanner() {
             ))}
           </AnimatePresence>
           {backlogTasks.length === 0 && (
-            <div className="flex-1 flex items-center justify-center">
-              <p className="text-xs text-[var(--text-tertiary)] text-center">All tasks are in sprints</p>
+            <div className="flex flex-1 items-center justify-center">
+              <p className="text-center text-xs text-[var(--text-tertiary)]">All tasks are in sprints</p>
             </div>
           )}
         </div>
@@ -514,7 +532,7 @@ export function SprintPlanner() {
 
       {/* Sprint columns */}
       <div className="flex-1 overflow-x-auto">
-        <div className="flex gap-5 p-5 h-full min-w-max">
+        <div className="flex h-full min-w-max gap-5 p-5">
           {sprints.map((sprint) => (
             <SprintColumn
               key={sprint.id}
@@ -527,8 +545,8 @@ export function SprintPlanner() {
           ))}
 
           {/* Add sprint */}
-          <div className="flex flex-col gap-3 min-w-[220px] w-[220px]">
-            <button className="flex items-center justify-center gap-2 p-4 rounded-2xl border border-dashed border-white/[0.08] text-[var(--text-tertiary)] hover:border-white/[0.14] hover:text-[var(--text-secondary)] hover:bg-white/[0.02] transition-all text-sm">
+          <div className="flex w-[220px] min-w-[220px] flex-col gap-3">
+            <button className="flex items-center justify-center gap-2 rounded-2xl border border-dashed border-[var(--border-default)] p-4 text-sm text-[var(--text-tertiary)] transition-all hover:border-[var(--border-strong)] hover:bg-[var(--bg-inset)] hover:text-[var(--text-secondary)]">
               <Plus size={15} />
               New Sprint
             </button>
