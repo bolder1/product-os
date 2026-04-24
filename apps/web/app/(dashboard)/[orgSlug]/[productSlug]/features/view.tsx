@@ -42,16 +42,33 @@ interface FeatureNode {
 /*  Constants                                                           */
 /* ------------------------------------------------------------------ */
 
-const COLUMNS: { status: Status; color: string; bg: string }[] = [
-  { status: 'Planned', color: '#64748B', bg: '#64748B' },
-  { status: 'In Progress', color: '#F59E0B', bg: '#F59E0B' },
-  { status: 'Shipped', color: '#10B981', bg: '#10B981' },
+// R20: per-column hex retired in favor of semantic tones. Status dot and
+// the active-status pill both tint by tone; neutral (planned), warning
+// (in-progress), success (shipped).
+type StatusTone = 'neutral' | 'warning' | 'success'
+
+const COLUMNS: { status: Status; tone: StatusTone }[] = [
+  { status: 'Planned', tone: 'neutral' },
+  { status: 'In Progress', tone: 'warning' },
+  { status: 'Shipped', tone: 'success' },
 ]
 
-const PRIORITY_COLORS: Record<string, string> = {
-  high: '#EF4444',
-  medium: '#F59E0B',
-  low: '#10B981',
+const TONE_DOT_BG: Record<StatusTone, string> = {
+  neutral: 'bg-[var(--text-tertiary)]',
+  warning: 'bg-[var(--color-warning)]',
+  success: 'bg-[var(--color-success)]',
+}
+
+const TONE_PILL_ACTIVE: Record<StatusTone, string> = {
+  neutral: 'bg-[var(--bg-inset)] text-[var(--text-secondary)] border-[var(--border-default)]',
+  warning: 'bg-[var(--color-warning-muted)] text-[var(--color-warning)] border-[var(--color-warning)]',
+  success: 'bg-[var(--color-success-muted)] text-[var(--color-success)] border-[var(--color-success)]',
+}
+
+const PRIORITY_DOT_BG: Record<string, string> = {
+  high: 'bg-[var(--color-error)]',
+  medium: 'bg-[var(--color-warning)]',
+  low: 'bg-[var(--color-success)]',
 }
 
 /* ------------------------------------------------------------------ */
@@ -204,10 +221,9 @@ function FeatureCard({
         <span className="text-[12px] font-medium text-[var(--text-primary)] leading-snug line-clamp-2 flex-1">
           {feature.label}
         </span>
-        {priority && PRIORITY_COLORS[priority] && (
+        {priority && PRIORITY_DOT_BG[priority] && (
           <span
-            className="mt-0.5 shrink-0 w-2 h-2 rounded-sm"
-            style={{ backgroundColor: PRIORITY_COLORS[priority] }}
+            className={`mt-0.5 shrink-0 w-2 h-2 rounded-sm ${PRIORITY_DOT_BG[priority]}`}
             title={`Priority: ${priority}`}
           />
         )}
@@ -389,20 +405,20 @@ function DetailPanel({
           Status
         </p>
         <div className="flex gap-1.5 flex-wrap">
-          {COLUMNS.map((col) => (
-            <button
-              key={col.status}
-              onClick={() => changeStatus(col.status)}
-              className="px-2.5 py-1 rounded-full text-[10px] font-medium transition-all"
-              style={
-                currentStatus === col.status
-                  ? { backgroundColor: col.bg + '33', color: col.color, border: `1px solid ${col.color}66` }
-                  : { backgroundColor: 'transparent', color: 'var(--text-tertiary)', border: '1px solid var(--border-default)' }
-              }
-            >
-              {col.status}
-            </button>
-          ))}
+          {COLUMNS.map((col) => {
+            const isActive = currentStatus === col.status
+            const activeCls = TONE_PILL_ACTIVE[col.tone]
+            const inactiveCls = 'bg-transparent text-[var(--text-tertiary)] border-[var(--border-default)]'
+            return (
+              <button
+                key={col.status}
+                onClick={() => changeStatus(col.status)}
+                className={`px-2.5 py-1 rounded-full text-[10px] font-medium transition-all border ${isActive ? activeCls : inactiveCls}`}
+              >
+                {col.status}
+              </button>
+            )
+          })}
         </div>
       </div>
 
@@ -487,12 +503,11 @@ function DetailPanel({
             }
           }}
           disabled={deleteMutation.isPending}
-          className="flex items-center gap-2 w-full px-3 py-2 rounded-lg text-[11px] transition-colors"
-          style={
+          className={`flex items-center gap-2 w-full px-3 py-2 rounded-lg text-[11px] transition-colors border ${
             confirmDelete
-              ? { backgroundColor: '#EF444420', color: '#EF4444', border: '1px solid #EF444440' }
-              : { color: 'var(--text-tertiary)' }
-          }
+              ? 'bg-[var(--color-error-muted)] text-[var(--color-error)] border-[var(--color-error)]'
+              : 'text-[var(--text-tertiary)] border-transparent'
+          }`}
         >
           {confirmDelete ? (
             <>
@@ -836,10 +851,7 @@ export function FeaturesView() {
               >
                 {/* Column header */}
                 <div className="flex items-center gap-2 mb-3 px-1">
-                  <span
-                    className="w-2 h-2 rounded-full shrink-0"
-                    style={{ backgroundColor: col.color }}
-                  />
+                  <span className={`w-2 h-2 rounded-full shrink-0 ${TONE_DOT_BG[col.tone]}`} />
                   <span className="text-[12px] font-semibold text-[var(--text-primary)]">
                     {col.status}
                   </span>
