@@ -39,17 +39,49 @@ interface AISuggestResult {
 
 // ── Sub-components ────────────────────────────────────────────────────────────
 
-const TYPE_CONFIG = {
-  connect: { icon: Link2, color: '#6398ff', bg: '#6398ff', label: 'Connect' },
-  missing_edge: { icon: AlertCircle, color: '#F59E0B', bg: '#F59E0B', label: 'Missing Edge' },
-  action: { icon: ArrowRight, color: '#10B981', bg: '#10B981', label: 'Action' },
-  insight: { icon: Lightbulb, color: '#8B5CF6', bg: '#8B5CF6', label: 'Insight' },
+/**
+ * Per R20, suggestion-type and priority identity rides the semantic tone
+ * ramp. Icon + label carry the meaning; color is a tone signal only.
+ */
+type Tone = 'info' | 'warning' | 'success' | 'accent' | 'error' | 'neutral'
+
+const TYPE_CONFIG: Record<Suggestion['type'], { icon: typeof Link2; tone: Tone; label: string }> = {
+  connect:      { icon: Link2,        tone: 'info',    label: 'Connect' },
+  missing_edge: { icon: AlertCircle,  tone: 'warning', label: 'Missing Edge' },
+  action:       { icon: ArrowRight,   tone: 'success', label: 'Action' },
+  insight:      { icon: Lightbulb,    tone: 'accent',  label: 'Insight' },
 }
 
-const PRIORITY_COLOR: Record<string, string> = {
-  high: '#F43F5E',
-  medium: '#F59E0B',
-  low: '#64748B',
+const PRIORITY_TONES: Record<string, Tone> = {
+  high:   'error',
+  medium: 'warning',
+  low:    'neutral',
+}
+
+/** Pre-composed tone → class-pair maps — no template-literal concat needed. */
+const toneText: Record<Tone, string> = {
+  info:    'text-[var(--accent)]',
+  warning: 'text-[var(--color-warning)]',
+  success: 'text-[var(--color-success)]',
+  accent:  'text-[var(--accent-text)]',
+  error:   'text-[var(--color-error)]',
+  neutral: 'text-[var(--text-tertiary)]',
+}
+const toneBgSoft: Record<Tone, string> = {
+  info:    'bg-[var(--accent-subtle)]',
+  warning: 'bg-[var(--color-warning-muted)]',
+  success: 'bg-[var(--color-success-muted)]',
+  accent:  'bg-[var(--accent-muted)]',
+  error:   'bg-[var(--color-error-muted)]',
+  neutral: 'bg-[var(--bg-inset)]',
+}
+const toneBgSolid: Record<Tone, string> = {
+  info:    'bg-[var(--accent)]',
+  warning: 'bg-[var(--color-warning)]',
+  success: 'bg-[var(--color-success)]',
+  accent:  'bg-[var(--accent-text)]',
+  error:   'bg-[var(--color-error)]',
+  neutral: 'bg-[var(--text-tertiary)]',
 }
 
 function SuggestionCard({
@@ -64,11 +96,11 @@ function SuggestionCard({
   const [expanded, setExpanded] = useState(false)
   const cfg = TYPE_CONFIG[suggestion.type] ?? TYPE_CONFIG.insight
   const Icon = cfg.icon
+  const priorityTone = suggestion.priority ? PRIORITY_TONES[suggestion.priority] : null
 
   const relatedNode = suggestion.relatedNodeId
     ? allNodes.find((n) => n.id === suggestion.relatedNodeId)
     : null
-  const relatedColor = relatedNode ? NODE_KIND_COLORS[relatedNode.kind] : '#64748B'
 
   return (
     <motion.div
@@ -81,28 +113,19 @@ function SuggestionCard({
         onClick={() => setExpanded((p) => !p)}
         className="w-full flex items-start gap-2.5 px-3 py-2.5 text-left hover:bg-[var(--surface-hover)] transition-colors"
       >
-        <div
-          className="w-5 h-5 rounded-md flex items-center justify-center shrink-0 mt-0.5"
-          style={{ backgroundColor: `${cfg.bg}18` }}
-        >
-          <Icon size={11} style={{ color: cfg.color }} />
+        <div className={`w-5 h-5 rounded-md flex items-center justify-center shrink-0 mt-0.5 ${toneBgSoft[cfg.tone]}`}>
+          <Icon size={11} className={toneText[cfg.tone]} />
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5 flex-wrap">
             <span className="text-[10px] font-semibold text-[var(--text-primary)] leading-tight">{suggestion.title}</span>
-            {suggestion.priority && (
-              <span
-                className="text-[8px] font-bold px-1.5 py-px rounded-full uppercase tracking-wide"
-                style={{ backgroundColor: PRIORITY_COLOR[suggestion.priority] + '18', color: PRIORITY_COLOR[suggestion.priority] }}
-              >
+            {suggestion.priority && priorityTone && (
+              <span className={`text-[8px] font-bold px-1.5 py-px rounded-full uppercase tracking-wide ${toneBgSoft[priorityTone]} ${toneText[priorityTone]}`}>
                 {suggestion.priority}
               </span>
             )}
           </div>
-          <span
-            className="text-[9px] font-medium uppercase tracking-wider"
-            style={{ color: cfg.color }}
-          >
+          <span className={`text-[9px] font-medium uppercase tracking-wider ${toneText[cfg.tone]}`}>
             {cfg.label}
           </span>
         </div>
@@ -122,30 +145,31 @@ function SuggestionCard({
             <div className="px-3 pb-3 flex flex-col gap-2">
               <p className="text-[10px] text-[var(--text-secondary)] leading-relaxed">{suggestion.description}</p>
 
-              {/* Related node chip */}
-              {relatedNode && (
-                <div className="flex items-center gap-1.5">
-                  <span className="text-[9px] text-[var(--text-tertiary)]">Related node:</span>
-                  <span
-                    className="inline-flex items-center gap-1 text-[9px] font-medium px-2 py-0.5 rounded-full"
-                    style={{ backgroundColor: `${relatedColor}18`, color: relatedColor }}
-                  >
+              {/* Related node chip — uses NODE_KIND_COLORS from data layer,
+                  which still carries raw hex. Opacity via rgb-mixing in the
+                  wrapper avoids the hex-concat pattern. */}
+              {relatedNode && (() => {
+                const relatedColor = NODE_KIND_COLORS[relatedNode.kind]
+                return (
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[9px] text-[var(--text-tertiary)]">Related node:</span>
                     <span
-                      className="w-1 h-1 rounded-full"
-                      style={{ backgroundColor: relatedColor }}
-                    />
-                    {relatedNode.label}
-                    <span className="opacity-60">· {NODE_KIND_LABELS[relatedNode.kind]}</span>
-                  </span>
-                </div>
-              )}
+                      className="inline-flex items-center gap-1 text-[9px] font-medium px-2 py-0.5 rounded-full bg-[var(--bg-inset)]"
+                      style={{ color: relatedColor }}
+                    >
+                      <span className="w-1 h-1 rounded-full" style={{ backgroundColor: relatedColor }} />
+                      {relatedNode.label}
+                      <span className="opacity-60">· {NODE_KIND_LABELS[relatedNode.kind]}</span>
+                    </span>
+                  </div>
+                )
+              })()}
 
               {/* Action button */}
               {suggestion.type === 'connect' && suggestion.relatedNodeId && onConnect && (
                 <button
                   onClick={() => onConnect(suggestion.relatedNodeId!, suggestion.edgeKind ?? 'depends_on')}
-                  className="self-start flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-semibold text-white transition-colors"
-                  style={{ backgroundColor: cfg.color }}
+                  className={`self-start flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-semibold text-white transition-colors ${toneBgSolid[cfg.tone]}`}
                 >
                   <Link2 size={9} />
                   Connect now
@@ -239,7 +263,7 @@ export function NodeAISuggestPanel({
     >
       {/* Header */}
       <div className="flex items-center gap-2 px-3 py-2.5 border-b border-[var(--border-default)] bg-[var(--bg-surface)] shrink-0">
-        <div className="w-5 h-5 rounded-md flex items-center justify-center" style={{ backgroundColor: '#8B5CF620' }}>
+        <div className="w-5 h-5 rounded-md flex items-center justify-center bg-[var(--accent-muted)]">
           <Sparkles size={11} className="text-[var(--accent)]" />
         </div>
         <div className="flex-1 min-w-0">
