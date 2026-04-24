@@ -9,6 +9,21 @@ import { useGraphStore } from '../../../../../lib/graph-store'
 import { useTaskStore } from '../../../../../lib/task-store'
 import { useValidation } from '../../../../../lib/validation-engine'
 
+// R20: stat tone — categorical identity via tone ramp, not raw hex.
+type StatTone = 'accent' | 'accent-text' | 'warning'
+
+const TONE_BG_SOFT: Record<StatTone, string> = {
+  accent:        'bg-[var(--accent-subtle)]',
+  'accent-text': 'bg-[var(--accent-muted)]',
+  warning:       'bg-[var(--color-warning-muted)]',
+}
+
+const TONE_ICON_TEXT: Record<StatTone, string> = {
+  accent:        'text-[var(--accent)]',
+  'accent-text': 'text-[var(--accent-text)]',
+  warning:       'text-[var(--color-warning)]',
+}
+
 function useLiveStats() {
   const params = useParams()
   const product = useProduct()
@@ -29,14 +44,14 @@ function useLiveStats() {
 
   return hasRealData
     ? [
-        { label: 'Graph Nodes', value: graphNodes.length, trend: graphNodes.length > 0 ? +graphNodes.length : 0, icon: Boxes, color: '#3B82F6' },
-        { label: 'Open Tasks', value: openTasks.length, trend: openTasks.length > 0 ? -openTasks.length : 0, icon: ListTodo, color: '#F59E0B' },
-        { label: 'Pending Reviews', value: inReview.length, trend: inReview.length, icon: ShieldCheck, color: '#8B5CF6' },
+        { label: 'Graph Nodes', value: graphNodes.length, trend: graphNodes.length > 0 ? +graphNodes.length : 0, icon: Boxes, tone: 'accent' as StatTone },
+        { label: 'Open Tasks', value: openTasks.length, trend: openTasks.length > 0 ? -openTasks.length : 0, icon: ListTodo, tone: 'warning' as StatTone },
+        { label: 'Pending Reviews', value: inReview.length, trend: inReview.length, icon: ShieldCheck, tone: 'accent-text' as StatTone },
       ]
     : [
-        { label: 'Total Nodes', value: 47, trend: +5, icon: Boxes, color: '#3B82F6' },
-        { label: 'Open Tasks', value: 12, trend: -2, icon: ListTodo, color: '#F59E0B' },
-        { label: 'Pending Approvals', value: 3, trend: +1, icon: ShieldCheck, color: '#8B5CF6' },
+        { label: 'Total Nodes', value: 47, trend: +5, icon: Boxes, tone: 'accent' as StatTone },
+        { label: 'Open Tasks', value: 12, trend: -2, icon: ListTodo, tone: 'warning' as StatTone },
+        { label: 'Pending Approvals', value: 3, trend: +1, icon: ShieldCheck, tone: 'accent-text' as StatTone },
       ]
 }
 
@@ -56,11 +71,8 @@ export function QuickStats() {
             className="bg-white/[0.03] border border-white/[0.08] rounded-xl p-5 flex flex-col justify-between"
           >
             <div className="flex items-center justify-between">
-              <div
-                className="w-9 h-9 rounded-lg flex items-center justify-center"
-                style={{ backgroundColor: `${stat.color}15` }}
-              >
-                <Icon className="w-4 h-4" style={{ color: stat.color }} />
+              <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${TONE_BG_SOFT[stat.tone]}`}>
+                <Icon className={`w-4 h-4 ${TONE_ICON_TEXT[stat.tone]}`} />
               </div>
               <div className="flex items-center gap-1">
                 {isPositive ? (
@@ -68,10 +80,7 @@ export function QuickStats() {
                 ) : (
                   <TrendingDown className="w-3 h-3 text-[var(--color-error)]" />
                 )}
-                <span
-                  className="text-xs font-medium"
-                  style={{ color: isPositive ? '#10B981' : '#F43F5E' }}
-                >
+                <span className={`text-xs font-medium ${isPositive ? 'text-[var(--color-success)]' : 'text-[var(--color-error)]'}`}>
                   {isPositive ? '+' : ''}
                   {stat.trend}
                 </span>
