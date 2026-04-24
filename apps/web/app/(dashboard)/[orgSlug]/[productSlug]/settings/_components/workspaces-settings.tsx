@@ -6,12 +6,14 @@ import {
   Eye, EyeOff, GripVertical,
 } from 'lucide-react'
 
+// R20: workspace identity was 8 hex swatches; retired in favor of single
+// --accent treatment. Workspace identity is carried by icon + label
+// alone. Reflects the R20 plan directive for role/workspace retirement.
 interface WorkspaceConfig {
   key: string
   label: string
   description: string
   icon: React.ElementType
-  color: string
   enabled: boolean
   defaultView: string
   views: string[]
@@ -23,7 +25,6 @@ const DEFAULT_WORKSPACES: WorkspaceConfig[] = [
     label: 'Home',
     description: 'Unified inbox, org pulse, and role-specific dashboard',
     icon: Home,
-    color: '#6366F1',
     enabled: true,
     defaultView: 'dashboard',
     views: ['dashboard'],
@@ -33,7 +34,6 @@ const DEFAULT_WORKSPACES: WorkspaceConfig[] = [
     label: 'Plan',
     description: 'Specs, roadmaps, features, decisions, and templates',
     icon: Map,
-    color: '#3B82F6',
     enabled: true,
     defaultView: 'planner',
     views: ['planner', 'roadmap', 'features', 'templates', 'canvas', 'decisions'],
@@ -43,7 +43,6 @@ const DEFAULT_WORKSPACES: WorkspaceConfig[] = [
     label: 'Design',
     description: 'Canvas, brand tokens, components, pages, and graphics',
     icon: Palette,
-    color: '#EC4899',
     enabled: true,
     defaultView: 'design',
     views: ['design', 'brand', 'components', 'pages', 'graphics'],
@@ -53,7 +52,6 @@ const DEFAULT_WORKSPACES: WorkspaceConfig[] = [
     label: 'Engineer',
     description: 'Code generation, handoff, and workflow configuration',
     icon: Code2,
-    color: '#10B981',
     enabled: true,
     defaultView: 'code',
     views: ['code', 'handoff', 'workflows'],
@@ -63,7 +61,6 @@ const DEFAULT_WORKSPACES: WorkspaceConfig[] = [
     label: 'Ship',
     description: 'Releases and testing runs',
     icon: Rocket,
-    color: '#F59E0B',
     enabled: true,
     defaultView: 'releases',
     views: ['releases', 'testing'],
@@ -73,7 +70,6 @@ const DEFAULT_WORKSPACES: WorkspaceConfig[] = [
     label: 'Operate',
     description: 'Tasks, approvals, and analytics',
     icon: CheckSquare,
-    color: '#8B5CF6',
     enabled: true,
     defaultView: 'tasks',
     views: ['tasks', 'approvals', 'analytics'],
@@ -83,7 +79,6 @@ const DEFAULT_WORKSPACES: WorkspaceConfig[] = [
     label: 'Intelligence',
     description: 'AI skills, ops-pilot, and brand compliance',
     icon: Sparkles,
-    color: '#A78BFA',
     enabled: true,
     defaultView: 'ai-skills',
     views: ['ai-skills', 'brand-compliance'],
@@ -93,7 +88,6 @@ const DEFAULT_WORKSPACES: WorkspaceConfig[] = [
     label: 'System',
     description: 'Graph explorer, connectors, and admin settings',
     icon: Settings2,
-    color: '#64748B',
     enabled: true,
     defaultView: 'graph-explorer',
     views: ['graph-explorer', 'connectors', 'settings'],
@@ -156,11 +150,8 @@ export function WorkspacesSettings() {
             >
               <GripVertical size={12} className="text-[var(--text-tertiary)] shrink-0 cursor-grab" />
 
-              <div
-                className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
-                style={{ backgroundColor: `${ws.color}18` }}
-              >
-                <Icon size={13} style={{ color: ws.color }} />
+              <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 bg-[var(--accent)]/10">
+                <Icon size={13} className="text-[var(--accent)]" />
               </div>
 
               <div className="flex-1 min-w-0">
