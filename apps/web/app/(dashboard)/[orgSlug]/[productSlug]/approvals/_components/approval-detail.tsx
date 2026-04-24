@@ -6,14 +6,47 @@ import { X, Check, MessageSquare, Clock, GitBranch, Users, ArrowRight } from 'lu
 import type { Approval, ApprovalApprover } from '../_data/mock-approvals'
 import { ApprovalTimeline } from './approval-timeline'
 
-const statusConfig: Record<
-  Approval['status'],
-  { color: string; bg: string; label: string }
-> = {
-  pending: { color: '#F59E0B', bg: 'bg-[var(--color-warning)]/10', label: 'Pending' },
-  approved: { color: '#10B981', bg: 'bg-[var(--color-success)]/10', label: 'Approved' },
-  rejected: { color: '#F43F5E', bg: 'bg-[var(--color-error)]/10', label: 'Rejected' },
-  changes_requested: { color: '#3B82F6', bg: 'bg-[var(--accent)]/10', label: 'Changes Requested' },
+// R20: status carries semantic tone, mapped to color-token class pairs.
+// Eliminates the raw-hex + bg-token mismatch that was the pre-R20 shape.
+type StatusTone = 'warning' | 'success' | 'error' | 'accent' | 'neutral'
+
+const TONE_TEXT: Record<StatusTone, string> = {
+  warning: 'text-[var(--color-warning)]',
+  success: 'text-[var(--color-success)]',
+  error:   'text-[var(--color-error)]',
+  accent:  'text-[var(--accent)]',
+  neutral: 'text-[var(--text-tertiary)]',
+}
+
+const TONE_DOT_BG: Record<StatusTone, string> = {
+  warning: 'bg-[var(--color-warning)]',
+  success: 'bg-[var(--color-success)]',
+  error:   'bg-[var(--color-error)]',
+  accent:  'bg-[var(--accent)]',
+  neutral: 'bg-[var(--text-tertiary)]',
+}
+
+const TONE_PILL_SOFT: Record<StatusTone, string> = {
+  warning: 'bg-[var(--color-warning)]/10',
+  success: 'bg-[var(--color-success)]/10',
+  error:   'bg-[var(--color-error)]/10',
+  accent:  'bg-[var(--accent)]/10',
+  neutral: 'bg-white/[0.05]',
+}
+
+const TONE_DECISION_PILL: Record<StatusTone, string> = {
+  warning: 'bg-[var(--color-warning-muted)] text-[var(--color-warning)]',
+  success: 'bg-[var(--color-success-muted)] text-[var(--color-success)]',
+  error:   'bg-[var(--color-error-muted)] text-[var(--color-error)]',
+  accent:  'bg-[var(--accent-muted)] text-[var(--accent-text)]',
+  neutral: 'bg-white/[0.05] text-[var(--text-tertiary)]',
+}
+
+const statusConfig: Record<Approval['status'], { tone: StatusTone; label: string }> = {
+  pending:           { tone: 'warning', label: 'Pending' },
+  approved:          { tone: 'success', label: 'Approved' },
+  rejected:          { tone: 'error',   label: 'Rejected' },
+  changes_requested: { tone: 'accent',  label: 'Changes Requested' },
 }
 
 const typeLabels: Record<string, string> = {
@@ -34,12 +67,12 @@ function decisionLabel(d: ApprovalApprover['decision']): string {
   }
 }
 
-function decisionColor(d: ApprovalApprover['decision']): string {
+function decisionTone(d: ApprovalApprover['decision']): StatusTone {
   switch (d) {
-    case 'approved': return '#10B981'
-    case 'rejected': return '#F43F5E'
-    case 'changes_requested': return '#3B82F6'
-    default: return '#64748B'
+    case 'approved': return 'success'
+    case 'rejected': return 'error'
+    case 'changes_requested': return 'accent'
+    default: return 'neutral'
   }
 }
 
@@ -101,11 +134,8 @@ export function ApprovalDetail({ approval, onClose, onAction }: ApprovalDetailPr
                 <span className="text-[10px] font-medium uppercase tracking-wider px-2 py-0.5 rounded-full bg-white/[0.06] text-[var(--text-secondary)]">
                   {typeLabels[approval.objectType] ?? approval.objectType}
                 </span>
-                <span
-                  className={`inline-flex items-center gap-1 text-[10px] font-medium rounded-full px-2 py-0.5 ${status.bg}`}
-                  style={{ color: status.color }}
-                >
-                  <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: status.color }} />
+                <span className={`inline-flex items-center gap-1 text-[10px] font-medium rounded-full px-2 py-0.5 ${TONE_PILL_SOFT[status.tone]} ${TONE_TEXT[status.tone]}`}>
+                  <span className={`w-1.5 h-1.5 rounded-full ${TONE_DOT_BG[status.tone]}`} />
                   {status.label}
                 </span>
               </div>
@@ -165,13 +195,7 @@ export function ApprovalDetail({ approval, onClose, onAction }: ApprovalDetailPr
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="text-sm font-medium text-[var(--text-primary)]">{a.name}</span>
-                        <span
-                          className="text-[10px] font-medium rounded-full px-2 py-0.5"
-                          style={{
-                            color: decisionColor(a.decision),
-                            backgroundColor: decisionColor(a.decision) + '15',
-                          }}
-                        >
+                        <span className={`text-[10px] font-medium rounded-full px-2 py-0.5 ${TONE_DECISION_PILL[decisionTone(a.decision)]}`}>
                           {decisionLabel(a.decision)}
                         </span>
                       </div>
@@ -221,7 +245,7 @@ export function ApprovalDetail({ approval, onClose, onAction }: ApprovalDetailPr
                   </button>
                   <button
                     onClick={() => handleAction('reject')}
-                    className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium text-white bg-[var(--color-error)] hover:bg-[#E11D48] transition-colors"
+                    className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium text-white bg-[var(--color-error)] hover:bg-[var(--color-error)]/90 transition-colors"
                   >
                     <X className="w-3.5 h-3.5" />
                     Reject
