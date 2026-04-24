@@ -10,10 +10,44 @@ interface HandoffCardProps {
   onViewSpec: (id: string) => void
 }
 
-const typeConfig: Record<string, { label: string; color: string }> = {
-  component: { label: 'Component', color: '#3B82F6' },
-  page: { label: 'Page', color: '#8B5CF6' },
-  token: { label: 'Token', color: '#F59E0B' },
+// R20: type + completeness tones replace raw hex. Tone maps to chrome
+// classes via TONE_PILL_SOFT / TONE_TEXT / TONE_BAR_BG.
+type HandoffTone = 'accent' | 'accent-text' | 'warning' | 'success' | 'error'
+
+const TONE_PILL_SOFT: Record<HandoffTone, string> = {
+  accent:        'bg-[var(--accent-muted)] text-[var(--accent)]',
+  'accent-text': 'bg-[var(--accent-muted)] text-[var(--accent-text)]',
+  warning:       'bg-[var(--color-warning-muted)] text-[var(--color-warning)]',
+  success:       'bg-[var(--color-success-muted)] text-[var(--color-success)]',
+  error:         'bg-[var(--color-error-muted)] text-[var(--color-error)]',
+}
+
+const TONE_TEXT: Record<HandoffTone, string> = {
+  accent:        'text-[var(--accent)]',
+  'accent-text': 'text-[var(--accent-text)]',
+  warning:       'text-[var(--color-warning)]',
+  success:       'text-[var(--color-success)]',
+  error:         'text-[var(--color-error)]',
+}
+
+const TONE_BAR_BG: Record<HandoffTone, string> = {
+  accent:        'bg-[var(--accent)]',
+  'accent-text': 'bg-[var(--accent-text)]',
+  warning:       'bg-[var(--color-warning)]',
+  success:       'bg-[var(--color-success)]',
+  error:         'bg-[var(--color-error)]',
+}
+
+function completenessTone(pct: number): HandoffTone {
+  if (pct >= 90) return 'success'
+  if (pct >= 70) return 'warning'
+  return 'error'
+}
+
+const typeConfig: Record<string, { label: string; tone: HandoffTone }> = {
+  component: { label: 'Component', tone: 'accent' },
+  page:      { label: 'Page',      tone: 'accent-text' },
+  token:     { label: 'Token',     tone: 'warning' },
 }
 
 export function HandoffCard({ item, index, onViewSpec }: HandoffCardProps) {
@@ -48,13 +82,7 @@ export function HandoffCard({ item, index, onViewSpec }: HandoffCardProps) {
           </span>
         </div>
         {/* Type badge */}
-        <span
-          className="absolute top-3 right-3 text-[10px] font-medium px-2 py-0.5 rounded-full"
-          style={{
-            color: typeInfo.color,
-            backgroundColor: `${typeInfo.color}15`,
-          }}
-        >
+        <span className={`absolute top-3 right-3 text-[10px] font-medium px-2 py-0.5 rounded-full ${TONE_PILL_SOFT[typeInfo.tone]}`}>
           {typeInfo.label}
         </span>
       </div>
@@ -70,38 +98,27 @@ export function HandoffCard({ item, index, onViewSpec }: HandoffCardProps) {
 
         {/* Completeness bar */}
         <div>
-          <div className="flex items-center justify-between mb-1.5">
-            <span className="text-[10px] text-[var(--text-tertiary)]">Spec completeness</span>
-            <span
-              className="text-[10px] font-medium"
-              style={{
-                color:
-                  item.completeness >= 90
-                    ? '#10B981'
-                    : item.completeness >= 70
-                    ? '#F59E0B'
-                    : '#F43F5E',
-              }}
-            >
-              {item.completeness}%
-            </span>
-          </div>
-          <div className="h-1.5 rounded-full bg-white/[0.06] overflow-hidden">
-            <motion.div
-              initial={{ width: 0 }}
-              animate={{ width: `${item.completeness}%` }}
-              transition={{ delay: index * 0.06 + 0.3, duration: 0.5, ease: 'easeOut' }}
-              className="h-full rounded-full"
-              style={{
-                backgroundColor:
-                  item.completeness >= 90
-                    ? '#10B981'
-                    : item.completeness >= 70
-                    ? '#F59E0B'
-                    : '#F43F5E',
-              }}
-            />
-          </div>
+          {(() => {
+            const cTone = completenessTone(item.completeness)
+            return (
+              <>
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-[10px] text-[var(--text-tertiary)]">Spec completeness</span>
+                  <span className={`text-[10px] font-medium ${TONE_TEXT[cTone]}`}>
+                    {item.completeness}%
+                  </span>
+                </div>
+                <div className="h-1.5 rounded-full bg-white/[0.06] overflow-hidden">
+                  <motion.div
+                    initial={{ width: 0 }}
+                    animate={{ width: `${item.completeness}%` }}
+                    transition={{ delay: index * 0.06 + 0.3, duration: 0.5, ease: 'easeOut' }}
+                    className={`h-full rounded-full ${TONE_BAR_BG[cTone]}`}
+                  />
+                </div>
+              </>
+            )
+          })()}
         </div>
 
         {/* Criteria summary */}
