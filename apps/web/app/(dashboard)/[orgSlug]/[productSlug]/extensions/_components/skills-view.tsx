@@ -25,6 +25,7 @@ import {
   FlaskConical,
   Search,
   Filter,
+  AlertTriangle,
 } from 'lucide-react'
 import { useParams } from 'next/navigation'
 import { useProduct } from '../../layout'
@@ -36,6 +37,8 @@ import {
   type SkillExecution,
   type ComputerMode,
 } from '../../../../../lib/ai-skills-store'
+import { useBudgetStore } from '../../../../../lib/budget-store'
+import { usageHistory } from '@product-os/ai'
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -55,6 +58,31 @@ const ACTION_CLASS_COLORS: Record<AIActionClass, string> = {
   transform: 'var(--color-warning)',
   analyze: 'var(--accent-text)',
   operate: 'var(--color-error)',
+}
+
+// Maps action class to routed model — lighter models for fast suggestions, heavier for mutations
+const ACTION_CLASS_MODEL: Record<AIActionClass, string> = {
+  suggest:   'claude-haiku-4-5',
+  analyze:   'claude-haiku-4-5',
+  scaffold:  'claude-sonnet-4-6',
+  transform: 'claude-sonnet-4-6',
+  operate:   'claude-opus-4-7',
+}
+
+// Display labels for model chips
+const MODEL_DISPLAY: Record<string, string> = {
+  'claude-haiku-4-5':   'Haiku 4.5',
+  'claude-sonnet-4-6':  'Sonnet 4.6',
+  'claude-opus-4-7':    'Opus 4.7',
+}
+
+// Estimated tokens per action class (used for budget projection)
+const ACTION_CLASS_TOKENS: Record<AIActionClass, number> = {
+  suggest:   800,
+  analyze:   1200,
+  scaffold:  2500,
+  transform: 3000,
+  operate:   5000,
 }
 
 const COMPUTER_MODE_CONFIG: Record<ComputerMode, { label: string; description: string; icon: typeof Bot; color: string }> = {
@@ -104,17 +132,39 @@ function RunModal({
   const [prompt, setPrompt] = useState('')
   const [running, setRunning] = useState(false)
   const [done, setDone] = useState(false)
-  function handleRun() {
+  const recordRun = useBudgetStore((s) => s.recordRun)
+  const usedToday = useBudgetStore((s) => s.usedToday())
+  const capToday = useBudgetStore((s) => s.capToday)
+
+  const estimatedTokens = ACTION_CLASS_TOKENS[skill.actionClass]
+  const estimatedCost = (estimatedTokens / 1_000_000) * 3 // ~$3/M tokens blended estimate
+  const budgetUsedPct = capToday > 0 ? usedToday / capToday : 0
+  const wouldExceedBudget = capToday > 0 && usedToday + estimatedCost > capToday
+
+  async function handleRun() {
     setRunning(true)
-    import('../../../../../lib/ai-runtime').then(({ aiRuntime }) => {
-      import('../../../../../lib/auth-store').then(({ useAuthStore }) => {
-        const userId = useAuthStore.getState().user?.id ?? 'anon'
-        const userName = useAuthStore.getState().user?.name ?? 'Unknown'
-        aiRuntime.run(skill.id, productId, { prompt }, { id: userId, name: userName })
-          .then(() => { setRunning(false); setDone(true) })
-          .catch(() => { setRunning(false) })
+    try {
+      const { aiRuntime } = await import('../../../../../lib/ai-runtime')
+      const { useAuthStore } = await import('../../../../../lib/auth-store')
+      const userId = useAuthStore.getState().user?.id ?? 'anon'
+      const userName = useAuthStore.getState().user?.name ?? 'Unknown'
+      await aiRuntime.run(skill.id, productId, { prompt }, { id: userId, name: userName })
+      // Learning loop — record actual run to budget + usage history
+      recordRun({ skillId: skill.id, cost: estimatedCost, tokens: estimatedTokens })
+      usageHistory.record({
+        skillId: skill.id,
+        stepId: skill.actionClass,
+        model: ACTION_CLASS_MODEL[skill.actionClass] as never,
+        inputTokens: Math.round(estimatedTokens * 0.4),
+        outputTokens: Math.round(estimatedTokens * 0.6),
+        at: new Date().toISOString(),
       })
-    })
+      setDone(true)
+    } catch {
+      // error state implicit via done=false
+    } finally {
+      setRunning(false)
+    }
   }
 
   const cfg = FAMILY_CONFIG[skill.family]
@@ -141,6 +191,16 @@ function RunModal({
             <X className="w-4 h-4 text-[var(--text-secondary)]" />
           </button>
         </div>
+
+        {/* Budget warning */}
+        {wouldExceedBudget && (
+          <div className="flex items-center gap-2 px-5 py-2.5 bg-[#F59E0B]/10 border-b border-[#F59E0B]/20">
+            <AlertTriangle className="w-3.5 h-3.5 text-[#F59E0B] flex-shrink-0" />
+            <p className="text-[11px] text-[#F59E0B]">
+              This run may exceed today&apos;s budget cap (${capToday.toFixed(2)} limit, ${usedToday.toFixed(2)} used).
+            </p>
+          </div>
+        )}
 
         <div className="p-5 space-y-4">
           {done ? (
@@ -176,6 +236,9 @@ function RunModal({
                 <div className="flex items-center gap-2 text-xs text-[var(--text-secondary)]">
                   <FlaskConical className="w-3.5 h-3.5" />
                   {skill.creditCost === 0 ? 'Free skill' : `${skill.creditCost} credits`}
+                  <span className="text-[var(--text-tertiary)]">·</span>
+                  <Cpu className="w-3 h-3 text-[var(--text-tertiary)]" />
+                  <span className="text-[var(--text-tertiary)]">{MODEL_DISPLAY[ACTION_CLASS_MODEL[skill.actionClass]] ?? ACTION_CLASS_MODEL[skill.actionClass]}</span>
                 </div>
                 <span
                   className="text-[10px] px-2 py-0.5 rounded-full font-medium"
@@ -184,6 +247,24 @@ function RunModal({
                   {skill.actionClass}
                 </span>
               </div>
+              {/* Budget meter */}
+              {capToday > 0 && (
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between text-[10px] text-[var(--text-tertiary)]">
+                    <span>Daily budget</span>
+                    <span>${usedToday.toFixed(2)} / ${capToday.toFixed(2)}</span>
+                  </div>
+                  <div className="h-1 rounded-full bg-[var(--bg-hover)] overflow-hidden">
+                    <div
+                      className="h-full rounded-full transition-all"
+                      style={{
+                        width: `${Math.min(100, budgetUsedPct * 100)}%`,
+                        background: budgetUsedPct > 0.8 ? '#F43F5E' : budgetUsedPct > 0.6 ? '#F59E0B' : '#10B981',
+                      }}
+                    />
+                  </div>
+                </div>
+              )}
               <div className="flex items-center justify-end gap-2 pt-1">
                 <button
                   onClick={onClose}
@@ -195,9 +276,14 @@ function RunModal({
                   onClick={handleRun}
                   disabled={running}
                   className="flex items-center gap-2 px-5 py-2 text-sm font-medium rounded-xl transition-all disabled:opacity-60"
-                  style={{ background: cfg.color, color: '#fff' }}
+                  style={{ background: wouldExceedBudget ? '#F59E0B' : cfg.color, color: '#fff' }}
                 >
-                  {running ? <><Loader2 className="w-3.5 h-3.5 animate-spin" />Running…</> : <><Play className="w-3.5 h-3.5" />Run Skill</>}
+                  {running
+                    ? <><Loader2 className="w-3.5 h-3.5 animate-spin" />Running…</>
+                    : wouldExceedBudget
+                      ? <><AlertTriangle className="w-3.5 h-3.5" />Run Anyway</>
+                      : <><Play className="w-3.5 h-3.5" />Run Skill</>
+                  }
                 </button>
               </div>
             </>
@@ -249,6 +335,9 @@ function SkillCard({ skill, onRun }: { skill: AISkill; onRun: (s: AISkill) => vo
             style={{ color: ACTION_CLASS_COLORS[skill.actionClass], background: 'var(--bg-hover)' }}
           >
             {skill.actionClass}
+          </span>
+          <span className="flex items-center gap-0.5 text-[9px] px-1.5 py-0.5 rounded text-[var(--text-tertiary)]" style={{ background: 'var(--bg-subtle)' }}>
+            <Cpu className="w-2.5 h-2.5" />{MODEL_DISPLAY[ACTION_CLASS_MODEL[skill.actionClass]] ?? ACTION_CLASS_MODEL[skill.actionClass]}
           </span>
           {skill.targetStudio && (
             <span className="text-[10px] px-1.5 py-0.5 rounded text-[var(--text-tertiary)]" style={{ background: 'var(--bg-subtle)' }}>
@@ -371,6 +460,11 @@ export default function SkillsView() {
     return list
   }, [skills, familyTab, actionFilter, search])
 
+  const usedToday = useBudgetStore((s) => s.usedToday())
+  const capToday = useBudgetStore((s) => s.capToday)
+  const budgetPct = capToday > 0 ? usedToday / capToday : 0
+  const showBudgetAlert = capToday > 0 && budgetPct >= 0.8
+
   const enabledCount = skills.filter((s) => s.enabled).length
   const completedExecs = productExecs.filter((e) => e.status === 'completed')
   const totalArtifacts = completedExecs.reduce((a, e) => a + e.artifactsCreated, 0)
@@ -432,6 +526,22 @@ export default function SkillsView() {
           ))}
         </div>
       </div>
+
+      {/* Budget alert bar */}
+      {showBudgetAlert && (
+        <div className="flex items-center gap-2 px-6 py-2 bg-[#F59E0B]/10 border-b border-[#F59E0B]/20 flex-shrink-0">
+          <AlertTriangle className="w-3.5 h-3.5 text-[#F59E0B] flex-shrink-0" />
+          <p className="text-[11px] text-[#F59E0B] flex-1">
+            Daily AI budget at {Math.round(budgetPct * 100)}% — ${usedToday.toFixed(2)} of ${capToday.toFixed(2)} used today.
+          </p>
+          <div className="h-1.5 w-24 rounded-full bg-[#F59E0B]/20 overflow-hidden">
+            <div
+              className="h-full rounded-full"
+              style={{ width: `${Math.min(100, budgetPct * 100)}%`, background: budgetPct >= 1 ? '#F43F5E' : '#F59E0B' }}
+            />
+          </div>
+        </div>
+      )}
 
       {/* Stats bar */}
       <div className="grid grid-cols-4 gap-3 px-6 pt-4 flex-shrink-0">
