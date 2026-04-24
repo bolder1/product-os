@@ -34,15 +34,41 @@ import { useCopilotStore } from '../../lib/copilot-store'
 
 type CommandCategory = 'studio' | 'task' | 'ai_skill' | 'action' | 'recent' | 'graph'
 
+/**
+ * Per R20 the palette is grouped into 5 tones. AI skills and graph-node
+ * accents ride these tones rather than carrying raw hex, so a skill
+ * returns 'warning' (lightbulb = suggestion) or 'success' (computer mode
+ * auto) instead of a per-skill hex.
+ */
+type CommandTone = 'accent' | 'accent-text' | 'success' | 'warning' | 'neutral'
+
 interface Command {
   id: string
   label: string
   description?: string
   category: CommandCategory
   icon: typeof Search
-  color?: string
+  tone?: CommandTone
   shortcut?: string
   action: () => void
+}
+
+/** Background class for a tone (used on the icon chip). */
+const TONE_BG_SOFT: Record<CommandTone, string> = {
+  accent:        'bg-[var(--accent-subtle)]',
+  'accent-text': 'bg-[var(--accent-muted)]',
+  success:       'bg-[var(--color-success-muted)]',
+  warning:       'bg-[var(--color-warning-muted)]',
+  neutral:       'bg-white/[0.04]',
+}
+
+/** Text class for a tone (used on the icon itself). */
+const TONE_TEXT: Record<CommandTone, string> = {
+  accent:        'text-[var(--accent)]',
+  'accent-text': 'text-[var(--accent-text)]',
+  success:       'text-[var(--color-success)]',
+  warning:       'text-[var(--color-warning)]',
+  neutral:       'text-[var(--text-tertiary)]',
 }
 
 /* ------------------------------------------------------------------ */
@@ -79,11 +105,17 @@ const STUDIOS = [
 /*  AI Skills                                                           */
 /* ------------------------------------------------------------------ */
 
-const AI_SKILLS = [
-  { id: 'suggest', label: 'AI Suggest', description: 'Surface improvement ideas for this studio', icon: Lightbulb, color: '#F59E0B' },
-  { id: 'scaffold', label: 'AI Scaffold', description: 'Generate draft artifacts from product graph', icon: Wand2, color: 'var(--accent-text)' },
-  { id: 'analyze', label: 'AI Analyze', description: 'Deep analysis of gaps and dependencies', icon: BarChart3, color: '#06B6D4' },
-  { id: 'computer-mode', label: 'Open Computer Mode', description: 'Multi-step AI execution with action log', icon: Cpu, color: '#10B981' },
+const AI_SKILLS: Array<{
+  id: string
+  label: string
+  description: string
+  icon: typeof Lightbulb
+  tone: CommandTone
+}> = [
+  { id: 'suggest',      label: 'AI Suggest',         description: 'Surface improvement ideas for this studio',   icon: Lightbulb, tone: 'warning'     },
+  { id: 'scaffold',     label: 'AI Scaffold',        description: 'Generate draft artifacts from product graph', icon: Wand2,     tone: 'accent-text' },
+  { id: 'analyze',      label: 'AI Analyze',         description: 'Deep analysis of gaps and dependencies',      icon: BarChart3, tone: 'accent-text' },
+  { id: 'computer-mode',label: 'Open Computer Mode', description: 'Multi-step AI execution with action log',    icon: Cpu,       tone: 'success'     },
 ]
 
 /* ------------------------------------------------------------------ */
@@ -229,16 +261,21 @@ function kindLabel(kind: NodeKind): string {
   return map[kind] ?? kind
 }
 
-/** Pick an accent color per node kind */
-function kindColor(kind: NodeKind): string {
-  if (['feature', 'plan', 'module'].includes(kind)) return '#3B82F6'
-  if (['page', 'route', 'screen'].includes(kind)) return '#8B5CF6'
-  if (['component', 'variant'].includes(kind)) return '#EC4899'
-  if (['token', 'asset'].includes(kind)) return '#F59E0B'
-  if (['workflow', 'entity', 'field'].includes(kind)) return '#10B981'
-  if (['task', 'approval'].includes(kind)) return '#F97316'
-  if (['insight', 'analytics_dashboard'].includes(kind)) return '#06B6D4'
-  return '#6398FF'
+/**
+ * Pick a tone per node kind. Per R20 we group kinds onto the 5-tone ramp
+ * rather than inventing a unique color per kind — visual identity is the
+ * label + category badge, not a color swatch.
+ *   accent       → structural primitives (feature/plan/module/component)
+ *   accent-text  → presentational (page/route/screen/variant/insight)
+ *   success      → data (workflow/entity/field)
+ *   warning      → brand + open work (token/asset/task/approval)
+ */
+function kindTone(kind: NodeKind): CommandTone {
+  if (['feature', 'plan', 'module', 'component', 'variant'].includes(kind)) return 'accent'
+  if (['page', 'route', 'screen', 'insight', 'analytics_dashboard'].includes(kind)) return 'accent-text'
+  if (['workflow', 'entity', 'field'].includes(kind)) return 'success'
+  if (['token', 'asset', 'task', 'approval'].includes(kind)) return 'warning'
+  return 'accent'
 }
 
 /* ------------------------------------------------------------------ */
@@ -303,7 +340,7 @@ export function CommandPalette({ isOpen, onClose, orgSlug, productSlug, currentS
         description: `Navigate to ${s.section} › ${s.label}`,
         category: 'studio',
         icon: s.icon,
-        color: s.key === currentStudio ? 'var(--accent-text)' : undefined,
+        tone: s.key === currentStudio ? 'accent-text' : undefined,
         action: () => navigate(s.key),
       })
     })
@@ -316,7 +353,7 @@ export function CommandPalette({ isOpen, onClose, orgSlug, productSlug, currentS
         description: skill.description,
         category: 'ai_skill',
         icon: skill.icon,
-        color: skill.color,
+        tone: skill.tone,
         action: () => {
           if (skill.id === 'computer-mode') {
             openComputerMode()
@@ -351,14 +388,14 @@ export function CommandPalette({ isOpen, onClose, orgSlug, productSlug, currentS
     // pre-filtered by kind/status and surfaced as Inspector openers.
     graphNodes.forEach((node) => {
       const studio = kindToStudio(node.kind)
-      const color = kindColor(node.kind)
+      const tone = kindTone(node.kind)
       base.push({
         id: `graph-${node.id}`,
         label: node.label,
         description: `${kindLabel(node.kind)} · ${studio}`,
         category: 'graph',
         icon: Hash,
-        color,
+        tone,
         action: () => {
           inspectNode(node.id)
           onClose()
@@ -400,7 +437,7 @@ export function CommandPalette({ isOpen, onClose, orgSlug, productSlug, currentS
       description: 'Open Copilot with the current query pre-filled',
       category: 'ai_skill',
       icon: Sparkles,
-      color: 'var(--accent-text)',
+      tone: 'accent-text',
       action: () => {
         openCopilot()
         onClose()
@@ -513,7 +550,7 @@ export function CommandPalette({ isOpen, onClose, orgSlug, productSlug, currentS
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.97, y: -8 }}
             transition={{ duration: 0.15, ease: [0.16, 1, 0.3, 1] }}
-            className="fixed top-[15%] left-1/2 -translate-x-1/2 z-[61] w-full max-w-[560px] bg-[#0B1120] border border-white/[0.1] rounded-2xl shadow-2xl overflow-hidden"
+            className="fixed top-[15%] left-1/2 -translate-x-1/2 z-[61] w-full max-w-[560px] bg-[var(--bg-surface)] border border-white/[0.1] rounded-2xl shadow-2xl overflow-hidden"
             style={{ boxShadow: '0 24px 80px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.06)' }}
           >
             {/* Search input */}
@@ -591,10 +628,9 @@ export function CommandPalette({ isOpen, onClose, orgSlug, productSlug, currentS
                       className={`w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors ${isSelected ? 'bg-white/[0.06]' : 'hover:bg-white/[0.03]'}`}
                     >
                       <div
-                        className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
-                        style={{ background: cmd.color ? `${cmd.color}20` : 'rgba(255,255,255,0.04)' }}
+                        className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${TONE_BG_SOFT[cmd.tone ?? 'neutral']}`}
                       >
-                        <Icon size={14} style={{ color: cmd.color ?? '#64748B' }} />
+                        <Icon size={14} className={TONE_TEXT[cmd.tone ?? 'neutral']} />
                       </div>
 
                       <div className="flex-1 min-w-0">
