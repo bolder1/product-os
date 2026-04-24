@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion'
 import { Plus, Tag } from 'lucide-react'
-import { type Release, statusConfig } from '../_data/mock-releases'
+import { type Release, statusConfig, TONE_CHIP, TONE_BORDER, TONE_DOT_BG, TONE_CHIP_SOFT_BG } from '../_data/mock-releases'
 
 interface ReleaseTimelineProps {
   releases: Release[]
@@ -32,7 +32,7 @@ export function ReleaseTimeline({
         <div className="w-[22px] h-[22px] rounded-full bg-[var(--color-success)]/20 flex items-center justify-center flex-shrink-0 z-10">
           <Plus className="w-3 h-3 text-[var(--color-success)]" />
         </div>
-        <span className="text-xs font-medium text-[var(--color-success)] group-hover:text-[#34D399] transition-colors">
+        <span className="text-xs font-medium text-[var(--color-success)] transition-colors">
           New Release
         </span>
       </motion.button>
@@ -58,16 +58,9 @@ export function ReleaseTimeline({
             {/* Timeline dot */}
             <div className="flex-shrink-0 mt-1 z-10">
               <div
-                className="w-[22px] h-[22px] rounded-full border-2 flex items-center justify-center"
-                style={{
-                  borderColor: status.color,
-                  backgroundColor: isSelected ? status.bg : 'transparent',
-                }}
+                className={`w-[22px] h-[22px] rounded-full border-2 flex items-center justify-center ${TONE_BORDER[status.tone]} ${isSelected ? TONE_CHIP_SOFT_BG[status.tone] : 'bg-transparent'}`}
               >
-                <div
-                  className="w-2 h-2 rounded-full"
-                  style={{ backgroundColor: status.color }}
-                />
+                <div className={`w-2 h-2 rounded-full ${TONE_DOT_BG[status.tone]}`} />
               </div>
             </div>
 
@@ -81,8 +74,7 @@ export function ReleaseTimeline({
                   </span>
                 </div>
                 <span
-                  className="text-[9px] font-medium px-1.5 py-0.5 rounded-full"
-                  style={{ color: status.color, backgroundColor: status.bg }}
+                  className={`text-[9px] font-medium px-1.5 py-0.5 rounded-full ${TONE_CHIP[status.tone]}`}
                 >
                   {status.label}
                 </span>

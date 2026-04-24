@@ -11,7 +11,7 @@ import {
   Minus,
   Pencil,
 } from 'lucide-react'
-import { type Release, statusConfig, changeTypeConfig } from '../_data/mock-releases'
+import { type Release, statusConfig, changeTypeConfig, TONE_CHIP, TONE_TEXT } from '../_data/mock-releases'
 import { ReleaseReadinessPanel } from './release-readiness-panel'
 import { StudioChangeSummary } from './studio-change-summary'
 
@@ -57,8 +57,7 @@ export function ReleaseDetail({ release, productId, onDeploy }: ReleaseDetailPro
               </span>
             </div>
             <span
-              className="text-[10px] font-medium px-2 py-0.5 rounded-full"
-              style={{ color: status.color, backgroundColor: status.bg }}
+              className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${TONE_CHIP[status.tone]}`}
             >
               {status.label}
             </span>
@@ -134,14 +133,13 @@ export function ReleaseDetail({ release, productId, onDeploy }: ReleaseDetailPro
                 transition={{ delay: i * 0.04 }}
                 className="flex items-center gap-3 px-3 py-2 rounded-lg bg-white/[0.02] border border-white/[0.06]"
               >
-                <span style={{ color: ct.color }}>{changeIcon(change.changeType)}</span>
+                <span className={TONE_TEXT[ct.tone]}>{changeIcon(change.changeType)}</span>
                 <span className="text-xs text-[var(--text-primary)] flex-1">{change.name}</span>
                 <span className="text-[10px] text-[var(--text-tertiary)] bg-white/[0.05] px-1.5 py-0.5 rounded">
                   {change.type}
                 </span>
                 <span
-                  className="text-[10px] font-medium px-1.5 py-0.5 rounded"
-                  style={{ color: ct.color, backgroundColor: `${ct.color}15` }}
+                  className={`text-[10px] font-medium px-1.5 py-0.5 rounded ${TONE_CHIP[ct.tone]}`}
                 >
                   {ct.label}
                 </span>
@@ -173,12 +171,11 @@ export function ReleaseDetail({ release, productId, onDeploy }: ReleaseDetailPro
                   setActiveEnv(env)
                   onDeploy?.(release.id, env)
                 }}
-                className="flex-1 py-1.5 rounded-md text-[11px] font-medium transition-all"
-                style={
+                className={`flex-1 py-1.5 rounded-md text-[11px] font-medium transition-all border ${
                   activeEnv === env
-                    ? { background: 'rgba(16,185,129,0.15)', color: '#10B981', border: '1px solid rgba(16,185,129,0.3)' }
-                    : { color: '#64748B', border: '1px solid transparent' }
-                }
+                    ? 'bg-[var(--color-success)]/15 text-[var(--color-success)] border-[var(--color-success)]/30'
+                    : 'text-[var(--text-tertiary)] border-transparent'
+                }`}
               >
                 {env}
               </button>

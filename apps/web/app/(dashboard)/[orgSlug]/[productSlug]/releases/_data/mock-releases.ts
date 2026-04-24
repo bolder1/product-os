@@ -24,17 +24,63 @@ export interface Release {
   checklist: ReleaseChecklist
 }
 
-export const statusConfig: Record<ReleaseStatus, { label: string; color: string; bg: string }> = {
-  draft: { label: 'Draft', color: '#94A3B8', bg: 'rgba(148,163,184,0.1)' },
-  staging: { label: 'Staging', color: '#F59E0B', bg: 'rgba(245,158,11,0.1)' },
-  production: { label: 'Production', color: '#10B981', bg: 'rgba(16,185,129,0.1)' },
-  'rolled-back': { label: 'Rolled Back', color: '#F43F5E', bg: 'rgba(244,63,94,0.1)' },
+// R20: map release/change statuses to canonical tones. Consumers
+// look up Tailwind class pairs via TONE_CHIP / TONE_BORDER /
+// TONE_DOT_BG, so chrome reads across Light / Dark / Dark-HC
+// themes without inline \${hex}15 alpha-concat.
+export type Tone = 'accent' | 'warning' | 'error' | 'success' | 'neutral'
+
+export const statusConfig: Record<ReleaseStatus, { label: string; tone: Tone }> = {
+  draft: { label: 'Draft', tone: 'neutral' },
+  staging: { label: 'Staging', tone: 'warning' },
+  production: { label: 'Production', tone: 'success' },
+  'rolled-back': { label: 'Rolled Back', tone: 'error' },
 }
 
-export const changeTypeConfig: Record<string, { label: string; color: string }> = {
-  added: { label: 'Added', color: '#10B981' },
-  modified: { label: 'Modified', color: '#F59E0B' },
-  removed: { label: 'Removed', color: '#F43F5E' },
+export const changeTypeConfig: Record<string, { label: string; tone: Tone }> = {
+  added: { label: 'Added', tone: 'success' },
+  modified: { label: 'Modified', tone: 'warning' },
+  removed: { label: 'Removed', tone: 'error' },
+}
+
+export const TONE_TEXT: Record<Tone, string> = {
+  accent: 'text-[var(--accent)]',
+  warning: 'text-[var(--color-warning)]',
+  error: 'text-[var(--color-error)]',
+  success: 'text-[var(--color-success)]',
+  neutral: 'text-[var(--text-tertiary)]',
+}
+
+export const TONE_CHIP: Record<Tone, string> = {
+  accent: 'bg-[var(--accent)]/10 text-[var(--accent)]',
+  warning: 'bg-[var(--color-warning)]/10 text-[var(--color-warning)]',
+  error: 'bg-[var(--color-error)]/10 text-[var(--color-error)]',
+  success: 'bg-[var(--color-success)]/10 text-[var(--color-success)]',
+  neutral: 'bg-[var(--text-tertiary)]/10 text-[var(--text-tertiary)]',
+}
+
+export const TONE_BORDER: Record<Tone, string> = {
+  accent: 'border-[var(--accent)]',
+  warning: 'border-[var(--color-warning)]',
+  error: 'border-[var(--color-error)]',
+  success: 'border-[var(--color-success)]',
+  neutral: 'border-[var(--text-tertiary)]',
+}
+
+export const TONE_DOT_BG: Record<Tone, string> = {
+  accent: 'bg-[var(--accent)]',
+  warning: 'bg-[var(--color-warning)]',
+  error: 'bg-[var(--color-error)]',
+  success: 'bg-[var(--color-success)]',
+  neutral: 'bg-[var(--text-tertiary)]',
+}
+
+export const TONE_CHIP_SOFT_BG: Record<Tone, string> = {
+  accent: 'bg-[var(--accent)]/10',
+  warning: 'bg-[var(--color-warning)]/10',
+  error: 'bg-[var(--color-error)]/10',
+  success: 'bg-[var(--color-success)]/10',
+  neutral: 'bg-[var(--text-tertiary)]/10',
 }
 
 export const mockReleases: Release[] = [
