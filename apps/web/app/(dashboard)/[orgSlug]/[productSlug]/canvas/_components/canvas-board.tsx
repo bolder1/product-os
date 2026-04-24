@@ -165,9 +165,19 @@ export function CanvasBoard({
   )
 }
 
+/**
+ * Per R20 palette consolidation, canvas UI chrome (selection ring, default
+ * text color) rides tokens. Item fills/strokes still honour `item.color` so
+ * users can pick any canvas colour, but the concat-with-hex-opacity pattern
+ * is gone — we use SVG's native `fillOpacity` / `strokeOpacity` so
+ * `item.color` can be a CSS var, not just a hex string.
+ */
+const SELECTION_STROKE = 'var(--accent)'
+const DEFAULT_TEXT_COLOR = 'var(--text-primary)'
+
 function CanvasItemRenderer({ item, isSelected }: { item: CanvasItem; isSelected: boolean }) {
   const strokeProps = isSelected
-    ? { stroke: '#3B82F6', strokeWidth: 2, strokeDasharray: '4 2' }
+    ? { stroke: SELECTION_STROKE, strokeWidth: 2, strokeDasharray: '4 2' }
     : {}
 
   if (item.type === 'sticky') {
@@ -179,7 +189,8 @@ function CanvasItemRenderer({ item, isSelected }: { item: CanvasItem; isSelected
           width={item.width}
           height={item.height}
           rx={8}
-          fill={item.color + '20'}
+          fill={item.color}
+          fillOpacity={0.125}
           {...strokeProps}
         />
         <rect
@@ -198,7 +209,7 @@ function CanvasItemRenderer({ item, isSelected }: { item: CanvasItem; isSelected
         >
           <div
             style={{
-              color: '#F1F5F9',
+              color: DEFAULT_TEXT_COLOR,
               fontSize: 13,
               fontWeight: 500,
               lineHeight: '1.4',
@@ -256,8 +267,10 @@ function CanvasItemRenderer({ item, isSelected }: { item: CanvasItem; isSelected
             cy={cy}
             rx={rx}
             ry={ry}
-            fill={item.color + '15'}
-            stroke={isSelected ? '#3B82F6' : item.color + '40'}
+            fill={item.color}
+            fillOpacity={0.082}
+            stroke={isSelected ? SELECTION_STROKE : item.color}
+            strokeOpacity={isSelected ? 1 : 0.25}
             strokeWidth={isSelected ? 2 : 1.5}
             strokeDasharray={isSelected ? '4 2' : undefined}
           />
@@ -269,7 +282,7 @@ function CanvasItemRenderer({ item, isSelected }: { item: CanvasItem; isSelected
           >
             <div
               style={{
-                color: '#F1F5F9',
+                color: DEFAULT_TEXT_COLOR,
                 fontSize: 12,
                 textAlign: 'center',
                 fontWeight: 500,
@@ -292,8 +305,10 @@ function CanvasItemRenderer({ item, isSelected }: { item: CanvasItem; isSelected
         <g data-item-id={item.id} style={{ cursor: 'grab' }}>
           <polygon
             points={points}
-            fill={item.color + '15'}
-            stroke={isSelected ? '#3B82F6' : item.color + '40'}
+            fill={item.color}
+            fillOpacity={0.082}
+            stroke={isSelected ? SELECTION_STROKE : item.color}
+            strokeOpacity={isSelected ? 1 : 0.25}
             strokeWidth={isSelected ? 2 : 1.5}
             strokeDasharray={isSelected ? '4 2' : undefined}
           />
@@ -305,7 +320,7 @@ function CanvasItemRenderer({ item, isSelected }: { item: CanvasItem; isSelected
           >
             <div
               style={{
-                color: '#F1F5F9',
+                color: DEFAULT_TEXT_COLOR,
                 fontSize: 11,
                 textAlign: 'center',
                 fontWeight: 500,
@@ -327,8 +342,10 @@ function CanvasItemRenderer({ item, isSelected }: { item: CanvasItem; isSelected
           width={item.width}
           height={item.height}
           rx={6}
-          fill={item.color + '15'}
-          stroke={isSelected ? '#3B82F6' : item.color + '40'}
+          fill={item.color}
+          fillOpacity={0.082}
+          stroke={isSelected ? SELECTION_STROKE : item.color}
+          strokeOpacity={isSelected ? 1 : 0.25}
           strokeWidth={isSelected ? 2 : 1.5}
           strokeDasharray={isSelected ? '4 2' : undefined}
         />
@@ -340,7 +357,7 @@ function CanvasItemRenderer({ item, isSelected }: { item: CanvasItem; isSelected
         >
           <div
             style={{
-              color: '#F1F5F9',
+              color: DEFAULT_TEXT_COLOR,
               fontSize: 12,
               textAlign: 'center',
               fontWeight: 500,
@@ -358,21 +375,34 @@ function CanvasItemRenderer({ item, isSelected }: { item: CanvasItem; isSelected
 
 let itemCounter = 100
 
+/**
+ * Default starter colors for new canvas items. Users can recolor via the
+ * canvas palette — these are just visually distinct initial tones so a new
+ * sticky doesn't collide with a new rect at first blush.
+ */
+const DEFAULT_ITEM_COLORS = {
+  sticky:    'var(--color-warning)',
+  text:      'var(--text-primary)',
+  rectangle: 'var(--color-success)',
+  circle:    'var(--accent)',
+  diamond:   'var(--accent-text)',
+} as const
+
 function createItem(tool: ToolType, x: number, y: number): CanvasItem | null {
   itemCounter++
   const id = `item-new-${itemCounter}`
 
   switch (tool) {
     case 'sticky':
-      return { id, type: 'sticky', x, y, width: 180, height: 140, text: 'New Note', color: '#F59E0B' }
+      return { id, type: 'sticky', x, y, width: 180, height: 140, text: 'New Note', color: DEFAULT_ITEM_COLORS.sticky }
     case 'text':
-      return { id, type: 'text', x, y, width: 200, height: 40, text: 'New text block', color: '#F1F5F9' }
+      return { id, type: 'text', x, y, width: 200, height: 40, text: 'New text block', color: DEFAULT_ITEM_COLORS.text }
     case 'rectangle':
-      return { id, type: 'shape', shapeKind: 'rectangle', x, y, width: 160, height: 100, text: 'Label', color: '#10B981' }
+      return { id, type: 'shape', shapeKind: 'rectangle', x, y, width: 160, height: 100, text: 'Label', color: DEFAULT_ITEM_COLORS.rectangle }
     case 'circle':
-      return { id, type: 'shape', shapeKind: 'circle', x, y, width: 120, height: 120, text: 'Label', color: '#3B82F6' }
+      return { id, type: 'shape', shapeKind: 'circle', x, y, width: 120, height: 120, text: 'Label', color: DEFAULT_ITEM_COLORS.circle }
     case 'diamond':
-      return { id, type: 'shape', shapeKind: 'diamond', x, y, width: 120, height: 120, text: 'Decision', color: '#8B5CF6' }
+      return { id, type: 'shape', shapeKind: 'diamond', x, y, width: 120, height: 120, text: 'Decision', color: DEFAULT_ITEM_COLORS.diamond }
     default:
       return null
   }
