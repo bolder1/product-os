@@ -24,16 +24,31 @@ interface ImpactChain {
   direction: 'upstream' | 'downstream'
 }
 
+// R20: canonical kind-palette — domain-identity tints tied to graph node
+// kinds. Mirrors the palette used in mock-graph.ts / conflict-preview.tsx.
+// This is reference data, not studio chrome, and belongs to its own
+// palette-centralization phase. Left literal and eslint-disabled line-by-line.
 const NODE_KIND_COLORS: Record<string, string> = {
+  // eslint-disable-next-line no-hardcoded-hex -- kind-palette: component
   component: '#EC4899',
+  // eslint-disable-next-line no-hardcoded-hex -- kind-palette: page
   page: '#06B6D4',
+  // eslint-disable-next-line no-hardcoded-hex -- kind-palette: token
   token: '#64748B',
+  // eslint-disable-next-line no-hardcoded-hex -- kind-palette: entity
   entity: '#10B981',
+  // eslint-disable-next-line no-hardcoded-hex -- kind-palette: workflow
   workflow: '#F59E0B',
+  // eslint-disable-next-line no-hardcoded-hex -- kind-palette: feature
   feature: '#8B5CF6',
+  // eslint-disable-next-line no-hardcoded-hex -- kind-palette: module
   module: '#3B82F6',
+  // eslint-disable-next-line no-hardcoded-hex -- kind-palette: journey
   journey: '#F97316',
 }
+
+// eslint-disable-next-line no-hardcoded-hex -- kind-palette fallback (see NODE_KIND_COLORS above)
+const KIND_FALLBACK = '#64748B'
 
 export function GraphImpactAnalysis({ productId, isOpen, onClose }: GraphImpactAnalysisProps) {
   const allNodes = useGraphStore((s) => s.nodes)
@@ -129,7 +144,7 @@ export function GraphImpactAnalysis({ productId, isOpen, onClose }: GraphImpactA
           {/* Header */}
           <div className="h-[var(--topbar-h)] flex items-center justify-between px-3 border-b border-[var(--border-default)]">
             <div className="flex items-center gap-2">
-              <Zap className="w-3.5 h-3.5 text-amber-400" />
+              <Zap className="w-3.5 h-3.5 text-[var(--color-warning)]" />
               <h2 className="text-[13px] font-medium text-[var(--text-primary)]">Impact Analysis</h2>
             </div>
             <button onClick={onClose} className="tool-btn p-1">
@@ -170,7 +185,7 @@ export function GraphImpactAnalysis({ productId, isOpen, onClose }: GraphImpactA
                   >
                     <div
                       className="w-2 h-2 rounded-full shrink-0"
-                      style={{ backgroundColor: NODE_KIND_COLORS[node.kind] || '#64748B' }}
+                      style={{ backgroundColor: NODE_KIND_COLORS[node.kind] || KIND_FALLBACK }}
                     />
                     <div className="min-w-0 flex-1">
                       <p className="text-[12px] text-[var(--text-primary)] truncate">{node.label}</p>
@@ -200,7 +215,7 @@ export function GraphImpactAnalysis({ productId, isOpen, onClose }: GraphImpactA
                   {/* Impact summary */}
                   <div className="grid grid-cols-3 gap-2">
                     <div className="rounded-[var(--radius-md)] bg-[var(--bg-inset)] border border-[var(--border-default)] p-2.5 text-center">
-                      <p className="text-[13px] font-bold text-amber-400">{totalImpacted}</p>
+                      <p className="text-[13px] font-bold text-[var(--color-warning)]">{totalImpacted}</p>
                       <p className="text-[10px] text-[var(--text-tertiary)]">Total Impacted</p>
                     </div>
                     <div className="rounded-[var(--radius-md)] bg-[var(--bg-inset)] border border-[var(--border-default)] p-2.5 text-center">
@@ -208,7 +223,7 @@ export function GraphImpactAnalysis({ productId, isOpen, onClose }: GraphImpactA
                       <p className="text-[10px] text-[var(--text-tertiary)]">Dependencies</p>
                     </div>
                     <div className="rounded-[var(--radius-md)] bg-[var(--bg-inset)] border border-[var(--border-default)] p-2.5 text-center">
-                      <p className="text-[13px] font-bold text-rose-400">{impactChains.downstream.length}</p>
+                      <p className="text-[13px] font-bold text-[var(--color-error)]">{impactChains.downstream.length}</p>
                       <p className="text-[10px] text-[var(--text-tertiary)]">Dependents</p>
                     </div>
                   </div>
@@ -217,8 +232,8 @@ export function GraphImpactAnalysis({ productId, isOpen, onClose }: GraphImpactA
                   {impactChains.downstream.length > 0 && (
                     <div>
                       <div className="flex items-center gap-1.5 mb-2">
-                        <AlertTriangle className="w-3.5 h-3.5 text-rose-400" />
-                        <p className="text-[11px] font-medium text-rose-400">
+                        <AlertTriangle className="w-3.5 h-3.5 text-[var(--color-error)]" />
+                        <p className="text-[11px] font-medium text-[var(--color-error)]">
                           Downstream Impact ({impactChains.downstream.length})
                         </p>
                       </div>
@@ -231,7 +246,7 @@ export function GraphImpactAnalysis({ productId, isOpen, onClose }: GraphImpactA
                           >
                             <div
                               className="w-2 h-2 rounded-full shrink-0"
-                              style={{ backgroundColor: NODE_KIND_COLORS[chain.node.kind] || '#64748B' }}
+                              style={{ backgroundColor: NODE_KIND_COLORS[chain.node.kind] || KIND_FALLBACK }}
                             />
                             <span className="text-[12px] text-[var(--text-primary)]">{chain.node.label}</span>
                             <span className="text-[10px] text-[var(--text-tertiary)]">({chain.node.kind})</span>
@@ -262,7 +277,7 @@ export function GraphImpactAnalysis({ productId, isOpen, onClose }: GraphImpactA
                           >
                             <div
                               className="w-2 h-2 rounded-full shrink-0"
-                              style={{ backgroundColor: NODE_KIND_COLORS[chain.node.kind] || '#64748B' }}
+                              style={{ backgroundColor: NODE_KIND_COLORS[chain.node.kind] || KIND_FALLBACK }}
                             />
                             <span className="text-[12px] text-[var(--text-primary)]">{chain.node.label}</span>
                             <span className="text-[10px] text-[var(--text-tertiary)]">({chain.node.kind})</span>
