@@ -1,3 +1,9 @@
+// R20: asset gradient palette — each mock asset carries a two-stop
+// gradient that visually characterizes the asset thumbnail in the
+// graphics studio. The first stop is a semantic token; the second
+// stop is a *darker shade* that can't be derived from existing
+// tokens, so it's kept literal with per-line eslint-disable. In
+// production these stops come from user-uploaded asset metadata.
 export interface GraphicAsset {
   id: string
   name: string
@@ -18,6 +24,7 @@ export const mockAssets: GraphicAsset[] = [
     width: 1920,
     height: 1080,
     size: '2.4 MB',
+    // eslint-disable-next-line no-hardcoded-hex -- asset gradient stop: warning darker
     gradient: ['var(--color-warning)', '#D97706'],
     tags: ['hero', 'landing', 'gradient'],
     createdAt: '2026-03-28T10:00:00Z',
@@ -51,6 +58,7 @@ export const mockAssets: GraphicAsset[] = [
     width: 512,
     height: 512,
     size: '48 KB',
+    // eslint-disable-next-line no-hardcoded-hex -- asset gradient stop: pink accent darker
     gradient: ['var(--accent)', '#DB2777'],
     tags: ['logo', 'brand', 'primary'],
     createdAt: '2026-03-25T16:45:00Z',
@@ -84,6 +92,7 @@ export const mockAssets: GraphicAsset[] = [
     width: 3840,
     height: 2160,
     size: '4.7 MB',
+    // eslint-disable-next-line no-hardcoded-hex -- asset gradient stop: warning darker alt
     gradient: ['var(--color-warning)', '#EA580C'],
     tags: ['office', 'workspace', 'interior'],
     createdAt: '2026-03-22T08:30:00Z',
@@ -106,6 +115,7 @@ export const mockAssets: GraphicAsset[] = [
     width: 800,
     height: 600,
     size: '980 KB',
+    // eslint-disable-next-line no-hardcoded-hex -- asset gradient stop: cyan darker
     gradient: ['var(--accent)', '#0891B2'],
     tags: ['feature', 'spotlight', 'marketing'],
     createdAt: '2026-03-20T12:00:00Z',
@@ -117,6 +127,7 @@ export const mockAssets: GraphicAsset[] = [
     width: 24,
     height: 24,
     size: '16 KB',
+    // eslint-disable-next-line no-hardcoded-hex -- asset gradient stops: violet pair
     gradient: ['#A855F7', '#9333EA'],
     tags: ['arrows', 'navigation', 'ui'],
     createdAt: '2026-03-19T15:45:00Z',
@@ -128,6 +139,7 @@ export const mockAssets: GraphicAsset[] = [
     width: 2400,
     height: 1600,
     size: '3.2 MB',
+    // eslint-disable-next-line no-hardcoded-hex -- asset gradient stop: teal darker
     gradient: ['var(--accent)', '#0D9488'],
     tags: ['product', 'mockup', 'device'],
     createdAt: '2026-03-18T10:30:00Z',
@@ -139,6 +151,7 @@ export const mockAssets: GraphicAsset[] = [
     width: 800,
     height: 200,
     size: '24 KB',
+    // eslint-disable-next-line no-hardcoded-hex -- asset gradient stop: error darker
     gradient: ['var(--color-error)', '#E11D48'],
     tags: ['wordmark', 'brand', 'text'],
     createdAt: '2026-03-17T09:00:00Z',
