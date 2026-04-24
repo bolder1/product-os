@@ -28,14 +28,8 @@ interface PlanData {
   activeStudios: string[]
 }
 
-const ROLE_COLORS: Record<OrgRole, string> = {
-  Manager: '#F59E0B',
-  'Business Analyst': '#06B6D4',
-  'Product Designer': '#EC4899',
-  'Frontend Dev': '#3B82F6',
-  'Backend Dev': '#10B981',
-  QA: '#F43F5E',
-}
+// R20: ROLE_COLORS retired — role identity is carried by label + icon, not
+// color tint. See step-review-launch.tsx for the post-R20 treatment.
 
 const ROLE_STUDIOS: Record<OrgRole, string> = {
   Manager: 'planner',
@@ -258,4 +252,4 @@ export function getTasksByRole(tasks: GeneratedTask[]): Record<OrgRole, Generate
   return grouped
 }
 
-export { ROLE_COLORS, ROLE_STUDIOS }
+export { ROLE_STUDIOS }

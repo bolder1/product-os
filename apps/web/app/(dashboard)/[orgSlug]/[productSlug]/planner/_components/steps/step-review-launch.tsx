@@ -21,7 +21,6 @@ import type { PlanData } from '../../page'
 import {
   generateTasksFromPlan,
   getTasksByRole,
-  ROLE_COLORS,
   type GeneratedTask,
   type OrgRole,
 } from '../../_lib/task-generator'
@@ -36,38 +35,45 @@ interface StepReviewLaunchProps {
   onTasksChange: (tasks: GeneratedTask[]) => void
 }
 
+/* ── Tone maps (R20) ──
+ * Effort and priority carry semantic tone, mapped to a class-pair for
+ * bg-muted + text. This replaces the raw-hex + alpha-concat pattern
+ * that was the pre-R20 convention. */
+type BadgeTone = 'accent' | 'success' | 'warning' | 'error' | 'neutral'
+
+const TONE_BADGE: Record<BadgeTone, string> = {
+  accent:  'bg-[var(--accent-muted)] text-[var(--accent-text)]',
+  success: 'bg-[var(--color-success-muted)] text-[var(--color-success)]',
+  warning: 'bg-[var(--color-warning-muted)] text-[var(--color-warning)]',
+  error:   'bg-[var(--color-error-muted)] text-[var(--color-error)]',
+  neutral: 'bg-white/[0.05] text-[var(--text-tertiary)]',
+}
+
 /* ── Effort badge ── */
 function EffortBadge({ effort }: { effort: 'S' | 'M' | 'L' }) {
-  const config = {
-    S: { label: 'S', color: '#10B981', bg: '#10B981' },
-    M: { label: 'M', color: '#F59E0B', bg: '#F59E0B' },
-    L: { label: 'L', color: '#F43F5E', bg: '#F43F5E' },
+  const tone: Record<'S' | 'M' | 'L', BadgeTone> = {
+    S: 'success',
+    M: 'warning',
+    L: 'error',
   }
-  const c = config[effort]
   return (
-    <span
-      className="text-[10px] font-bold px-1.5 py-0.5 rounded"
-      style={{ backgroundColor: c.bg + '15', color: c.color }}
-    >
-      {c.label}
+    <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${TONE_BADGE[tone[effort]]}`}>
+      {effort}
     </span>
   )
 }
 
 /* ── Priority badge ── */
 function PriorityBadge({ priority }: { priority: GeneratedTask['priority'] }) {
-  const config: Record<string, { color: string }> = {
-    critical: { color: '#F43F5E' },
-    high: { color: '#F59E0B' },
-    medium: { color: '#3B82F6' },
-    low: { color: '#64748B' },
+  const tone: Record<string, BadgeTone> = {
+    critical: 'error',
+    high:     'warning',
+    medium:   'accent',
+    low:      'neutral',
   }
-  const c = config[priority] || config.medium
+  const t = tone[priority] ?? 'accent'
   return (
-    <span
-      className="text-[10px] font-medium px-2 py-0.5 rounded-full capitalize"
-      style={{ backgroundColor: c.color + '15', color: c.color }}
-    >
+    <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full capitalize ${TONE_BADGE[t]}`}>
       {priority}
     </span>
   )
@@ -209,7 +215,6 @@ export default function StepReviewLaunch({
             const roleTasks = tasksByRole[role] || []
             if (roleTasks.length === 0) return null
             const isExpanded = expandedRoles.has(role)
-            const roleColor = ROLE_COLORS[role]
 
             return (
               <motion.div
@@ -224,11 +229,8 @@ export default function StepReviewLaunch({
                   onClick={() => toggleRole(role)}
                   className="w-full flex items-center gap-3 px-4 py-3 hover:bg-white/[0.02] transition-colors"
                 >
-                  {/* Role badge */}
-                  <span
-                    className="text-xs font-semibold px-2.5 py-1 rounded-lg"
-                    style={{ backgroundColor: roleColor + '15', color: roleColor }}
-                  >
+                  {/* Role badge — R20: role identity via label only, not color tint */}
+                  <span className="text-xs font-semibold px-2.5 py-1 rounded-lg bg-white/[0.05] text-[var(--text-secondary)]">
                     {role}
                   </span>
 
