@@ -32,17 +32,32 @@ export const SECTION_TYPES = [
 
 export type SectionType = (typeof SECTION_TYPES)[number]
 
+// R20: section-type palette — identity tints tied to page section kinds.
+// Analogous to NODE_KIND_COLORS on the graph surface, this is domain
+// reference data (not studio chrome) and belongs to its own palette-
+// centralization phase. Left literal and eslint-disabled line-by-line.
 export const SECTION_COLORS: Record<string, string> = {
+  // eslint-disable-next-line no-hardcoded-hex -- section-palette: Hero
   Hero: '#8B5CF6',
+  // eslint-disable-next-line no-hardcoded-hex -- section-palette: Features
   Features: '#3B82F6',
+  // eslint-disable-next-line no-hardcoded-hex -- section-palette: Content
   Content: '#94A3B8',
+  // eslint-disable-next-line no-hardcoded-hex -- section-palette: CTA
   CTA: '#10B981',
+  // eslint-disable-next-line no-hardcoded-hex -- section-palette: Testimonials
   Testimonials: '#EC4899',
+  // eslint-disable-next-line no-hardcoded-hex -- section-palette: Pricing
   Pricing: '#F59E0B',
+  // eslint-disable-next-line no-hardcoded-hex -- section-palette: FAQ
   FAQ: '#06B6D4',
+  // eslint-disable-next-line no-hardcoded-hex -- section-palette: Gallery
   Gallery: '#F97316',
+  // eslint-disable-next-line no-hardcoded-hex -- section-palette: Stats
   Stats: '#6366F1',
+  // eslint-disable-next-line no-hardcoded-hex -- section-palette: Footer
   Footer: '#64748B',
+  // eslint-disable-next-line no-hardcoded-hex -- section-palette: Custom (fallback)
   Custom: '#64748B',
 }
 
