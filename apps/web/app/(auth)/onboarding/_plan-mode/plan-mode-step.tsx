@@ -115,12 +115,17 @@ const MCQ_BANK: Array<{
   },
 ]
 
+// User-facing palette options for the onboarding primary-color picker.
+// Literal hex is intentional — these are the brand-primary candidates the
+// user picks between, persisted as brand data (not chrome). First entry
+// mirrors --accent so the default pick is token-aligned.
+// eslint-disable-next-line no-hardcoded-hex -- user-facing brand palette options
 const COLOR_SWATCHES = ['#6398ff', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#06b6d4', '#ef4444', '#64748b']
 
 const TEMPLATE_OPTIONS = [
-  { id: 'saas-starter', name: 'SaaS Starter', description: 'Auth, billing, dashboard scaffolding.', icon: <Rocket size={18} />, color: '#3B82F6' },
-  { id: 'ops-pilot', name: 'OpsPilot', description: 'Internal ops dashboard + analytics.', icon: <Sparkles size={18} />, color: '#8B5CF6' },
-  { id: 'landing-page', name: 'Landing Page', description: 'Marketing page with components library.', icon: <Globe size={18} />, color: '#06B6D4' },
+  { id: 'saas-starter', name: 'SaaS Starter', description: 'Auth, billing, dashboard scaffolding.', icon: <Rocket size={18} /> },
+  { id: 'ops-pilot', name: 'OpsPilot', description: 'Internal ops dashboard + analytics.', icon: <Sparkles size={18} /> },
+  { id: 'landing-page', name: 'Landing Page', description: 'Marketing page with components library.', icon: <Globe size={18} /> },
 ]
 
 const PHASE_ORDER: PlanStep[] = ['memory', 'brief', 'summary', 'template', 'team', 'tasks']
@@ -385,7 +390,7 @@ export function PlanModeStep({ defaultProductName, onComplete, onSkip }: Props) 
                           isSelected ? 'border-[var(--accent)] bg-[var(--accent-subtle)]' : 'border-[var(--border-default)] bg-[var(--bg-inset)] hover:bg-[var(--surface-hover)]'
                         }`}
                       >
-                        <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: `${t.color}25`, color: t.color }}>
+                        <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 bg-[var(--accent-subtle)] text-[var(--accent-text)]">
                           {t.icon}
                         </div>
                         <div className="flex-1 min-w-0">
@@ -808,6 +813,8 @@ function generateLocalSummary(freeform: string, mcq: MCQAnswer, name: string): P
   }
   const voiceAdjectives = voiceMap[mcq.voice ?? 'friendly']
 
+  // Fallback primary when user skips the color picker; mirrors --accent.
+  // eslint-disable-next-line no-hardcoded-hex -- default brand primary stored as user data
   const primary = mcq.primaryColor ?? '#6398ff'
   const palette = deriveFivePalette(primary)
 
