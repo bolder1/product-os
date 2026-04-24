@@ -22,11 +22,31 @@ const fadeUp = {
   }),
 }
 
-const stats = [
-  { label: 'Total Members', value: '24', icon: Users, color: '#3B82F6', change: '+3 this month' },
-  { label: 'Active Products', value: '7', icon: Package, color: '#10B981', change: '+1 this week' },
-  { label: 'Pending Requests', value: '4', icon: Clock, color: '#F59E0B', change: '2 urgent' },
-  { label: 'Storage Used', value: '18.4 GB', icon: HardDrive, color: '#8B5CF6', change: 'of 50 GB' },
+// R20: stat/action tone — semantic tone ramp replaces raw hex. Tone maps
+// to chrome classes via TONE_BG_SOFT / TONE_ICON_TEXT below.
+type StatTone = 'accent' | 'accent-text' | 'success' | 'warning' | 'error'
+
+const TONE_BG_SOFT: Record<StatTone, string> = {
+  accent:        'bg-[var(--accent-subtle)]',
+  'accent-text': 'bg-[var(--accent-muted)]',
+  success:       'bg-[var(--color-success-muted)]',
+  warning:       'bg-[var(--color-warning-muted)]',
+  error:         'bg-[var(--color-error-muted)]',
+}
+
+const TONE_ICON_TEXT: Record<StatTone, string> = {
+  accent:        'text-[var(--accent)]',
+  'accent-text': 'text-[var(--accent-text)]',
+  success:       'text-[var(--color-success)]',
+  warning:       'text-[var(--color-warning)]',
+  error:         'text-[var(--color-error)]',
+}
+
+const stats: { label: string; value: string; icon: typeof Users; tone: StatTone; change: string }[] = [
+  { label: 'Total Members', value: '24', icon: Users, tone: 'accent', change: '+3 this month' },
+  { label: 'Active Products', value: '7', icon: Package, tone: 'success', change: '+1 this week' },
+  { label: 'Pending Requests', value: '4', icon: Clock, tone: 'warning', change: '2 urgent' },
+  { label: 'Storage Used', value: '18.4 GB', icon: HardDrive, tone: 'accent-text', change: 'of 50 GB' },
 ]
 
 const activityBars = [
@@ -44,12 +64,12 @@ const activityBars = [
   { day: 'Fri', height: 50 },
 ]
 
-const recentActions = [
-  { id: '1', text: 'Invited alex.chen@company.com as Frontend Dev', icon: UserPlus, color: '#3B82F6', time: '2 hours ago' },
-  { id: '2', text: 'Changed role of Sarah Kim to Manager', icon: Shield, color: '#F59E0B', time: '5 hours ago' },
-  { id: '3', text: 'Approved access request for Design Studio', icon: UserCheck, color: '#10B981', time: '1 day ago' },
-  { id: '4', text: 'Updated permissions for QA Engineer role', icon: Settings, color: '#8B5CF6', time: '2 days ago' },
-  { id: '5', text: 'Removed inactive member john.doe@company.com', icon: Trash2, color: '#F43F5E', time: '3 days ago' },
+const recentActions: { id: string; text: string; icon: typeof UserPlus; tone: StatTone; time: string }[] = [
+  { id: '1', text: 'Invited alex.chen@company.com as Frontend Dev', icon: UserPlus, tone: 'accent', time: '2 hours ago' },
+  { id: '2', text: 'Changed role of Sarah Kim to Manager', icon: Shield, tone: 'warning', time: '5 hours ago' },
+  { id: '3', text: 'Approved access request for Design Studio', icon: UserCheck, tone: 'success', time: '1 day ago' },
+  { id: '4', text: 'Updated permissions for QA Engineer role', icon: Settings, tone: 'accent-text', time: '2 days ago' },
+  { id: '5', text: 'Removed inactive member john.doe@company.com', icon: Trash2, tone: 'error', time: '3 days ago' },
 ]
 
 export default function AdminOverview() {
@@ -67,11 +87,8 @@ export default function AdminOverview() {
               custom={i}
             >
               <div className="flex items-start justify-between mb-3">
-                <div
-                  className="w-10 h-10 rounded-lg flex items-center justify-center"
-                  style={{ backgroundColor: `${stat.color}12` }}
-                >
-                  <Icon className="w-5 h-5" style={{ color: stat.color }} />
+                <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${TONE_BG_SOFT[stat.tone]}`}>
+                  <Icon className={`w-5 h-5 ${TONE_ICON_TEXT[stat.tone]}`} />
                 </div>
               </div>
               <div className="text-2xl font-semibold text-[var(--text-primary)]">{stat.value}</div>
@@ -145,11 +162,8 @@ export default function AdminOverview() {
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.5 + i * 0.08 }}
                 >
-                  <div
-                    className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
-                    style={{ backgroundColor: `${action.color}12` }}
-                  >
-                    <Icon className="w-4 h-4" style={{ color: action.color }} />
+                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${TONE_BG_SOFT[action.tone]}`}>
+                    <Icon className={`w-4 h-4 ${TONE_ICON_TEXT[action.tone]}`} />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm text-[var(--text-secondary)] truncate">{action.text}</p>
