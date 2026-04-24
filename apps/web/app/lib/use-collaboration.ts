@@ -41,9 +41,32 @@ export interface CollaborationState {
 
 const YJS_WS_URL = process.env.NEXT_PUBLIC_YJS_URL ?? 'ws://localhost:4000'
 
+// R20: user-presence palette — each connected user gets a distinct color
+// via hash for cursors/avatars in the collaboration layer. These are
+// *functional* identity tints (distinguishing users in real time), not
+// studio chrome, and intentionally span the full spectrum so N users in
+// a room are visually separable. Left literal and eslint-disabled.
 const COLORS = [
-  '#ef4444', '#f97316', '#eab308', '#22c55e', '#06b6d4',
-  '#3b82f6', '#8b5cf6', '#ec4899', '#14b8a6', '#f59e0b',
+  // eslint-disable-next-line no-hardcoded-hex -- presence palette
+  '#ef4444',
+  // eslint-disable-next-line no-hardcoded-hex -- presence palette
+  '#f97316',
+  // eslint-disable-next-line no-hardcoded-hex -- presence palette
+  '#eab308',
+  // eslint-disable-next-line no-hardcoded-hex -- presence palette
+  '#22c55e',
+  // eslint-disable-next-line no-hardcoded-hex -- presence palette
+  '#06b6d4',
+  // eslint-disable-next-line no-hardcoded-hex -- presence palette
+  '#3b82f6',
+  // eslint-disable-next-line no-hardcoded-hex -- presence palette
+  '#8b5cf6',
+  // eslint-disable-next-line no-hardcoded-hex -- presence palette
+  '#ec4899',
+  // eslint-disable-next-line no-hardcoded-hex -- presence palette
+  '#14b8a6',
+  // eslint-disable-next-line no-hardcoded-hex -- presence palette
+  '#f59e0b',
 ]
 
 function pickColor(userId: string): string {
