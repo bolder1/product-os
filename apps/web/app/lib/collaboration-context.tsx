@@ -30,9 +30,32 @@ interface CollaborationProviderProps {
   children: ReactNode
 }
 
+// R20: presence palette — 8-swatch deterministic color map for
+// multi-user collaboration cursors and avatar tints. These are
+// *functional* identity colors (user A is always color A) used
+// to distinguish concurrent collaborators at a glance. Not chrome;
+// kept literal and per-line eslint-disabled. A Phase-2 concern is
+// centralizing this into a presence-palette token collection.
 // Deterministic per-user color from their ID
 function pickUserColor(userId: string): string {
-  const colors = ['#6398ff', '#3dd68c', '#f59e0b', '#ec4899', '#8b5cf6', '#06b6d4', '#ef5350', '#a78bfa']
+  const colors = [
+    // eslint-disable-next-line no-hardcoded-hex -- presence palette
+    '#6398ff',
+    // eslint-disable-next-line no-hardcoded-hex -- presence palette
+    '#3dd68c',
+    // eslint-disable-next-line no-hardcoded-hex -- presence palette
+    '#f59e0b',
+    // eslint-disable-next-line no-hardcoded-hex -- presence palette
+    '#ec4899',
+    // eslint-disable-next-line no-hardcoded-hex -- presence palette
+    '#8b5cf6',
+    // eslint-disable-next-line no-hardcoded-hex -- presence palette
+    '#06b6d4',
+    // eslint-disable-next-line no-hardcoded-hex -- presence palette
+    '#ef5350',
+    // eslint-disable-next-line no-hardcoded-hex -- presence palette
+    '#a78bfa',
+  ]
   let hash = 0
   for (let i = 0; i < userId.length; i++) hash = (hash * 31 + userId.charCodeAt(i)) >>> 0
   return colors[hash % colors.length]
