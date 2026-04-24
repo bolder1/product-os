@@ -27,13 +27,42 @@ interface Feature {
   priority: 'must-have' | 'should-have' | 'nice-to-have'
 }
 
-const priorityConfig = {
-  'must-have': { label: 'Must Have', color: '#F43F5E', bg: '#F43F5E' },
-  'should-have': { label: 'Should Have', color: '#F59E0B', bg: '#F59E0B' },
-  'nice-to-have': { label: 'Nice to Have', color: '#06B6D4', bg: '#06B6D4' },
+/**
+ * R20: priority maps to semantic tokens. Escalating intensity
+ * (error → warning → info/accent) is meaningful state, so keep semantics.
+ */
+type PriorityTone = 'error' | 'warning' | 'info'
+const priorityConfig: Record<'must-have' | 'should-have' | 'nice-to-have', { label: string; tone: PriorityTone }> = {
+  'must-have':   { label: 'Must Have',   tone: 'error'   },
+  'should-have': { label: 'Should Have', tone: 'warning' },
+  'nice-to-have':{ label: 'Nice to Have',tone: 'info'    },
 }
 
-const avatarColors = ['#3B82F6', '#8B5CF6', '#06B6D4', '#10B981', '#F59E0B', '#EC4899', '#F43F5E']
+const toneDot: Record<PriorityTone, string> = {
+  error: 'bg-[var(--color-error)]',
+  warning: 'bg-[var(--color-warning)]',
+  info: 'bg-[var(--accent)]',
+}
+const toneText: Record<PriorityTone, string> = {
+  error: 'text-[var(--color-error)]',
+  warning: 'text-[var(--color-warning)]',
+  info: 'text-[var(--accent)]',
+}
+const toneBgSoft: Record<PriorityTone, string> = {
+  error: 'bg-[var(--color-error)]/15',
+  warning: 'bg-[var(--color-warning)]/15',
+  info: 'bg-[var(--accent)]/15',
+}
+const toneBgMedium: Record<PriorityTone, string> = {
+  error: 'bg-[var(--color-error)]/20',
+  warning: 'bg-[var(--color-warning)]/20',
+  info: 'bg-[var(--accent)]/20',
+}
+const toneBorder: Record<PriorityTone, string> = {
+  error: 'border-[var(--color-error)]/40',
+  warning: 'border-[var(--color-warning)]/40',
+  info: 'border-[var(--accent)]/40',
+}
 
 /* ── Props ── */
 interface StepUsersFeaturesProps {
@@ -132,20 +161,16 @@ export default function StepUsersFeatures({
         {/* Persona cards */}
         <div className="space-y-2">
           <AnimatePresence>
-            {personas.map((persona, index) => {
-              const color = avatarColors[index % avatarColors.length]
+            {personas.map((persona) => {
               return (
                 <motion.div
                   key={persona.id}
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, x: -20 }}
-                  className="flex items-center gap-3 bg-white/[0.03] border border-white/[0.08] rounded-xl px-4 py-3 group hover:border-white/[0.12] transition-colors"
+                  className="flex items-center gap-3 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-xl px-4 py-3 group hover:border-[var(--border-default)] transition-colors"
                 >
-                  <div
-                    className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 text-sm font-bold"
-                    style={{ backgroundColor: color + '20', color }}
-                  >
+                  <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 text-sm font-bold bg-[var(--accent)]/20 text-[var(--accent)]">
                     {persona.name.charAt(0).toUpperCase()}
                   </div>
                   <div className="flex-1 min-w-0">
@@ -159,7 +184,7 @@ export default function StepUsersFeatures({
                   )}
                   <button
                     onClick={() => removePersona(persona.id)}
-                    className="p-1 rounded-md opacity-0 group-hover:opacity-100 hover:bg-white/[0.05] transition-all"
+                    className="p-1 rounded-md opacity-0 group-hover:opacity-100 hover:bg-[var(--bg-hover)] transition-all"
                   >
                     <X className="w-3.5 h-3.5 text-[var(--text-tertiary)]" />
                   </button>
@@ -176,7 +201,7 @@ export default function StepUsersFeatures({
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className="bg-white/[0.03] border border-[var(--accent)]/20 rounded-xl p-4 space-y-3"
+              className="bg-[var(--bg-surface)] border border-[var(--accent)]/20 rounded-xl p-4 space-y-3"
             >
               <div className="grid grid-cols-2 gap-3">
                 <input
@@ -184,7 +209,7 @@ export default function StepUsersFeatures({
                   value={personaForm.name}
                   onChange={(e) => setPersonaForm({ ...personaForm, name: e.target.value })}
                   placeholder="Name (e.g. Startup Steve)"
-                  className="bg-white/[0.03] border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:border-[var(--accent)]/50 focus:outline-none transition-colors"
+                  className="bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-lg px-3 py-2 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:border-[var(--accent)]/50 focus:outline-none transition-colors"
                   autoFocus
                 />
                 <input
@@ -192,7 +217,7 @@ export default function StepUsersFeatures({
                   value={personaForm.role}
                   onChange={(e) => setPersonaForm({ ...personaForm, role: e.target.value })}
                   placeholder="Role (e.g. Founder / CEO)"
-                  className="bg-white/[0.03] border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:border-[var(--accent)]/50 focus:outline-none transition-colors"
+                  className="bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-lg px-3 py-2 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:border-[var(--accent)]/50 focus:outline-none transition-colors"
                 />
               </div>
               <input
@@ -200,7 +225,7 @@ export default function StepUsersFeatures({
                 value={personaForm.painPoint}
                 onChange={(e) => setPersonaForm({ ...personaForm, painPoint: e.target.value })}
                 placeholder="Key pain point (e.g. Too many tools)"
-                className="w-full bg-white/[0.03] border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:border-[var(--accent)]/50 focus:outline-none transition-colors"
+                className="w-full bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-lg px-3 py-2 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:border-[var(--accent)]/50 focus:outline-none transition-colors"
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') addPersona()
                 }}
@@ -211,13 +236,13 @@ export default function StepUsersFeatures({
                     setShowPersonaForm(false)
                     setPersonaForm({ name: '', role: '', painPoint: '' })
                   }}
-                  className="px-4 py-2 text-xs bg-white/[0.05] border border-white/[0.08] rounded-lg text-[var(--text-secondary)] hover:bg-white/[0.08] transition-colors"
+                  className="px-4 py-2 text-xs bg-[var(--bg-hover)] border border-[var(--border-subtle)] rounded-lg text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]/80 transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={addPersona}
-                  className="px-4 py-2 text-xs bg-[var(--accent)] text-white rounded-lg hover:bg-[var(--accent)]/90 transition-colors font-medium"
+                  className="px-4 py-2 text-xs bg-[var(--accent)] text-[var(--text-inverse)] rounded-lg hover:bg-[var(--accent-hover)] transition-colors font-medium"
                 >
                   Add Persona
                 </button>
@@ -228,7 +253,7 @@ export default function StepUsersFeatures({
               whileHover={{ scale: 1.01 }}
               whileTap={{ scale: 0.99 }}
               onClick={() => setShowPersonaForm(true)}
-              className="w-full flex items-center justify-center gap-2 py-2.5 border border-dashed border-white/[0.08] rounded-xl text-sm text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] hover:border-[var(--accent)]/30 transition-all"
+              className="w-full flex items-center justify-center gap-2 py-2.5 border border-dashed border-[var(--border-subtle)] rounded-xl text-sm text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] hover:border-[var(--accent)]/30 transition-all"
             >
               <Plus className="w-4 h-4" />
               Add Persona
@@ -239,9 +264,9 @@ export default function StepUsersFeatures({
 
       {/* ── Divider ── */}
       <div className="flex items-center gap-3">
-        <div className="flex-1 h-px bg-white/[0.06]" />
+        <div className="flex-1 h-px bg-[var(--border-subtle)]" />
         <span className="text-[10px] font-medium text-[var(--text-tertiary)] uppercase tracking-wider">Features</span>
-        <div className="flex-1 h-px bg-white/[0.06]" />
+        <div className="flex-1 h-px bg-[var(--border-subtle)]" />
       </div>
 
       {/* ════════════════ FEATURES ════════════════ */}
@@ -249,15 +274,15 @@ export default function StepUsersFeatures({
         {/* Summary pills */}
         <div className="flex items-center gap-4">
           <div className="flex gap-3">
-            {[
-              { label: 'Must Have', count: mustHaveCount, color: '#F43F5E' },
-              { label: 'Should Have', count: shouldHaveCount, color: '#F59E0B' },
-              { label: 'Nice to Have', count: niceToHaveCount, color: '#06B6D4' },
-            ].map((item) => (
+            {([
+              { label: 'Must Have',    count: mustHaveCount,    tone: 'error'   },
+              { label: 'Should Have',  count: shouldHaveCount,  tone: 'warning' },
+              { label: 'Nice to Have', count: niceToHaveCount,  tone: 'info'    },
+            ] as const).map((item) => (
               <div key={item.label} className="flex items-center gap-1.5 text-xs">
-                <span className="w-2 h-2 rounded-full" style={{ backgroundColor: item.color }} />
+                <span className={`w-2 h-2 rounded-full ${toneDot[item.tone]}`} />
                 <span className="text-[var(--text-tertiary)]">{item.label}</span>
-                <span className="font-medium" style={{ color: item.color }}>
+                <span className={`font-medium ${toneText[item.tone]}`}>
                   {item.count}
                 </span>
               </div>
@@ -283,14 +308,14 @@ export default function StepUsersFeatures({
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, x: -20 }}
                   layout
-                  className="flex items-start gap-2 bg-white/[0.03] border border-white/[0.08] rounded-xl px-3 py-3 group hover:border-white/[0.12] transition-colors"
+                  className="flex items-start gap-2 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-xl px-3 py-3 group hover:border-[var(--border-default)] transition-colors"
                 >
                   {/* Reorder controls */}
                   <div className="flex flex-col items-center gap-0.5 pt-0.5">
                     <button
                       onClick={() => moveFeature(index, 'up')}
                       disabled={index === 0}
-                      className="p-0.5 rounded hover:bg-white/[0.05] transition-colors disabled:opacity-20"
+                      className="p-0.5 rounded hover:bg-[var(--bg-hover)] transition-colors disabled:opacity-20"
                     >
                       <ChevronUp className="w-3.5 h-3.5 text-[var(--text-tertiary)]" />
                     </button>
@@ -298,7 +323,7 @@ export default function StepUsersFeatures({
                     <button
                       onClick={() => moveFeature(index, 'down')}
                       disabled={index === features.length - 1}
-                      className="p-0.5 rounded hover:bg-white/[0.05] transition-colors disabled:opacity-20"
+                      className="p-0.5 rounded hover:bg-[var(--bg-hover)] transition-colors disabled:opacity-20"
                     >
                       <ChevronDown className="w-3.5 h-3.5 text-[var(--text-tertiary)]" />
                     </button>
@@ -310,8 +335,7 @@ export default function StepUsersFeatures({
                       <p className="text-sm font-medium text-[var(--text-primary)]">{feature.name}</p>
                       <button
                         onClick={() => cyclePriority(feature.id)}
-                        className="text-[10px] font-medium px-2 py-0.5 rounded-full flex-shrink-0 cursor-pointer hover:opacity-80 transition-opacity"
-                        style={{ backgroundColor: pc.bg + '15', color: pc.color }}
+                        className={`text-[10px] font-medium px-2 py-0.5 rounded-full flex-shrink-0 cursor-pointer hover:opacity-80 transition-opacity ${toneBgSoft[pc.tone]} ${toneText[pc.tone]}`}
                       >
                         {pc.label}
                       </button>
@@ -324,7 +348,7 @@ export default function StepUsersFeatures({
                   {/* Remove */}
                   <button
                     onClick={() => removeFeature(feature.id)}
-                    className="p-1 rounded-md opacity-0 group-hover:opacity-100 hover:bg-white/[0.05] transition-all flex-shrink-0"
+                    className="p-1 rounded-md opacity-0 group-hover:opacity-100 hover:bg-[var(--bg-hover)] transition-all flex-shrink-0"
                   >
                     <X className="w-3.5 h-3.5 text-[var(--text-tertiary)]" />
                   </button>
@@ -341,14 +365,14 @@ export default function StepUsersFeatures({
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className="bg-white/[0.03] border border-[var(--accent)]/20 rounded-xl p-4 space-y-3"
+              className="bg-[var(--bg-surface)] border border-[var(--accent)]/20 rounded-xl p-4 space-y-3"
             >
               <input
                 type="text"
                 value={featureName}
                 onChange={(e) => setFeatureName(e.target.value)}
                 placeholder="Feature name"
-                className="w-full bg-white/[0.03] border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:border-[var(--accent)]/50 focus:outline-none transition-colors"
+                className="w-full bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-lg px-3 py-2 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:border-[var(--accent)]/50 focus:outline-none transition-colors"
                 autoFocus
               />
               <textarea
@@ -356,22 +380,22 @@ export default function StepUsersFeatures({
                 onChange={(e) => setFeatureDesc(e.target.value)}
                 placeholder="Feature description (optional)"
                 rows={2}
-                className="w-full bg-white/[0.03] border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:border-[var(--accent)]/50 focus:outline-none resize-none transition-colors"
+                className="w-full bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-lg px-3 py-2 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:border-[var(--accent)]/50 focus:outline-none resize-none transition-colors"
               />
               <div className="flex items-center gap-2">
                 <span className="text-xs text-[var(--text-tertiary)]">Priority:</span>
                 {(['must-have', 'should-have', 'nice-to-have'] as const).map((p) => {
                   const pc = priorityConfig[p]
+                  const selected = featurePriority === p
                   return (
                     <button
                       key={p}
                       onClick={() => setFeaturePriority(p)}
-                      className="text-[10px] font-medium px-2.5 py-1 rounded-full border transition-all"
-                      style={
-                        featurePriority === p
-                          ? { backgroundColor: pc.bg + '20', color: pc.color, borderColor: pc.bg + '40' }
-                          : { backgroundColor: 'transparent', color: '#64748B', borderColor: 'rgba(255,255,255,0.08)' }
-                      }
+                      className={`text-[10px] font-medium px-2.5 py-1 rounded-full border transition-all ${
+                        selected
+                          ? `${toneBgMedium[pc.tone]} ${toneText[pc.tone]} ${toneBorder[pc.tone]}`
+                          : 'bg-transparent text-[var(--text-tertiary)] border-[var(--border-subtle)]'
+                      }`}
                     >
                       {pc.label}
                     </button>
@@ -385,13 +409,13 @@ export default function StepUsersFeatures({
                     setFeatureName('')
                     setFeatureDesc('')
                   }}
-                  className="px-4 py-2 text-xs bg-white/[0.05] border border-white/[0.08] rounded-lg text-[var(--text-secondary)] hover:bg-white/[0.08] transition-colors"
+                  className="px-4 py-2 text-xs bg-[var(--bg-hover)] border border-[var(--border-subtle)] rounded-lg text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]/80 transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={addFeature}
-                  className="px-4 py-2 text-xs bg-[var(--accent)] text-white rounded-lg hover:bg-[var(--accent)]/90 transition-colors font-medium"
+                  className="px-4 py-2 text-xs bg-[var(--accent)] text-[var(--text-inverse)] rounded-lg hover:bg-[var(--accent-hover)] transition-colors font-medium"
                 >
                   Add Feature
                 </button>
@@ -402,7 +426,7 @@ export default function StepUsersFeatures({
               whileHover={{ scale: 1.01 }}
               whileTap={{ scale: 0.99 }}
               onClick={() => setShowFeatureForm(true)}
-              className="w-full flex items-center justify-center gap-2 py-2.5 border border-dashed border-white/[0.08] rounded-xl text-sm text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] hover:border-[var(--accent)]/30 transition-all"
+              className="w-full flex items-center justify-center gap-2 py-2.5 border border-dashed border-[var(--border-subtle)] rounded-xl text-sm text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] hover:border-[var(--accent)]/30 transition-all"
             >
               <Plus className="w-4 h-4" />
               Add Feature

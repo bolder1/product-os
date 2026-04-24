@@ -44,12 +44,18 @@ export const categories = ['All', 'Layout', 'Form', 'Data', 'Feedback', 'Navigat
 
 export type Category = (typeof categories)[number]
 
+/**
+ * Category → token reference. Post-R20 all categories share the single
+ * `--accent` token; `Feedback` keeps `--color-error` because it carries
+ * real status meaning. Retained as CSS var refs so the palette re-themes
+ * automatically when the user switches Dark/Light/Dark-HC.
+ */
 export const categoryColors: Record<string, string> = {
-  Layout: '#8B5CF6',
-  Form: '#06B6D4',
-  Data: '#F59E0B',
-  Feedback: '#EF4444',
-  Navigation: '#10B981',
+  Layout: 'var(--accent)',
+  Form: 'var(--accent)',
+  Data: 'var(--accent)',
+  Feedback: 'var(--color-error)',
+  Navigation: 'var(--accent)',
 }
 
 export const mockComponents: ComponentDef[] = [

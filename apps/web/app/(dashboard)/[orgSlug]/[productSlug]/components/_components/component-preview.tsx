@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Monitor, Moon, Sun, Grid3X3 } from 'lucide-react'
-import { type ComponentDef, type PropDef, categoryColors } from '../_data/mock-components'
+import { type ComponentDef, type PropDef } from '../_data/mock-components'
 
 type BackgroundMode = 'dark' | 'light' | 'checkerboard'
 type InteractionState = 'hover' | 'focus' | 'active' | 'disabled'
@@ -12,6 +12,51 @@ interface ComponentPreviewProps {
   component: ComponentDef
   propValues: Record<string, string>
   onPropChange: (propName: string, value: string) => void
+}
+
+/* ---------- Semantic token pill pairs ---------- */
+/**
+ * Pre-composed Tailwind classes for each semantic pill. Keyed pairs avoid
+ * template-literal opacity concat (`${hex}20`) which breaks with CSS vars.
+ */
+const pillBg: Record<string, string> = {
+  default: 'bg-[var(--bg-hover)]',
+  success: 'bg-[var(--color-success)]/15',
+  warning: 'bg-[var(--color-warning)]/15',
+  error: 'bg-[var(--color-error)]/15',
+  info: 'bg-[var(--accent)]/15',
+}
+const pillText: Record<string, string> = {
+  default: 'text-[var(--text-secondary)]',
+  success: 'text-[var(--color-success)]',
+  warning: 'text-[var(--color-warning)]',
+  error: 'text-[var(--color-error)]',
+  info: 'text-[var(--accent)]',
+}
+
+const alertBg: Record<string, string> = {
+  info: 'bg-[var(--accent)]/10',
+  success: 'bg-[var(--color-success)]/10',
+  warning: 'bg-[var(--color-warning)]/10',
+  error: 'bg-[var(--color-error)]/10',
+}
+const alertBorder: Record<string, string> = {
+  info: 'border-[var(--accent)]/30',
+  success: 'border-[var(--color-success)]/30',
+  warning: 'border-[var(--color-warning)]/30',
+  error: 'border-[var(--color-error)]/30',
+}
+const alertText: Record<string, string> = {
+  info: 'text-[var(--accent)]',
+  success: 'text-[var(--color-success)]',
+  warning: 'text-[var(--color-warning)]',
+  error: 'text-[var(--color-error)]',
+}
+const alertDot: Record<string, string> = {
+  info: 'bg-[var(--accent)]',
+  success: 'bg-[var(--color-success)]',
+  warning: 'bg-[var(--color-warning)]',
+  error: 'bg-[var(--color-error)]',
 }
 
 /* ---------- Live JSX generator ----------------------------------- */
@@ -51,7 +96,6 @@ function renderComponentPlaceholder(
   propValues: Record<string, string>,
   states: Set<InteractionState>
 ) {
-  const accent = categoryColors[component.category] ?? '#06B6D4'
   const isDisabled = states.has('disabled') || propValues.disabled === 'true'
   const opacity = isDisabled ? 0.4 : 1
 
@@ -59,14 +103,19 @@ function renderComponentPlaceholder(
     case 'Button': {
       const v = propValues.variant ?? 'primary'
       const filled = v === 'primary' || v === 'destructive'
-      const bg = v === 'destructive' ? '#EF4444' : filled ? accent : 'transparent'
-      const border = filled ? 'none' : `1px solid ${accent}`
+      const isDestructive = v === 'destructive'
       const sz = propValues.size === 'lg' ? 'px-6 py-2.5 text-sm' : propValues.size === 'sm' ? 'px-3 py-1 text-xs' : 'px-4 py-2 text-sm'
+      const bgClass = isDestructive
+        ? 'bg-[var(--color-error)]'
+        : filled
+          ? 'bg-[var(--accent)]'
+          : 'bg-transparent border border-[var(--accent)]'
+      const textClass = filled ? 'text-[var(--text-inverse)]' : 'text-[var(--accent)]'
       return (
         <button
           disabled={isDisabled}
-          className={`rounded-lg font-medium text-white ${sz} transition-all`}
-          style={{ backgroundColor: bg, border, opacity, filter: states.has('hover') ? 'brightness(1.15)' : undefined }}
+          className={`rounded-lg font-medium ${sz} transition-all ${bgClass} ${textClass}`}
+          style={{ opacity, filter: states.has('hover') ? 'brightness(1.15)' : undefined }}
         >
           {propValues.label ?? 'Click me'}
         </button>
@@ -78,13 +127,16 @@ function renderComponentPlaceholder(
         <div className="w-64" style={{ opacity }}>
           {propValues.label && <label className="block text-xs text-[var(--text-secondary)] mb-1">{propValues.label}</label>}
           <div
-            className="w-full px-3 py-2 rounded-lg text-sm text-[var(--text-primary)]"
-            style={{ border: `1px solid ${hasError ? '#EF4444' : 'rgba(255,255,255,0.08)'}`, backgroundColor: 'rgba(255,255,255,0.03)' }}
+            className={`w-full px-3 py-2 rounded-lg text-sm text-[var(--text-primary)] bg-[var(--bg-surface)] border ${
+              hasError ? 'border-[var(--color-error)]' : 'border-[var(--border-subtle)]'
+            }`}
           >
             <span className="text-[var(--text-tertiary)]">{propValues.placeholder ?? 'Enter text...'}</span>
           </div>
           {propValues.helperText && (
-            <p className={`text-xs mt-1 ${hasError ? 'text-red-400' : 'text-[var(--text-tertiary)]'}`}>{propValues.helperText}</p>
+            <p className={`text-xs mt-1 ${hasError ? 'text-[var(--color-error)]' : 'text-[var(--text-tertiary)]'}`}>
+              {propValues.helperText}
+            </p>
           )}
         </div>
       )
@@ -92,18 +144,19 @@ function renderComponentPlaceholder(
     case 'Card':
       return (
         <div
-          className="w-64 rounded-xl p-4"
-          style={{ border: '1px solid rgba(255,255,255,0.06)', backgroundColor: 'rgba(255,255,255,0.03)', opacity }}
+          className="w-64 rounded-xl p-4 border border-[var(--border-subtle)] bg-[var(--bg-surface)]"
+          style={{ opacity }}
         >
           <h3 className="text-sm font-medium text-[var(--text-primary)]">{propValues.title ?? 'Card Title'}</h3>
           <p className="text-xs text-[var(--text-tertiary)] mt-1">Card content goes here.</p>
         </div>
       )
     case 'Badge': {
-      const vColors: Record<string, string> = { default: '#94A3B8', success: '#10B981', warning: '#F59E0B', error: '#EF4444', info: '#3B82F6' }
-      const c = vColors[propValues.variant ?? 'default'] ?? '#94A3B8'
+      const v = propValues.variant ?? 'default'
+      const bg = pillBg[v] ?? pillBg.default
+      const text = pillText[v] ?? pillText.default
       return (
-        <span className="px-2.5 py-1 rounded-full text-xs font-medium" style={{ backgroundColor: `${c}20`, color: c, opacity }}>
+        <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${bg} ${text}`} style={{ opacity }}>
           {propValues.label ?? 'Badge'}
         </span>
       )
@@ -114,8 +167,8 @@ function renderComponentPlaceholder(
       const initials = (propValues.name ?? 'JD').slice(0, 2).toUpperCase()
       return (
         <div
-          className="rounded-full flex items-center justify-center font-medium text-white"
-          style={{ width: sz, height: sz, backgroundColor: accent, fontSize: sz * 0.35, opacity }}
+          className="rounded-full flex items-center justify-center font-medium text-[var(--text-inverse)] bg-[var(--accent)]"
+          style={{ width: sz, height: sz, fontSize: sz * 0.35, opacity }}
         >
           {initials}
         </div>
@@ -123,17 +176,20 @@ function renderComponentPlaceholder(
     }
     case 'Modal':
       return (
-        <div className="w-72 rounded-xl overflow-hidden" style={{ border: '1px solid rgba(255,255,255,0.08)', backgroundColor: '#0c1125', opacity }}>
-          <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.06]">
+        <div
+          className="w-72 rounded-xl overflow-hidden border border-[var(--border-subtle)] bg-[var(--bg-elevated)]"
+          style={{ opacity }}
+        >
+          <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--border-subtle)]">
             <span className="text-sm font-medium text-[var(--text-primary)]">{propValues.title ?? 'Modal Title'}</span>
             {propValues.closable !== 'false' && <span className="text-[var(--text-tertiary)] cursor-pointer">×</span>}
           </div>
           <div className="p-4">
             <p className="text-xs text-[var(--text-tertiary)]">Modal body content area.</p>
           </div>
-          <div className="flex justify-end gap-2 px-4 py-3 border-t border-white/[0.06]">
-            <span className="px-3 py-1.5 rounded-lg text-xs text-[var(--text-secondary)] bg-white/[0.05]">Cancel</span>
-            <span className="px-3 py-1.5 rounded-lg text-xs text-white" style={{ backgroundColor: accent }}>Confirm</span>
+          <div className="flex justify-end gap-2 px-4 py-3 border-t border-[var(--border-subtle)]">
+            <span className="px-3 py-1.5 rounded-lg text-xs text-[var(--text-secondary)] bg-[var(--bg-hover)]">Cancel</span>
+            <span className="px-3 py-1.5 rounded-lg text-xs text-[var(--text-inverse)] bg-[var(--accent)]">Confirm</span>
           </div>
         </div>
       )
@@ -143,14 +199,21 @@ function renderComponentPlaceholder(
       const compact = propValues.compact === 'true'
       const py = compact ? 'py-1' : 'py-2'
       return (
-        <div className="w-80 rounded-lg overflow-hidden" style={{ border: '1px solid rgba(255,255,255,0.06)', opacity }}>
-          <div className={`grid px-3 ${py} border-b border-white/[0.06]`} style={{ gridTemplateColumns: `repeat(${cols}, 1fr)` }}>
+        <div className="w-80 rounded-lg overflow-hidden border border-[var(--border-subtle)]" style={{ opacity }}>
+          <div
+            className={`grid px-3 ${py} border-b border-[var(--border-subtle)]`}
+            style={{ gridTemplateColumns: `repeat(${cols}, 1fr)` }}
+          >
             {Array.from({ length: cols }).map((_, i) => (
               <span key={i} className="text-[10px] font-medium text-[var(--text-tertiary)]">Col {i + 1}</span>
             ))}
           </div>
           {[0, 1, 2].map((r) => (
-            <div key={r} className={`grid px-3 ${py}`} style={{ gridTemplateColumns: `repeat(${cols}, 1fr)`, backgroundColor: striped && r % 2 ? 'rgba(255,255,255,0.02)' : undefined }}>
+            <div
+              key={r}
+              className={`grid px-3 ${py} ${striped && r % 2 ? 'bg-[var(--bg-hover)]/40' : ''}`}
+              style={{ gridTemplateColumns: `repeat(${cols}, 1fr)` }}
+            >
               {Array.from({ length: cols }).map((_, i) => (
                 <span key={i} className="text-[10px] text-[var(--text-secondary)]">Cell</span>
               ))}
@@ -162,17 +225,19 @@ function renderComponentPlaceholder(
     case 'Tabs': {
       const items = Number(propValues.items ?? 3)
       const v = propValues.variant ?? 'default'
+      const containerClass =
+        v === 'pill' ? 'bg-[var(--bg-surface)]' : v === 'underline' ? 'border-b border-[var(--border-subtle)]' : ''
+      const activeBg =
+        v === 'pill' ? 'bg-[var(--accent)]/20' : v === 'default' ? 'bg-[var(--accent)]/15' : 'bg-transparent'
+      const activeUnderline = v === 'underline' ? 'border-b-2 border-[var(--accent)]' : ''
       return (
-        <div className="flex gap-1 rounded-lg p-1" style={{ backgroundColor: v === 'pill' ? 'rgba(255,255,255,0.03)' : undefined, borderBottom: v === 'underline' ? '1px solid rgba(255,255,255,0.06)' : undefined, opacity }}>
+        <div className={`flex gap-1 rounded-lg p-1 ${containerClass}`} style={{ opacity }}>
           {Array.from({ length: items }).map((_, i) => (
             <span
               key={i}
-              className="px-3 py-1.5 rounded-md text-xs font-medium transition-colors"
-              style={{
-                backgroundColor: i === 0 ? (v === 'pill' ? `${accent}20` : v === 'default' ? `${accent}15` : 'transparent') : 'transparent',
-                color: i === 0 ? accent : '#64748B',
-                borderBottom: i === 0 && v === 'underline' ? `2px solid ${accent}` : undefined,
-              }}
+              className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
+                i === 0 ? `${activeBg} ${activeUnderline} text-[var(--accent)]` : 'text-[var(--text-tertiary)]'
+              }`}
             >
               Tab {i + 1}
             </span>
@@ -181,12 +246,15 @@ function renderComponentPlaceholder(
       )
     }
     case 'Alert': {
-      const vColors: Record<string, string> = { info: '#3B82F6', success: '#10B981', warning: '#F59E0B', error: '#EF4444' }
-      const c = vColors[propValues.variant ?? 'info'] ?? '#3B82F6'
+      const v = propValues.variant ?? 'info'
+      const bg = alertBg[v] ?? alertBg.info
+      const border = alertBorder[v] ?? alertBorder.info
+      const text = alertText[v] ?? alertText.info
+      const dot = alertDot[v] ?? alertDot.info
       return (
-        <div className="w-72 flex items-start gap-2 px-4 py-3 rounded-lg" style={{ backgroundColor: `${c}10`, border: `1px solid ${c}30`, opacity }}>
-          <div className="w-1.5 h-1.5 rounded-full mt-1.5 shrink-0" style={{ backgroundColor: c }} />
-          <span className="text-xs" style={{ color: c }}>{propValues.message ?? 'Alert message'}</span>
+        <div className={`w-72 flex items-start gap-2 px-4 py-3 rounded-lg border ${bg} ${border}`} style={{ opacity }}>
+          <div className={`w-1.5 h-1.5 rounded-full mt-1.5 shrink-0 ${dot}`} />
+          <span className={`text-xs ${text}`}>{propValues.message ?? 'Alert message'}</span>
         </div>
       )
     }
@@ -197,7 +265,13 @@ function renderComponentPlaceholder(
         <div className="flex items-center gap-2 text-xs" style={{ opacity }}>
           {Array.from({ length: items }).map((_, i) => (
             <span key={i} className="flex items-center gap-2">
-              <span className={i === items - 1 ? 'text-[var(--text-primary)]' : 'text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]'}>
+              <span
+                className={
+                  i === items - 1
+                    ? 'text-[var(--text-primary)]'
+                    : 'text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]'
+                }
+              >
                 {i === 0 ? 'Home' : i === items - 1 ? 'Current' : `Page ${i}`}
               </span>
               {i < items - 1 && <span className="text-[var(--text-tertiary)]">{sep}</span>}
@@ -208,8 +282,11 @@ function renderComponentPlaceholder(
     }
     default:
       return (
-        <div className="px-6 py-4 rounded-lg" style={{ border: `1px solid ${accent}30`, backgroundColor: `${accent}10`, opacity }}>
-          <span className="text-sm" style={{ color: accent }}>{component.name}</span>
+        <div
+          className="px-6 py-4 rounded-lg border border-[var(--accent)]/30 bg-[var(--accent)]/10"
+          style={{ opacity }}
+        >
+          <span className="text-sm text-[var(--accent)]">{component.name}</span>
         </div>
       )
   }
@@ -222,11 +299,11 @@ function PropControl({ prop, value, onChange }: { prop: PropDef; value: string; 
       <button
         onClick={() => onChange(value === 'true' ? 'false' : 'true')}
         className={`relative w-9 h-5 rounded-full transition-colors ${
-          value === 'true' ? 'bg-[var(--accent)]' : 'bg-white/[0.1]'
+          value === 'true' ? 'bg-[var(--accent)]' : 'bg-[var(--bg-hover)]'
         }`}
       >
         <span
-          className="absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white transition-transform"
+          className="absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-[var(--text-inverse)] transition-transform"
           style={{ transform: value === 'true' ? 'translateX(16px)' : 'translateX(0)' }}
         />
       </button>
@@ -238,10 +315,10 @@ function PropControl({ prop, value, onChange }: { prop: PropDef; value: string; 
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="px-2 py-1 rounded-md bg-white/[0.03] border border-white/[0.08] text-xs text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent)]/50"
+        className="px-2 py-1 rounded-md bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-xs text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent)]/50"
       >
         {prop.options.map((o) => (
-          <option key={o} value={o} className="bg-[#0c1125]">
+          <option key={o} value={o} className="bg-[var(--bg-elevated)]">
             {o}
           </option>
         ))}
@@ -255,7 +332,7 @@ function PropControl({ prop, value, onChange }: { prop: PropDef; value: string; 
         type="number"
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-20 px-2 py-1 rounded-md bg-white/[0.03] border border-white/[0.08] text-xs text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent)]/50"
+        className="w-20 px-2 py-1 rounded-md bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-xs text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent)]/50"
       />
     )
   }
@@ -265,7 +342,7 @@ function PropControl({ prop, value, onChange }: { prop: PropDef; value: string; 
       type="text"
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className="w-40 px-2 py-1 rounded-md bg-white/[0.03] border border-white/[0.08] text-xs text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent)]/50"
+      className="w-40 px-2 py-1 rounded-md bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-xs text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent)]/50"
     />
   )
 }
@@ -294,7 +371,7 @@ export function ComponentPreview({ component, propValues, onPropChange }: Compon
     bgMode === 'checkerboard'
       ? {
           backgroundImage:
-            'linear-gradient(45deg, rgba(255,255,255,0.03) 25%, transparent 25%, transparent 75%, rgba(255,255,255,0.03) 75%), linear-gradient(45deg, rgba(255,255,255,0.03) 25%, transparent 25%, transparent 75%, rgba(255,255,255,0.03) 75%)',
+            'linear-gradient(45deg, rgba(127,127,127,0.08) 25%, transparent 25%, transparent 75%, rgba(127,127,127,0.08) 75%), linear-gradient(45deg, rgba(127,127,127,0.08) 25%, transparent 25%, transparent 75%, rgba(127,127,127,0.08) 75%)',
           backgroundSize: '20px 20px',
           backgroundPosition: '0 0, 10px 10px',
         }
@@ -304,7 +381,7 @@ export function ComponentPreview({ component, propValues, onPropChange }: Compon
     <div className="space-y-4">
       {/* Canvas controls */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-1 rounded-lg border border-white/[0.08] bg-white/[0.03] p-0.5">
+        <div className="flex items-center gap-1 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-surface)] p-0.5">
           {(['dark', 'light', 'checkerboard'] as BackgroundMode[]).map((mode) => {
             const Icon = mode === 'dark' ? Moon : mode === 'light' ? Sun : Grid3X3
             return (
@@ -330,7 +407,7 @@ export function ComponentPreview({ component, propValues, onPropChange }: Compon
               className={`px-2 py-1 rounded-md text-[10px] font-medium transition-colors ${
                 states.has(s)
                   ? 'bg-[var(--accent)]/15 text-[var(--accent)]'
-                  : 'text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] bg-white/[0.03]'
+                  : 'text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] bg-[var(--bg-surface)]'
               }`}
             >
               :{s}
@@ -344,7 +421,7 @@ export function ComponentPreview({ component, propValues, onPropChange }: Compon
         initial={{ opacity: 0, scale: 0.98 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.3 }}
-        className={`rounded-xl border border-white/[0.06] min-h-[300px] flex items-center justify-center ${bgStyles[bgMode]}`}
+        className={`rounded-xl border border-[var(--border-subtle)] min-h-[300px] flex items-center justify-center ${bgStyles[bgMode]}`}
         style={checkerBg}
       >
         {renderComponentPlaceholder(component, propValues, states)}
@@ -355,7 +432,10 @@ export function ComponentPreview({ component, propValues, onPropChange }: Compon
         <h4 className="text-xs font-medium text-[var(--text-tertiary)] uppercase tracking-wider">Props Playground</h4>
         <div className="grid grid-cols-2 gap-2">
           {component.props.map((prop) => (
-            <div key={prop.id} className="flex items-center justify-between gap-2 px-3 py-2 rounded-lg bg-white/[0.02] border border-white/[0.04]">
+            <div
+              key={prop.id}
+              className="flex items-center justify-between gap-2 px-3 py-2 rounded-lg bg-[var(--bg-surface)] border border-[var(--border-subtle)]"
+            >
               <div className="flex items-center gap-1.5 min-w-0">
                 <span className="text-xs text-[var(--text-primary)] truncate">{prop.name}</span>
                 <span className="text-[10px] text-[var(--text-tertiary)]">{prop.type}</span>
@@ -379,12 +459,12 @@ export function ComponentPreview({ component, propValues, onPropChange }: Compon
               const code = generateJSX(component, propValues)
               navigator.clipboard?.writeText(code)
             }}
-            className="px-2 py-0.5 rounded text-[10px] text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] hover:bg-white/[0.04] transition-colors"
+            className="px-2 py-0.5 rounded text-[10px] text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] transition-colors"
           >
             Copy
           </button>
         </div>
-        <pre className="p-3 rounded-lg bg-[var(--bg-base)] border border-white/[0.06] text-[11px] font-mono text-[var(--text-secondary)] overflow-x-auto whitespace-pre-wrap leading-relaxed">
+        <pre className="p-3 rounded-lg bg-[var(--bg-base)] border border-[var(--border-subtle)] text-[11px] font-mono text-[var(--text-secondary)] overflow-x-auto whitespace-pre-wrap leading-relaxed">
           <code>{generateJSX(component, propValues)}</code>
         </pre>
       </div>

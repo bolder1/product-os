@@ -44,12 +44,16 @@ import { usageHistory } from '@product-os/ai'
 // Constants
 // ---------------------------------------------------------------------------
 
-const FAMILY_CONFIG: Record<AISkillFamily, { label: string; icon: typeof Sparkles; color: string; bg: string }> = {
-  product: { label: 'Product', icon: Zap, color: '#6398ff', bg: 'rgba(99,152,255,0.12)' },
-  design: { label: 'Design', icon: Palette, color: '#ec4899', bg: 'rgba(236,72,153,0.12)' },
-  engineering: { label: 'Engineering', icon: Code, color: '#10b981', bg: 'rgba(16,185,129,0.12)' },
-  growth: { label: 'Growth', icon: TrendingUp, color: '#f59e0b', bg: 'rgba(245,158,11,0.12)' },
-  system: { label: 'System', icon: Cpu, color: '#8b5cf6', bg: 'rgba(139,92,246,0.12)' },
+/**
+ * R20: Skill families identify via icon + label only — no per-family hex.
+ * All families share the single `--accent` token so the surface re-themes.
+ */
+const FAMILY_CONFIG: Record<AISkillFamily, { label: string; icon: typeof Sparkles }> = {
+  product: { label: 'Product', icon: Zap },
+  design: { label: 'Design', icon: Palette },
+  engineering: { label: 'Engineering', icon: Code },
+  growth: { label: 'Growth', icon: TrendingUp },
+  system: { label: 'System', icon: Cpu },
 }
 
 const ACTION_CLASS_COLORS: Record<AIActionClass, string> = {
@@ -85,25 +89,71 @@ const ACTION_CLASS_TOKENS: Record<AIActionClass, number> = {
   operate:   5000,
 }
 
-const COMPUTER_MODE_CONFIG: Record<ComputerMode, { label: string; description: string; icon: typeof Bot; color: string }> = {
+/**
+ * Computer modes identify via icon + label. Semantic token mapping:
+ * suggest (info/accent), assist (success), autopilot (warning) — the
+ * escalating intensity ramp is meaningful state, so semantic tokens stay.
+ */
+const COMPUTER_MODE_CONFIG: Record<
+  ComputerMode,
+  { label: string; description: string; icon: typeof Bot; tone: 'info' | 'success' | 'warning' }
+> = {
   suggest: {
     label: 'Suggest',
     description: 'AI surfaces recommendations. You decide what to apply.',
     icon: Sparkles,
-    color: '#6398ff',
+    tone: 'info',
   },
   assist: {
     label: 'Assist',
     description: 'AI drafts changes and applies with one-click approval.',
     icon: Bot,
-    color: '#10b981',
+    tone: 'success',
   },
   autopilot: {
     label: 'Autopilot',
     description: 'AI executes within policy bounds autonomously.',
     icon: Zap,
-    color: '#f59e0b',
+    tone: 'warning',
   },
+}
+
+// Semantic tone → token className pairs (pre-composed to survive CSS vars)
+const toneText: Record<'info' | 'success' | 'warning' | 'error', string> = {
+  info: 'text-[var(--accent)]',
+  success: 'text-[var(--color-success)]',
+  warning: 'text-[var(--color-warning)]',
+  error: 'text-[var(--color-error)]',
+}
+const toneBg: Record<'info' | 'success' | 'warning' | 'error', string> = {
+  info: 'bg-[var(--accent)]/15',
+  success: 'bg-[var(--color-success)]/15',
+  warning: 'bg-[var(--color-warning)]/15',
+  error: 'bg-[var(--color-error)]/15',
+}
+const toneBgStrong: Record<'info' | 'success' | 'warning' | 'error', string> = {
+  info: 'bg-[var(--accent)]/30',
+  success: 'bg-[var(--color-success)]/30',
+  warning: 'bg-[var(--color-warning)]/30',
+  error: 'bg-[var(--color-error)]/30',
+}
+const toneBorder: Record<'info' | 'success' | 'warning' | 'error', string> = {
+  info: 'border-[var(--accent)]',
+  success: 'border-[var(--color-success)]',
+  warning: 'border-[var(--color-warning)]',
+  error: 'border-[var(--color-error)]',
+}
+const toneRing: Record<'info' | 'success' | 'warning' | 'error', string> = {
+  info: 'ring-1 ring-[var(--accent)]',
+  success: 'ring-1 ring-[var(--color-success)]',
+  warning: 'ring-1 ring-[var(--color-warning)]',
+  error: 'ring-1 ring-[var(--color-error)]',
+}
+const toneSolid: Record<'info' | 'success' | 'warning' | 'error', string> = {
+  info: 'bg-[var(--accent)]',
+  success: 'bg-[var(--color-success)]',
+  warning: 'bg-[var(--color-warning)]',
+  error: 'bg-[var(--color-error)]',
 }
 
 function timeAgo(dateStr: string): string {
@@ -171,7 +221,7 @@ function RunModal({
   const Icon = cfg.icon
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[var(--bg-base)]/60 backdrop-blur-sm">
       <div
         className="w-[520px] rounded-2xl border border-[var(--border-default)] overflow-hidden"
         style={{ background: 'var(--bg-card)' }}
@@ -179,8 +229,8 @@ function RunModal({
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--border-subtle)]">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: cfg.bg }}>
-              <Icon className="w-4 h-4" style={{ color: cfg.color }} />
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-[var(--accent)]/12">
+              <Icon className="w-4 h-4 text-[var(--accent)]" />
             </div>
             <div>
               <p className="text-sm font-semibold text-[var(--text-primary)]">{skill.name}</p>
@@ -212,8 +262,7 @@ function RunModal({
               <p className="text-xs text-[var(--text-tertiary)]">Results added to execution history</p>
               <button
                 onClick={onClose}
-                className="mt-2 px-5 py-2 text-xs font-medium rounded-xl"
-                style={{ background: 'var(--accent-text)', color: '#fff' }}
+                className="mt-2 px-5 py-2 text-xs font-medium rounded-xl bg-[var(--accent)] text-[var(--text-inverse)]"
               >
                 Done
               </button>
@@ -256,11 +305,14 @@ function RunModal({
                   </div>
                   <div className="h-1 rounded-full bg-[var(--bg-hover)] overflow-hidden">
                     <div
-                      className="h-full rounded-full transition-all"
-                      style={{
-                        width: `${Math.min(100, budgetUsedPct * 100)}%`,
-                        background: budgetUsedPct > 0.8 ? '#F43F5E' : budgetUsedPct > 0.6 ? '#F59E0B' : '#10B981',
-                      }}
+                      className={`h-full rounded-full transition-all ${
+                        budgetUsedPct > 0.8
+                          ? 'bg-[var(--color-error)]'
+                          : budgetUsedPct > 0.6
+                            ? 'bg-[var(--color-warning)]'
+                            : 'bg-[var(--color-success)]'
+                      }`}
+                      style={{ width: `${Math.min(100, budgetUsedPct * 100)}%` }}
                     />
                   </div>
                 </div>
@@ -275,8 +327,9 @@ function RunModal({
                 <button
                   onClick={handleRun}
                   disabled={running}
-                  className="flex items-center gap-2 px-5 py-2 text-sm font-medium rounded-xl transition-all disabled:opacity-60"
-                  style={{ background: wouldExceedBudget ? '#F59E0B' : cfg.color, color: '#fff' }}
+                  className={`flex items-center gap-2 px-5 py-2 text-sm font-medium rounded-xl transition-all disabled:opacity-60 text-[var(--text-inverse)] ${
+                    wouldExceedBudget ? 'bg-[var(--color-warning)]' : 'bg-[var(--accent)]'
+                  }`}
                 >
                   {running
                     ? <><Loader2 className="w-3.5 h-3.5 animate-spin" />Running…</>
@@ -310,8 +363,8 @@ function SkillCard({ skill, onRun }: { skill: AISkill; onRun: (s: AISkill) => vo
     >
       <div className="flex items-start justify-between gap-2">
         <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: cfg.bg }}>
-            <Icon className="w-3.5 h-3.5" style={{ color: cfg.color }} />
+          <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 bg-[var(--accent)]/12">
+            <Icon className="w-3.5 h-3.5 text-[var(--accent)]" />
           </div>
           <div>
             <p className="text-xs font-semibold text-[var(--text-primary)]">{skill.name}</p>
@@ -352,8 +405,7 @@ function SkillCard({ skill, onRun }: { skill: AISkill; onRun: (s: AISkill) => vo
           <button
             onClick={() => skill.enabled && onRun(skill)}
             disabled={!skill.enabled}
-            className="flex items-center gap-1 text-[10px] px-2 py-1 rounded-lg font-medium transition-all disabled:opacity-40 hover:opacity-80"
-            style={{ background: cfg.color, color: '#fff' }}
+            className="flex items-center gap-1 text-[10px] px-2 py-1 rounded-lg font-medium transition-all disabled:opacity-40 hover:opacity-80 bg-[var(--accent)] text-[var(--text-inverse)]"
           >
             <Play className="w-2.5 h-2.5" />Run
           </button>
@@ -396,27 +448,28 @@ function ExecRow({ exec, skillName }: { exec: SkillExecution; skillName: string 
 function ComputerModeCard({ mode, active, onSelect }: { mode: ComputerMode; active: boolean; onSelect: () => void }) {
   const cfg = COMPUTER_MODE_CONFIG[mode]
   const Icon = cfg.icon
+  const activeBorder = active ? toneBorder[cfg.tone] : 'border-[var(--border-subtle)]'
+  const activeBg = active ? toneBg[cfg.tone] : 'bg-[var(--bg-subtle)]'
+  const activeRing = active ? toneRing[cfg.tone] : ''
+  const iconBg = active ? toneBgStrong[cfg.tone] : 'bg-[var(--bg-hover)]'
+  const iconColor = active ? toneText[cfg.tone] : 'text-[var(--text-tertiary)]'
+  const titleColor = active ? toneText[cfg.tone] : 'text-[var(--text-primary)]'
   return (
     <button
       onClick={onSelect}
-      className="flex-1 flex flex-col gap-2 p-4 rounded-2xl border text-left transition-all"
-      style={{
-        borderColor: active ? cfg.color : 'var(--border-subtle)',
-        background: active ? `${cfg.color}18` : 'var(--bg-subtle)',
-        boxShadow: active ? `0 0 0 1px ${cfg.color}` : 'none',
-      }}
+      className={`flex-1 flex flex-col gap-2 p-4 rounded-2xl border text-left transition-all ${activeBorder} ${activeBg} ${activeRing}`}
     >
       <div className="flex items-center justify-between">
-        <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: active ? `${cfg.color}30` : 'var(--bg-hover)' }}>
-          <Icon className="w-3.5 h-3.5" style={{ color: active ? cfg.color : 'var(--text-tertiary)' }} />
+        <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${iconBg}`}>
+          <Icon className={`w-3.5 h-3.5 ${iconColor}`} />
         </div>
         {active && (
-          <span className="text-[10px] px-2 py-0.5 rounded-full font-medium" style={{ background: `${cfg.color}30`, color: cfg.color }}>
+          <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${toneBgStrong[cfg.tone]} ${toneText[cfg.tone]}`}>
             Active
           </span>
         )}
       </div>
-      <p className="text-xs font-semibold" style={{ color: active ? cfg.color : 'var(--text-primary)' }}>{cfg.label}</p>
+      <p className={`text-xs font-semibold ${titleColor}`}>{cfg.label}</p>
       <p className="text-[10px] text-[var(--text-tertiary)] leading-relaxed">{cfg.description}</p>
     </button>
   )
@@ -498,8 +551,8 @@ export default function SkillsView() {
         style={{ background: 'var(--bg-card)' }}
       >
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'rgba(99,152,255,0.15)' }}>
-            <Sparkles className="w-4 h-4 text-[var(--accent-text)]" />
+          <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-[var(--accent)]/15">
+            <Sparkles className="w-4 h-4 text-[var(--accent)]" />
           </div>
           <div>
             <h1 className="text-base font-semibold text-[var(--text-primary)]">AI Skills</h1>
@@ -536,8 +589,8 @@ export default function SkillsView() {
           </p>
           <div className="h-1.5 w-24 rounded-full bg-[var(--color-warning)]/20 overflow-hidden">
             <div
-              className="h-full rounded-full"
-              style={{ width: `${Math.min(100, budgetPct * 100)}%`, background: budgetPct >= 1 ? '#F43F5E' : '#F59E0B' }}
+              className={`h-full rounded-full ${budgetPct >= 1 ? 'bg-[var(--color-error)]' : 'bg-[var(--color-warning)]'}`}
+              style={{ width: `${Math.min(100, budgetPct * 100)}%` }}
             />
           </div>
         </div>
@@ -569,16 +622,16 @@ export default function SkillsView() {
               {/* Family tabs */}
               <div className="flex items-center gap-1 p-1 rounded-xl border border-[var(--border-subtle)]" style={{ background: 'var(--bg-subtle)' }}>
                 {familyTabs.map((ft) => {
-                  const cfg = ft.key !== 'all' ? FAMILY_CONFIG[ft.key] : null
+                  const selected = familyTab === ft.key
                   return (
                     <button
                       key={ft.key}
                       onClick={() => setFamilyTab(ft.key)}
-                      className="px-3 py-1.5 text-xs rounded-lg font-medium transition-all"
-                      style={{
-                        background: familyTab === ft.key ? (cfg?.bg ?? 'var(--bg-card)') : 'transparent',
-                        color: familyTab === ft.key ? (cfg?.color ?? 'var(--text-primary)') : 'var(--text-tertiary)',
-                      }}
+                      className={`px-3 py-1.5 text-xs rounded-lg font-medium transition-all ${
+                        selected
+                          ? 'bg-[var(--accent)]/12 text-[var(--accent)]'
+                          : 'bg-transparent text-[var(--text-tertiary)]'
+                      }`}
                     >
                       {ft.label}
                     </button>
