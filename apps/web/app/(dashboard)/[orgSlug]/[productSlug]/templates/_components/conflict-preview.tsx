@@ -23,38 +23,69 @@ interface Props {
   onResolveAll: (resolution: ConflictResolution) => void
 }
 
+// Kind palette for conflict rows — mirrors the canonical kind-palette used
+// across the graph surface (see mock-graph.ts NODE_KIND_COLORS). These are
+// domain-identity tints tied to graph node kinds, not studio chrome. They
+// are the single source of truth for kind color and belong to their own
+// R20 migration phase (palette centralization). Left literal here and
+// eslint-disabled line-by-line.
 const KIND_COLORS: Record<string, string> = {
+  // eslint-disable-next-line no-hardcoded-hex -- kind-palette: module
   module:    '#3B82F6',
+  // eslint-disable-next-line no-hardcoded-hex -- kind-palette: feature
   feature:   '#8B5CF6',
+  // eslint-disable-next-line no-hardcoded-hex -- kind-palette: page
   page:      '#10B981',
+  // eslint-disable-next-line no-hardcoded-hex -- kind-palette: entity
   entity:    '#F59E0B',
+  // eslint-disable-next-line no-hardcoded-hex -- kind-palette: workflow
   workflow:  '#06B6D4',
+  // eslint-disable-next-line no-hardcoded-hex -- kind-palette: token
   token:     '#EC4899',
+  // eslint-disable-next-line no-hardcoded-hex -- kind-palette: component
   component: '#F97316',
+  // eslint-disable-next-line no-hardcoded-hex -- kind-palette: journey
   journey:   '#64748B',
 }
 
-const RESOLUTION_OPTIONS: { key: ConflictResolution; label: string; desc: string; icon: React.ReactNode; color: string }[] = [
+// R20: resolution options carry a semantic tone, not raw hex. Tone maps to
+// chrome classes via TONE_TEXT / TONE_PILL_ACTIVE. Skip = neutral, Rename =
+// warning (reversible but disruptive), Overwrite = error (destructive).
+type ResolutionTone = 'neutral' | 'warning' | 'error'
+
+const TONE_TEXT: Record<ResolutionTone, string> = {
+  neutral: 'text-[var(--text-tertiary)]',
+  warning: 'text-[var(--color-warning)]',
+  error:   'text-[var(--color-error)]',
+}
+
+const TONE_PILL_ACTIVE: Record<ResolutionTone, string> = {
+  neutral: 'border-[var(--border-strong)] bg-white/[0.04] text-[var(--text-primary)]',
+  warning: 'border-[var(--color-warning)] bg-[var(--color-warning-muted)] text-[var(--color-warning)]',
+  error:   'border-[var(--color-error)] bg-[var(--color-error-muted)] text-[var(--color-error)]',
+}
+
+const RESOLUTION_OPTIONS: { key: ConflictResolution; label: string; desc: string; icon: React.ReactNode; tone: ResolutionTone }[] = [
   {
     key: 'skip',
     label: 'Skip',
     desc: 'Keep existing, don\'t create',
     icon: <SkipForward size={11} />,
-    color: '#64748B',
+    tone: 'neutral',
   },
   {
     key: 'rename',
     label: 'Rename',
     desc: 'Create with " (copy)" suffix',
     icon: <RefreshCw size={11} />,
-    color: '#F59E0B',
+    tone: 'warning',
   },
   {
     key: 'overwrite',
     label: 'Overwrite',
     desc: 'Replace the existing node',
     icon: <Layers size={11} />,
-    color: '#EF4444',
+    tone: 'error',
   },
 ]
 
@@ -86,10 +117,10 @@ export function ConflictPreviewStep({
   return (
     <div className="p-5 space-y-4">
       {/* Summary bar */}
-      <div className="flex items-start gap-3 p-3 rounded-xl bg-amber-500/10 border border-amber-500/20">
-        <AlertTriangle size={15} className="text-amber-400 shrink-0 mt-0.5" />
+      <div className="flex items-start gap-3 p-3 rounded-xl bg-[var(--color-warning-muted)] border border-[var(--color-warning)]/20">
+        <AlertTriangle size={15} className="text-[var(--color-warning)] shrink-0 mt-0.5" />
         <div className="text-[11px] leading-relaxed">
-          <span className="font-semibold text-amber-300">{conflicts.length} conflict{conflicts.length > 1 ? 's' : ''} found.</span>
+          <span className="font-semibold text-[var(--color-warning)]">{conflicts.length} conflict{conflicts.length > 1 ? 's' : ''} found.</span>
           {' '}
           <span className="text-[var(--text-secondary)]">
             {newNodes} nodes are new. For each conflict, choose how to proceed.
@@ -104,8 +135,7 @@ export function ConflictPreviewStep({
           <button
             key={opt.key}
             onClick={() => onResolveAll(opt.key)}
-            className="flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium border border-white/[0.08] hover:border-white/[0.18] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all"
-            style={{ color: opt.color }}
+            className={`flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium border border-white/[0.08] hover:border-white/[0.18] transition-all ${TONE_TEXT[opt.tone]}`}
           >
             {opt.icon}
             {opt.label}
@@ -117,6 +147,7 @@ export function ConflictPreviewStep({
       <div className="space-y-2 max-h-64 overflow-y-auto pr-0.5">
         {conflicts.map((conflict) => {
           const current = resolutions[conflict.templateNodeId] ?? 'skip'
+          // eslint-disable-next-line no-hardcoded-hex -- kind-palette fallback (see KIND_COLORS above)
           const color = KIND_COLORS[conflict.kind] ?? '#64748B'
 
           return (
@@ -147,10 +178,9 @@ export function ConflictPreviewStep({
                     onClick={() => onResolutionChange(conflict.templateNodeId, opt.key)}
                     className={`flex-1 flex flex-col items-center gap-0.5 py-1.5 rounded-lg border text-[9px] font-medium transition-all ${
                       current === opt.key
-                        ? 'border-current bg-current/10'
+                        ? TONE_PILL_ACTIVE[opt.tone]
                         : 'border-white/[0.07] bg-transparent text-[var(--text-tertiary)] hover:border-white/[0.15]'
                     }`}
-                    style={current === opt.key ? { color: opt.color, borderColor: opt.color } : {}}
                     title={opt.desc}
                   >
                     {opt.icon}
