@@ -20,7 +20,9 @@ const LINE_LOCAL_ALLOW = [
   /&#\d+;/,
   /pattern:.*#\\/,
   /\.match\(/,
-  /'#000000'|'#ffffff'|'#FFFFFF'/,
+  // Allow literal black/white in either quoting style — they are the only
+  // hex neutrals the R20 palette tolerates inline (SVG fill attrs use ").
+  /['"]#000000['"]|['"]#ffffff['"]|['"]#FFFFFF['"]/,
 ]
 
 function walk(dir, acc = []) {
