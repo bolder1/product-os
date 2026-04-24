@@ -44,13 +44,35 @@ function timeAgo(iso: string) {
   return `${Math.floor(h / 24)}d ago`
 }
 
-const STATUS_META: Record<MemoryAsset['status'], { label: string; color: string; icon: React.ReactNode }> = {
-  uploading:  { label: 'Uploading',  color: '#6398ff', icon: <Loader2 size={12} className="animate-spin" /> },
-  queued:     { label: 'Queued',     color: '#64748B', icon: <Clock size={12} /> },
-  parsing:    { label: 'Parsing',    color: '#F59E0B', icon: <Loader2 size={12} className="animate-spin" /> },
-  embedding:  { label: 'Embedding',  color: '#8B5CF6', icon: <Loader2 size={12} className="animate-spin" /> },
-  ready:      { label: 'Ready',      color: '#10B981', icon: <CheckCircle size={12} /> },
-  failed:     { label: 'Failed',     color: '#EF4444', icon: <AlertCircle size={12} /> },
+// R20: status tone — each processing status gets a semantic tone that
+// maps to chrome class-pairs via TONE_TEXT / TONE_PILL_SOFT below.
+type StatusTone = 'accent' | 'accent-text' | 'neutral' | 'warning' | 'success' | 'error'
+
+const TONE_TEXT: Record<StatusTone, string> = {
+  accent:        'text-[var(--accent)]',
+  'accent-text': 'text-[var(--accent-text)]',
+  neutral:       'text-[var(--text-tertiary)]',
+  warning:       'text-[var(--color-warning)]',
+  success:       'text-[var(--color-success)]',
+  error:         'text-[var(--color-error)]',
+}
+
+const TONE_PILL_SOFT: Record<StatusTone, string> = {
+  accent:        'bg-[var(--accent)]/10',
+  'accent-text': 'bg-[var(--accent-muted)]',
+  neutral:       'bg-white/[0.06]',
+  warning:       'bg-[var(--color-warning)]/10',
+  success:       'bg-[var(--color-success)]/10',
+  error:         'bg-[var(--color-error)]/10',
+}
+
+const STATUS_META: Record<MemoryAsset['status'], { label: string; tone: StatusTone; icon: React.ReactNode }> = {
+  uploading:  { label: 'Uploading',  tone: 'accent',       icon: <Loader2 size={12} className="animate-spin" /> },
+  queued:     { label: 'Queued',     tone: 'neutral',      icon: <Clock size={12} /> },
+  parsing:    { label: 'Parsing',    tone: 'warning',      icon: <Loader2 size={12} className="animate-spin" /> },
+  embedding:  { label: 'Embedding',  tone: 'accent-text',  icon: <Loader2 size={12} className="animate-spin" /> },
+  ready:      { label: 'Ready',      tone: 'success',      icon: <CheckCircle size={12} /> },
+  failed:     { label: 'Failed',     tone: 'error',        icon: <AlertCircle size={12} /> },
 }
 
 const KIND_ICON: Record<MemoryAsset['kind'], React.ReactNode> = {
@@ -90,10 +112,7 @@ async function mockRetrieve(query: string, assets: MemoryAsset[]): Promise<Retri
 function StatusPill({ status }: { status: MemoryAsset['status'] }) {
   const meta = STATUS_META[status]
   return (
-    <span
-      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium"
-      style={{ backgroundColor: `${meta.color}18`, color: meta.color }}
-    >
+    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium ${TONE_PILL_SOFT[meta.tone]} ${TONE_TEXT[meta.tone]}`}>
       {meta.icon}
       {meta.label}
     </span>
@@ -111,7 +130,7 @@ function AssetDrawer({ asset, onClose }: { asset: MemoryAsset; onClose: () => vo
       animate={{ x: 0 }}
       exit={{ x: '100%' }}
       transition={{ type: 'spring', stiffness: 320, damping: 32 }}
-      className="fixed right-0 top-0 bottom-0 w-[420px] z-50 border-l border-white/[0.08] bg-[#0B0F1A] flex flex-col"
+      className="fixed right-0 top-0 bottom-0 w-[420px] z-50 border-l border-white/[0.08] bg-[var(--bg-surface-raised)] flex flex-col"
       style={{ boxShadow: '-24px 0 64px rgba(0,0,0,0.5)' }}
     >
       {/* Header */}
@@ -413,7 +432,7 @@ export default function MemoryPage() {
   }
 
   return (
-    <div className="flex flex-col h-full bg-[#080C14]">
+    <div className="flex flex-col h-full bg-[var(--bg-base)]">
       {/* Header */}
       <div className="flex items-center justify-between px-6 py-4 border-b border-white/[0.06]">
         <div className="flex items-center gap-3">
