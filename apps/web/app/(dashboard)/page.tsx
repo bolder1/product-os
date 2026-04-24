@@ -1,28 +1,45 @@
 'use client'
 
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
 import {
   Plus,
   Search,
   Bell,
-  Settings,
-  ArrowRight,
   Clock,
   Shield,
   Store,
+  ArrowRight,
+  Sparkles,
+  Coins,
+  LayoutGrid,
 } from 'lucide-react'
 import { useAuth } from '../lib/auth-context'
 import { roleConfigs, type OrgRole } from '../lib/role-config'
 import { useProductStore } from '../lib/product-store'
 import { useNotificationStore } from '../lib/notification-store'
 import { useCommandPaletteStore } from '../lib/command-palette-store'
+import { useBudgetStore } from '../lib/budget-store'
+import { useCopilotStore } from '../lib/copilot-store'
 import { trpc } from '../lib/trpc'
 import { Shield as ShieldIcon, Briefcase, BarChart3, Bug, Palette, Code2, Server, Eye } from 'lucide-react'
 import CreateProductModal from './_components/create-product-modal'
 import QuickStartTemplates from './_components/quick-start-templates'
 import TodaysAITasks from './_components/todays-ai-tasks'
+import MarketplaceBanner from './_components/marketplace-banner'
 import { TemplateMarketplace } from '../components/shared/template-marketplace'
+import { UserMenu } from '../components/shell/user-menu'
+import { ThemeSwitcher } from '../components/shell/theme-switcher'
+
+function timeAgo(dateStr: string): string {
+  const seconds = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000)
+  if (seconds < 60) return 'just now'
+  const minutes = Math.floor(seconds / 60)
+  if (minutes < 60) return `${minutes}m ago`
+  const hours = Math.floor(minutes / 60)
+  if (hours < 24) return `${hours}h ago`
+  return `${Math.floor(hours / 24)}d ago`
+}
 
 const roleIconMap: Record<string, React.ElementType> = {
   Shield: ShieldIcon, Briefcase, BarChart3, Bug, Palette, Code2, Server, Eye,
@@ -45,14 +62,38 @@ export default function DashboardHome() {
   const [searchQuery, setSearchQuery] = useState('')
   const [modalOpen, setModalOpen] = useState(false)
   const [marketplaceOpen, setMarketplaceOpen] = useState(false)
+  const [showNotifs, setShowNotifs] = useState(false)
+  const notifRef = useRef<HTMLDivElement>(null)
   const openCommandPalette = useCommandPaletteStore((s) => s.open)
+  const toggleCopilot = useCopilotStore((s) => s.togglePanel)
+  const copilotOpen = useCopilotStore((s) => s.open)
+  const notifications = useNotificationStore((s) => s.notifications)
+  const markRead = useNotificationStore((s) => s.markRead)
+  const markAllRead = useNotificationStore((s) => s.markAllRead)
+  const unreadNotifs = useMemo(() => notifications.filter((n) => !n.read), [notifications])
+  const capToday = useBudgetStore((s) => s.capToday)
+  const budgetRuns = useBudgetStore((s) => s.runs)
+  const usedToday = useMemo(() => {
+    const cutoff = Date.now() - 24 * 60 * 60 * 1000
+    return budgetRuns.filter((r) => new Date(r.at).getTime() >= cutoff).reduce((a, r) => a + r.cost, 0)
+  }, [budgetRuns])
+  const budgetPct = Math.min(100, Math.round((usedToday / Math.max(capToday, 0.0001)) * 100))
   const { user } = useAuth()
   const orgSlug =
     user?.orgSlug ||
     user?.email?.split('@')[0]?.toLowerCase().replace(/[^a-z0-9]/g, '-') ||
     'my-org'
   const allProducts = useProductStore((s) => s.products)
-  const unreadCount = useNotificationStore((s) => s.unreadCount)
+
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (notifRef.current && !notifRef.current.contains(e.target as Node)) {
+        setShowNotifs(false)
+      }
+    }
+    if (showNotifs) document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [showNotifs])
 
   const productsQuery = trpc.product.list.useQuery({}, { enabled: !!user })
   useEffect(() => {
@@ -118,34 +159,124 @@ export default function DashboardHome() {
           </div>
 
           <div className="flex-1 max-w-md mx-8">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-tertiary)]" />
-              <input
-                type="text"
-                placeholder="Search products, studios, templates..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onFocus={(e) => { e.target.blur(); openCommandPalette(); }}
-                className="w-full pl-9 pr-4 py-2 text-sm bg-white/[0.03] border border-white/[0.08] rounded-lg text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:border-[var(--accent)]/40 focus:outline-none focus:ring-1 focus:ring-[var(--accent)]/20 transition cursor-pointer"
-              />
-            </div>
+            <button
+              onClick={openCommandPalette}
+              className="w-full flex items-center gap-2 px-3 h-9 rounded-lg bg-white/[0.03] border border-white/[0.08] text-sm text-[var(--text-tertiary)] hover:border-white/[0.14] hover:text-[var(--text-secondary)] transition text-left"
+              aria-label="Search — Command K"
+            >
+              <Search className="w-4 h-4 shrink-0 opacity-60" />
+              <span className="flex-1">Search products, studios, templates...</span>
+              <kbd className="hidden sm:inline-flex items-center px-1.5 h-5 rounded bg-white/[0.06] text-[10px] font-mono text-[var(--text-tertiary)]">⌘K</kbd>
+            </button>
           </div>
 
-          <div className="flex items-center gap-2">
-            <button className="p-2 rounded-lg text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] hover:bg-white/[0.04] transition relative">
-              <Bell className="w-4 h-4" />
-              {unreadCount > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-[var(--color-error)] text-white text-[9px] font-bold flex items-center justify-center">
-                  {unreadCount > 9 ? '9+' : unreadCount}
-                </span>
+          <div className="flex items-center gap-1">
+            {/* All Products shortcut */}
+            <a
+              href="/products"
+              className="hidden md:inline-flex items-center gap-1.5 h-8 px-2.5 rounded-md text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:bg-white/[0.04] transition text-xs font-medium"
+              title="View all products"
+            >
+              <LayoutGrid className="w-3.5 h-3.5" />
+              Products
+            </a>
+
+            {/* Budget pill */}
+            <button
+              type="button"
+              className="hidden md:flex items-center gap-1.5 h-8 px-2 rounded-md text-[11px] tabular-nums border border-white/[0.06] hover:border-white/[0.12] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
+              title={`AI spend today: $${usedToday.toFixed(2)} of $${capToday.toFixed(2)} (${budgetPct}%)`}
+              aria-label="AI budget"
+            >
+              <Coins className={`w-3.5 h-3.5 ${budgetPct >= 80 ? 'text-[var(--color-error)]' : 'opacity-60'}`} />
+              <span>
+                ${usedToday < 1 ? usedToday.toFixed(3) : usedToday.toFixed(2)}
+                <span className="text-[var(--text-tertiary)]"> / ${capToday.toFixed(0)}</span>
+              </span>
+            </button>
+
+            {/* Copilot toggle */}
+            <button
+              onClick={toggleCopilot}
+              className="p-2 rounded-md text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:bg-white/[0.04] transition"
+              title="Copilot"
+              aria-label="Toggle copilot"
+              aria-pressed={copilotOpen}
+              style={{ color: copilotOpen ? 'var(--accent)' : undefined }}
+            >
+              <Sparkles className="w-4 h-4" />
+            </button>
+
+            {/* Theme */}
+            <ThemeSwitcher />
+
+            {/* Notifications */}
+            <div className="relative" ref={notifRef}>
+              <button
+                onClick={() => setShowNotifs((v) => !v)}
+                className="relative p-2 rounded-md text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:bg-white/[0.04] transition"
+                title="Notifications"
+                aria-label={unreadNotifs.length > 0 ? `Notifications — ${unreadNotifs.length} unread` : 'Notifications'}
+                aria-haspopup="true"
+                aria-expanded={showNotifs}
+              >
+                <Bell className="w-4 h-4" />
+                {unreadNotifs.length > 0 && (
+                  <span className="absolute top-1.5 right-1.5 w-[7px] h-[7px] rounded-full bg-[var(--accent)] ring-2 ring-[var(--bg-base)]" />
+                )}
+              </button>
+
+              {showNotifs && (
+                <div
+                  className="absolute right-0 top-full mt-2 w-[320px] z-[100] rounded-xl border border-white/10 bg-[var(--bg-elevated)] shadow-[var(--shadow-panel)] overflow-hidden"
+                  style={{ animation: 'slideInDown 150ms cubic-bezier(0.16,1,0.3,1)' }}
+                >
+                  <div className="flex items-center justify-between px-3 py-2.5 border-b border-white/[0.06]">
+                    <span className="text-xs font-semibold text-[var(--text-primary)]">Notifications</span>
+                    {unreadNotifs.length > 0 && (
+                      <button
+                        onClick={() => markAllRead()}
+                        className="text-[11px] text-[var(--accent)] hover:opacity-80 transition"
+                      >
+                        Mark all read
+                      </button>
+                    )}
+                  </div>
+                  <div className="max-h-[360px] overflow-y-auto">
+                    {notifications.length === 0 ? (
+                      <div className="flex items-center justify-center py-10 text-xs text-[var(--text-tertiary)]">
+                        No notifications
+                      </div>
+                    ) : (
+                      notifications.slice(0, 12).map((n) => (
+                        <button
+                          key={n.id}
+                          onClick={() => { if (!n.read) markRead(n.id) }}
+                          className={`w-full flex items-start gap-2.5 px-3 py-2.5 border-b border-white/[0.04] hover:bg-white/[0.03] transition text-left ${
+                            !n.read ? 'bg-[var(--accent)]/[0.04]' : ''
+                          }`}
+                        >
+                          <div className={`mt-1.5 w-[6px] h-[6px] rounded-full shrink-0 ${n.read ? 'bg-transparent' : 'bg-[var(--accent)]'}`} />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs text-[var(--text-primary)] line-clamp-1">{n.title}</p>
+                            {n.body && (
+                              <p className="text-[11px] text-[var(--text-secondary)] mt-0.5 line-clamp-2">{n.body}</p>
+                            )}
+                            <p className="text-[10px] text-[var(--text-tertiary)] mt-1">{timeAgo(n.timestamp)}</p>
+                          </div>
+                        </button>
+                      ))
+                    )}
+                  </div>
+                </div>
               )}
-            </button>
-            <button className="p-2 rounded-lg text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] hover:bg-white/[0.04] transition">
-              <Settings className="w-4 h-4" />
-            </button>
-            <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-medium text-[var(--color-white)] ml-1 bg-[var(--accent)]">
-              {user?.name?.charAt(0)?.toUpperCase() || 'S'}
             </div>
+
+            {/* Separator */}
+            <div className="w-px h-5 bg-white/10 mx-1" />
+
+            {/* User menu */}
+            <UserMenu />
           </div>
         </div>
       </header>
@@ -217,13 +348,39 @@ export default function DashboardHome() {
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xs font-medium text-[var(--text-tertiary)] uppercase tracking-wider">All Products</h2>
             {hasProducts && (
-              <span className="text-xs text-[var(--text-tertiary)]">{storeProducts.length} total</span>
+              <div className="flex items-center gap-3 text-xs">
+                <span className="text-[var(--text-tertiary)]">{storeProducts.length} total</span>
+                {storeProducts.length > 7 && (
+                  <a
+                    href="/products"
+                    className="flex items-center gap-1 text-[var(--accent)] hover:text-[var(--accent)]/80 font-medium transition"
+                  >
+                    View all
+                    <ArrowRight className="w-3 h-3" />
+                  </a>
+                )}
+              </div>
             )}
           </div>
 
           {hasProducts ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {storeProducts.map((product) => (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <button
+                onClick={() => setModalOpen(true)}
+                className="group relative p-5 rounded-xl border border-dashed border-white/[0.1] bg-gradient-to-br from-[var(--accent)]/[0.04] to-transparent hover:from-[var(--accent)]/[0.1] hover:border-[var(--accent)]/30 transition-all flex flex-col items-center justify-center gap-2 min-h-[160px] overflow-hidden"
+              >
+                <div
+                  className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
+                  style={{ background: 'radial-gradient(circle at 50% 20%, rgba(59,130,246,0.14), transparent 60%)' }}
+                />
+                <div className="relative w-11 h-11 rounded-lg bg-[var(--accent)]/15 border border-[var(--accent)]/25 flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <Plus className="w-5 h-5 text-[var(--accent)]" />
+                </div>
+                <span className="relative text-sm font-medium text-[var(--text-primary)]">Create new product</span>
+                <span className="relative text-[11px] text-[var(--text-tertiary)]">Start fresh or from template</span>
+              </button>
+
+              {storeProducts.slice(0, 7).map((product) => (
                 <motion.a
                   key={product.id}
                   href={`/${product.orgSlug || orgSlug}/${product.slug}/planner`}
@@ -266,16 +423,6 @@ export default function DashboardHome() {
                   </div>
                 </motion.a>
               ))}
-
-              <button
-                onClick={() => setModalOpen(true)}
-                className="p-5 rounded-xl border border-dashed border-white/[0.08] bg-transparent hover:bg-white/[0.02] hover:border-white/[0.15] transition-all flex flex-col items-center justify-center gap-2 min-h-[160px]"
-              >
-                <div className="w-10 h-10 rounded-lg bg-white/[0.04] border border-white/[0.08] flex items-center justify-center">
-                  <Plus className="w-5 h-5 text-[var(--text-tertiary)]" />
-                </div>
-                <span className="text-sm text-[var(--text-tertiary)]">Create new product</span>
-              </button>
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center py-10 rounded-2xl border border-dashed border-white/[0.08] bg-white/[0.01]">
@@ -291,39 +438,22 @@ export default function DashboardHome() {
           )}
         </motion.section>
 
+        {/* Blueprint Marketplace banner (Microsoft-style hero) */}
+        <motion.div variants={fadeUp} custom={2}>
+          <MarketplaceBanner onOpen={() => setMarketplaceOpen(true)} />
+        </motion.div>
+
+        {/* Today's Tasks — AI-curated card grid */}
+        <motion.div className="mb-10" variants={fadeUp} custom={3}>
+          <TodaysAITasks orgSlug={orgSlug} />
+        </motion.div>
+
         {/* Quick Start (shown when no products) */}
         {!hasProducts && (
-          <motion.section className="mb-10" variants={fadeUp} custom={2}>
+          <motion.section className="mb-10" variants={fadeUp} custom={4}>
             <QuickStartTemplates />
           </motion.section>
         )}
-
-        {/* Today's AI Tasks + Marketplace CTA */}
-        <motion.section variants={fadeUp} custom={3}>
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-            <div className="lg:col-span-2">
-              <TodaysAITasks orgSlug={orgSlug} />
-            </div>
-            <button
-              onClick={() => setMarketplaceOpen(true)}
-              className="group relative p-5 rounded-xl border border-white/[0.08] bg-gradient-to-br from-[var(--accent)]/[0.08] to-[var(--accent)]/[0.04] hover:from-[var(--accent)]/[0.12] hover:to-[var(--accent)]/[0.08] transition-all text-left overflow-hidden"
-            >
-              <div className="absolute -top-6 -right-6 w-32 h-32 rounded-full bg-[var(--accent)]/10 blur-3xl group-hover:bg-[#8B5CF6]/20 transition" />
-              <div className="relative">
-                <div className="w-10 h-10 rounded-lg bg-[var(--accent)]/15 flex items-center justify-center mb-3">
-                  <Store className="w-5 h-5 text-[var(--accent)]" />
-                </div>
-                <h3 className="text-sm font-medium text-[var(--text-primary)]">Browse Marketplace</h3>
-                <p className="text-xs text-[var(--text-secondary)] mt-1 leading-relaxed">
-                  100+ responsive templates organized by use case — from landing pages to full SaaS apps.
-                </p>
-                <div className="flex items-center gap-1 mt-3 text-xs text-[var(--accent)] group-hover:translate-x-0.5 transition-transform">
-                  Open marketplace <ArrowRight className="w-3 h-3" />
-                </div>
-              </div>
-            </button>
-          </div>
-        </motion.section>
       </motion.main>
 
       <CreateProductModal open={modalOpen} onClose={() => setModalOpen(false)} />
