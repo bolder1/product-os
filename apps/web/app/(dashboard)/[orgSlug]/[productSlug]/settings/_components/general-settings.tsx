@@ -4,8 +4,12 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Save, Palette } from 'lucide-react'
 
+// User-facing palette for the product icon color. These are the *options*
+// a user picks between (brand data, persisted to the product), not chrome.
 const PRODUCT_COLORS = [
+  // eslint-disable-next-line no-hardcoded-hex -- user-facing product icon color palette
   '#3B82F6', '#8B5CF6', '#EC4899', '#F59E0B', '#10B981',
+  // eslint-disable-next-line no-hardcoded-hex -- user-facing product icon color palette
   '#06B6D4', '#F43F5E', '#6366F1', '#14B8A6', '#F97316',
 ]
 
@@ -21,6 +25,9 @@ export function GeneralSettings() {
     'A unified product intelligence and execution system for modern product teams.'
   )
   const [slug, setSlug] = useState('product-os')
+  // Default product color mirrors the first PRODUCT_COLORS entry; persisted
+  // as user data once the user picks.
+  // eslint-disable-next-line no-hardcoded-hex -- default product color mirrors first palette entry
   const [selectedColor, setSelectedColor] = useState('#3B82F6')
   const [timezone, setTimezone] = useState('America/New_York')
   const [saved, setSaved] = useState(false)
@@ -126,7 +133,7 @@ export function GeneralSettings() {
           className="w-full px-3.5 py-2.5 rounded-lg bg-white/[0.04] border border-white/[0.08] text-sm text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent)]/50 focus:ring-1 focus:ring-[var(--accent)]/25 transition-colors appearance-none cursor-pointer"
         >
           {TIMEZONES.map((tz) => (
-            <option key={tz} value={tz} className="bg-[#0f1629] text-[var(--text-primary)]">
+            <option key={tz} value={tz} className="bg-[var(--bg-surface)] text-[var(--text-primary)]">
               {tz}
             </option>
           ))}
