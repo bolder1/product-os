@@ -131,6 +131,11 @@ export const INITIAL_ENTITIES: Entity[] = [
 ];
 
 // ── Mock Workflows ─────────────────────────────────────────────────────────
+// R20: workflow state colors are *user-authored* workflow metadata — users
+// can rename states and pick colors in the workflow editor. These mock
+// values are the seed palette a new user sees, not studio chrome, and live
+// in the domain model (Workflow.states[].color). Left literal and
+// eslint-disabled line-by-line, matching the mock-canvas.ts convention.
 
 export const INITIAL_WORKFLOWS: Workflow[] = [
   {
@@ -138,10 +143,15 @@ export const INITIAL_WORKFLOWS: Workflow[] = [
     name: "Task Lifecycle",
     entityId: "ent_task",
     states: [
+      // eslint-disable-next-line no-hardcoded-hex -- user-authored state color
       { id: "s1", name: "Backlog", color: "#3B82F6", type: "initial" },
+      // eslint-disable-next-line no-hardcoded-hex -- user-authored state color
       { id: "s2", name: "Todo", color: "#94A3B8", type: "normal" },
+      // eslint-disable-next-line no-hardcoded-hex -- user-authored state color
       { id: "s3", name: "In Progress", color: "#F59E0B", type: "normal" },
+      // eslint-disable-next-line no-hardcoded-hex -- user-authored state color
       { id: "s4", name: "In Review", color: "#A855F7", type: "normal" },
+      // eslint-disable-next-line no-hardcoded-hex -- user-authored state color
       { id: "s5", name: "Done", color: "#10B981", type: "final" },
     ],
     transitions: [
@@ -158,10 +168,15 @@ export const INITIAL_WORKFLOWS: Workflow[] = [
     name: "Project Lifecycle",
     entityId: "ent_project",
     states: [
+      // eslint-disable-next-line no-hardcoded-hex -- user-authored state color
       { id: "s6", name: "Draft", color: "#3B82F6", type: "initial" },
+      // eslint-disable-next-line no-hardcoded-hex -- user-authored state color
       { id: "s7", name: "Planning", color: "#94A3B8", type: "normal" },
+      // eslint-disable-next-line no-hardcoded-hex -- user-authored state color
       { id: "s8", name: "Active", color: "#F59E0B", type: "normal" },
+      // eslint-disable-next-line no-hardcoded-hex -- user-authored state color
       { id: "s9", name: "On Hold", color: "#EF4444", type: "normal" },
+      // eslint-disable-next-line no-hardcoded-hex -- user-authored state color
       { id: "s10", name: "Completed", color: "#10B981", type: "final" },
     ],
     transitions: [
