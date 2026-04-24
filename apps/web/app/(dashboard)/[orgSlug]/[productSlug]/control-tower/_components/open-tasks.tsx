@@ -11,17 +11,36 @@ import { useTaskStore } from '../../../../../lib/task-store'
 type Priority = 'critical' | 'high' | 'medium' | 'low'
 type Status = 'todo' | 'in_progress' | 'review'
 
-const priorityColors: Record<Priority, string> = {
-  critical: '#F43F5E',
-  high: '#F59E0B',
-  medium: '#3B82F6',
-  low: '#64748B',
+// R20: map priorities/statuses to the 4 canonical tones and drive
+// chrome via Tailwind classes that reference semantic tokens, so
+// the dot + chip alpha colors re-theme without \${hex}15 concat.
+type Tone = 'accent' | 'warning' | 'error' | 'neutral'
+
+const priorityTone: Record<Priority, Tone> = {
+  critical: 'error',
+  high: 'warning',
+  medium: 'accent',
+  low: 'neutral',
 }
 
-const statusColors: Record<Status, string> = {
-  todo: '#64748B',
-  in_progress: '#3B82F6',
-  review: '#F59E0B',
+const statusTone: Record<Status, Tone> = {
+  todo: 'neutral',
+  in_progress: 'accent',
+  review: 'warning',
+}
+
+const TONE_DOT_BG: Record<Tone, string> = {
+  accent: 'bg-[var(--accent)]',
+  warning: 'bg-[var(--color-warning)]',
+  error: 'bg-[var(--color-error)]',
+  neutral: 'bg-[var(--text-tertiary)]',
+}
+
+const TONE_CHIP: Record<Tone, string> = {
+  accent: 'bg-[var(--accent)]/10 text-[var(--accent)]',
+  warning: 'bg-[var(--color-warning)]/10 text-[var(--color-warning)]',
+  error: 'bg-[var(--color-error)]/10 text-[var(--color-error)]',
+  neutral: 'bg-[var(--text-tertiary)]/10 text-[var(--text-tertiary)]',
 }
 
 const statusLabels: Record<Status, string> = {
@@ -90,8 +109,7 @@ export function OpenTasks() {
             className="flex items-center gap-3 py-2.5 border-b border-white/[0.04] last:border-0"
           >
             <div
-              className="w-2 h-2 rounded-full shrink-0"
-              style={{ backgroundColor: statusColors[task.status] }}
+              className={`w-2 h-2 rounded-full shrink-0 ${TONE_DOT_BG[statusTone[task.status]]}`}
               title={statusLabels[task.status]}
             />
             <div className="flex-1 min-w-0">
@@ -102,11 +120,7 @@ export function OpenTasks() {
               </div>
             </div>
             <span
-              className="text-[10px] px-1.5 py-0.5 rounded font-medium shrink-0"
-              style={{
-                backgroundColor: priorityColors[task.priority] + '15',
-                color: priorityColors[task.priority],
-              }}
+              className={`text-[10px] px-1.5 py-0.5 rounded font-medium shrink-0 ${TONE_CHIP[priorityTone[task.priority]]}`}
             >
               {task.priority}
             </span>
