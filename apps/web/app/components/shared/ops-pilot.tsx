@@ -64,11 +64,39 @@ function renderMarkdown(text: string) {
 // Sub-components
 // ---------------------------------------------------------------------------
 
+/**
+ * Per R20 palette consolidation, priority rides the semantic tone ramp.
+ * Label carries the meaning; color is now a tone signal, not an identity.
+ */
+type Tone = 'error' | 'warning' | 'info' | 'success' | 'accent' | 'neutral'
+
+const PRIORITY_TONES: Record<string, Tone> = {
+  urgent: 'error',
+  high:   'warning',
+  medium: 'info',
+  low:    'neutral',
+}
+
+const toneBgSoft: Record<Tone, string> = {
+  error:   'bg-[var(--color-error-muted)]',
+  warning: 'bg-[var(--color-warning-muted)]',
+  info:    'bg-[var(--accent-subtle)]',
+  success: 'bg-[var(--color-success-muted)]',
+  accent:  'bg-[var(--accent-muted)]',
+  neutral: 'bg-[var(--bg-inset)]',
+}
+const toneText: Record<Tone, string> = {
+  error:   'text-[var(--color-error)]',
+  warning: 'text-[var(--color-warning)]',
+  info:    'text-[var(--accent)]',
+  success: 'text-[var(--color-success)]',
+  accent:  'text-[var(--accent-text)]',
+  neutral: 'text-[var(--text-tertiary)]',
+}
+
 function TaskCreatedCard({ data }: { data: Record<string, unknown> }) {
   const priority = data.priority as string
-  const PRIORITY_COLOR: Record<string, string> = {
-    urgent: '#F43F5E', high: '#F59E0B', medium: '#3B82F6', low: '#64748B',
-  }
+  const tone = PRIORITY_TONES[priority] ?? 'neutral'
   return (
     <div className="mt-2 flex items-start gap-2 p-2.5 rounded-lg bg-[var(--color-success)]/08 border border-[var(--color-success)]/20">
       <CheckCircle2 size={13} className="text-[var(--color-success)] mt-0.5 shrink-0" />
@@ -77,10 +105,7 @@ function TaskCreatedCard({ data }: { data: Record<string, unknown> }) {
         {data.description ? (
           <p className="text-[10px] text-[var(--text-secondary)] mt-0.5 line-clamp-2">{data.description as string}</p>
         ) : null}
-        <span
-          className="inline-block mt-1 text-[9px] font-semibold px-1.5 py-0.5 rounded"
-          style={{ background: `${PRIORITY_COLOR[priority] ?? '#64748B'}20`, color: PRIORITY_COLOR[priority] ?? '#64748B' }}
-        >
+        <span className={`inline-block mt-1 text-[9px] font-semibold px-1.5 py-0.5 rounded ${toneBgSoft[tone]} ${toneText[tone]}`}>
           {priority}
         </span>
       </div>
@@ -96,7 +121,7 @@ function NavigateCard({ data, onNavigate }: { data: Record<string, unknown>; onN
     >
       <div className="flex items-center gap-2">
         <ExternalLink size={11} className="text-[var(--accent)]" />
-        <span className="text-[11px] text-[#93C5FD]">Open <strong className="text-[#BFDBFE]">{data.studio as string}</strong> studio</span>
+        <span className="text-[11px] text-[var(--accent-text)]">Open <strong className="text-[var(--accent)]">{data.studio as string}</strong> studio</span>
       </div>
       <ChevronDown size={11} className="text-[var(--accent)] rotate-[-90deg]" />
     </button>
@@ -216,7 +241,7 @@ function MessageBubble({
       <div className={`flex-1 min-w-0 ${isUser ? 'items-end' : 'items-start'} flex flex-col`}>
         <div className={`max-w-[85%] rounded-xl px-3 py-2 text-[12px] leading-relaxed ${
           isUser
-            ? 'bg-[var(--accent)]/20 border border-[var(--accent)]/30 text-[#BFDBFE] rounded-tr-none'
+            ? 'bg-[var(--accent)]/20 border border-[var(--accent)]/30 text-[var(--accent-text)] rounded-tr-none'
             : 'bg-white/[0.04] border border-white/[0.06] text-[var(--text-secondary)] rounded-tl-none'
         }`}>
           {message.isStreaming ? (
@@ -278,13 +303,13 @@ function WelcomeScreen({
       {/* Capabilities */}
       <div className="grid grid-cols-2 gap-2 w-full max-w-[260px]">
         {[
-          { icon: ListTodo,    label: 'Create tasks',        color: '#10B981' },
-          { icon: BarChart3,   label: 'Graph insights',      color: '#8B5CF6' },
-          { icon: ExternalLink,label: 'Navigate studios',    color: '#3B82F6' },
-          { icon: GitFork,     label: 'Scaffold nodes',      color: '#F59E0B' },
-        ].map(({ icon: Icon, label, color }) => (
+          { icon: ListTodo,    label: 'Create tasks',     tone: 'success' as const },
+          { icon: BarChart3,   label: 'Graph insights',   tone: 'accent'  as const },
+          { icon: ExternalLink,label: 'Navigate studios', tone: 'info'    as const },
+          { icon: GitFork,     label: 'Scaffold nodes',   tone: 'warning' as const },
+        ].map(({ icon: Icon, label, tone }) => (
           <div key={label} className="flex items-center gap-2 p-2 rounded-lg bg-white/[0.03] border border-white/[0.05]">
-            <Icon size={11} style={{ color }} />
+            <Icon size={11} className={toneText[tone]} />
             <span className="text-[10px] text-[var(--text-tertiary)]">{label}</span>
           </div>
         ))}
@@ -459,7 +484,7 @@ export function OpsPilot({ productId, currentStudio, orgSlug, productSlug }: Ops
             exit={{ opacity: 0, scale: 0.92, y: 16 }}
             transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
             style={{ width: panelWidth, height: panelHeight }}
-            className="fixed bottom-6 right-6 z-[60] flex flex-col rounded-2xl border border-white/[0.1] bg-[#0D1117] shadow-2xl overflow-hidden transition-[width,height] duration-200"
+            className="fixed bottom-6 right-6 z-[60] flex flex-col rounded-2xl border border-[var(--border-default)] bg-[var(--bg-surface)] shadow-2xl overflow-hidden transition-[width,height] duration-200"
           >
             {/* ── Header ── */}
             <div className="flex items-center justify-between px-3 py-2.5 border-b border-white/[0.07] bg-white/[0.02] flex-shrink-0">
