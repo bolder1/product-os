@@ -30,9 +30,34 @@ interface ProductStore {
   seedProducts: (orgSlug: string) => void
 }
 
+// R20: product identity palette — 8-swatch palette used to tint
+// newly-created products so they can be distinguished at a glance
+// across the sidebar, product switcher, and dashboard card grid.
+// These are *functional* identity colors (each product keeps its
+// color for life) and the value round-trips through `${color}18`
+// alpha-concat patterns across ~12 consumers (see products/page.tsx,
+// (dashboard)/page.tsx, command-palette-global.tsx, upstream-empty-
+// state.tsx, first-run-banner.tsx, scaffold-panel.tsx). Swapping to
+// `var(--accent)` would break the alpha-concat CSS silently. Kept
+// literal and per-line eslint-disabled pending a Phase-2 retagging
+// scheme that stores a semantic token instead of a raw hex.
 const PRODUCT_COLORS = [
-  '#3B82F6', '#8B5CF6', '#06B6D4', '#10B981',
-  '#F59E0B', '#EC4899', '#F43F5E', '#6366F1',
+  // eslint-disable-next-line no-hardcoded-hex -- product identity palette
+  '#3B82F6',
+  // eslint-disable-next-line no-hardcoded-hex -- product identity palette
+  '#8B5CF6',
+  // eslint-disable-next-line no-hardcoded-hex -- product identity palette
+  '#06B6D4',
+  // eslint-disable-next-line no-hardcoded-hex -- product identity palette
+  '#10B981',
+  // eslint-disable-next-line no-hardcoded-hex -- product identity palette
+  '#F59E0B',
+  // eslint-disable-next-line no-hardcoded-hex -- product identity palette
+  '#EC4899',
+  // eslint-disable-next-line no-hardcoded-hex -- product identity palette
+  '#F43F5E',
+  // eslint-disable-next-line no-hardcoded-hex -- product identity palette
+  '#6366F1',
 ]
 
 function randomPick<T>(arr: T[]): T {
