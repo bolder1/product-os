@@ -88,23 +88,23 @@ export function NotificationItem({
 
         {/* Content */}
         <div className="flex-1 min-w-0">
-          <p className="text-sm text-[#F1F5F9] line-clamp-2">
+          <p className="text-sm text-[var(--text-primary)] line-clamp-2">
             <span className="font-medium">{notification.actor.name}</span>{' '}
-            <span className="text-[#94A3B8]">{notification.action}</span>{' '}
-            <span className="font-medium text-[#F1F5F9]">{notification.target}</span>
+            <span className="text-[var(--text-secondary)]">{notification.action}</span>{' '}
+            <span className="font-medium text-[var(--text-primary)]">{notification.target}</span>
           </p>
         </div>
 
         {/* Right side */}
         <div className="shrink-0 flex items-center gap-2">
-          <span className="text-[11px] text-[#64748B] whitespace-nowrap">
+          <span className="text-[11px] text-[var(--text-tertiary)] whitespace-nowrap">
             {formatTimestamp(notification.timestamp)}
           </span>
           {!notification.read && (
-            <div className="w-2 h-2 rounded-full bg-[#3B82F6] shrink-0" />
+            <div className="w-2 h-2 rounded-full bg-[var(--accent)] shrink-0" />
           )}
           <ChevronDown
-            className={`w-3.5 h-3.5 text-[#64748B] transition-transform ${
+            className={`w-3.5 h-3.5 text-[var(--text-tertiary)] transition-transform ${
               expanded ? 'rotate-180' : ''
             }`}
           />
@@ -122,7 +122,7 @@ export function NotificationItem({
             className="overflow-hidden"
           >
             <div className="px-4 pb-3 pl-[3.75rem]">
-              <p className="text-xs text-[#94A3B8] leading-relaxed mb-3">
+              <p className="text-xs text-[var(--text-secondary)] leading-relaxed mb-3">
                 {notification.message}
               </p>
               <div className="flex items-center gap-2">
@@ -131,7 +131,7 @@ export function NotificationItem({
                     e.stopPropagation()
                     onMarkRead(notification.id)
                   }}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-[#94A3B8] border border-white/[0.08] bg-white/[0.03] hover:bg-white/[0.06] transition-colors"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-[var(--text-secondary)] border border-white/[0.08] bg-white/[0.03] hover:bg-white/[0.06] transition-colors"
                 >
                   <Eye className="w-3 h-3" />
                   View
@@ -141,7 +141,7 @@ export function NotificationItem({
                     e.stopPropagation()
                     onDismiss(notification.id)
                   }}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-[#64748B] hover:text-red-400 hover:bg-red-500/10 transition-colors"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-[var(--text-tertiary)] hover:text-red-400 hover:bg-red-500/10 transition-colors"
                 >
                   <XCircle className="w-3 h-3" />
                   Dismiss

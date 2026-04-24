@@ -69,13 +69,13 @@ export function AIInsightsPanel({ insights }: AIInsightsPanelProps) {
         onClick={() => setIsOpen(!isOpen)}
         className="w-full flex items-center gap-2 px-4 py-3 hover:bg-white/[0.02] transition-colors"
       >
-        <Sparkles className="w-4 h-4 text-[#8B5CF6]" />
-        <span className="text-sm font-medium text-[#F1F5F9] flex-1 text-left">AI Insights</span>
-        <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-[#8B5CF6]/15 text-[#8B5CF6]">
+        <Sparkles className="w-4 h-4 text-[var(--accent)]" />
+        <span className="text-sm font-medium text-[var(--text-primary)] flex-1 text-left">AI Insights</span>
+        <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-[var(--accent)]/15 text-[var(--accent)]">
           {visibleInsights.length}
         </span>
         <ChevronRight
-          className={`w-4 h-4 text-[#64748B] transition-transform ${isOpen ? 'rotate-90' : ''}`}
+          className={`w-4 h-4 text-[var(--text-tertiary)] transition-transform ${isOpen ? 'rotate-90' : ''}`}
         />
       </button>
 
@@ -105,7 +105,7 @@ export function AIInsightsPanel({ insights }: AIInsightsPanelProps) {
                       <div className="flex items-start gap-2">
                         <div className="mt-0.5 shrink-0">{config.icon}</div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-xs text-[#94A3B8] leading-relaxed">
+                          <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
                             {insight.text}
                           </p>
                           <button
@@ -117,7 +117,7 @@ export function AIInsightsPanel({ insights }: AIInsightsPanelProps) {
                         </div>
                         <button
                           onClick={() => dismiss(insight.id)}
-                          className="shrink-0 text-[#64748B] hover:text-[#94A3B8] transition-colors"
+                          className="shrink-0 text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] transition-colors"
                         >
                           <X className="w-3.5 h-3.5" />
                         </button>
@@ -128,7 +128,7 @@ export function AIInsightsPanel({ insights }: AIInsightsPanelProps) {
               </AnimatePresence>
 
               {visibleInsights.length === 0 && (
-                <p className="text-xs text-[#64748B] text-center py-3">
+                <p className="text-xs text-[var(--text-tertiary)] text-center py-3">
                   All insights dismissed
                 </p>
               )}

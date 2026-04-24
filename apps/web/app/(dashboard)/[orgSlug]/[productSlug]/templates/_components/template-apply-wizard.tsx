@@ -51,9 +51,10 @@ export function TemplateApplyWizard({ template, onClose }: TemplateApplyWizardPr
   const params = useParams()
   const currentProduct = useProduct()
   const productId = currentProduct?.id ?? `${params.orgSlug}-${params.productSlug}`
-  const { bulkAddNodes, addEdge } = useGraphStore()
-  const { addActivity } = useActivityStore()
-  const { addNotification } = useNotificationStore()
+  const bulkAddNodes = useGraphStore((s) => s.bulkAddNodes)
+  const addEdge = useGraphStore((s) => s.addEdge)
+  const addActivity = useActivityStore((s) => s.addActivity)
+  const addNotification = useNotificationStore((s) => s.addNotification)
 
   if (!template) return null
 
@@ -145,7 +146,7 @@ export function TemplateApplyWizard({ template, onClose }: TemplateApplyWizardPr
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="absolute inset-0 bg-[#060918]/80 backdrop-blur-sm"
+          className="absolute inset-0 bg-[var(--bg-base)]/80 backdrop-blur-sm"
           onClick={onClose}
         />
 
@@ -160,14 +161,14 @@ export function TemplateApplyWizard({ template, onClose }: TemplateApplyWizardPr
           {/* Header */}
           <div className="flex items-center justify-between px-6 py-4 border-b border-white/[0.06]">
             <div>
-              <h2 className="text-lg font-semibold text-[#F1F5F9]">Apply: {template.name}</h2>
-              <p className="text-xs text-[#64748B] mt-0.5">
+              <h2 className="text-lg font-semibold text-[var(--text-primary)]">Apply: {template.name}</h2>
+              <p className="text-xs text-[var(--text-tertiary)] mt-0.5">
                 {steps[step].description}
               </p>
             </div>
             <button
               onClick={onClose}
-              className="p-2 rounded-lg hover:bg-white/[0.06] text-[#64748B] hover:text-[#94A3B8] transition-colors"
+              className="p-2 rounded-lg hover:bg-white/[0.06] text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] transition-colors"
             >
               <X className="w-5 h-5" />
             </button>
@@ -181,17 +182,17 @@ export function TemplateApplyWizard({ template, onClose }: TemplateApplyWizardPr
                   <div
                     className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-medium border transition-colors ${
                       i < step
-                        ? 'bg-[#3B82F6]/20 border-[#3B82F6]/40 text-[#3B82F6]'
+                        ? 'bg-[var(--accent)]/20 border-[var(--accent)]/40 text-[var(--accent)]'
                         : i === step
-                          ? 'bg-[#3B82F6] border-[#3B82F6] text-white'
-                          : 'bg-white/[0.03] border-white/[0.08] text-[#64748B]'
+                          ? 'bg-[var(--accent)] border-[var(--accent)] text-white'
+                          : 'bg-white/[0.03] border-white/[0.08] text-[var(--text-tertiary)]'
                     }`}
                   >
                     {i < step ? <Check className="w-3.5 h-3.5" /> : i + 1}
                   </div>
                   <span
                     className={`text-xs font-medium ${
-                      i <= step ? 'text-[#F1F5F9]' : 'text-[#64748B]'
+                      i <= step ? 'text-[var(--text-primary)]' : 'text-[var(--text-tertiary)]'
                     }`}
                   >
                     {s.label}
@@ -200,7 +201,7 @@ export function TemplateApplyWizard({ template, onClose }: TemplateApplyWizardPr
                 {i < steps.length - 1 && (
                   <div className="w-12 h-px mx-3 bg-white/[0.08]">
                     <div
-                      className="h-full bg-[#3B82F6] transition-all"
+                      className="h-full bg-[var(--accent)] transition-all"
                       style={{ width: i < step ? '100%' : '0%' }}
                     />
                   </div>
@@ -222,12 +223,12 @@ export function TemplateApplyWizard({ template, onClose }: TemplateApplyWizardPr
                   transition={{ duration: 0.2 }}
                   className="space-y-4"
                 >
-                  <p className="text-sm text-[#94A3B8] mb-4">
+                  <p className="text-sm text-[var(--text-secondary)] mb-4">
                     Customize the template variables below before applying.
                   </p>
                   {template.variables.map((v) => (
                     <div key={v.key}>
-                      <label className="block text-xs font-medium text-[#94A3B8] mb-1.5">
+                      <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1.5">
                         {v.label}
                       </label>
                       <input
@@ -236,7 +237,7 @@ export function TemplateApplyWizard({ template, onClose }: TemplateApplyWizardPr
                         onChange={(e) =>
                           setValues((prev) => ({ ...prev, [v.key]: e.target.value }))
                         }
-                        className="w-full px-3 py-2.5 rounded-lg bg-white/[0.03] border border-white/[0.08] text-[#F1F5F9] text-sm placeholder:text-[#64748B] focus:outline-none focus:border-[#3B82F6]/50 focus:ring-1 focus:ring-[#3B82F6]/25 transition-colors"
+                        className="w-full px-3 py-2.5 rounded-lg bg-white/[0.03] border border-white/[0.08] text-[var(--text-primary)] text-sm placeholder:text-[var(--text-tertiary)] focus:outline-none focus:border-[var(--accent)]/50 focus:ring-1 focus:ring-[var(--accent)]/25 transition-colors"
                       />
                     </div>
                   ))}
@@ -253,17 +254,17 @@ export function TemplateApplyWizard({ template, onClose }: TemplateApplyWizardPr
                   transition={{ duration: 0.2 }}
                   className="space-y-4"
                 >
-                  <p className="text-sm text-[#94A3B8] mb-4">
+                  <p className="text-sm text-[var(--text-secondary)] mb-4">
                     The following nodes and edges will be created in your product graph.
                   </p>
 
                   {/* Variables summary */}
                   <div className="p-3 rounded-lg bg-white/[0.03] border border-white/[0.06] space-y-1.5">
-                    <h4 className="text-xs font-medium text-[#64748B] uppercase tracking-wider mb-2">Variables</h4>
+                    <h4 className="text-xs font-medium text-[var(--text-tertiary)] uppercase tracking-wider mb-2">Variables</h4>
                     {template.variables.map((v) => (
                       <div key={v.key} className="flex items-center justify-between text-xs">
-                        <span className="text-[#94A3B8]">{v.label}</span>
-                        <span className="text-[#F1F5F9] font-mono">{values[v.key]}</span>
+                        <span className="text-[var(--text-secondary)]">{v.label}</span>
+                        <span className="text-[var(--text-primary)] font-mono">{values[v.key]}</span>
                       </div>
                     ))}
                   </div>
@@ -277,8 +278,8 @@ export function TemplateApplyWizard({ template, onClose }: TemplateApplyWizardPr
                           fill={kindColors[kind] || '#64748B'}
                           stroke="none"
                         />
-                        <span className="text-xs font-medium text-[#94A3B8] capitalize">{kind}s</span>
-                        <span className="text-[10px] text-[#64748B]">({nodes.length})</span>
+                        <span className="text-xs font-medium text-[var(--text-secondary)] capitalize">{kind}s</span>
+                        <span className="text-[10px] text-[var(--text-tertiary)]">({nodes.length})</span>
                       </div>
                       <div className="flex flex-wrap gap-1.5 pl-4 mb-2">
                         {nodes.map((n) => (
@@ -298,7 +299,7 @@ export function TemplateApplyWizard({ template, onClose }: TemplateApplyWizardPr
                     </div>
                   ))}
 
-                  <div className="p-3 rounded-lg bg-white/[0.03] border border-white/[0.06] text-xs text-[#94A3B8]">
+                  <div className="p-3 rounded-lg bg-white/[0.03] border border-white/[0.06] text-xs text-[var(--text-secondary)]">
                     Total: {template.nodeCount} nodes, {template.edgeCount} edges
                   </div>
                 </motion.div>
@@ -320,12 +321,12 @@ export function TemplateApplyWizard({ template, onClose }: TemplateApplyWizardPr
                         initial={{ scale: 0 }}
                         animate={{ scale: 1 }}
                         transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-                        className="w-16 h-16 rounded-full bg-[#10B981]/10 border border-[#10B981]/20 flex items-center justify-center mb-4"
+                        className="w-16 h-16 rounded-full bg-[var(--color-success)]/10 border border-[var(--color-success)]/20 flex items-center justify-center mb-4"
                       >
-                        <Check className="w-8 h-8 text-[#10B981]" />
+                        <Check className="w-8 h-8 text-[var(--color-success)]" />
                       </motion.div>
-                      <h3 className="text-lg font-semibold text-[#F1F5F9] mb-2">Template Applied!</h3>
-                      <p className="text-sm text-[#94A3B8] max-w-sm">
+                      <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-2">Template Applied!</h3>
+                      <p className="text-sm text-[var(--text-secondary)] max-w-sm">
                         {template.nodeCount} nodes and {template.edgeCount} edges have been added to your product graph.
                       </p>
                     </>
@@ -334,20 +335,20 @@ export function TemplateApplyWizard({ template, onClose }: TemplateApplyWizardPr
                       <motion.div
                         animate={{ rotate: 360 }}
                         transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}
-                        className="w-16 h-16 rounded-full bg-[#3B82F6]/10 border border-[#3B82F6]/20 flex items-center justify-center mb-4"
+                        className="w-16 h-16 rounded-full bg-[var(--accent)]/10 border border-[var(--accent)]/20 flex items-center justify-center mb-4"
                       >
-                        <Loader2 className="w-8 h-8 text-[#3B82F6]" />
+                        <Loader2 className="w-8 h-8 text-[var(--accent)]" />
                       </motion.div>
-                      <h3 className="text-lg font-semibold text-[#F1F5F9] mb-2">Applying Template...</h3>
-                      <p className="text-sm text-[#94A3B8]">Creating nodes and edges in your product graph.</p>
+                      <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-2">Applying Template...</h3>
+                      <p className="text-sm text-[var(--text-secondary)]">Creating nodes and edges in your product graph.</p>
                     </>
                   ) : (
                     <>
-                      <div className="w-16 h-16 rounded-full bg-[#3B82F6]/10 border border-[#3B82F6]/20 flex items-center justify-center mb-4">
+                      <div className="w-16 h-16 rounded-full bg-[var(--accent)]/10 border border-[var(--accent)]/20 flex items-center justify-center mb-4">
                         <span className="text-2xl">T</span>
                       </div>
-                      <h3 className="text-lg font-semibold text-[#F1F5F9] mb-2">Ready to Apply</h3>
-                      <p className="text-sm text-[#94A3B8] max-w-sm">
+                      <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-2">Ready to Apply</h3>
+                      <p className="text-sm text-[var(--text-secondary)] max-w-sm">
                         This will create {template.nodeCount} nodes and {template.edgeCount} edges using the &quot;{template.name}&quot; template.
                       </p>
                     </>
@@ -362,7 +363,7 @@ export function TemplateApplyWizard({ template, onClose }: TemplateApplyWizardPr
             <button
               onClick={() => (step === 0 ? onClose() : setStep(step - 1))}
               disabled={applying || done}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium text-[#94A3B8] hover:text-[#F1F5F9] hover:bg-white/[0.06] transition-colors disabled:opacity-40 disabled:pointer-events-none"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-white/[0.06] transition-colors disabled:opacity-40 disabled:pointer-events-none"
             >
               <ChevronLeft className="w-3.5 h-3.5" />
               {step === 0 ? 'Cancel' : 'Back'}
@@ -371,14 +372,14 @@ export function TemplateApplyWizard({ template, onClose }: TemplateApplyWizardPr
             {done ? (
               <button
                 onClick={onClose}
-                className="px-5 py-2 rounded-lg text-sm font-medium bg-[#10B981] text-white hover:bg-[#059669] transition-colors"
+                className="px-5 py-2 rounded-lg text-sm font-medium bg-[var(--color-success)] text-white hover:bg-[var(--color-success)] transition-colors"
               >
                 Done
               </button>
             ) : step < 2 ? (
               <button
                 onClick={() => setStep(step + 1)}
-                className="flex items-center gap-1.5 px-5 py-2 rounded-lg text-sm font-medium bg-[#3B82F6] text-white hover:bg-[#2563EB] transition-colors"
+                className="flex items-center gap-1.5 px-5 py-2 rounded-lg text-sm font-medium bg-[var(--accent)] text-white hover:bg-[var(--accent)] transition-colors"
               >
                 Next
                 <ChevronRight className="w-3.5 h-3.5" />
@@ -387,7 +388,7 @@ export function TemplateApplyWizard({ template, onClose }: TemplateApplyWizardPr
               <button
                 onClick={handleApply}
                 disabled={applying}
-                className="flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-medium bg-[#3B82F6] text-white hover:bg-[#2563EB] transition-colors disabled:opacity-60 shadow-[0_0_20px_rgba(59,130,246,0.2)]"
+                className="flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-medium bg-[var(--accent)] text-white hover:bg-[var(--accent)] transition-colors disabled:opacity-60 shadow-[0_0_20px_rgba(59,130,246,0.2)]"
               >
                 {applying ? (
                   <>

@@ -74,35 +74,35 @@ function GuardRow({ guard, entity, onUpdate, onRemove }: {
     <div className="flex flex-wrap items-center gap-1.5 p-2 rounded-md bg-white/[0.02] border border-white/[0.06]">
       <Shield className="w-3 h-3 text-amber-400 shrink-0" />
       <select value={guard.type} onChange={(e) => onUpdate({ ...guard, type: e.target.value as Guard["type"] })}
-        className="bg-white/[0.05] text-[10px] text-[#94A3B8] rounded px-1 py-0.5 outline-none border border-white/[0.08]">
-        {GUARD_TYPES.map((g) => <option key={g.value} value={g.value} className="bg-[#0c1022]">{g.label}</option>)}
+        className="bg-white/[0.05] text-[10px] text-[var(--text-secondary)] rounded px-1 py-0.5 outline-none border border-white/[0.08]">
+        {GUARD_TYPES.map((g) => <option key={g.value} value={g.value} className="bg-[var(--bg-inset)]">{g.label}</option>)}
       </select>
 
       {guard.type === "field_check" && (
         <>
           <select value={guard.field ?? ""} onChange={(e) => onUpdate({ ...guard, field: e.target.value })}
-            className="bg-white/[0.05] text-[10px] text-[#94A3B8] rounded px-1 py-0.5 outline-none border border-white/[0.08]">
+            className="bg-white/[0.05] text-[10px] text-[var(--text-secondary)] rounded px-1 py-0.5 outline-none border border-white/[0.08]">
             <option value="">field...</option>
-            {fields.map((f) => <option key={f} value={f} className="bg-[#0c1022]">{f}</option>)}
+            {fields.map((f) => <option key={f} value={f} className="bg-[var(--bg-inset)]">{f}</option>)}
           </select>
           <select value={guard.operator ?? "eq"} onChange={(e) => onUpdate({ ...guard, operator: e.target.value })}
-            className="bg-white/[0.05] text-[10px] text-[#94A3B8] rounded px-1 py-0.5 outline-none border border-white/[0.08]">
-            {OPERATORS.map((o) => <option key={o} value={o} className="bg-[#0c1022]">{o}</option>)}
+            className="bg-white/[0.05] text-[10px] text-[var(--text-secondary)] rounded px-1 py-0.5 outline-none border border-white/[0.08]">
+            {OPERATORS.map((o) => <option key={o} value={o} className="bg-[var(--bg-inset)]">{o}</option>)}
           </select>
           <input value={guard.value ?? ""} onChange={(e) => onUpdate({ ...guard, value: e.target.value })}
-            className="bg-transparent text-[10px] text-[#F1F5F9] outline-none w-16 border-b border-white/[0.06]" placeholder="value" />
+            className="bg-transparent text-[10px] text-[var(--text-primary)] outline-none w-16 border-b border-white/[0.06]" placeholder="value" />
         </>
       )}
       {guard.type === "role_check" && (
         <input value={guard.role ?? ""} onChange={(e) => onUpdate({ ...guard, role: e.target.value })}
-          className="bg-transparent text-[10px] text-[#F1F5F9] outline-none w-20 border-b border-white/[0.06]" placeholder="admin, manager..." />
+          className="bg-transparent text-[10px] text-[var(--text-primary)] outline-none w-20 border-b border-white/[0.06]" placeholder="admin, manager..." />
       )}
       {guard.type === "custom_expression" && (
         <input value={guard.expression ?? ""} onChange={(e) => onUpdate({ ...guard, expression: e.target.value })}
-          className="bg-transparent text-[10px] text-[#F1F5F9] outline-none flex-1 border-b border-white/[0.06]" placeholder="entity.status !== 'locked'" />
+          className="bg-transparent text-[10px] text-[var(--text-primary)] outline-none flex-1 border-b border-white/[0.06]" placeholder="entity.status !== 'locked'" />
       )}
 
-      <button onClick={onRemove} className="ml-auto text-[#64748B] hover:text-red-400"><Trash2 className="w-3 h-3" /></button>
+      <button onClick={onRemove} className="ml-auto text-[var(--text-tertiary)] hover:text-red-400"><Trash2 className="w-3 h-3" /></button>
     </div>
   );
 }
@@ -114,30 +114,30 @@ function ActionRow({ action, onUpdate, onRemove }: {
     <div className="flex items-center gap-1.5 p-2 rounded-md bg-white/[0.02] border border-white/[0.06]">
       <Zap className="w-3 h-3 text-blue-400 shrink-0" />
       <select value={action.type} onChange={(e) => onUpdate({ ...action, type: e.target.value as Action["type"] })}
-        className="bg-white/[0.05] text-[10px] text-[#94A3B8] rounded px-1 py-0.5 outline-none border border-white/[0.08]">
-        {ACTION_TYPES.map((a) => <option key={a.value} value={a.value} className="bg-[#0c1022]">{a.label}</option>)}
+        className="bg-white/[0.05] text-[10px] text-[var(--text-secondary)] rounded px-1 py-0.5 outline-none border border-white/[0.08]">
+        {ACTION_TYPES.map((a) => <option key={a.value} value={a.value} className="bg-[var(--bg-inset)]">{a.label}</option>)}
       </select>
       {action.type === "set_field" && (
         <>
           <input value={String(action.config.field ?? "")} onChange={(e) => onUpdate({ ...action, config: { ...action.config, field: e.target.value } })}
-            className="bg-transparent text-[10px] text-[#F1F5F9] outline-none w-16 border-b border-white/[0.06]" placeholder="field" />
-          <span className="text-[10px] text-[#64748B]">=</span>
+            className="bg-transparent text-[10px] text-[var(--text-primary)] outline-none w-16 border-b border-white/[0.06]" placeholder="field" />
+          <span className="text-[10px] text-[var(--text-tertiary)]">=</span>
           <input value={String(action.config.value ?? "")} onChange={(e) => onUpdate({ ...action, config: { ...action.config, value: e.target.value } })}
-            className="bg-transparent text-[10px] text-[#F1F5F9] outline-none w-16 border-b border-white/[0.06]" placeholder="value" />
+            className="bg-transparent text-[10px] text-[var(--text-primary)] outline-none w-16 border-b border-white/[0.06]" placeholder="value" />
         </>
       )}
       {action.type === "call_webhook" && (
         <input value={String(action.config.url ?? "")} onChange={(e) => onUpdate({ ...action, config: { ...action.config, url: e.target.value } })}
-          className="bg-transparent text-[10px] text-[#F1F5F9] outline-none flex-1 border-b border-white/[0.06]" placeholder="https://..." />
+          className="bg-transparent text-[10px] text-[var(--text-primary)] outline-none flex-1 border-b border-white/[0.06]" placeholder="https://..." />
       )}
       {action.type === "send_notification" && (
         <input value={String(action.config.message ?? "")} onChange={(e) => onUpdate({ ...action, config: { ...action.config, message: e.target.value } })}
-          className="bg-transparent text-[10px] text-[#F1F5F9] outline-none flex-1 border-b border-white/[0.06]" placeholder="Notification text..." />
+          className="bg-transparent text-[10px] text-[var(--text-primary)] outline-none flex-1 border-b border-white/[0.06]" placeholder="Notification text..." />
       )}
       {(action.type === "create_task" || action.type === "request_approval" || action.type === "run_ai_skill") && (
-        <span className="text-[10px] text-[#64748B]">(configure in automation)</span>
+        <span className="text-[10px] text-[var(--text-tertiary)]">(configure in automation)</span>
       )}
-      <button onClick={onRemove} className="ml-auto text-[#64748B] hover:text-red-400"><Trash2 className="w-3 h-3" /></button>
+      <button onClick={onRemove} className="ml-auto text-[var(--text-tertiary)] hover:text-red-400"><Trash2 className="w-3 h-3" /></button>
     </div>
   );
 }
@@ -250,20 +250,20 @@ export default function WorkflowEditor({ workflow, entities, onChange, onDelete 
           <input
             value={workflow.name}
             onChange={(e) => update({ name: e.target.value })}
-            className="text-xl font-semibold bg-transparent text-[#F1F5F9] outline-none border-b border-transparent focus:border-emerald-500/40 pb-1 transition-colors flex-1 min-w-0"
+            className="text-xl font-semibold bg-transparent text-[var(--text-primary)] outline-none border-b border-transparent focus:border-emerald-500/40 pb-1 transition-colors flex-1 min-w-0"
             placeholder="Workflow name"
           />
           <ViewInGraphLink nodeId={workflow.id} />
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-xs text-[#64748B]">Entity:</span>
+          <span className="text-xs text-[var(--text-tertiary)]">Entity:</span>
           <select
             value={workflow.entityId}
             onChange={(e) => update({ entityId: e.target.value })}
-            className="bg-white/[0.05] text-sm text-[#94A3B8] rounded-lg px-2 py-1 outline-none border border-white/[0.08]"
+            className="bg-white/[0.05] text-sm text-[var(--text-secondary)] rounded-lg px-2 py-1 outline-none border border-white/[0.08]"
           >
             {entities.map((e) => (
-              <option key={e.id} value={e.id} className="bg-[#0c1022]">
+              <option key={e.id} value={e.id} className="bg-[var(--bg-inset)]">
                 {e.name}
               </option>
             ))}
@@ -281,7 +281,7 @@ export default function WorkflowEditor({ workflow, entities, onChange, onDelete 
 
       {/* States list */}
       <div className="flex flex-col gap-2">
-        <h3 className="text-sm font-medium text-[#F1F5F9]">States</h3>
+        <h3 className="text-sm font-medium text-[var(--text-primary)]">States</h3>
         <div className="flex flex-col gap-1.5">
           {workflow.states.map((state) => (
             <div
@@ -297,13 +297,13 @@ export default function WorkflowEditor({ workflow, entities, onChange, onDelete 
               <input
                 value={state.name}
                 onChange={(e) => updateState(state.id, { name: e.target.value })}
-                className="bg-transparent text-sm text-[#F1F5F9] outline-none flex-1"
+                className="bg-transparent text-sm text-[var(--text-primary)] outline-none flex-1"
                 onClick={(e) => e.stopPropagation()}
               />
 
               <div className="relative group">
                 <button className="w-5 h-5 rounded border border-white/[0.12]" style={{ backgroundColor: state.color }} />
-                <div className="absolute right-0 top-7 z-10 hidden group-hover:flex gap-1 p-1.5 bg-[#0c1022] border border-white/[0.1] rounded-lg shadow-xl">
+                <div className="absolute right-0 top-7 z-10 hidden group-hover:flex gap-1 p-1.5 bg-[var(--bg-inset)] border border-white/[0.1] rounded-lg shadow-xl">
                   {PRESET_COLORS.map((c) => (
                     <button key={c} onClick={(e) => { e.stopPropagation(); updateState(state.id, { color: c }); }}
                       className="w-4 h-4 rounded-sm border border-white/[0.1] hover:scale-110 transition-transform" style={{ backgroundColor: c }} />
@@ -314,30 +314,30 @@ export default function WorkflowEditor({ workflow, entities, onChange, onDelete 
               <select
                 value={state.type}
                 onChange={(e) => updateState(state.id, { type: e.target.value as WorkflowState["type"] })}
-                className="bg-white/[0.05] text-xs text-[#94A3B8] rounded px-1.5 py-0.5 outline-none border border-white/[0.08]"
+                className="bg-white/[0.05] text-xs text-[var(--text-secondary)] rounded px-1.5 py-0.5 outline-none border border-white/[0.08]"
                 onClick={(e) => e.stopPropagation()}
               >
                 {STATE_TYPES.map((t) => (
-                  <option key={t} value={t} className="bg-[#0c1022]">{t}</option>
+                  <option key={t} value={t} className="bg-[var(--bg-inset)]">{t}</option>
                 ))}
               </select>
 
               <button onClick={(e) => { e.stopPropagation(); removeState(state.id); }}
-                className="text-[#64748B] hover:text-red-400 transition-colors">
+                className="text-[var(--text-tertiary)] hover:text-red-400 transition-colors">
                 <Trash2 className="w-3.5 h-3.5" />
               </button>
             </div>
           ))}
         </div>
         <button onClick={addState}
-          className="flex items-center gap-1.5 text-xs text-[#64748B] hover:text-emerald-400 transition-colors self-start mt-1">
+          className="flex items-center gap-1.5 text-xs text-[var(--text-tertiary)] hover:text-emerald-400 transition-colors self-start mt-1">
           <Plus className="w-3.5 h-3.5" /> Add State
         </button>
       </div>
 
       {/* Transitions list — now with expandable guards/actions */}
       <div className="flex flex-col gap-2">
-        <h3 className="text-sm font-medium text-[#F1F5F9]">Transitions</h3>
+        <h3 className="text-sm font-medium text-[var(--text-primary)]">Transitions</h3>
         <div className="flex flex-col gap-1.5">
           {(workflow.transitions as EnhancedTransition[]).map((tr) => {
             const isExpanded = expandedTransitionId === tr.id;
@@ -349,20 +349,20 @@ export default function WorkflowEditor({ workflow, entities, onChange, onDelete 
                 {/* Transition header row */}
                 <div className="flex items-center gap-2 px-3 py-2">
                   <select value={tr.fromStateId} onChange={(e) => updateTransition(tr.id, { fromStateId: e.target.value })}
-                    className="bg-white/[0.05] text-xs text-[#94A3B8] rounded px-1.5 py-1 outline-none border border-white/[0.08] flex-1">
+                    className="bg-white/[0.05] text-xs text-[var(--text-secondary)] rounded px-1.5 py-1 outline-none border border-white/[0.08] flex-1">
                     {workflow.states.map((s) => (
-                      <option key={s.id} value={s.id} className="bg-[#0c1022]">{s.name}</option>
+                      <option key={s.id} value={s.id} className="bg-[var(--bg-inset)]">{s.name}</option>
                     ))}
                   </select>
-                  <ArrowRight className="w-3.5 h-3.5 text-[#64748B] shrink-0" />
+                  <ArrowRight className="w-3.5 h-3.5 text-[var(--text-tertiary)] shrink-0" />
                   <select value={tr.toStateId} onChange={(e) => updateTransition(tr.id, { toStateId: e.target.value })}
-                    className="bg-white/[0.05] text-xs text-[#94A3B8] rounded px-1.5 py-1 outline-none border border-white/[0.08] flex-1">
+                    className="bg-white/[0.05] text-xs text-[var(--text-secondary)] rounded px-1.5 py-1 outline-none border border-white/[0.08] flex-1">
                     {workflow.states.map((s) => (
-                      <option key={s.id} value={s.id} className="bg-[#0c1022]">{s.name}</option>
+                      <option key={s.id} value={s.id} className="bg-[var(--bg-inset)]">{s.name}</option>
                     ))}
                   </select>
                   <input value={tr.trigger} onChange={(e) => updateTransition(tr.id, { trigger: e.target.value })}
-                    className="bg-transparent text-xs text-[#F1F5F9] outline-none w-20" placeholder="trigger" />
+                    className="bg-transparent text-xs text-[var(--text-primary)] outline-none w-20" placeholder="trigger" />
 
                   {/* Badges for guards/actions */}
                   {guardCount > 0 && (
@@ -380,11 +380,11 @@ export default function WorkflowEditor({ workflow, entities, onChange, onDelete 
                   )}
 
                   <button onClick={() => setExpandedTransitionId(isExpanded ? null : tr.id)}
-                    className="text-[#64748B] hover:text-[#94A3B8] transition-colors">
+                    className="text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] transition-colors">
                     {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
                   </button>
                   <button onClick={() => removeTransition(tr.id)}
-                    className="text-[#64748B] hover:text-red-400 transition-colors">
+                    className="text-[var(--text-tertiary)] hover:text-red-400 transition-colors">
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
                 </div>
@@ -407,7 +407,7 @@ export default function WorkflowEditor({ workflow, entities, onChange, onDelete 
                             </button>
                           </div>
                           {(tr.guards ?? []).length === 0 && (
-                            <span className="text-[10px] text-[#64748B]">No guards — transition always allowed</span>
+                            <span className="text-[10px] text-[var(--text-tertiary)]">No guards — transition always allowed</span>
                           )}
                           {(tr.guards ?? []).map((g) => (
                             <GuardRow key={g.id} guard={g} entity={selectedEntity}
@@ -428,7 +428,7 @@ export default function WorkflowEditor({ workflow, entities, onChange, onDelete 
                             </button>
                           </div>
                           {(tr.actions ?? []).length === 0 && (
-                            <span className="text-[10px] text-[#64748B]">No actions — transition fires silently</span>
+                            <span className="text-[10px] text-[var(--text-tertiary)]">No actions — transition fires silently</span>
                           )}
                           {(tr.actions ?? []).map((a) => (
                             <ActionRow key={a.id} action={a}
@@ -439,7 +439,7 @@ export default function WorkflowEditor({ workflow, entities, onChange, onDelete 
 
                         {/* Requires approval toggle */}
                         <div className="flex items-center justify-between pt-1">
-                          <span className="text-[10px] text-[#64748B] flex items-center gap-1">
+                          <span className="text-[10px] text-[var(--text-tertiary)] flex items-center gap-1">
                             <Lock className="w-3 h-3" /> Requires Approval
                           </span>
                           <button onClick={() => updateTransition(tr.id, { requiresApproval: !tr.requiresApproval })}
@@ -450,10 +450,10 @@ export default function WorkflowEditor({ workflow, entities, onChange, onDelete 
 
                         {/* Allowed roles */}
                         <div className="space-y-1">
-                          <span className="text-[10px] text-[#64748B]">Allowed Roles (comma-separated)</span>
+                          <span className="text-[10px] text-[var(--text-tertiary)]">Allowed Roles (comma-separated)</span>
                           <input value={(tr.allowedRoles ?? []).join(", ")}
                             onChange={(e) => updateTransition(tr.id, { allowedRoles: e.target.value.split(",").map((s) => s.trim()).filter(Boolean) })}
-                            className="w-full bg-transparent text-[10px] text-[#F1F5F9] outline-none border-b border-white/[0.06] pb-0.5"
+                            className="w-full bg-transparent text-[10px] text-[var(--text-primary)] outline-none border-b border-white/[0.06] pb-0.5"
                             placeholder="admin, manager, lead..." />
                         </div>
                       </div>
@@ -465,7 +465,7 @@ export default function WorkflowEditor({ workflow, entities, onChange, onDelete 
           })}
         </div>
         <button onClick={addTransition}
-          className="flex items-center gap-1.5 text-xs text-[#64748B] hover:text-emerald-400 transition-colors self-start mt-1">
+          className="flex items-center gap-1.5 text-xs text-[var(--text-tertiary)] hover:text-emerald-400 transition-colors self-start mt-1">
           <Plus className="w-3.5 h-3.5" /> Add Transition
         </button>
       </div>

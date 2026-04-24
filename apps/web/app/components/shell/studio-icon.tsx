@@ -69,7 +69,7 @@ const studioIconMap: Record<string, LucideIcon> = {
   cortex: BrainCircuit,
 }
 
-const ACTIVE_COLOR = '#6398ff'
+const ACTIVE_COLOR = 'var(--accent)'
 const INACTIVE_COLOR = 'currentColor'
 
 interface StudioIconProps {

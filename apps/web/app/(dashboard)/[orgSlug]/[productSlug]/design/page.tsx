@@ -365,9 +365,9 @@ export default function DesignStudioPage() {
       {/* ── Context banner ── */}
       <ContextBanner
         chips={[
-          { label: 'Brand Tokens', source: 'brand', color: '#EC4899' },
-          { label: 'Brand Voice', source: 'brand-voice', color: '#8B5CF6' },
-          { label: 'Components', source: 'components', color: '#6366F1' },
+          { label: 'Brand Tokens', source: 'brand' },
+          { label: 'Brand Voice', source: 'brand-voice' },
+          { label: 'Components', source: 'components' },
         ]}
         missing={[]}
       />

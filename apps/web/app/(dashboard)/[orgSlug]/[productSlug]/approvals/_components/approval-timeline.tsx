@@ -8,12 +8,12 @@ const actionConfig: Record<
   string,
   { color: string; bg: string; icon: React.ElementType; label: string }
 > = {
-  created: { color: '#94A3B8', bg: 'bg-[#94A3B8]/20', icon: Plus, label: 'Created' },
-  reviewed: { color: '#3B82F6', bg: 'bg-[#3B82F6]/20', icon: Eye, label: 'Reviewed' },
-  approved: { color: '#10B981', bg: 'bg-[#10B981]/20', icon: Check, label: 'Approved' },
-  rejected: { color: '#F43F5E', bg: 'bg-[#F43F5E]/20', icon: X, label: 'Rejected' },
-  changes_requested: { color: '#3B82F6', bg: 'bg-[#3B82F6]/20', icon: MessageSquare, label: 'Changes Requested' },
-  commented: { color: '#94A3B8', bg: 'bg-[#94A3B8]/20', icon: MessageSquare, label: 'Commented' },
+  created: { color: '#94A3B8', bg: 'bg-[var(--text-secondary)]/20', icon: Plus, label: 'Created' },
+  reviewed: { color: '#3B82F6', bg: 'bg-[var(--accent)]/20', icon: Eye, label: 'Reviewed' },
+  approved: { color: '#10B981', bg: 'bg-[var(--color-success)]/20', icon: Check, label: 'Approved' },
+  rejected: { color: '#F43F5E', bg: 'bg-[var(--color-error)]/20', icon: X, label: 'Rejected' },
+  changes_requested: { color: '#3B82F6', bg: 'bg-[var(--accent)]/20', icon: MessageSquare, label: 'Changes Requested' },
+  commented: { color: '#94A3B8', bg: 'bg-[var(--text-secondary)]/20', icon: MessageSquare, label: 'Commented' },
 }
 
 function formatTimestamp(iso: string): string {
@@ -62,14 +62,14 @@ export function ApprovalTimeline({ events }: ApprovalTimelineProps) {
               {/* Content */}
               <div className="flex flex-col gap-0.5 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-sm font-medium text-[#F1F5F9]">{event.actor}</span>
+                  <span className="text-sm font-medium text-[var(--text-primary)]">{event.actor}</span>
                   <span className="text-xs font-medium" style={{ color: config.color }}>
                     {config.label}
                   </span>
-                  <span className="text-xs text-[#64748B]">{formatTimestamp(event.timestamp)}</span>
+                  <span className="text-xs text-[var(--text-tertiary)]">{formatTimestamp(event.timestamp)}</span>
                 </div>
                 {event.comment && (
-                  <p className="text-xs text-[#94A3B8] leading-relaxed">{event.comment}</p>
+                  <p className="text-xs text-[var(--text-secondary)] leading-relaxed">{event.comment}</p>
                 )}
               </div>
             </motion.div>

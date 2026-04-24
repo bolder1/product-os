@@ -53,10 +53,10 @@ function deriveMatrix(studioScores: Array<{ studio: string; score: number }>): M
 }
 
 function CellIcon({ state }: { state: CellState }) {
-  if (state === 'done')    return <CheckCircle2 size={12} className="text-[#10B981]" />
-  if (state === 'partial') return <div className="w-2.5 h-2.5 rounded-sm bg-[#F59E0B]/40 border border-[#F59E0B]/60" />
-  if (state === 'missing') return <XCircle size={12} className="text-[#F43F5E]/60" />
-  return <Minus size={10} className="text-[#334155]" />
+  if (state === 'done')    return <CheckCircle2 size={12} className="text-[var(--color-success)]" />
+  if (state === 'partial') return <div className="w-2.5 h-2.5 rounded-sm bg-[var(--color-warning)]/40 border border-[var(--color-warning)]/60" />
+  if (state === 'missing') return <XCircle size={12} className="text-[var(--color-error)]/60" />
+  return <Minus size={10} className="text-[var(--border-default)]" />
 }
 
 export function StudioReadinessMatrix({ productId }: { productId: string }) {
@@ -81,20 +81,20 @@ export function StudioReadinessMatrix({ productId }: { productId: string }) {
       {/* Header */}
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
-          <LayoutGrid className="w-3.5 h-3.5 text-[#8B5CF6]" />
-          <span className="text-[12px] font-semibold text-[#94A3B8] uppercase tracking-wider">Studio Readiness Matrix</span>
+          <LayoutGrid className="w-3.5 h-3.5 text-[var(--accent)]" />
+          <span className="text-[12px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider">Studio Readiness Matrix</span>
         </div>
         <button
           onClick={() => refetch()}
           disabled={isLoading}
-          className="text-[#475569] hover:text-[#94A3B8] transition-colors disabled:opacity-40"
+          className="text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] transition-colors disabled:opacity-40"
         >
           <RefreshCw size={11} className={isLoading ? 'animate-spin' : ''} />
         </button>
       </div>
 
       {isLoading ? (
-        <div className="flex items-center justify-center gap-2 py-8 text-[#475569]">
+        <div className="flex items-center justify-center gap-2 py-8 text-[var(--text-tertiary)]">
           <Loader2 size={14} className="animate-spin" />
           <span className="text-[11px]">Computing readiness…</span>
         </div>
@@ -103,11 +103,11 @@ export function StudioReadinessMatrix({ productId }: { productId: string }) {
           <table className="w-full text-[10px]">
             <thead>
               <tr>
-                <th className="text-left text-[#475569] font-medium pb-2 pr-3 w-[100px]">Studio</th>
+                <th className="text-left text-[var(--text-tertiary)] font-medium pb-2 pr-3 w-[100px]">Studio</th>
                 {DIMENSIONS.map((d) => (
-                  <th key={d.key} className="text-center text-[#475569] font-medium pb-2 px-2">{d.label}</th>
+                  <th key={d.key} className="text-center text-[var(--text-tertiary)] font-medium pb-2 px-2">{d.label}</th>
                 ))}
-                <th className="text-right text-[#475569] font-medium pb-2 pl-3 w-[48px]">Score</th>
+                <th className="text-right text-[var(--text-tertiary)] font-medium pb-2 pl-3 w-[48px]">Score</th>
               </tr>
             </thead>
             <tbody>
@@ -125,8 +125,8 @@ export function StudioReadinessMatrix({ productId }: { productId: string }) {
                   >
                     <td className="py-2 pr-3">
                       <div className="flex items-center gap-1.5">
-                        <span className="text-[#94A3B8] group-hover:text-[#F1F5F9] transition-colors font-medium">{studio.label}</span>
-                        <ArrowRight size={8} className="opacity-0 group-hover:opacity-100 text-[#64748B] transition-opacity" />
+                        <span className="text-[var(--text-secondary)] group-hover:text-[#F1F5F9] transition-colors font-medium">{studio.label}</span>
+                        <ArrowRight size={8} className="opacity-0 group-hover:opacity-100 text-[var(--text-tertiary)] transition-opacity" />
                       </div>
                     </td>
                     {DIMENSIONS.map((d) => (
@@ -148,10 +148,10 @@ export function StudioReadinessMatrix({ productId }: { productId: string }) {
       )}
 
       {/* Legend */}
-      <div className="flex items-center gap-4 mt-3 pt-3 border-t border-white/[0.06] text-[9px] text-[#475569]">
-        <span className="flex items-center gap-1"><CheckCircle2 size={9} className="text-[#10B981]" /> Done</span>
-        <span className="flex items-center gap-1"><div className="w-2 h-2 rounded-sm bg-[#F59E0B]/40 border border-[#F59E0B]/60" /> Partial</span>
-        <span className="flex items-center gap-1"><XCircle size={9} className="text-[#F43F5E]/60" /> Missing</span>
+      <div className="flex items-center gap-4 mt-3 pt-3 border-t border-white/[0.06] text-[9px] text-[var(--text-tertiary)]">
+        <span className="flex items-center gap-1"><CheckCircle2 size={9} className="text-[var(--color-success)]" /> Done</span>
+        <span className="flex items-center gap-1"><div className="w-2 h-2 rounded-sm bg-[var(--color-warning)]/40 border border-[var(--color-warning)]/60" /> Partial</span>
+        <span className="flex items-center gap-1"><XCircle size={9} className="text-[var(--color-error)]/60" /> Missing</span>
       </div>
     </motion.div>
   )

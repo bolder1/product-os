@@ -337,9 +337,9 @@ export default function DevHandoffPage() {
     <div className="flex flex-col h-full bg-[var(--bg-workspace)] overflow-hidden">
       <ContextBanner
         chips={[
-          { label: 'Design Screens', source: 'design', color: '#3B82F6' },
-          { label: 'Components', source: 'components', color: '#6366F1' },
-          { label: 'Brand Tokens', source: 'brand', color: '#EC4899' },
+          { label: 'Design Screens', source: 'design' },
+          { label: 'Components', source: 'components' },
+          { label: 'Brand Tokens', source: 'brand' },
         ]}
         missing={[]}
       />
@@ -391,7 +391,7 @@ export default function DevHandoffPage() {
 
           {/* Generate All button */}
           <div className="px-2 py-1.5 border-b border-[var(--border-subtle)] shrink-0">
-            <button className="w-full flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-[11px] font-medium text-[#8B5CF6] bg-[#8B5CF6]/10 hover:bg-[#8B5CF6]/20 border border-[#8B5CF6]/20 transition-colors">
+            <button className="w-full flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-[11px] font-medium text-[var(--accent)] bg-[var(--accent)]/10 hover:bg-[var(--accent)]/20 border border-[var(--accent)]/20 transition-colors">
               <Sparkles className="w-3 h-3" />
               Generate All
             </button>

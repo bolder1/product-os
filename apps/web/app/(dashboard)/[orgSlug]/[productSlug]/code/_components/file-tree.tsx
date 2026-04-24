@@ -30,22 +30,22 @@ function FolderItem({
     <div>
       <button
         onClick={() => setExpanded(!expanded)}
-        className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-sm text-[#94A3B8] hover:text-[#F1F5F9] hover:bg-white/[0.03] transition-colors group"
+        className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-white/[0.03] transition-colors group"
         style={{ paddingLeft: `${depth * 16 + 8}px` }}
       >
         <motion.div
           animate={{ rotate: expanded ? 90 : 0 }}
           transition={{ duration: 0.15 }}
         >
-          <ChevronRight className="w-3.5 h-3.5 text-[#64748B]" />
+          <ChevronRight className="w-3.5 h-3.5 text-[var(--text-tertiary)]" />
         </motion.div>
         {expanded ? (
-          <FolderOpen className="w-4 h-4 text-[#06B6D4]" />
+          <FolderOpen className="w-4 h-4 text-[var(--accent)]" />
         ) : (
-          <Folder className="w-4 h-4 text-[#06B6D4]/60" />
+          <Folder className="w-4 h-4 text-[var(--accent)]/60" />
         )}
         <span className="flex-1 text-left truncate">{folder.name}</span>
-        <span className="text-[10px] text-[#64748B] bg-white/[0.05] px-1.5 py-0.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+        <span className="text-[10px] text-[var(--text-tertiary)] bg-white/[0.05] px-1.5 py-0.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
           {fileCount}
         </span>
       </button>
@@ -105,8 +105,8 @@ function FileItem({
       onClick={onSelect}
       className={`w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-sm transition-colors ${
         isSelected
-          ? 'bg-[#06B6D4]/10 text-[#06B6D4]'
-          : 'text-[#94A3B8] hover:text-[#F1F5F9] hover:bg-white/[0.03]'
+          ? 'bg-[var(--accent)]/10 text-[var(--accent)]'
+          : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-white/[0.03]'
       }`}
       style={{ paddingLeft: `${(depth + 1) * 16 + 8}px` }}
     >

@@ -86,17 +86,17 @@ export function ApprovalCreateModal({ open, onClose, onCreate }: ApprovalCreateM
             exit={{ opacity: 0, scale: 0.95, y: 12 }}
             transition={{ duration: 0.25, type: 'spring', stiffness: 300, damping: 30 }}
             onClick={(e) => e.stopPropagation()}
-            className="relative w-full max-w-lg bg-[#0A0F1E] border border-white/[0.08] rounded-2xl shadow-2xl"
+            className="relative w-full max-w-lg bg-[var(--bg-base)] border border-white/[0.08] rounded-2xl shadow-2xl"
           >
             {/* Header */}
             <div className="flex items-center justify-between p-6 pb-4 border-b border-white/[0.08]">
               <div>
-                <h2 className="text-lg font-semibold text-[#F1F5F9]">New Approval Request</h2>
-                <p className="text-xs text-[#64748B] mt-0.5">Submit an object for review</p>
+                <h2 className="text-lg font-semibold text-[var(--text-primary)]">New Approval Request</h2>
+                <p className="text-xs text-[var(--text-tertiary)] mt-0.5">Submit an object for review</p>
               </div>
               <button
                 onClick={onClose}
-                className="p-1.5 rounded-lg text-[#64748B] hover:text-[#F1F5F9] hover:bg-white/[0.06] transition-colors"
+                className="p-1.5 rounded-lg text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:bg-white/[0.06] transition-colors"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -105,16 +105,16 @@ export function ApprovalCreateModal({ open, onClose, onCreate }: ApprovalCreateM
             <div className="p-6 flex flex-col gap-5">
               {/* Object selector */}
               <div>
-                <label className="block text-xs font-medium text-[#94A3B8] mb-2">Object</label>
+                <label className="block text-xs font-medium text-[var(--text-secondary)] mb-2">Object</label>
                 <div className="relative">
                   <button
                     onClick={() => setNodeDropdownOpen(!nodeDropdownOpen)}
-                    className="w-full flex items-center justify-between px-4 py-2.5 bg-white/[0.03] border border-white/[0.08] rounded-xl text-sm text-[#F1F5F9] hover:border-white/[0.15] transition-colors"
+                    className="w-full flex items-center justify-between px-4 py-2.5 bg-white/[0.03] border border-white/[0.08] rounded-xl text-sm text-[var(--text-primary)] hover:border-white/[0.15] transition-colors"
                   >
-                    <span className={selectedNodeObj ? 'text-[#F1F5F9]' : 'text-[#64748B]'}>
+                    <span className={selectedNodeObj ? 'text-[var(--text-primary)]' : 'text-[var(--text-tertiary)]'}>
                       {selectedNodeObj ? selectedNodeObj.name : 'Select an object...'}
                     </span>
-                    <ChevronDown className={`w-4 h-4 text-[#64748B] transition-transform ${nodeDropdownOpen ? 'rotate-180' : ''}`} />
+                    <ChevronDown className={`w-4 h-4 text-[var(--text-tertiary)] transition-transform ${nodeDropdownOpen ? 'rotate-180' : ''}`} />
                   </button>
                   <AnimatePresence>
                     {nodeDropdownOpen && (
@@ -132,11 +132,11 @@ export function ApprovalCreateModal({ open, onClose, onCreate }: ApprovalCreateM
                               setNodeDropdownOpen(false)
                             }}
                             className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-white/[0.05] transition-colors ${
-                              selectedNode === node.id ? 'bg-[#F59E0B]/10 text-[#F59E0B]' : 'text-[#F1F5F9]'
+                              selectedNode === node.id ? 'bg-[var(--color-warning)]/10 text-[var(--color-warning)]' : 'text-[var(--text-primary)]'
                             }`}
                           >
                             <span className="flex-1 text-left">{node.name}</span>
-                            <span className="text-[10px] uppercase tracking-wider text-[#64748B]">{node.type}</span>
+                            <span className="text-[10px] uppercase tracking-wider text-[var(--text-tertiary)]">{node.type}</span>
                           </button>
                         ))}
                       </motion.div>
@@ -147,7 +147,7 @@ export function ApprovalCreateModal({ open, onClose, onCreate }: ApprovalCreateM
 
               {/* Approvers multi-select */}
               <div>
-                <label className="block text-xs font-medium text-[#94A3B8] mb-2">
+                <label className="block text-xs font-medium text-[var(--text-secondary)] mb-2">
                   Approvers ({selectedApprovers.length} selected)
                 </label>
                 <div className="relative">
@@ -171,9 +171,9 @@ export function ApprovalCreateModal({ open, onClose, onCreate }: ApprovalCreateM
                         })}
                       </div>
                     ) : (
-                      <span className="text-[#64748B]">Select approvers...</span>
+                      <span className="text-[var(--text-tertiary)]">Select approvers...</span>
                     )}
-                    <ChevronDown className={`w-4 h-4 text-[#64748B] transition-transform flex-shrink-0 ml-2 ${approverDropdownOpen ? 'rotate-180' : ''}`} />
+                    <ChevronDown className={`w-4 h-4 text-[var(--text-tertiary)] transition-transform flex-shrink-0 ml-2 ${approverDropdownOpen ? 'rotate-180' : ''}`} />
                   </button>
                   <AnimatePresence>
                     {approverDropdownOpen && (
@@ -190,7 +190,7 @@ export function ApprovalCreateModal({ open, onClose, onCreate }: ApprovalCreateM
                               key={member.id}
                               onClick={() => toggleApprover(member.id)}
                               className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-white/[0.05] transition-colors ${
-                                selected ? 'bg-[#F59E0B]/5' : ''
+                                selected ? 'bg-[var(--color-warning)]/5' : ''
                               }`}
                             >
                               <div
@@ -199,8 +199,8 @@ export function ApprovalCreateModal({ open, onClose, onCreate }: ApprovalCreateM
                               >
                                 {member.initials}
                               </div>
-                              <span className="flex-1 text-left text-[#F1F5F9]">{member.name}</span>
-                              {selected && <Check className="w-3.5 h-3.5 text-[#F59E0B]" />}
+                              <span className="flex-1 text-left text-[var(--text-primary)]">{member.name}</span>
+                              {selected && <Check className="w-3.5 h-3.5 text-[var(--color-warning)]" />}
                             </button>
                           )
                         })}
@@ -212,14 +212,14 @@ export function ApprovalCreateModal({ open, onClose, onCreate }: ApprovalCreateM
 
               {/* Routing type */}
               <div>
-                <label className="block text-xs font-medium text-[#94A3B8] mb-2">Routing</label>
+                <label className="block text-xs font-medium text-[var(--text-secondary)] mb-2">Routing</label>
                 <div className="flex items-center rounded-lg border border-white/[0.08] bg-white/[0.03] p-0.5">
                   <button
                     onClick={() => setRouting('parallel')}
                     className={`flex-1 px-4 py-2 rounded-md text-xs font-medium transition-colors ${
                       routing === 'parallel'
-                        ? 'bg-[#F59E0B]/15 text-[#F59E0B]'
-                        : 'text-[#64748B] hover:text-[#94A3B8]'
+                        ? 'bg-[var(--color-warning)]/15 text-[var(--color-warning)]'
+                        : 'text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]'
                     }`}
                   >
                     Parallel
@@ -228,8 +228,8 @@ export function ApprovalCreateModal({ open, onClose, onCreate }: ApprovalCreateM
                     onClick={() => setRouting('sequential')}
                     className={`flex-1 px-4 py-2 rounded-md text-xs font-medium transition-colors ${
                       routing === 'sequential'
-                        ? 'bg-[#F59E0B]/15 text-[#F59E0B]'
-                        : 'text-[#64748B] hover:text-[#94A3B8]'
+                        ? 'bg-[var(--color-warning)]/15 text-[var(--color-warning)]'
+                        : 'text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]'
                     }`}
                   >
                     Sequential
@@ -239,13 +239,13 @@ export function ApprovalCreateModal({ open, onClose, onCreate }: ApprovalCreateM
 
               {/* Message */}
               <div>
-                <label className="block text-xs font-medium text-[#94A3B8] mb-2">Message</label>
+                <label className="block text-xs font-medium text-[var(--text-secondary)] mb-2">Message</label>
                 <textarea
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                   placeholder="Describe what needs approval and any context..."
                   rows={3}
-                  className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-4 py-3 text-sm text-[#F1F5F9] placeholder-[#64748B] resize-none focus:outline-none focus:border-[#F59E0B]/40 transition-colors"
+                  className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-4 py-3 text-sm text-[var(--text-primary)] placeholder-[var(--text-tertiary)] resize-none focus:outline-none focus:border-[var(--color-warning)]/40 transition-colors"
                 />
               </div>
 
@@ -255,8 +255,8 @@ export function ApprovalCreateModal({ open, onClose, onCreate }: ApprovalCreateM
                 disabled={!isValid}
                 className={`flex items-center justify-center gap-2 w-full px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
                   isValid
-                    ? 'bg-[#F59E0B] hover:bg-[#D97706] text-white cursor-pointer'
-                    : 'bg-white/[0.06] text-[#64748B] cursor-not-allowed'
+                    ? 'bg-[var(--color-warning)] hover:bg-[#D97706] text-white cursor-pointer'
+                    : 'bg-white/[0.06] text-[var(--text-tertiary)] cursor-not-allowed'
                 }`}
               >
                 <Plus className="w-4 h-4" />

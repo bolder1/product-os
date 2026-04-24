@@ -27,9 +27,9 @@ function Section({
         onClick={() => setOpen(!open)}
         className="w-full flex items-center justify-between px-4 py-2.5 hover:bg-white/[0.02] transition-colors"
       >
-        <span className="text-[11px] uppercase tracking-wider text-[#64748B] font-semibold">{title}</span>
+        <span className="text-[11px] uppercase tracking-wider text-[var(--text-tertiary)] font-semibold">{title}</span>
         <ChevronDown
-          className={`w-3.5 h-3.5 text-[#64748B] transition-transform ${open ? 'rotate-0' : '-rotate-90'}`}
+          className={`w-3.5 h-3.5 text-[var(--text-tertiary)] transition-transform ${open ? 'rotate-0' : '-rotate-90'}`}
         />
       </button>
       {open && <div className="px-4 pb-3">{children}</div>}
@@ -51,15 +51,15 @@ function NumField({
 }) {
   return (
     <div className="flex flex-col gap-1">
-      <label className="text-[10px] text-[#64748B] font-medium">{label}</label>
+      <label className="text-[10px] text-[var(--text-tertiary)] font-medium">{label}</label>
       <div className="flex items-center bg-white/[0.03] border border-white/[0.06] rounded-lg overflow-hidden">
         <input
           type="number"
           value={value}
           onChange={(e) => onChange(Number(e.target.value))}
-          className="w-full bg-transparent text-[#F1F5F9] text-xs px-2.5 py-1.5 outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+          className="w-full bg-transparent text-[var(--text-primary)] text-xs px-2.5 py-1.5 outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
         />
-        {suffix && <span className="text-[10px] text-[#64748B] pr-2">{suffix}</span>}
+        {suffix && <span className="text-[10px] text-[var(--text-tertiary)] pr-2">{suffix}</span>}
       </div>
     </div>
   )
@@ -77,12 +77,12 @@ function TextField({
 }) {
   return (
     <div className="flex flex-col gap-1">
-      <label className="text-[10px] text-[#64748B] font-medium">{label}</label>
+      <label className="text-[10px] text-[var(--text-tertiary)] font-medium">{label}</label>
       <input
         type="text"
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="bg-white/[0.03] border border-white/[0.06] rounded-lg text-[#F1F5F9] text-xs px-2.5 py-1.5 outline-none focus:border-violet-500/40 transition-colors"
+        className="bg-white/[0.03] border border-white/[0.06] rounded-lg text-[var(--text-primary)] text-xs px-2.5 py-1.5 outline-none focus:border-violet-500/40 transition-colors"
       />
     </div>
   )
@@ -102,11 +102,11 @@ function SelectField({
 }) {
   return (
     <div className="flex flex-col gap-1">
-      <label className="text-[10px] text-[#64748B] font-medium">{label}</label>
+      <label className="text-[10px] text-[var(--text-tertiary)] font-medium">{label}</label>
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="bg-white/[0.03] border border-white/[0.06] rounded-lg text-[#F1F5F9] text-xs px-2.5 py-1.5 outline-none focus:border-violet-500/40 transition-colors cursor-pointer"
+        className="bg-white/[0.03] border border-white/[0.06] rounded-lg text-[var(--text-primary)] text-xs px-2.5 py-1.5 outline-none focus:border-violet-500/40 transition-colors cursor-pointer"
       >
         {options.map((o) => (
           <option key={o} value={o} className="bg-[#0d1129]">
@@ -134,8 +134,8 @@ export default function PropertiesPanel({ element, onUpdate }: PropertiesPanelPr
     return (
       <div className="h-full flex items-center justify-center">
         <div className="text-center space-y-2 px-4">
-          <p className="text-sm text-[#64748B]">No element selected</p>
-          <p className="text-[11px] text-[#475569]">Click an element on the canvas to edit its properties</p>
+          <p className="text-sm text-[var(--text-tertiary)]">No element selected</p>
+          <p className="text-[11px] text-[var(--text-tertiary)]">Click an element on the canvas to edit its properties</p>
         </div>
       </div>
     )
@@ -168,8 +168,8 @@ export default function PropertiesPanel({ element, onUpdate }: PropertiesPanelPr
             <span className="text-[10px] text-violet-400 font-bold">{local.type.charAt(0)}</span>
           </div>
           <div>
-            <p className="text-xs font-semibold text-[#F1F5F9]">{local.type}</p>
-            <p className="text-[10px] text-[#64748B]">{local.id}</p>
+            <p className="text-xs font-semibold text-[var(--text-primary)]">{local.type}</p>
+            <p className="text-[10px] text-[var(--text-tertiary)]">{local.id}</p>
           </div>
         </div>
       </div>
@@ -273,7 +273,7 @@ export default function PropertiesPanel({ element, onUpdate }: PropertiesPanelPr
         <motion.button
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.97 }}
-          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#8B5CF6]/20 to-[#7C3AED]/20 border border-violet-500/20 text-violet-300 text-xs font-medium hover:from-[#8B5CF6]/30 hover:to-[#7C3AED]/30 transition-all"
+          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[var(--accent)]/20 to-[var(--accent)]/20 border border-violet-500/20 text-violet-300 text-xs font-medium hover:from-[var(--accent)]/30 hover:to-[var(--accent)]/30 transition-all"
         >
           <Sparkles className="w-3.5 h-3.5" />
           AI: Suggest Layout

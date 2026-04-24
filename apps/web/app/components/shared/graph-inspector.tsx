@@ -16,10 +16,11 @@
 
 import { useMemo } from 'react'
 import Link from 'next/link'
-import { X, ExternalLink, GitBranch, History, AlertTriangle, Network, ArrowUpRight, ArrowDownLeft } from 'lucide-react'
+import { X, ExternalLink, GitBranch, History, AlertTriangle, Network, ArrowUpRight, ArrowDownLeft, BookOpen } from 'lucide-react'
 import { useInspectorStore, type InspectorTab } from '../../lib/inspector-store'
 import { useGraphStore, type GraphNode } from '../../lib/graph-store'
 import { useLivingGraphStore } from '../../lib/living-graph-store'
+import { useDecisionStore } from '../../lib/decision-store'
 
 interface GraphInspectorProps {
   productId: string
@@ -45,6 +46,7 @@ export function GraphInspector({ productId, orgSlug, productSlug }: GraphInspect
   const nodes = useGraphStore((s) => s.nodes)
   const edges = useGraphStore((s) => s.edges)
   const versionsByNode = useLivingGraphStore((s) => s.versionsByNode)
+  const allDecisions = useDecisionStore((s) => s.decisions)
 
   const node: GraphNode | null = useMemo(() => {
     if (selectedNodeId) return nodes.find((n) => n.id === selectedNodeId) ?? null
@@ -138,7 +140,16 @@ export function GraphInspector({ productId, orgSlug, productSlug }: GraphInspect
           <ConnectionsTab outgoing={outgoing} incoming={incoming} nodesById={nodes} />
         )}
         {node && tab === 'history' && (
-          <HistoryTab versions={versionsByNode[node.id] ?? []} />
+          <HistoryTab
+            versions={versionsByNode[node.id] ?? []}
+            decisions={allDecisions.filter(
+              (d) =>
+                d.productId === productId &&
+                d.relatedEntities.some((e) => e.id === node.id || e.id === node.id)
+            )}
+            orgSlug={orgSlug}
+            productSlug={productSlug}
+          />
         )}
         {node && tab === 'impact' && (
           <ImpactTab outgoing={outgoing} nodesById={nodes} />
@@ -233,24 +244,97 @@ function ConnectionsTab({
   )
 }
 
-function HistoryTab({ versions }: { versions: Array<{ version: number; changedAt: string; changedBy?: string; diff: Record<string, unknown> }> }) {
-  if (versions.length === 0) return <Empty label="No recorded versions" className="p-6" />
+function HistoryTab({
+  versions,
+  decisions,
+  orgSlug,
+  productSlug,
+}: {
+  versions: Array<{ version: number; changedAt: string; changedBy?: string; diff: Record<string, unknown> }>
+  decisions: import('../../lib/decision-store').Decision[]
+  orgSlug: string
+  productSlug: string
+}) {
+  const hasContent = versions.length > 0 || decisions.length > 0
+  if (!hasContent) return <Empty label="No recorded versions or decisions" className="p-6" />
+
   return (
     <div className="p-4 space-y-3">
-      {versions.map((v) => (
-        <div key={v.version} className="p-3 rounded-md border border-[var(--border-subtle)] bg-[var(--bg-base)]">
-          <div className="flex items-center justify-between text-[11px] text-[var(--text-tertiary)]">
-            <span className="font-medium text-[var(--text-primary)]">v{v.version}</span>
-            <span>{new Date(v.changedAt).toLocaleString()}</span>
+      {/* Decisions linked to this node */}
+      {decisions.length > 0 && (
+        <div>
+          <div className="flex items-center gap-1.5 mb-2">
+            <BookOpen size={11} className="text-[var(--accent-text)]" />
+            <span className="text-[10px] uppercase tracking-wide font-semibold text-[var(--text-tertiary)]">
+              Decisions
+            </span>
           </div>
-          {v.changedBy && (
-            <div className="mt-1 text-[11px] text-[var(--text-secondary)]">by {v.changedBy}</div>
-          )}
-          <pre className="mt-2 text-[10px] text-[var(--text-secondary)] overflow-auto max-h-24">
-            {JSON.stringify(v.diff, null, 2)}
-          </pre>
+          <div className="space-y-2">
+            {decisions.map((d) => (
+              <div key={d.id} className="p-3 rounded-md border border-[var(--border-subtle)] bg-[var(--bg-base)]">
+                <div className="flex items-start justify-between gap-2">
+                  <span className="text-[12px] font-medium text-[var(--text-primary)] leading-snug">
+                    {d.title}
+                  </span>
+                  <span
+                    className="shrink-0 text-[9px] uppercase tracking-wide px-1.5 py-0.5 rounded font-semibold"
+                    style={{
+                      background: d.status === 'decided' ? 'var(--color-success-muted)' : 'var(--bg-elevated)',
+                      color: d.status === 'decided' ? 'var(--color-success)' : 'var(--text-tertiary)',
+                    }}
+                  >
+                    {d.status}
+                  </span>
+                </div>
+                {d.rationale && (
+                  <p className="mt-1.5 text-[11px] text-[var(--text-secondary)] leading-relaxed line-clamp-3">
+                    {d.rationale}
+                  </p>
+                )}
+                <div className="mt-2 flex items-center gap-2 text-[10px] text-[var(--text-tertiary)]">
+                  <span>{new Date(d.createdAt).toLocaleDateString()}</span>
+                  {d.decidedBy && <span>· {d.decidedBy}</span>}
+                  <Link
+                    href={`/${orgSlug}/${productSlug}/decisions`}
+                    className="ml-auto flex items-center gap-0.5 text-[var(--accent-text)] hover:opacity-80"
+                  >
+                    <ExternalLink size={9} />
+                    Decisions
+                  </Link>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
-      ))}
+      )}
+
+      {/* Version history */}
+      {versions.length > 0 && (
+        <div>
+          {decisions.length > 0 && (
+            <div className="flex items-center gap-1.5 mb-2 mt-4">
+              <History size={11} className="text-[var(--text-tertiary)]" />
+              <span className="text-[10px] uppercase tracking-wide font-semibold text-[var(--text-tertiary)]">
+                Versions
+              </span>
+            </div>
+          )}
+          {versions.map((v) => (
+            <div key={v.version} className="p-3 rounded-md border border-[var(--border-subtle)] bg-[var(--bg-base)] mb-2">
+              <div className="flex items-center justify-between text-[11px] text-[var(--text-tertiary)]">
+                <span className="font-medium text-[var(--text-primary)]">v{v.version}</span>
+                <span>{new Date(v.changedAt).toLocaleString()}</span>
+              </div>
+              {v.changedBy && (
+                <div className="mt-1 text-[11px] text-[var(--text-secondary)]">by {v.changedBy}</div>
+              )}
+              <pre className="mt-2 text-[10px] text-[var(--text-secondary)] overflow-auto max-h-24">
+                {JSON.stringify(v.diff, null, 2)}
+              </pre>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   )
 }

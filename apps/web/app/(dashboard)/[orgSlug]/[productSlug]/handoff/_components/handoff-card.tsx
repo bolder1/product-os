@@ -26,7 +26,7 @@ export function HandoffCard({ item, index, onViewSpec }: HandoffCardProps) {
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.06, duration: 0.3 }}
-      className="group flex flex-col rounded-2xl bg-white/[0.02] border border-white/[0.08] hover:border-[#F59E0B]/30 transition-all duration-200 overflow-hidden"
+      className="group flex flex-col rounded-2xl bg-white/[0.02] border border-white/[0.08] hover:border-[var(--color-warning)]/30 transition-all duration-200 overflow-hidden"
     >
       {/* Preview area */}
       <div
@@ -62,8 +62,8 @@ export function HandoffCard({ item, index, onViewSpec }: HandoffCardProps) {
       {/* Content */}
       <div className="flex-1 p-4 flex flex-col gap-3">
         <div>
-          <h3 className="text-sm font-semibold text-[#F1F5F9]">{item.name}</h3>
-          <p className="text-xs text-[#64748B] mt-0.5">
+          <h3 className="text-sm font-semibold text-[var(--text-primary)]">{item.name}</h3>
+          <p className="text-xs text-[var(--text-tertiary)] mt-0.5">
             {item.specs.length} specs / {item.tokens.length} tokens
           </p>
         </div>
@@ -71,7 +71,7 @@ export function HandoffCard({ item, index, onViewSpec }: HandoffCardProps) {
         {/* Completeness bar */}
         <div>
           <div className="flex items-center justify-between mb-1.5">
-            <span className="text-[10px] text-[#64748B]">Spec completeness</span>
+            <span className="text-[10px] text-[var(--text-tertiary)]">Spec completeness</span>
             <span
               className="text-[10px] font-medium"
               style={{
@@ -105,9 +105,9 @@ export function HandoffCard({ item, index, onViewSpec }: HandoffCardProps) {
         </div>
 
         {/* Criteria summary */}
-        <div className="flex items-center gap-2 text-[10px] text-[#64748B]">
+        <div className="flex items-center gap-2 text-[10px] text-[var(--text-tertiary)]">
           {doneCriteria === totalCriteria ? (
-            <CheckCircle2 className="w-3 h-3 text-[#10B981]" />
+            <CheckCircle2 className="w-3 h-3 text-[var(--color-success)]" />
           ) : (
             <Circle className="w-3 h-3" />
           )}
@@ -119,7 +119,7 @@ export function HandoffCard({ item, index, onViewSpec }: HandoffCardProps) {
         {/* View spec button */}
         <button
           onClick={() => onViewSpec(item.id)}
-          className="flex items-center justify-center gap-1.5 w-full px-3 py-2 rounded-lg text-xs font-medium text-[#F59E0B] bg-[#F59E0B]/10 hover:bg-[#F59E0B]/20 border border-[#F59E0B]/20 transition-colors mt-auto"
+          className="flex items-center justify-center gap-1.5 w-full px-3 py-2 rounded-lg text-xs font-medium text-[var(--color-warning)] bg-[var(--color-warning)]/10 hover:bg-[var(--color-warning)]/20 border border-[var(--color-warning)]/20 transition-colors mt-auto"
         >
           <Eye className="w-3.5 h-3.5" />
           View Spec

@@ -21,6 +21,7 @@ import {
   Upload, FileText, X, Sparkles, Send, Palette, Users, ListChecks, ChevronRight, ChevronLeft, Check,
   Rocket, Globe, LayoutTemplate, Plus, Wand2,
 } from 'lucide-react'
+import { useShallow } from 'zustand/react/shallow'
 import { usePlanModeStore, type PlanStep, type MCQAnswer } from '../../../lib/plan-mode-store'
 import { useProductMemoryStore, kindFromFilename } from '../../../lib/product-memory-store'
 
@@ -138,8 +139,8 @@ const PHASE_LABELS: Record<PlanStep, string> = {
 // ──────────────────────────────────────────────────────────────────────────
 
 export function PlanModeStep({ defaultProductName, onComplete, onSkip }: Props) {
-  const plan = usePlanModeStore()
-  const memory = useProductMemoryStore()
+  const plan = usePlanModeStore(useShallow((s) => s))
+  const memory = useProductMemoryStore(useShallow((s) => s))
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const phase = plan.step === 'done' ? 'memory' : plan.step
@@ -234,17 +235,17 @@ export function PlanModeStep({ defaultProductName, onComplete, onSkip }: Props) 
               >
                 <div
                   className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-semibold shrink-0 transition-colors ${
-                    done ? 'bg-[#3dd68c] text-black' : active ? 'bg-[#6398ff] text-white' : 'bg-white/[0.05] text-[#64748b]'
+                    done ? 'bg-[var(--color-success)] text-[var(--text-inverse)]' : active ? 'bg-[var(--accent)] text-[var(--color-white)]' : 'bg-[var(--surface-hover)] text-[var(--text-tertiary)]'
                   }`}
                 >
                   {done ? <Check size={12} /> : i + 1}
                 </div>
-                <span className={`text-[11px] font-medium truncate ${active ? 'text-[#e4e4e7]' : 'text-[#64748b]'}`}>
+                <span className={`text-[11px] font-medium truncate ${active ? 'text-[var(--text-primary)]' : 'text-[var(--text-tertiary)]'}`}>
                   {PHASE_LABELS[p]}
                 </span>
               </button>
               {i < PHASE_ORDER.length - 1 && (
-                <div className={`h-px flex-1 ${done ? 'bg-[#3dd68c]/50' : 'bg-white/[0.06]'}`} />
+                <div className={`h-px flex-1 ${done ? 'bg-[var(--color-success)] opacity-60' : 'bg-[var(--surface-hover)]'}`} />
               )}
             </div>
           )
@@ -265,12 +266,12 @@ export function PlanModeStep({ defaultProductName, onComplete, onSkip }: Props) 
             {phase === 'memory' && (
               <div className="flex flex-col gap-4">
                 <div className="flex items-start gap-3">
-                  <div className="w-9 h-9 rounded-lg bg-[#6398ff]/15 flex items-center justify-center shrink-0">
-                    <Upload size={18} className="text-[#6398ff]" />
+                  <div className="w-9 h-9 rounded-lg bg-[var(--accent-subtle)] flex items-center justify-center shrink-0">
+                    <Upload size={18} className="text-[var(--accent-text)]" />
                   </div>
                   <div>
-                    <h3 className="text-sm font-medium text-[#e4e4e7]">Product Memory</h3>
-                    <p className="text-xs text-[#94a3b8] leading-relaxed mt-0.5">
+                    <h3 className="text-sm font-medium text-[var(--text-primary)]">Product Memory</h3>
+                    <p className="text-xs text-[var(--text-secondary)] leading-relaxed mt-0.5">
                       Upload briefs, research, PDFs — anything that helps AI understand your product.
                       We’ll read, embed, and use this context throughout Plan Mode.
                     </p>
@@ -279,11 +280,11 @@ export function PlanModeStep({ defaultProductName, onComplete, onSkip }: Props) 
 
                 <button
                   onClick={() => fileInputRef.current?.click()}
-                  className="flex flex-col items-center justify-center gap-2 py-10 border-2 border-dashed border-white/[0.1] rounded-xl hover:border-[#6398ff]/40 hover:bg-white/[0.02] transition-colors"
+                  className="flex flex-col items-center justify-center gap-2 py-10 border-2 border-dashed border-[var(--border-default)] rounded-xl hover:border-[var(--accent)] hover:bg-[var(--bg-inset)] transition-colors"
                 >
-                  <Upload size={22} className="text-[#6398ff]" />
-                  <p className="text-sm text-[#e4e4e7] font-medium">Drop files or click to upload</p>
-                  <p className="text-[11px] text-[#64748b]">PDF · DOCX · MD · TXT · Images</p>
+                  <Upload size={22} className="text-[var(--accent-text)]" />
+                  <p className="text-sm text-[var(--text-primary)] font-medium">Drop files or click to upload</p>
+                  <p className="text-[11px] text-[var(--text-tertiary)]">PDF · DOCX · MD · TXT · Images</p>
                 </button>
                 <input
                   ref={fileInputRef}
@@ -297,13 +298,13 @@ export function PlanModeStep({ defaultProductName, onComplete, onSkip }: Props) 
                 {memoryAssets.length > 0 && (
                   <div className="flex flex-col gap-1.5">
                     {memoryAssets.map((a) => (
-                      <div key={a.id} className="flex items-center gap-3 px-3 py-2 rounded-lg bg-white/[0.02] border border-white/[0.06]">
-                        <FileText size={14} className="text-[#94a3b8] shrink-0" />
-                        <span className="text-xs text-[#e4e4e7] flex-1 truncate">{a.filename}</span>
+                      <div key={a.id} className="flex items-center gap-3 px-3 py-2 rounded-lg bg-[var(--bg-inset)] border border-[var(--border-subtle)]">
+                        <FileText size={14} className="text-[var(--text-secondary)] shrink-0" />
+                        <span className="text-xs text-[var(--text-primary)] flex-1 truncate">{a.filename}</span>
                         <StatusPill status={a.status} />
                         <button
                           onClick={() => { memory.removeAsset(a.id); plan.removeMemoryAsset(a.id) }}
-                          className="text-[#64748b] hover:text-[#ef5350] transition-colors"
+                          className="text-[var(--text-tertiary)] hover:text-[var(--color-error)] transition-colors"
                         >
                           <X size={13} />
                         </button>
@@ -312,7 +313,7 @@ export function PlanModeStep({ defaultProductName, onComplete, onSkip }: Props) 
                   </div>
                 )}
 
-                <p className="text-[11px] text-[#64748b] text-center mt-2">
+                <p className="text-[11px] text-[var(--text-tertiary)] text-center mt-2">
                   You can always add more to Memory later from the sidebar.
                 </p>
               </div>
@@ -323,8 +324,8 @@ export function PlanModeStep({ defaultProductName, onComplete, onSkip }: Props) 
               <div className="grid grid-cols-1 md:grid-cols-5 gap-5">
                 {/* Freeform */}
                 <div className="md:col-span-3 flex flex-col gap-2">
-                  <label className="text-xs text-[#94a3b8] flex items-center gap-1.5">
-                    <Sparkles size={12} className="text-[#6398ff]" />
+                  <label className="text-xs text-[var(--text-secondary)] flex items-center gap-1.5">
+                    <Sparkles size={12} className="text-[var(--accent-text)]" />
                     Describe your product in your own words
                   </label>
                   <textarea
@@ -332,16 +333,16 @@ export function PlanModeStep({ defaultProductName, onComplete, onSkip }: Props) 
                     onChange={(e) => plan.setFreeform(e.target.value)}
                     placeholder="What are you building? Who is it for? What problem does it solve?"
                     rows={12}
-                    className="w-full px-4 py-3 rounded-lg bg-white/[0.03] border border-white/[0.08] text-[#e4e4e7] placeholder:text-[#64748b] focus:border-[#6398ff]/50 focus:outline-none focus:ring-1 focus:ring-[#6398ff]/30 resize-none text-sm leading-relaxed"
+                    className="w-full px-4 py-3 rounded-lg bg-[var(--bg-inset)] border border-[var(--border-default)] text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:border-[var(--accent)] focus:outline-none focus:ring-1 focus:ring-[var(--accent)]/30 resize-none text-sm leading-relaxed"
                   />
-                  <p className="text-[11px] text-[#64748b]">
+                  <p className="text-[11px] text-[var(--text-tertiary)]">
                     {plan.freeformBrief.length} characters · AI reads freeform text + Memory + MCQ answers together.
                   </p>
                 </div>
 
                 {/* MCQ cards */}
                 <div className="md:col-span-2 flex flex-col gap-3">
-                  <label className="text-xs text-[#94a3b8]">Quick answers (optional)</label>
+                  <label className="text-xs text-[var(--text-secondary)]">Quick answers (optional)</label>
                   <div className="flex flex-col gap-3 max-h-[340px] overflow-y-auto pr-1">
                     {MCQ_BANK.map((q) => (
                       <MCQCard
@@ -372,7 +373,7 @@ export function PlanModeStep({ defaultProductName, onComplete, onSkip }: Props) 
             {/* ─────────── TEMPLATE ─────────── */}
             {phase === 'template' && (
               <div className="flex flex-col gap-3">
-                <label className="text-xs text-[#94a3b8]">Start from a template or scratch</label>
+                <label className="text-xs text-[var(--text-secondary)]">Start from a template or scratch</label>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                   {TEMPLATE_OPTIONS.map((t) => {
                     const isSelected = plan.selectedTemplateId === t.id
@@ -381,7 +382,7 @@ export function PlanModeStep({ defaultProductName, onComplete, onSkip }: Props) 
                         key={t.id}
                         onClick={() => plan.setTemplate(t.id)}
                         className={`flex items-start gap-3 p-3.5 rounded-xl border text-left transition-colors ${
-                          isSelected ? 'border-[#6398ff]/50 bg-[#6398ff]/10' : 'border-white/[0.08] bg-white/[0.02] hover:bg-white/[0.04]'
+                          isSelected ? 'border-[var(--accent)] bg-[var(--accent-subtle)]' : 'border-[var(--border-default)] bg-[var(--bg-inset)] hover:bg-[var(--surface-hover)]'
                         }`}
                       >
                         <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: `${t.color}25`, color: t.color }}>
@@ -389,12 +390,12 @@ export function PlanModeStep({ defaultProductName, onComplete, onSkip }: Props) 
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2">
-                            <p className="text-sm font-medium text-[#e4e4e7]">{t.name}</p>
+                            <p className="text-sm font-medium text-[var(--text-primary)]">{t.name}</p>
                             {t.id === recommendTemplate(plan.mcq) && (
-                              <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-[#6398ff]/20 text-[#6398ff] font-semibold">RECOMMENDED</span>
+                              <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-[var(--accent-subtle)] text-[var(--accent-text)] font-semibold">RECOMMENDED</span>
                             )}
                           </div>
-                          <p className="text-xs text-[#64748b] mt-0.5">{t.description}</p>
+                          <p className="text-xs text-[var(--text-tertiary)] mt-0.5">{t.description}</p>
                         </div>
                       </button>
                     )
@@ -402,15 +403,15 @@ export function PlanModeStep({ defaultProductName, onComplete, onSkip }: Props) 
                   <button
                     onClick={() => plan.setTemplate(null)}
                     className={`flex items-start gap-3 p-3.5 rounded-xl border text-left transition-colors ${
-                      plan.selectedTemplateId === null ? 'border-[#6398ff]/50 bg-[#6398ff]/10' : 'border-white/[0.08] bg-white/[0.02] hover:bg-white/[0.04]'
+                      plan.selectedTemplateId === null ? 'border-[var(--accent)] bg-[var(--accent-subtle)]' : 'border-[var(--border-default)] bg-[var(--bg-inset)] hover:bg-[var(--surface-hover)]'
                     }`}
                   >
-                    <div className="w-9 h-9 rounded-lg bg-white/[0.06] flex items-center justify-center shrink-0">
-                      <LayoutTemplate size={18} className="text-[#94a3b8]" />
+                    <div className="w-9 h-9 rounded-lg bg-[var(--surface-hover)] flex items-center justify-center shrink-0">
+                      <LayoutTemplate size={18} className="text-[var(--text-secondary)]" />
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-[#e4e4e7]">Start from scratch</p>
-                      <p className="text-xs text-[#64748b] mt-0.5">Empty product — AI scaffolds from your brief only.</p>
+                      <p className="text-sm font-medium text-[var(--text-primary)]">Start from scratch</p>
+                      <p className="text-xs text-[var(--text-tertiary)] mt-0.5">Empty product — AI scaffolds from your brief only.</p>
                     </div>
                   </button>
                 </div>
@@ -421,12 +422,12 @@ export function PlanModeStep({ defaultProductName, onComplete, onSkip }: Props) 
             {phase === 'team' && (
               <div className="flex flex-col gap-4">
                 <div className="flex items-start gap-3">
-                  <div className="w-9 h-9 rounded-lg bg-[#8b5cf6]/15 flex items-center justify-center">
-                    <Users size={18} className="text-[#8b5cf6]" />
+                  <div className="w-9 h-9 rounded-lg bg-[var(--accent-subtle)] flex items-center justify-center">
+                    <Users size={18} className="text-[var(--accent-text)]" />
                   </div>
                   <div>
-                    <h3 className="text-sm font-medium text-[#e4e4e7]">Invite teammates</h3>
-                    <p className="text-xs text-[#94a3b8]">They’ll get their own role-specific dashboard and task list.</p>
+                    <h3 className="text-sm font-medium text-[var(--text-primary)]">Invite teammates</h3>
+                    <p className="text-xs text-[var(--text-secondary)]">They’ll get their own role-specific dashboard and task list.</p>
                   </div>
                 </div>
                 <TeamInviter invitees={plan.invitees} onAdd={plan.addInvitee} onRemove={plan.removeInvitee} />
@@ -449,18 +450,18 @@ export function PlanModeStep({ defaultProductName, onComplete, onSkip }: Props) 
       </div>
 
       {/* Nav */}
-      <div className="flex items-center justify-between pt-4 border-t border-white/[0.08]">
+      <div className="flex items-center justify-between pt-4 border-t border-[var(--border-default)]">
         <div className="flex items-center gap-2">
           <button
             onClick={back}
             disabled={phaseIndex === 0}
             className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-              phaseIndex === 0 ? 'text-[#64748b]/40 cursor-not-allowed' : 'text-[#94a3b8] hover:bg-white/[0.06] hover:text-[#e4e4e7]'
+              phaseIndex === 0 ? 'text-[var(--text-tertiary)]/40 cursor-not-allowed' : 'text-[var(--text-secondary)] hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)]'
             }`}
           >
             <ChevronLeft size={16} /> Back
           </button>
-          <button onClick={onSkip} className="text-xs text-[#64748b] hover:text-[#94a3b8] transition-colors">
+          <button onClick={onSkip} className="text-xs text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] transition-colors">
             Skip Plan Mode
           </button>
         </div>
@@ -471,7 +472,7 @@ export function PlanModeStep({ defaultProductName, onComplete, onSkip }: Props) 
           whileHover={canProceed ? { scale: 1.02 } : {}}
           whileTap={canProceed ? { scale: 0.98 } : {}}
           className={`flex items-center gap-1.5 px-5 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-            canProceed ? 'bg-[#6398ff] text-white hover:bg-[#5286e6]' : 'bg-white/[0.06] text-[#64748b] cursor-not-allowed'
+            canProceed ? 'bg-[var(--accent)] text-[var(--color-white)] hover:bg-[var(--accent-hover)]' : 'bg-[var(--surface-hover)] text-[var(--text-tertiary)] cursor-not-allowed'
           }`}
         >
           {phase === 'tasks' ? 'Scaffold product' : 'Next'}
@@ -487,12 +488,19 @@ export function PlanModeStep({ defaultProductName, onComplete, onSkip }: Props) 
 // ──────────────────────────────────────────────────────────────────────────
 
 function StatusPill({ status }: { status: string }) {
-  const color = status === 'ready' ? '#3dd68c' : status === 'failed' ? '#ef5350' : '#e8a830'
+  const color =
+    status === 'ready' ? 'var(--color-success)' :
+    status === 'failed' ? 'var(--color-error)' :
+    'var(--color-warning)'
+  const bg =
+    status === 'ready' ? 'var(--color-success-muted)' :
+    status === 'failed' ? 'var(--color-error-muted)' :
+    'var(--color-warning-muted)'
   const label = status === 'uploading' ? 'uploading' : status
   return (
     <span
       className="text-[9px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded"
-      style={{ backgroundColor: `${color}20`, color }}
+      style={{ backgroundColor: bg, color }}
     >
       {label}
     </span>
@@ -508,8 +516,8 @@ function MCQCard({
   onChange: (v: string) => void
 }) {
   return (
-    <div className="p-3 rounded-lg bg-white/[0.02] border border-white/[0.06]">
-      <p className="text-[11px] text-[#94a3b8] mb-2 font-medium">{question}</p>
+    <div className="p-3 rounded-lg bg-[var(--bg-inset)] border border-[var(--border-subtle)]">
+      <p className="text-[11px] text-[var(--text-secondary)] mb-2 font-medium">{question}</p>
       <div className="flex flex-wrap gap-1.5">
         {options.map((o) => {
           const selected = value === o.value
@@ -519,8 +527,8 @@ function MCQCard({
               onClick={() => onChange(o.value)}
               className={`text-[11px] px-2.5 py-1.5 rounded-md border transition-colors ${
                 selected
-                  ? 'border-[#6398ff]/60 bg-[#6398ff]/15 text-[#6398ff]'
-                  : 'border-white/[0.08] bg-white/[0.02] text-[#94a3b8] hover:text-[#e4e4e7] hover:bg-white/[0.04]'
+                  ? 'border-[var(--accent)] bg-[var(--accent-subtle)] text-[var(--accent-text)]'
+                  : 'border-[var(--border-default)] bg-[var(--bg-inset)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-hover)]'
               }`}
             >
               {o.label}
@@ -534,8 +542,8 @@ function MCQCard({
 
 function ColorPicker({ value, onChange }: { value: string | undefined; onChange: (c: string) => void }) {
   return (
-    <div className="p-3 rounded-lg bg-white/[0.02] border border-white/[0.06]">
-      <p className="text-[11px] text-[#94a3b8] mb-2 font-medium flex items-center gap-1.5">
+    <div className="p-3 rounded-lg bg-[var(--bg-inset)] border border-[var(--border-subtle)]">
+      <p className="text-[11px] text-[var(--text-secondary)] mb-2 font-medium flex items-center gap-1.5">
         <Palette size={11} /> Primary color instinct?
       </p>
       <div className="flex gap-1.5 flex-wrap">
@@ -543,7 +551,7 @@ function ColorPicker({ value, onChange }: { value: string | undefined; onChange:
           <button
             key={c}
             onClick={() => onChange(c)}
-            className={`w-6 h-6 rounded-md transition-transform ${value === c ? 'scale-110 ring-2 ring-white/40' : 'hover:scale-105'}`}
+            className={`w-6 h-6 rounded-md transition-transform ${value === c ? 'scale-110 ring-2 ring-[var(--text-primary)]/40' : 'hover:scale-105'}`}
             style={{ backgroundColor: c }}
             aria-label={c}
           />
@@ -562,35 +570,35 @@ function SummaryEditor({
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-start gap-3">
-        <div className="w-9 h-9 rounded-lg bg-[#3dd68c]/15 flex items-center justify-center shrink-0">
-          <Wand2 size={18} className="text-[#3dd68c]" />
+        <div className="w-9 h-9 rounded-lg bg-[var(--color-success-muted)] flex items-center justify-center shrink-0">
+          <Wand2 size={18} className="text-[var(--color-success)]" />
         </div>
         <div>
-          <h3 className="text-sm font-medium text-[#e4e4e7]">Here’s what I understood</h3>
-          <p className="text-xs text-[#94a3b8]">Tweak anything before we scaffold your product.</p>
+          <h3 className="text-sm font-medium text-[var(--text-primary)]">Here’s what I understood</h3>
+          <p className="text-xs text-[var(--text-secondary)]">Tweak anything before we scaffold your product.</p>
         </div>
       </div>
 
       <label className="flex flex-col gap-1.5">
-        <span className="text-[11px] text-[#94a3b8]">Product one-liner</span>
+        <span className="text-[11px] text-[var(--text-secondary)]">Product one-liner</span>
         <input
           value={summary.oneLiner}
           onChange={(e) => onPatch({ oneLiner: e.target.value })}
-          className="px-3 py-2 rounded-lg bg-white/[0.03] border border-white/[0.08] text-sm text-[#e4e4e7] focus:border-[#6398ff]/50 focus:outline-none"
+          className="px-3 py-2 rounded-lg bg-[var(--bg-inset)] border border-[var(--border-default)] text-sm text-[var(--text-primary)] focus:border-[var(--accent)] focus:outline-none"
         />
       </label>
 
       <label className="flex flex-col gap-1.5">
-        <span className="text-[11px] text-[#94a3b8]">Target users</span>
+        <span className="text-[11px] text-[var(--text-secondary)]">Target users</span>
         <input
           value={summary.targetUsers}
           onChange={(e) => onPatch({ targetUsers: e.target.value })}
-          className="px-3 py-2 rounded-lg bg-white/[0.03] border border-white/[0.08] text-sm text-[#e4e4e7] focus:border-[#6398ff]/50 focus:outline-none"
+          className="px-3 py-2 rounded-lg bg-[var(--bg-inset)] border border-[var(--border-default)] text-sm text-[var(--text-primary)] focus:border-[var(--accent)] focus:outline-none"
         />
       </label>
 
       <div>
-        <span className="text-[11px] text-[#94a3b8]">Voice</span>
+        <span className="text-[11px] text-[var(--text-secondary)]">Voice</span>
         <div className="flex gap-2 mt-1.5">
           {summary.voiceAdjectives.map((v, i) => (
             <input
@@ -601,33 +609,33 @@ function SummaryEditor({
                 next[i] = e.target.value
                 onPatch({ voiceAdjectives: next })
               }}
-              className="flex-1 px-2.5 py-1.5 rounded-md bg-white/[0.03] border border-white/[0.08] text-xs text-[#e4e4e7]"
+              className="flex-1 px-2.5 py-1.5 rounded-md bg-[var(--bg-inset)] border border-[var(--border-default)] text-xs text-[var(--text-primary)]"
             />
           ))}
         </div>
       </div>
 
       <div>
-        <span className="text-[11px] text-[#94a3b8]">Suggested palette</span>
+        <span className="text-[11px] text-[var(--text-secondary)]">Suggested palette</span>
         <div className="flex gap-2 mt-1.5">
           {summary.palette.map((c, i) => (
             <div key={i} className="flex flex-col items-center gap-1">
-              <div className="w-10 h-10 rounded-lg border border-white/[0.1]" style={{ backgroundColor: c }} />
-              <span className="text-[9px] font-mono text-[#64748b]">{c}</span>
+              <div className="w-10 h-10 rounded-lg border border-[var(--border-default)]" style={{ backgroundColor: c }} />
+              <span className="text-[9px] font-mono text-[var(--text-tertiary)]">{c}</span>
             </div>
           ))}
         </div>
       </div>
 
       <div>
-        <span className="text-[11px] text-[#94a3b8]">MVP features ({summary.features.length})</span>
+        <span className="text-[11px] text-[var(--text-secondary)]">MVP features ({summary.features.length})</span>
         <div className="flex flex-col gap-1.5 mt-1.5 max-h-[180px] overflow-y-auto pr-1">
           {summary.features.map((f, i) => (
-            <div key={i} className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white/[0.02] border border-white/[0.06]">
+            <div key={i} className="flex items-center gap-2 px-3 py-2 rounded-lg bg-[var(--bg-inset)] border border-[var(--border-subtle)]">
               <span className={`text-[9px] font-semibold uppercase px-1.5 py-0.5 rounded ${
-                f.priority === 'must' ? 'bg-[#ef5350]/20 text-[#ef5350]' :
-                f.priority === 'should' ? 'bg-[#e8a830]/20 text-[#e8a830]' :
-                'bg-white/[0.06] text-[#94a3b8]'
+                f.priority === 'must' ? 'bg-[var(--color-error-muted)] text-[var(--color-error)]' :
+                f.priority === 'should' ? 'bg-[var(--color-warning-muted)] text-[var(--color-warning)]' :
+                'bg-[var(--surface-hover)] text-[var(--text-secondary)]'
               }`}>{f.priority}</span>
               <input
                 value={f.name}
@@ -636,11 +644,11 @@ function SummaryEditor({
                   next[i] = { ...f, name: e.target.value }
                   onPatch({ features: next })
                 }}
-                className="flex-1 bg-transparent text-sm text-[#e4e4e7] focus:outline-none"
+                className="flex-1 bg-transparent text-sm text-[var(--text-primary)] focus:outline-none"
               />
               <button
                 onClick={() => onPatch({ features: summary.features.filter((_, j) => j !== i) })}
-                className="text-[#64748b] hover:text-[#ef5350]"
+                className="text-[var(--text-tertiary)] hover:text-[var(--color-error)]"
               >
                 <X size={13} />
               </button>
@@ -675,12 +683,12 @@ function TeamInviter({
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="teammate@company.com"
-          className="flex-1 px-3 py-2 rounded-lg bg-white/[0.03] border border-white/[0.08] text-sm text-[#e4e4e7] placeholder:text-[#64748b] focus:border-[#6398ff]/50 focus:outline-none"
+          className="flex-1 px-3 py-2 rounded-lg bg-[var(--bg-inset)] border border-[var(--border-default)] text-sm text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:border-[var(--accent)] focus:outline-none"
         />
         <select
           value={role}
           onChange={(e) => setRole(e.target.value)}
-          className="px-3 py-2 rounded-lg bg-white/[0.03] border border-white/[0.08] text-sm text-[#e4e4e7] focus:outline-none"
+          className="px-3 py-2 rounded-lg bg-[var(--bg-inset)] border border-[var(--border-default)] text-sm text-[var(--text-primary)] focus:outline-none"
         >
           <option value="manager">Manager</option>
           <option value="business_analyst">BA</option>
@@ -692,7 +700,7 @@ function TeamInviter({
         </select>
         <button
           onClick={submit}
-          className="px-3 py-2 rounded-lg bg-[#6398ff]/15 border border-[#6398ff]/30 text-[#6398ff] text-sm font-medium hover:bg-[#6398ff]/25 transition-colors"
+          className="px-3 py-2 rounded-lg bg-[var(--accent-subtle)] border border-[var(--accent)] text-[var(--accent-text)] text-sm font-medium hover:bg-[var(--accent-subtle)] hover:brightness-110 transition-colors"
         >
           <Plus size={14} />
         </button>
@@ -701,11 +709,11 @@ function TeamInviter({
       {invitees.length > 0 && (
         <div className="flex flex-col gap-1.5">
           {invitees.map((i) => (
-            <div key={i.email} className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/[0.02] border border-white/[0.06]">
-              <Send size={12} className="text-[#94a3b8]" />
-              <span className="flex-1 text-xs text-[#e4e4e7]">{i.email}</span>
-              <span className="text-[10px] text-[#94a3b8]">{i.role}</span>
-              <button onClick={() => onRemove(i.email)} className="text-[#64748b] hover:text-[#ef5350]">
+            <div key={i.email} className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[var(--bg-inset)] border border-[var(--border-subtle)]">
+              <Send size={12} className="text-[var(--text-secondary)]" />
+              <span className="flex-1 text-xs text-[var(--text-primary)]">{i.email}</span>
+              <span className="text-[10px] text-[var(--text-secondary)]">{i.role}</span>
+              <button onClick={() => onRemove(i.email)} className="text-[var(--text-tertiary)] hover:text-[var(--color-error)]">
                 <X size={12} />
               </button>
             </div>
@@ -713,7 +721,7 @@ function TeamInviter({
         </div>
       )}
 
-      <p className="text-[11px] text-[#64748b]">You can invite more people anytime from Settings.</p>
+      <p className="text-[11px] text-[var(--text-tertiary)]">You can invite more people anytime from Settings.</p>
     </div>
   )
 }
@@ -733,19 +741,19 @@ function TaskPreview({
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-start gap-3">
-        <div className="w-9 h-9 rounded-lg bg-[#6398ff]/15 flex items-center justify-center shrink-0">
-          <ListChecks size={18} className="text-[#6398ff]" />
+        <div className="w-9 h-9 rounded-lg bg-[var(--accent-subtle)] flex items-center justify-center shrink-0">
+          <ListChecks size={18} className="text-[var(--accent-text)]" />
         </div>
         <div className="flex-1">
-          <h3 className="text-sm font-medium text-[#e4e4e7]">AI-generated tasks</h3>
-          <p className="text-xs text-[#94a3b8]">Grouped by role. Skip any that don’t apply.</p>
+          <h3 className="text-sm font-medium text-[var(--text-primary)]">AI-generated tasks</h3>
+          <p className="text-xs text-[var(--text-secondary)]">Grouped by role. Skip any that don’t apply.</p>
         </div>
-        <label className="flex items-center gap-2 text-xs text-[#94a3b8] cursor-pointer">
+        <label className="flex items-center gap-2 text-xs text-[var(--text-secondary)] cursor-pointer">
           <input
             type="checkbox"
             checked={autopilot}
             onChange={(e) => onToggleAutopilot(e.target.checked)}
-            className="accent-[#6398ff]"
+            className="accent-[var(--accent)]"
           />
           AI manages tasks
         </label>
@@ -758,16 +766,16 @@ function TaskPreview({
             <div
               key={t.id}
               className={`flex items-center gap-3 px-3 py-2 rounded-lg border transition-colors ${
-                isSkipped ? 'border-white/[0.04] bg-white/[0.01] opacity-50' : 'border-white/[0.06] bg-white/[0.02]'
+                isSkipped ? 'border-[var(--border-subtle)] bg-[var(--bg-inset)] opacity-50' : 'border-[var(--border-subtle)] bg-[var(--bg-inset)]'
               }`}
             >
-              <span className="text-[9px] font-semibold uppercase text-[#94a3b8] px-1.5 py-0.5 rounded bg-white/[0.05]">
+              <span className="text-[9px] font-semibold uppercase text-[var(--text-secondary)] px-1.5 py-0.5 rounded bg-[var(--surface-hover)]">
                 {t.role}
               </span>
-              <span className={`flex-1 text-xs ${isSkipped ? 'line-through text-[#64748b]' : 'text-[#e4e4e7]'}`}>
+              <span className={`flex-1 text-xs ${isSkipped ? 'line-through text-[var(--text-tertiary)]' : 'text-[var(--text-primary)]'}`}>
                 {t.title}
               </span>
-              <button onClick={() => onToggleSkip(t.id)} className="text-[#64748b] hover:text-[#ef5350] text-[11px]">
+              <button onClick={() => onToggleSkip(t.id)} className="text-[var(--text-tertiary)] hover:text-[var(--color-error)] text-[11px]">
                 {isSkipped ? 'Unskip' : 'Skip'}
               </button>
             </div>

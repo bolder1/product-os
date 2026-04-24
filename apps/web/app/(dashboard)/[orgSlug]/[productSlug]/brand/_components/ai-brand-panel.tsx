@@ -47,14 +47,14 @@ function SuggestionCard({
   return (
     <motion.div
       whileHover={{ scale: 1.02 }}
-      className="p-4 rounded-xl border border-white/[0.08] bg-white/[0.02] hover:bg-white/[0.04] hover:border-[#EC4899]/20 transition-colors cursor-pointer group"
+      className="p-4 rounded-xl border border-white/[0.08] bg-white/[0.02] hover:bg-white/[0.04] hover:border-[var(--accent)]/20 transition-colors cursor-pointer group"
       onClick={onApply}
     >
       <div className="flex items-center justify-between mb-2">
-        <h4 className="text-sm font-semibold text-[#F1F5F9]">{suggestion.name}</h4>
-        <ChevronRight className="w-4 h-4 text-[#64748B] group-hover:text-[#EC4899] transition-colors" />
+        <h4 className="text-sm font-semibold text-[var(--text-primary)]">{suggestion.name}</h4>
+        <ChevronRight className="w-4 h-4 text-[var(--text-tertiary)] group-hover:text-[#EC4899] transition-colors" />
       </div>
-      <p className="text-xs text-[#64748B] mb-3">{suggestion.description}</p>
+      <p className="text-xs text-[var(--text-tertiary)] mb-3">{suggestion.description}</p>
       <div className="flex items-center gap-1.5">
         {colorDots.map((color, i) => (
           <div
@@ -88,7 +88,7 @@ export default function AIBrandPanel({
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           onClick={onToggle}
-          className="fixed right-6 top-1/2 -translate-y-1/2 z-40 p-3 rounded-xl bg-[#EC4899]/10 border border-[#EC4899]/20 text-[#EC4899] hover:bg-[#EC4899]/20 transition-colors"
+          className="fixed right-6 top-1/2 -translate-y-1/2 z-40 p-3 rounded-xl bg-[var(--accent)]/10 border border-[var(--accent)]/20 text-[var(--accent)] hover:bg-[var(--accent)]/20 transition-colors"
         >
           <Sparkles className="w-5 h-5" />
         </motion.button>
@@ -108,12 +108,12 @@ export default function AIBrandPanel({
               {/* Header */}
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 text-[#EC4899]" />
-                  <h3 className="text-sm font-semibold text-[#F1F5F9]">AI Brand Assistant</h3>
+                  <Sparkles className="w-4 h-4 text-[var(--accent)]" />
+                  <h3 className="text-sm font-semibold text-[var(--text-primary)]">AI Brand Assistant</h3>
                 </div>
                 <button
                   onClick={onToggle}
-                  className="p-1.5 rounded-lg text-[#64748B] hover:text-[#F1F5F9] hover:bg-white/[0.06] transition-colors"
+                  className="p-1.5 rounded-lg text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:bg-white/[0.06] transition-colors"
                 >
                   <ChevronRight className="w-4 h-4" />
                 </button>
@@ -121,7 +121,7 @@ export default function AIBrandPanel({
 
               {/* Prompt */}
               <div className="mb-4">
-                <label className="text-xs text-[#64748B] mb-1.5 block">
+                <label className="text-xs text-[var(--text-tertiary)] mb-1.5 block">
                   Describe your brand
                 </label>
                 <textarea
@@ -129,9 +129,9 @@ export default function AIBrandPanel({
                   onChange={(e) => setPrompt(e.target.value)}
                   placeholder="A modern fintech platform that feels trustworthy and innovative..."
                   rows={3}
-                  className="w-full px-3 py-2.5 rounded-xl bg-white/[0.03] border border-white/[0.08] text-[#F1F5F9] text-sm placeholder:text-[#475569] focus:outline-none focus:border-[#EC4899]/50 resize-none"
+                  className="w-full px-3 py-2.5 rounded-xl bg-white/[0.03] border border-white/[0.08] text-[var(--text-primary)] text-sm placeholder:text-[var(--text-tertiary)] focus:outline-none focus:border-[var(--accent)]/50 resize-none"
                 />
-                <button className="mt-2 w-full flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-[#8B5CF6] to-[#EC4899] text-white text-sm font-medium hover:opacity-90 transition-opacity">
+                <button className="mt-2 w-full flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-[var(--accent)] to-[var(--accent)] text-white text-sm font-medium hover:opacity-90 transition-opacity">
                   <Wand2 className="w-3.5 h-3.5" />
                   Generate
                 </button>
@@ -140,7 +140,7 @@ export default function AIBrandPanel({
               {/* Divider */}
               <div className="flex items-center gap-3 mb-4">
                 <div className="flex-1 h-px bg-white/[0.08]" />
-                <span className="text-[10px] text-[#64748B] uppercase tracking-wider">
+                <span className="text-[10px] text-[var(--text-tertiary)] uppercase tracking-wider">
                   Presets
                 </span>
                 <div className="flex-1 h-px bg-white/[0.08]" />

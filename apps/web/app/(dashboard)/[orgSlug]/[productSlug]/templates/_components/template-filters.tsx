@@ -31,13 +31,13 @@ export function TemplateFilters({
       {/* Search and Sort Row */}
       <div className="flex items-center gap-3">
         <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#64748B]" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-tertiary)]" />
           <input
             type="text"
             placeholder="Search templates..."
             value={search}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 rounded-lg bg-white/[0.03] border border-white/[0.08] text-[#F1F5F9] text-sm placeholder:text-[#64748B] focus:outline-none focus:border-[#3B82F6]/50 focus:ring-1 focus:ring-[#3B82F6]/25 transition-colors"
+            className="w-full pl-10 pr-4 py-2.5 rounded-lg bg-white/[0.03] border border-white/[0.08] text-[var(--text-primary)] text-sm placeholder:text-[var(--text-tertiary)] focus:outline-none focus:border-[var(--accent)]/50 focus:ring-1 focus:ring-[var(--accent)]/25 transition-colors"
           />
         </div>
 
@@ -45,15 +45,15 @@ export function TemplateFilters({
           <select
             value={sort}
             onChange={(e) => onSortChange(e.target.value as SortOption)}
-            className="appearance-none pl-3 pr-9 py-2.5 rounded-lg bg-white/[0.03] border border-white/[0.08] text-[#94A3B8] text-sm focus:outline-none focus:border-[#3B82F6]/50 cursor-pointer transition-colors"
+            className="appearance-none pl-3 pr-9 py-2.5 rounded-lg bg-white/[0.03] border border-white/[0.08] text-[var(--text-secondary)] text-sm focus:outline-none focus:border-[var(--accent)]/50 cursor-pointer transition-colors"
           >
             {sortOptions.map((option) => (
-              <option key={option} value={option} className="bg-[#0C1024] text-[#F1F5F9]">
+              <option key={option} value={option} className="bg-[#0C1024] text-[var(--text-primary)]">
                 {option}
               </option>
             ))}
           </select>
-          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#64748B] pointer-events-none" />
+          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[var(--text-tertiary)] pointer-events-none" />
         </div>
       </div>
 
@@ -65,13 +65,13 @@ export function TemplateFilters({
             onClick={() => onCategoryChange(cat)}
             className="relative px-4 py-2.5 text-sm font-medium transition-colors"
           >
-            <span className={category === cat ? 'text-[#3B82F6]' : 'text-[#64748B] hover:text-[#94A3B8]'}>
+            <span className={category === cat ? 'text-[var(--accent)]' : 'text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]'}>
               {cat}
             </span>
             {category === cat && (
               <motion.div
                 layoutId="category-underline"
-                className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#3B82F6]"
+                className="absolute bottom-0 left-0 right-0 h-0.5 bg-[var(--accent)]"
                 transition={{ type: 'spring', stiffness: 380, damping: 30 }}
               />
             )}

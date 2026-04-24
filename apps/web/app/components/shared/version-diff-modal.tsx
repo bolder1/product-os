@@ -37,7 +37,9 @@ interface VersionDiffModalProps {
 }
 
 export function VersionDiffModal({ isOpen, onClose, version1, version2 }: VersionDiffModalProps) {
-  const { compareVersions, restoreVersion, closePanel } = useVersionStore()
+  const compareVersions = useVersionStore((s) => s.compareVersions)
+  const restoreVersion  = useVersionStore((s) => s.restoreVersion)
+  const closePanel      = useVersionStore((s) => s.closePanel)
   const [restoringId, setRestoringId] = useState<string | null>(null)
 
   if (!isOpen || !version1 || !version2) return null

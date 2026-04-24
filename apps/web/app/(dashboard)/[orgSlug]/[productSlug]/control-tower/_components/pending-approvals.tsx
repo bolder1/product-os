@@ -53,11 +53,11 @@ export function PendingApprovals() {
       className="bg-white/[0.03] border border-white/[0.08] rounded-xl p-5 flex flex-col h-full"
     >
       <div className="flex items-center gap-2 mb-4">
-        <ShieldCheck className="w-4 h-4 text-[#8B5CF6]" />
-        <span className="text-sm font-medium text-[#94A3B8] uppercase tracking-wider">
+        <ShieldCheck className="w-4 h-4 text-[var(--accent)]" />
+        <span className="text-sm font-medium text-[var(--text-secondary)] uppercase tracking-wider">
           Pending Approvals
         </span>
-        <span className="text-xs bg-[#8B5CF6]/10 text-[#8B5CF6] px-2 py-0.5 rounded-full font-medium">
+        <span className="text-xs bg-[var(--accent)]/10 text-[var(--accent)] px-2 py-0.5 rounded-full font-medium">
           {approvals.length}
         </span>
       </div>
@@ -72,10 +72,10 @@ export function PendingApprovals() {
             className="py-3 border-b border-white/[0.04] last:border-0"
           >
             <div className="flex items-start gap-2.5">
-              <div className="w-2 h-2 rounded-full bg-[#F59E0B] mt-1.5 shrink-0" />
+              <div className="w-2 h-2 rounded-full bg-[var(--color-warning)] mt-1.5 shrink-0" />
               <div className="flex-1 min-w-0">
-                <p className="text-sm text-[#F1F5F9] truncate">{item.object}</p>
-                <p className="text-[10px] text-[#64748B] mt-0.5">
+                <p className="text-sm text-[var(--text-primary)] truncate">{item.object}</p>
+                <p className="text-[10px] text-[var(--text-tertiary)] mt-0.5">
                   Requested by {item.requester} &middot; {item.timeAgo}
                 </p>
               </div>
@@ -83,11 +83,11 @@ export function PendingApprovals() {
             <div className="flex gap-2 mt-2.5 ml-4">
               <button
                 onClick={() => item.id && item.stepId && decideStep(item.id, item.stepId, 'approved', undefined, 'You')}
-                className="text-[11px] px-3 py-1 rounded-md bg-[#10B981]/10 text-[#10B981] hover:bg-[#10B981]/20 transition-colors font-medium"
+                className="text-[11px] px-3 py-1 rounded-md bg-[var(--color-success)]/10 text-[var(--color-success)] hover:bg-[var(--color-success)]/20 transition-colors font-medium"
               >
                 Approve
               </button>
-              <button className="text-[11px] px-3 py-1 rounded-md bg-white/[0.05] text-[#94A3B8] hover:bg-white/[0.08] transition-colors font-medium">
+              <button className="text-[11px] px-3 py-1 rounded-md bg-white/[0.05] text-[var(--text-secondary)] hover:bg-white/[0.08] transition-colors font-medium">
                 Review
               </button>
             </div>

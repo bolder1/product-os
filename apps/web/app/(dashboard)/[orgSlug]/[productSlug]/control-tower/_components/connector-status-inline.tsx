@@ -55,19 +55,19 @@ export function ConnectorStatusInline() {
       {/* Header */}
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
-          <Plug className="w-3.5 h-3.5 text-[#06B6D4]" />
-          <span className="text-[12px] font-semibold text-[#94A3B8] uppercase tracking-wider">Connector Status</span>
+          <Plug className="w-3.5 h-3.5 text-[var(--accent)]" />
+          <span className="text-[12px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider">Connector Status</span>
         </div>
         <div className="flex items-center gap-2">
           {needsAction > 0 && (
-            <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-[#F59E0B]/15 text-[#F59E0B] font-medium">
+            <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-[var(--color-warning)]/15 text-[var(--color-warning)] font-medium">
               {needsAction} need attention
             </span>
           )}
           <button
             onClick={handleRefresh}
             disabled={refreshing}
-            className="text-[#475569] hover:text-[#94A3B8] transition-colors disabled:opacity-40"
+            className="text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] transition-colors disabled:opacity-40"
             title="Refresh all connectors"
           >
             <RefreshCw size={11} className={refreshing ? 'animate-spin' : ''} />
@@ -77,14 +77,14 @@ export function ConnectorStatusInline() {
 
       {/* Summary pills */}
       <div className="flex items-center gap-2 mb-3">
-        <span className="text-[9px] px-2 py-0.5 rounded-full bg-[#10B981]/12 text-[#10B981] font-medium">{synced} synced</span>
+        <span className="text-[9px] px-2 py-0.5 rounded-full bg-[var(--color-success)]/12 text-[var(--color-success)] font-medium">{synced} synced</span>
         {DEMO_CONNECTORS.filter((c) => c.state === 'stale').length > 0 && (
-          <span className="text-[9px] px-2 py-0.5 rounded-full bg-[#F59E0B]/12 text-[#F59E0B] font-medium">
+          <span className="text-[9px] px-2 py-0.5 rounded-full bg-[var(--color-warning)]/12 text-[var(--color-warning)] font-medium">
             {DEMO_CONNECTORS.filter((c) => c.state === 'stale').length} stale
           </span>
         )}
         {DEMO_CONNECTORS.filter((c) => c.state === 'error').length > 0 && (
-          <span className="text-[9px] px-2 py-0.5 rounded-full bg-[#F43F5E]/12 text-[#F43F5E] font-medium">
+          <span className="text-[9px] px-2 py-0.5 rounded-full bg-[var(--color-error)]/12 text-[var(--color-error)] font-medium">
             {DEMO_CONNECTORS.filter((c) => c.state === 'error').length} error
           </span>
         )}
@@ -103,8 +103,8 @@ export function ConnectorStatusInline() {
               className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg bg-white/[0.02] border border-white/[0.04] hover:bg-white/[0.04] transition-colors"
             >
               <span className="text-sm leading-none w-5 text-center">{c.icon}</span>
-              <span className="text-[11px] text-[#94A3B8] font-medium flex-1 truncate">{c.name}</span>
-              <span className="text-[9px] text-[#475569] hidden sm:block">{timeAgo(c.lastSync)}</span>
+              <span className="text-[11px] text-[var(--text-secondary)] font-medium flex-1 truncate">{c.name}</span>
+              <span className="text-[9px] text-[var(--text-tertiary)] hidden sm:block">{timeAgo(c.lastSync)}</span>
               <div className="flex items-center gap-1" style={{ color: cfg.color }}>
                 {cfg.icon}
                 <span className="text-[9px] font-medium">{cfg.label}</span>

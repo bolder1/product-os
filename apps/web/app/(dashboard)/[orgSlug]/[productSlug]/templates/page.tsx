@@ -117,7 +117,7 @@ function VariableField({
   return (
     <div className="space-y-1.5">
       <div className="flex items-center gap-1.5">
-        <Icon size={11} className="text-[#64748B]" />
+        <Icon size={11} className="text-[var(--text-tertiary)]" />
         <label className="text-[11px] font-medium text-[var(--text-primary)]">{variable.label}</label>
         {variable.description && (
           <span className="text-[10px] text-[var(--text-tertiary)]">— {variable.description}</span>
@@ -182,7 +182,7 @@ function TemplateCard({
     >
       {/* Applied badge */}
       {isApplied && (
-        <div className="absolute top-2 right-2 z-10 flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-[#10B981]/20 border border-[#10B981]/30 text-[#6EE7B7] text-[9px] font-medium">
+        <div className="absolute top-2 right-2 z-10 flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-[var(--color-success)]/20 border border-[var(--color-success)]/30 text-[#6EE7B7] text-[9px] font-medium">
           <CheckCircle2 size={9} />
           Applied
         </div>
@@ -208,7 +208,7 @@ function TemplateCard({
         {bundle.tags.length > 0 && (
           <div className="flex items-center gap-1 flex-wrap">
             {bundle.tags.slice(0, 3).map((tag) => (
-              <span key={tag} className="flex items-center gap-0.5 text-[9px] px-1.5 py-0.5 rounded-full bg-white/[0.04] border border-white/[0.07] text-[#64748B]">
+              <span key={tag} className="flex items-center gap-0.5 text-[9px] px-1.5 py-0.5 rounded-full bg-white/[0.04] border border-white/[0.07] text-[var(--text-tertiary)]">
                 <Tag size={7} />
                 {tag}
               </span>
@@ -236,7 +236,7 @@ function TemplateCard({
             {bundle.variables.length > 0 && (
               <span className="text-[var(--accent-text)]">{bundle.variables.length} vars</span>
             )}
-            <span className="text-[#334155]">v{bundle.version}</span>
+            <span className="text-[var(--border-default)]">v{bundle.version}</span>
           </div>
 
           {/* Basket toggle */}
@@ -246,7 +246,7 @@ function TemplateCard({
             className={`flex items-center gap-0.5 px-2 py-0.5 rounded-lg text-[9px] font-medium border transition-all ${
               isInBasket
                 ? 'border-[var(--accent)]/40 bg-[var(--accent)]/10 text-[var(--accent-text)]'
-                : 'border-white/[0.08] text-[#64748B] hover:border-white/[0.18] hover:text-[#94A3B8] opacity-0 group-hover:opacity-100'
+                : 'border-white/[0.08] text-[var(--text-tertiary)] hover:border-white/[0.18] hover:text-[var(--text-secondary)] opacity-0 group-hover:opacity-100'
             }`}
           >
             {isInBasket ? <Minus size={9} /> : <Plus size={9} />}
@@ -377,10 +377,10 @@ function ApplyModal({
               <div key={s} className="flex items-center gap-1 shrink-0">
                 <div className={`w-4 h-4 rounded-full text-[9px] font-bold flex items-center justify-center transition-colors ${
                   s === step ? 'bg-[var(--accent)] text-white' :
-                  i < currentStepIdx ? 'bg-[#10B981] text-white' : 'bg-white/[0.08] text-[#64748B]'
+                  i < currentStepIdx ? 'bg-[var(--color-success)] text-white' : 'bg-white/[0.08] text-[var(--text-tertiary)]'
                 }`}>{i + 1}</div>
-                <span className={`text-[10px] ${s === step ? 'text-[var(--text-primary)]' : 'text-[#64748B]'}`}>{STEP_LABELS[s]}</span>
-                {i < STEPS.length - 1 && <ChevronRight size={10} className="text-[#475569] ml-0.5" />}
+                <span className={`text-[10px] ${s === step ? 'text-[var(--text-primary)]' : 'text-[var(--text-tertiary)]'}`}>{STEP_LABELS[s]}</span>
+                {i < STEPS.length - 1 && <ChevronRight size={10} className="text-[var(--text-tertiary)] ml-0.5" />}
               </div>
             ))}
           </div>
@@ -402,24 +402,24 @@ function ApplyModal({
                       <div key={i} className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-white/[0.03] border border-white/[0.06]">
                         <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: KIND_COLORS[n.kind] ?? '#64748B' }} />
                         <span className="text-[11px] text-[var(--text-primary)] truncate">{n.label}</span>
-                        <span className="text-[9px] text-[#64748B] ml-auto shrink-0">{n.kind}</span>
+                        <span className="text-[9px] text-[var(--text-tertiary)] ml-auto shrink-0">{n.kind}</span>
                       </div>
                     ))}
                     {bundle.nodeCount > 8 && (
                       <div className="flex items-center justify-center px-2.5 py-1.5 rounded-lg bg-white/[0.02] border border-dashed border-white/[0.06]">
-                        <span className="text-[10px] text-[#64748B]">+{bundle.nodeCount - 8} more nodes</span>
+                        <span className="text-[10px] text-[var(--text-tertiary)]">+{bundle.nodeCount - 8} more nodes</span>
                       </div>
                     )}
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3 text-[10px] text-[#64748B]">
+                <div className="flex items-center gap-3 text-[10px] text-[var(--text-tertiary)]">
                   <span className="flex items-center gap-1"><Layers size={10} />{bundle.nodeCount} nodes</span>
                   <span className="flex items-center gap-1"><Hash size={10} />{bundle.edgeCount} edges</span>
                   {bundle.variables.length > 0 && (
                     <span className="flex items-center gap-1 text-[var(--accent-text)]"><Settings size={10} />{bundle.variables.length} personalizable</span>
                   )}
-                  <span className="flex items-center gap-1 text-[#475569]">v{bundle.version} · {bundle.author}</span>
+                  <span className="flex items-center gap-1 text-[var(--text-tertiary)]">v{bundle.version} · {bundle.author}</span>
                 </div>
 
                 {/* AI Remix toggle */}
@@ -428,7 +428,7 @@ function ApplyModal({
                     <button
                       onClick={() => setShowAIRemix((p) => !p)}
                       className={`flex items-center gap-1.5 text-[10px] font-medium transition-colors ${
-                        showAIRemix ? 'text-[#C4B5FD]' : 'text-[#64748B] hover:text-[#94A3B8]'
+                        showAIRemix ? 'text-[var(--accent)]' : 'text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]'
                       }`}
                     >
                       <Sparkles size={11} />
@@ -487,7 +487,7 @@ function ApplyModal({
             {step === 'conflicts' && (
               <motion.div key="conflicts" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
                 {conflictsQuery.isLoading || !conflictData ? (
-                  <div className="flex items-center justify-center gap-2 p-10 text-[#64748B]">
+                  <div className="flex items-center justify-center gap-2 p-10 text-[var(--text-tertiary)]">
                     <Loader2 size={16} className="animate-spin" />
                     <span className="text-[11px]">Scanning for conflicts…</span>
                   </div>
@@ -528,7 +528,7 @@ function ApplyModal({
                 </div>
                 <div className="text-center">
                   <p className="text-[13px] font-medium text-[var(--text-primary)]">Applying template…</p>
-                  <p className="text-[11px] text-[#64748B] mt-1">Creating {animStep} / {bundle.nodeCount} nodes</p>
+                  <p className="text-[11px] text-[var(--text-tertiary)] mt-1">Creating {animStep} / {bundle.nodeCount} nodes</p>
                 </div>
               </motion.div>
             )}
@@ -540,22 +540,22 @@ function ApplyModal({
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
                   transition={{ type: 'spring', damping: 12, stiffness: 200, delay: 0.1 }}
-                  className="w-16 h-16 rounded-full bg-[#10B981]/15 border border-[#10B981]/30 flex items-center justify-center"
+                  className="w-16 h-16 rounded-full bg-[var(--color-success)]/15 border border-[var(--color-success)]/30 flex items-center justify-center"
                 >
-                  <CheckCircle2 size={28} className="text-[#10B981]" />
+                  <CheckCircle2 size={28} className="text-[var(--color-success)]" />
                 </motion.div>
                 <div>
                   <p className="text-[16px] font-bold text-[var(--text-primary)]">{progress.bundleName} applied!</p>
-                  <p className="text-[12px] text-[#64748B] mt-1">{progress.nodesCreated} nodes and {progress.edgesCreated} edges added to your product graph.</p>
+                  <p className="text-[12px] text-[var(--text-tertiary)] mt-1">{progress.nodesCreated} nodes and {progress.edgesCreated} edges added to your product graph.</p>
                 </div>
                 <div className="grid grid-cols-2 gap-3 w-full">
                   <div className="rounded-xl bg-white/[0.03] border border-white/[0.06] p-3">
                     <p className="text-[22px] font-bold text-[var(--text-primary)]">{progress.nodesCreated}</p>
-                    <p className="text-[10px] text-[#64748B]">Nodes created</p>
+                    <p className="text-[10px] text-[var(--text-tertiary)]">Nodes created</p>
                   </div>
                   <div className="rounded-xl bg-white/[0.03] border border-white/[0.06] p-3">
                     <p className="text-[22px] font-bold text-[var(--text-primary)]">{progress.edgesCreated}</p>
-                    <p className="text-[10px] text-[#64748B]">Edges linked</p>
+                    <p className="text-[10px] text-[var(--text-tertiary)]">Edges linked</p>
                   </div>
                 </div>
               </motion.div>
@@ -605,7 +605,7 @@ function ApplyModal({
               <button onClick={onClose} className="tool-btn text-[11px]">Back to Templates</button>
               <button
                 onClick={() => onSuccess(progress!)}
-                className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-[#10B981] text-white text-[11px] font-medium hover:bg-[#059669] transition-colors"
+                className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-[var(--color-success)] text-white text-[11px] font-medium hover:bg-[var(--color-success)] transition-colors"
               >
                 View in Graph Explorer <ArrowRight size={12} />
               </button>
@@ -755,7 +755,7 @@ export default function TemplateGalleryPage() {
             className="tool-input flex-1 bg-transparent border-none p-0 text-[11px] outline-none"
           />
           {search && (
-            <button onClick={() => setSearch('')} className="text-[#475569] hover:text-[#94A3B8]">
+            <button onClick={() => setSearch('')} className="text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]">
               <X size={10} />
             </button>
           )}
@@ -770,7 +770,7 @@ export default function TemplateGalleryPage() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
             onAnimationComplete={() => setTimeout(() => setSavedName(null), 3000)}
-            className="flex items-center gap-2 px-4 py-2 bg-[#10B981]/10 border-b border-[#10B981]/20 text-[#6EE7B7] text-[11px] shrink-0"
+            className="flex items-center gap-2 px-4 py-2 bg-[var(--color-success)]/10 border-b border-[var(--color-success)]/20 text-[#6EE7B7] text-[11px] shrink-0"
           >
             <CheckCircle2 size={13} />
             <span>Template <strong>"{savedName}"</strong> saved to My Templates.</span>

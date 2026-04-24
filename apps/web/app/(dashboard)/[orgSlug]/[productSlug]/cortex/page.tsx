@@ -26,45 +26,44 @@ import { TokenEstimate } from '@product-os/ui'
 // Mode config
 // ---------------------------------------------------------------------------
 
-const MODE_CONFIG: Record<CMMode, { label: string; description: string; icon: typeof Bot; color: string; glow: string }> = {
+// R20.6 — Mode/status/kind distinction via label + icon. Color reserved for
+// true semantics: accent = neutral/active, success/warning/error = state truth.
+const MODE_CONFIG: Record<CMMode, { label: string; description: string; icon: typeof Bot; color: string }> = {
   suggest: {
     label: 'Suggest',
     description: 'Cortex surfaces recommendations. You choose what to apply.',
     icon: Sparkles,
-    color: '#6398ff',
-    glow: 'rgba(99,152,255,0.25)',
+    color: 'var(--accent)',
   },
   assist: {
     label: 'Assist',
     description: 'Cortex drafts changes. Each mutation asks for your confirmation.',
     icon: Bot,
-    color: '#10B981',
-    glow: 'rgba(16,185,129,0.25)',
+    color: 'var(--color-success)',
   },
   auto: {
     label: 'Autopilot',
     description: 'Cortex executes within policy bounds. Full action log preserved.',
     icon: Zap,
-    color: '#F59E0B',
-    glow: 'rgba(245,158,11,0.3)',
+    color: 'var(--color-warning)',
   },
 }
 
 const STATUS_META: Record<ActionStatus, { label: string; color: string; icon: React.ReactNode }> = {
-  pending:  { label: 'Pending',  color: '#F59E0B', icon: <Clock size={11} /> },
-  running:  { label: 'Running',  color: '#6398ff', icon: <Loader2 size={11} className="animate-spin" /> },
-  done:     { label: 'Done',     color: '#10B981', icon: <CheckCircle2 size={11} /> },
-  rejected: { label: 'Rejected', color: '#64748B', icon: <XCircle size={11} /> },
-  failed:   { label: 'Failed',   color: '#EF4444', icon: <AlertCircle size={11} /> },
+  pending:  { label: 'Pending',  color: 'var(--color-warning)',  icon: <Clock size={11} /> },
+  running:  { label: 'Running',  color: 'var(--accent)',         icon: <Loader2 size={11} className="animate-spin" /> },
+  done:     { label: 'Done',     color: 'var(--color-success)',  icon: <CheckCircle2 size={11} /> },
+  rejected: { label: 'Rejected', color: 'var(--text-tertiary)',  icon: <XCircle size={11} /> },
+  failed:   { label: 'Failed',   color: 'var(--color-error)',    icon: <AlertCircle size={11} /> },
 }
 
 const KIND_META: Record<ActionKind, { label: string; color: string }> = {
-  suggest:     { label: 'Suggest',     color: '#6398ff' },
-  scaffold:    { label: 'Scaffold',    color: '#10B981' },
-  analyze:     { label: 'Analyze',     color: '#8B5CF6' },
-  create_task: { label: 'Create task', color: '#EC4899' },
-  update_node: { label: 'Update node', color: '#F59E0B' },
-  run_plan:    { label: 'Run plan',    color: '#EF4444' },
+  suggest:     { label: 'Suggest',     color: 'var(--accent)' },
+  scaffold:    { label: 'Scaffold',    color: 'var(--accent)' },
+  analyze:     { label: 'Analyze',     color: 'var(--accent)' },
+  create_task: { label: 'Create task', color: 'var(--accent)' },
+  update_node: { label: 'Update node', color: 'var(--accent)' },
+  run_plan:    { label: 'Run plan',    color: 'var(--accent)' },
 }
 
 function timeAgo(iso: string) {
@@ -82,22 +81,28 @@ function timeAgo(iso: string) {
 // Subcomponents
 // ---------------------------------------------------------------------------
 
+type StatTone = 'accent' | 'success' | 'warning' | 'info'
+const STAT_TONE: Record<StatTone, { bg: string; fg: string }> = {
+  accent:  { bg: 'bg-[var(--accent-subtle)]',        fg: 'text-[var(--accent)]' },
+  success: { bg: 'bg-[var(--color-success-muted)]',  fg: 'text-[var(--color-success)]' },
+  warning: { bg: 'bg-[var(--color-warning-muted)]',  fg: 'text-[var(--color-warning)]' },
+  info:    { bg: 'bg-[var(--accent-subtle)]',        fg: 'text-[var(--accent)]' },
+}
+
 function StatCard({
-  label, value, sub, icon: Icon, color,
-}: { label: string; value: string | number; sub?: string; icon: typeof Bot; color: string }) {
+  label, value, sub, icon: Icon, tone = 'accent',
+}: { label: string; value: string | number; sub?: string; icon: typeof Bot; tone?: StatTone }) {
+  const t = STAT_TONE[tone]
   return (
     <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3">
       <div className="flex items-center justify-between mb-2">
-        <span className="text-[10px] text-[#64748B] uppercase tracking-wider">{label}</span>
-        <div
-          className="w-6 h-6 rounded-lg flex items-center justify-center"
-          style={{ background: `${color}18` }}
-        >
-          <Icon size={12} style={{ color }} />
+        <span className="text-[10px] text-[var(--text-tertiary)] uppercase tracking-wider">{label}</span>
+        <div className={`w-6 h-6 rounded-lg flex items-center justify-center ${t.bg}`}>
+          <Icon size={12} className={t.fg} />
         </div>
       </div>
-      <p className="text-xl font-semibold text-[#F1F5F9] leading-none">{value}</p>
-      {sub && <p className="text-[10px] text-[#64748B] mt-1.5">{sub}</p>}
+      <p className="text-xl font-semibold text-[var(--text-primary)] leading-none">{value}</p>
+      {sub && <p className="text-[10px] text-[var(--text-tertiary)] mt-1.5">{sub}</p>}
     </div>
   )
 }
@@ -115,12 +120,12 @@ function ModeSwitcher() {
           <button
             key={m}
             onClick={() => setMode(m)}
-            className="relative flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium transition-all"
-            style={{
-              color: active ? cfg.color : '#94A3B8',
-              background: active ? `${cfg.color}14` : 'transparent',
-              boxShadow: active ? `0 0 0 1px ${cfg.color}40 inset, 0 0 12px ${cfg.glow}` : 'none',
-            }}
+            className={`relative flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium transition-all ${
+              active
+                ? 'bg-white/[0.04] ring-1 ring-inset ring-white/10'
+                : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+            }`}
+            style={active ? { color: cfg.color } : undefined}
           >
             <Icon size={11} />
             {cfg.label}
@@ -136,38 +141,34 @@ function PendingActionRow({ action }: { action: ActionEntry }) {
   const rejectAction = useComputerModeStore((s) => s.rejectAction)
   const kind = KIND_META[action.kind]
   return (
-    <div className="rounded-lg border border-[#F59E0B]/20 bg-[#F59E0B]/[0.04] p-3 flex items-start gap-3">
-      <div
-        className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
-        style={{ background: `${kind.color}18` }}
-      >
-        <Clock size={13} style={{ color: kind.color }} />
+    <div className="rounded-lg border border-[var(--color-warning)]/20 bg-[var(--color-warning)]/[0.04] p-3 flex items-start gap-3">
+      <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 bg-[var(--accent-subtle)]">
+        <Clock size={13} className="text-[var(--accent)]" />
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 mb-0.5">
-          <span className="text-[10px] font-medium px-1.5 py-px rounded uppercase tracking-wide"
-            style={{ color: kind.color, background: `${kind.color}12` }}>
+          <span className="text-[10px] font-medium px-1.5 py-px rounded uppercase tracking-wide bg-[var(--accent-subtle)] text-[var(--accent-text)]">
             {kind.label}
           </span>
           {action.studio && (
-            <span className="text-[10px] text-[#64748B]">in {action.studio}</span>
+            <span className="text-[10px] text-[var(--text-tertiary)]">in {action.studio}</span>
           )}
         </div>
-        <p className="text-xs text-[#F1F5F9] font-medium truncate">{action.label}</p>
+        <p className="text-xs text-[var(--text-primary)] font-medium truncate">{action.label}</p>
         {action.detail && (
-          <p className="text-[11px] text-[#94A3B8] mt-0.5 line-clamp-2">{action.detail}</p>
+          <p className="text-[11px] text-[var(--text-secondary)] mt-0.5 line-clamp-2">{action.detail}</p>
         )}
       </div>
       <div className="flex items-center gap-1 shrink-0">
         <button
           onClick={() => rejectAction(action.id)}
-          className="h-7 px-2.5 rounded-md text-[10px] font-medium text-[#94A3B8] hover:bg-white/[0.06] hover:text-[#F1F5F9] transition-colors"
+          className="h-7 px-2.5 rounded-md text-[10px] font-medium text-[var(--text-secondary)] hover:bg-white/[0.06] hover:text-[var(--text-primary)] transition-colors"
         >
           Reject
         </button>
         <button
           onClick={() => confirmAction(action.id)}
-          className="h-7 px-2.5 rounded-md text-[10px] font-semibold text-white bg-[#10B981] hover:bg-[#0EA371] transition-colors flex items-center gap-1"
+          className="h-7 px-2.5 rounded-md text-[10px] font-semibold text-[var(--text-inverse)] bg-[var(--color-success)] hover:bg-[var(--color-success)]/85 transition-colors flex items-center gap-1"
         >
           <CheckCircle2 size={11} />
           Approve
@@ -182,32 +183,28 @@ function ActionLogRow({ action }: { action: ActionEntry }) {
   const kind = KIND_META[action.kind]
   return (
     <div className="group flex items-start gap-3 px-3 py-2.5 rounded-lg hover:bg-white/[0.03] transition-colors">
-      <div
-        className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 mt-0.5"
-        style={{ background: `${kind.color}14` }}
-      >
-        <span style={{ color: kind.color }}>{status.icon}</span>
+      <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 mt-0.5 bg-[var(--accent-subtle)]">
+        <span style={{ color: status.color }}>{status.icon}</span>
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 mb-0.5">
-          <span className="text-[10px] font-medium px-1.5 py-px rounded uppercase tracking-wide"
-            style={{ color: kind.color, background: `${kind.color}12` }}>
+          <span className="text-[10px] font-medium px-1.5 py-px rounded uppercase tracking-wide bg-[var(--accent-subtle)] text-[var(--accent-text)]">
             {kind.label}
           </span>
           <span
-            className="text-[10px] font-medium px-1.5 py-px rounded uppercase tracking-wide"
-            style={{ color: status.color, background: `${status.color}12` }}
+            className="text-[10px] font-medium px-1.5 py-px rounded uppercase tracking-wide bg-white/[0.05]"
+            style={{ color: status.color }}
           >
             {status.label}
           </span>
           {action.studio && (
-            <span className="text-[10px] text-[#64748B]">· {action.studio}</span>
+            <span className="text-[10px] text-[var(--text-tertiary)]">· {action.studio}</span>
           )}
-          <span className="text-[10px] text-[#64748B] ml-auto">{timeAgo(action.timestamp)}</span>
+          <span className="text-[10px] text-[var(--text-tertiary)] ml-auto">{timeAgo(action.timestamp)}</span>
         </div>
-        <p className="text-xs text-[#F1F5F9] truncate">{action.label}</p>
+        <p className="text-xs text-[var(--text-primary)] truncate">{action.label}</p>
         {action.detail && (
-          <p className="text-[11px] text-[#94A3B8] mt-0.5 line-clamp-2">{action.detail}</p>
+          <p className="text-[11px] text-[var(--text-secondary)] mt-0.5 line-clamp-2">{action.detail}</p>
         )}
       </div>
     </div>
@@ -221,19 +218,19 @@ function ActivePlanPanel() {
   if (!activePlan) return null
   const running = activePlan.status === 'running' || activePlan.status === 'planning'
   return (
-    <div className="rounded-xl border border-[#6398ff]/25 bg-[#6398ff]/[0.04] p-4">
+    <div className="rounded-xl border border-[var(--accent)]/25 bg-[var(--accent)]/[0.04] p-4">
       <div className="flex items-center gap-2 mb-3">
-        <div className="w-7 h-7 rounded-lg bg-[#6398ff]/15 flex items-center justify-center">
-          <Target size={13} className="text-[#6398ff]" />
+        <div className="w-7 h-7 rounded-lg bg-[var(--accent)]/15 flex items-center justify-center">
+          <Target size={13} className="text-[var(--accent)]" />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-[10px] text-[#64748B] uppercase tracking-wider">Active plan</p>
-          <p className="text-sm font-semibold text-[#F1F5F9] truncate">{activePlan.goal}</p>
+          <p className="text-[10px] text-[var(--text-tertiary)] uppercase tracking-wider">Active plan</p>
+          <p className="text-sm font-semibold text-[var(--text-primary)] truncate">{activePlan.goal}</p>
         </div>
         {running && (
           <button
             onClick={() => abortPlan(activePlan.id)}
-            className="h-7 px-2 rounded-md text-[10px] text-[#94A3B8] hover:bg-white/[0.06] hover:text-[#F1F5F9] flex items-center gap-1"
+            className="h-7 px-2 rounded-md text-[10px] text-[var(--text-secondary)] hover:bg-white/[0.06] hover:text-[var(--text-primary)] flex items-center gap-1"
           >
             <Pause size={11} />
             Abort
@@ -242,23 +239,20 @@ function ActivePlanPanel() {
       </div>
       <div className="space-y-1.5">
         {activePlan.steps.map((step) => {
-          const dotColor =
-            step.status === 'done' ? '#10B981' :
-            step.status === 'running' ? '#6398ff' :
-            step.status === 'skipped' ? '#64748B' : '#475569'
+          const dotClass =
+            step.status === 'done' ? 'bg-[var(--color-success)]' :
+            step.status === 'running' ? 'bg-[var(--accent)]' :
+            step.status === 'skipped' ? 'bg-[var(--text-tertiary)]' : 'bg-[var(--border-default)]'
           return (
             <div key={step.order} className="flex items-center gap-2 text-[11px]">
+              <span className={`w-2 h-2 rounded-full shrink-0 ${dotClass}`} />
               <span
-                className="w-2 h-2 rounded-full shrink-0"
-                style={{ background: dotColor }}
-              />
-              <span
-                className={step.status === 'done' ? 'text-[#64748B] line-through' : 'text-[#F1F5F9]'}
+                className={step.status === 'done' ? 'text-[var(--text-tertiary)] line-through' : 'text-[var(--text-primary)]'}
               >
                 {step.label}
               </span>
               {step.status === 'running' && (
-                <Loader2 size={11} className="text-[#6398ff] animate-spin ml-auto" />
+                <Loader2 size={11} className="text-[var(--accent)] animate-spin ml-auto" />
               )}
             </div>
           )
@@ -267,7 +261,7 @@ function ActivePlanPanel() {
       {running && (
         <button
           onClick={() => advancePlan(activePlan.id)}
-          className="mt-3 w-full h-8 rounded-lg bg-[#6398ff] text-white text-[11px] font-semibold hover:bg-[#4f7ad9] transition-colors flex items-center justify-center gap-1.5"
+          className="mt-3 w-full h-8 rounded-lg bg-[var(--accent)] text-[var(--text-inverse)] text-[11px] font-semibold hover:bg-[var(--accent-hover)] transition-colors flex items-center justify-center gap-1.5"
         >
           <Play size={11} />
           Advance step
@@ -286,12 +280,12 @@ function SkillLauncher({ productId }: { productId: string }) {
     <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
-          <Wand2 size={13} className="text-[#8B5CF6]" />
-          <p className="text-xs font-semibold text-[#F1F5F9]">Quick skills</p>
+          <Wand2 size={13} className="text-[var(--accent)]" />
+          <p className="text-xs font-semibold text-[var(--text-primary)]">Quick skills</p>
         </div>
         <button
           onClick={() => router.push(`/${params.orgSlug}/${params.productSlug}/ai-skills`)}
-          className="text-[10px] text-[#94A3B8] hover:text-[#F1F5F9] flex items-center gap-0.5"
+          className="text-[10px] text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center gap-0.5"
         >
           Browse all
           <ChevronRight size={10} />
@@ -304,16 +298,16 @@ function SkillLauncher({ productId }: { productId: string }) {
             onClick={() => router.push(`/${params.orgSlug}/${params.productSlug}/ai-skills`)}
             className="group flex items-center gap-2 px-2.5 py-2 rounded-lg hover:bg-white/[0.04] border border-transparent hover:border-white/[0.06] transition-all text-left"
           >
-            <div className="w-6 h-6 rounded-md bg-[#8B5CF6]/12 flex items-center justify-center shrink-0">
-              <Sparkles size={11} className="text-[#8B5CF6]" />
+            <div className="w-6 h-6 rounded-md bg-[var(--accent)]/12 flex items-center justify-center shrink-0">
+              <Sparkles size={11} className="text-[var(--accent)]" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-[11px] font-medium text-[#F1F5F9] truncate">{sk.name}</p>
-              <p className="text-[10px] text-[#64748B] truncate">{sk.description}</p>
+              <p className="text-[11px] font-medium text-[var(--text-primary)] truncate">{sk.name}</p>
+              <p className="text-[10px] text-[var(--text-tertiary)] truncate">{sk.description}</p>
             </div>
             <ChevronRight
               size={11}
-              className="text-[#475569] group-hover:text-[#94A3B8] group-hover:translate-x-0.5 transition-all shrink-0"
+              className="text-[var(--text-tertiary)] group-hover:text-[#94A3B8] group-hover:translate-x-0.5 transition-all shrink-0"
             />
           </button>
         ))}
@@ -400,7 +394,7 @@ function CortexPromptBox({ mode }: { mode: CMMode }) {
   return (
     <div className="px-5 py-3 border-b border-white/[0.06] bg-black/20">
       <div className="flex items-center gap-2">
-        <Sparkles size={12} className="text-[#8B5CF6] shrink-0" />
+        <Sparkles size={12} className="text-[var(--accent)] shrink-0" />
         <input
           value={value}
           onChange={(e) => setValue(e.target.value)}
@@ -412,16 +406,15 @@ function CortexPromptBox({ mode }: { mode: CMMode }) {
           }}
           placeholder="Ask Cortex — vague prompts get rewritten before they run…"
           disabled={busy}
-          className="flex-1 h-[32px] bg-transparent text-[12px] text-[#F1F5F9] placeholder:text-[#64748B] focus:outline-none"
+          className="flex-1 h-[32px] bg-transparent text-[12px] text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:outline-none"
           aria-label="Cortex prompt"
         />
-        <kbd className="text-[9px] px-1.5 py-0.5 rounded border border-white/10 text-[#64748B] font-mono">↵</kbd>
+        <kbd className="text-[9px] px-1.5 py-0.5 rounded border border-white/10 text-[var(--text-tertiary)] font-mono">↵</kbd>
         <button
           type="button"
           onClick={() => void submit()}
           disabled={busy || value.trim().length === 0}
-          className="h-[28px] px-3 rounded-md text-[11px] font-medium text-white transition-opacity disabled:opacity-40"
-          style={{ background: 'linear-gradient(135deg, #7C3AED 0%, #2563EB 100%)' }}
+          className="h-[28px] px-3 rounded-md text-[11px] font-medium text-[var(--text-inverse)] bg-[var(--accent)] hover:bg-[var(--accent-hover)] transition-colors disabled:opacity-40"
         >
           Submit
         </button>
@@ -542,21 +535,15 @@ export default function CortexPage() {
   )
 
   return (
-    <div className="flex-1 min-h-0 flex flex-col bg-[var(--bg-workspace)] text-[#F1F5F9]">
+    <div className="flex-1 min-h-0 flex flex-col bg-[var(--bg-workspace)] text-[var(--text-primary)]">
       {/* ── Header ── */}
       <div className="flex items-center gap-3 px-5 py-4 border-b border-white/[0.06]">
-        <div
-          className="w-10 h-10 rounded-xl flex items-center justify-center"
-          style={{
-            background: 'linear-gradient(135deg, #7C3AED 0%, #2563EB 100%)',
-            boxShadow: '0 0 24px rgba(124,58,237,0.35)',
-          }}
-        >
-          <BrainCircuit size={20} className="text-white" />
+        <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-[var(--accent)] shadow-[0_0_24px_var(--accent-subtle)]">
+          <BrainCircuit size={20} className="text-[var(--text-inverse)]" />
         </div>
         <div className="flex-1 min-w-0">
-          <h1 className="text-base font-semibold text-[#F1F5F9] leading-none">Cortex</h1>
-          <p className="text-[11px] text-[#94A3B8] mt-1">
+          <h1 className="text-base font-semibold text-[var(--text-primary)] leading-none">Cortex</h1>
+          <p className="text-[11px] text-[var(--text-secondary)] mt-1">
             The AI brain of your Product OS — acts across every studio.
           </p>
         </div>
@@ -567,14 +554,11 @@ export default function CortexPage() {
       <CortexPromptBox mode={mode} />
 
       {/* ── Mode banner ── */}
-      <div
-        className="flex items-center gap-3 px-5 py-2.5 border-b border-white/[0.06]"
-        style={{ background: `${modeCfg.color}08` }}
-      >
+      <div className="flex items-center gap-3 px-5 py-2.5 border-b border-white/[0.06] bg-white/[0.02]">
         <ModeIcon size={14} style={{ color: modeCfg.color }} />
         <p className="text-[11px]" style={{ color: modeCfg.color }}>
           <span className="font-semibold">{modeCfg.label} mode:</span>{' '}
-          <span className="text-[#94A3B8]">{modeCfg.description}</span>
+          <span className="text-[var(--text-secondary)]">{modeCfg.description}</span>
         </p>
       </div>
 
@@ -584,10 +568,10 @@ export default function CortexPage() {
 
           {/* Stats */}
           <div className="grid grid-cols-4 gap-3">
-            <StatCard label="Actions today" value={stats.today} icon={Activity} color="#6398ff" />
-            <StatCard label="Pending" value={stats.pending} sub={stats.pending > 0 ? 'Needs approval' : 'All clear'} icon={Clock} color="#F59E0B" />
-            <StatCard label="Success rate" value={`${stats.success}%`} icon={TrendingUp} color="#10B981" />
-            <StatCard label="Total logged" value={stats.total} sub="Last 200 actions" icon={ListTodo} color="#8B5CF6" />
+            <StatCard label="Actions today" value={stats.today} icon={Activity} tone="accent" />
+            <StatCard label="Pending" value={stats.pending} sub={stats.pending > 0 ? 'Needs approval' : 'All clear'} icon={Clock} tone="warning" />
+            <StatCard label="Success rate" value={`${stats.success}%`} icon={TrendingUp} tone="success" />
+            <StatCard label="Total logged" value={stats.total} sub="Last 200 actions" icon={ListTodo} tone="accent" />
           </div>
 
           {/* Main grid */}
@@ -602,12 +586,12 @@ export default function CortexPage() {
                     initial={{ opacity: 0, y: -8 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -8 }}
-                    className="rounded-xl border border-[#F59E0B]/20 bg-[#F59E0B]/[0.03] p-4"
+                    className="rounded-xl border border-[var(--color-warning)]/20 bg-[var(--color-warning)]/[0.03] p-4"
                   >
                     <div className="flex items-center gap-2 mb-3">
-                      <Clock size={13} className="text-[#F59E0B]" />
-                      <p className="text-xs font-semibold text-[#F1F5F9]">Awaiting your approval</p>
-                      <span className="ml-auto text-[10px] text-[#94A3B8]">
+                      <Clock size={13} className="text-[var(--color-warning)]" />
+                      <p className="text-xs font-semibold text-[var(--text-primary)]">Awaiting your approval</p>
+                      <span className="ml-auto text-[10px] text-[var(--text-secondary)]">
                         {pendingActions.length} action{pendingActions.length === 1 ? '' : 's'}
                       </span>
                     </div>
@@ -623,18 +607,18 @@ export default function CortexPage() {
               {/* Action log */}
               <div className="rounded-xl border border-white/[0.06] bg-white/[0.02]">
                 <div className="flex items-center gap-2 px-4 py-3 border-b border-white/[0.06]">
-                  <Activity size={13} className="text-[#6398ff]" />
-                  <p className="text-xs font-semibold text-[#F1F5F9]">Action log</p>
+                  <Activity size={13} className="text-[var(--accent)]" />
+                  <p className="text-xs font-semibold text-[var(--text-primary)]">Action log</p>
                   <div className="ml-auto flex items-center gap-1">
                     {(['all', 'suggest', 'scaffold', 'analyze', 'create_task'] as const).map((f) => (
                       <button
                         key={f}
                         onClick={() => setFilter(f as typeof filter)}
-                        className="px-2 py-1 rounded text-[10px] font-medium transition-colors"
-                        style={{
-                          color: filter === f ? '#F1F5F9' : '#94A3B8',
-                          background: filter === f ? 'rgba(99,152,255,0.14)' : 'transparent',
-                        }}
+                        className={`px-2 py-1 rounded text-[10px] font-medium transition-colors ${
+                          filter === f
+                            ? 'bg-[var(--accent-subtle)] text-[var(--text-primary)]'
+                            : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+                        }`}
                       >
                         {f === 'all' ? 'All' : KIND_META[f as ActionKind].label}
                       </button>
@@ -642,7 +626,7 @@ export default function CortexPage() {
                     {actionLog.length > 0 && (
                       <button
                         onClick={clearLog}
-                        className="ml-2 px-2 py-1 rounded text-[10px] text-[#64748B] hover:bg-white/[0.04] hover:text-[#94A3B8] transition-colors"
+                        className="ml-2 px-2 py-1 rounded text-[10px] text-[var(--text-tertiary)] hover:bg-white/[0.04] hover:text-[var(--text-secondary)] transition-colors"
                       >
                         Clear
                       </button>
@@ -653,10 +637,10 @@ export default function CortexPage() {
                   {filteredLog.length === 0 ? (
                     <div className="flex flex-col items-center py-12 text-center">
                       <div className="w-12 h-12 rounded-full bg-white/[0.03] flex items-center justify-center mb-3">
-                        <BrainCircuit size={18} className="text-[#64748B]" />
+                        <BrainCircuit size={18} className="text-[var(--text-tertiary)]" />
                       </div>
-                      <p className="text-sm font-medium text-[#F1F5F9]">No actions yet</p>
-                      <p className="text-[11px] text-[#64748B] mt-1 max-w-[320px]">
+                      <p className="text-sm font-medium text-[var(--text-primary)]">No actions yet</p>
+                      <p className="text-[11px] text-[var(--text-tertiary)] mt-1 max-w-[320px]">
                         Cortex will log every suggestion, scaffold, and decision it makes across your studios.
                       </p>
                     </div>

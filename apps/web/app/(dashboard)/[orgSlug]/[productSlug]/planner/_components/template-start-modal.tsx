@@ -135,7 +135,7 @@ export default function TemplateStartModal({ open, onClose, onApplyTemplate }: T
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 bg-[#060918]/80 backdrop-blur-sm"
+            className="absolute inset-0 bg-[var(--bg-base)]/80 backdrop-blur-sm"
             onClick={onClose}
           />
 
@@ -150,19 +150,19 @@ export default function TemplateStartModal({ open, onClose, onApplyTemplate }: T
             {/* Header */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-white/[0.08]">
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-[#8B5CF6]/10 flex items-center justify-center">
-                  <FileText className="w-4 h-4 text-[#8B5CF6]" />
+                <div className="w-8 h-8 rounded-lg bg-[var(--accent)]/10 flex items-center justify-center">
+                  <FileText className="w-4 h-4 text-[var(--accent)]" />
                 </div>
                 <div>
-                  <h2 className="text-lg font-semibold text-[#F1F5F9]">Start from Template</h2>
-                  <p className="text-xs text-[#64748B]">Choose a template to pre-fill your product plan</p>
+                  <h2 className="text-lg font-semibold text-[var(--text-primary)]">Start from Template</h2>
+                  <p className="text-xs text-[var(--text-tertiary)]">Choose a template to pre-fill your product plan</p>
                 </div>
               </div>
               <button
                 onClick={onClose}
                 className="p-2 rounded-lg hover:bg-white/[0.05] transition-colors"
               >
-                <X className="w-5 h-5 text-[#64748B]" />
+                <X className="w-5 h-5 text-[var(--text-tertiary)]" />
               </button>
             </div>
 
@@ -173,23 +173,23 @@ export default function TemplateStartModal({ open, onClose, onApplyTemplate }: T
                   key={template.id}
                   whileHover={{ scale: 1.02, y: -2 }}
                   whileTap={{ scale: 0.98 }}
-                  className="bg-white/[0.03] border border-white/[0.08] rounded-xl p-4 flex flex-col gap-3 cursor-pointer hover:border-[#8B5CF6]/30 transition-colors group"
+                  className="bg-white/[0.03] border border-white/[0.08] rounded-xl p-4 flex flex-col gap-3 cursor-pointer hover:border-[var(--accent)]/30 transition-colors group"
                 >
                   {/* Icon / Thumbnail */}
-                  <div className="w-12 h-12 rounded-xl bg-[#8B5CF6]/10 flex items-center justify-center text-[#8B5CF6] group-hover:bg-[#8B5CF6]/20 transition-colors">
+                  <div className="w-12 h-12 rounded-xl bg-[var(--accent)]/10 flex items-center justify-center text-[var(--accent)] group-hover:bg-[#8B5CF6]/20 transition-colors">
                     {template.icon}
                   </div>
 
                   {/* Info */}
                   <div className="flex-1">
-                    <h3 className="text-sm font-semibold text-[#F1F5F9] mb-1">{template.name}</h3>
-                    <p className="text-xs text-[#94A3B8] leading-relaxed line-clamp-3">{template.description}</p>
+                    <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-1">{template.name}</h3>
+                    <p className="text-xs text-[var(--text-secondary)] leading-relaxed line-clamp-3">{template.description}</p>
                   </div>
 
                   {/* Tags */}
                   <div className="flex flex-wrap gap-1.5">
                     {template.tags.map((tag) => (
-                      <span key={tag} className="text-[10px] px-2 py-0.5 rounded-full bg-white/[0.05] text-[#64748B]">
+                      <span key={tag} className="text-[10px] px-2 py-0.5 rounded-full bg-white/[0.05] text-[var(--text-tertiary)]">
                         {tag}
                       </span>
                     ))}
@@ -197,7 +197,7 @@ export default function TemplateStartModal({ open, onClose, onApplyTemplate }: T
 
                   {/* Footer */}
                   <div className="flex items-center justify-between pt-2 border-t border-white/[0.06]">
-                    <span className="text-[10px] text-[#64748B]">{template.nodeCount} nodes</span>
+                    <span className="text-[10px] text-[var(--text-tertiary)]">{template.nodeCount} nodes</span>
                     <div className="flex gap-2">
                       <button
                         onClick={(e) => {
@@ -205,13 +205,13 @@ export default function TemplateStartModal({ open, onClose, onApplyTemplate }: T
                           onApplyTemplate(template.data)
                           onClose()
                         }}
-                        className="text-xs px-3 py-1 rounded-lg bg-[#8B5CF6] text-white hover:bg-[#8B5CF6]/90 transition-colors font-medium"
+                        className="text-xs px-3 py-1 rounded-lg bg-[var(--accent)] text-white hover:bg-[var(--accent)]/90 transition-colors font-medium"
                       >
                         Use
                       </button>
                       <button
                         onClick={(e) => e.stopPropagation()}
-                        className="text-xs px-3 py-1 rounded-lg bg-white/[0.05] border border-white/[0.08] text-[#94A3B8] hover:bg-white/[0.08] transition-colors flex items-center gap-1"
+                        className="text-xs px-3 py-1 rounded-lg bg-white/[0.05] border border-white/[0.08] text-[var(--text-secondary)] hover:bg-white/[0.08] transition-colors flex items-center gap-1"
                       >
                         <Sparkles className="w-3 h-3" />
                         AI Remix

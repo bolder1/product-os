@@ -330,7 +330,7 @@ export function AIAssistantPanel({
             {contextHints.length > 0 && (
               <div className="px-3 py-2 border-b border-[var(--border-default)]">
                 <div className="flex items-center gap-1.5 mb-1.5">
-                  <Zap size={10} className="text-[#F59E0B]" />
+                  <Zap size={10} className="text-[var(--color-warning)]" />
                   <span className="text-[10px] text-[var(--text-tertiary)] uppercase tracking-wider font-medium">Context</span>
                 </div>
                 <div className="flex flex-wrap gap-1">

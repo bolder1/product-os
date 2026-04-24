@@ -18,6 +18,8 @@ import { MessageSquare, X, Send, Sparkles, Trash2, Network, Brain } from 'lucide
 import { useCopilotStore, type CopilotMessage } from '../../lib/copilot-store'
 import { useInspectorStore } from '../../lib/inspector-store'
 import { useGraphStore } from '../../lib/graph-store'
+import { useComputerModeStore } from '../../lib/computer-mode-store'
+import { runCopilotOrchestrator } from '../../lib/copilot-orchestrator'
 import { submitPromptThroughGate } from '../../lib/prompt-gate-store'
 
 interface CopilotProps {
@@ -43,6 +45,8 @@ export function Copilot({ productId, orgSlug, productSlug, studio }: CopilotProp
 
   const selectedNodeId = useInspectorStore((s) => s.selectedNodeId)
   const nodesCount = useGraphStore((s) => s.nodes.length)
+  const pendingCount = useComputerModeStore((s) => s.pendingActions.length)
+  const openComputerMode = useComputerModeStore((s) => s.open)
 
   // Keep context fresh
   useEffect(() => {
@@ -69,11 +73,27 @@ export function Copilot({ productId, orgSlug, productSlug, studio }: CopilotProp
     setInput('')
     addMessage({ role: 'user', content: finalText, studio })
     setBusy(true)
-    // Simulated reply — real wire-up to aiRuntime in R10/R11
     const placeholderId = addMessage({ role: 'assistant', content: '…thinking', studio })
-    await new Promise((r) => setTimeout(r, 650))
-    const reply = composeStubReply(finalText, { studio, nodesCount, selectedNodeId })
-    updateMessage(placeholderId, { content: reply })
+    // Let the placeholder paint before we do the (sync) orchestrator work.
+    await new Promise((r) => setTimeout(r, 250))
+    try {
+      const result = runCopilotOrchestrator(finalText, {
+        productId,
+        orgSlug,
+        productSlug,
+        studio,
+        selectedNodeId: selectedNodeId ?? undefined,
+      })
+      updateMessage(placeholderId, {
+        content: result.reply,
+        refs: result.refs,
+        pendingAction: result.pendingAction,
+      })
+    } catch (err) {
+      updateMessage(placeholderId, {
+        content: `I hit an error handling that. ${err instanceof Error ? err.message : ''}`,
+      })
+    }
     setBusy(false)
   }
 
@@ -125,6 +145,20 @@ export function Copilot({ productId, orgSlug, productSlug, studio }: CopilotProp
         <ContextChip icon={Network} label={`graph · ${nodesCount}`} />
         {selectedNodeId && <ContextChip icon={Brain} label="selected node" />}
       </div>
+
+      {/* Pending-drafts banner */}
+      {pendingCount > 0 && (
+        <button
+          onClick={openComputerMode}
+          className="flex items-center justify-between gap-2 px-4 py-2 border-b border-[var(--border-subtle)] bg-[var(--accent-muted)]/40 text-[var(--accent-text)] hover:bg-[var(--accent-muted)]/60 transition"
+          aria-label="Open Computer Mode drafts"
+        >
+          <span className="text-[11px] font-medium">
+            {pendingCount} draft{pendingCount === 1 ? '' : 's'} awaiting approval
+          </span>
+          <span className="text-[10px] uppercase tracking-wide">Review</span>
+        </button>
+      )}
 
       {/* Thread */}
       <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-3 space-y-3">
@@ -211,20 +245,3 @@ function MessageRow({ m }: { m: CopilotMessage }) {
   )
 }
 
-// Stub reply composer — replaced by real runtime later.
-function composeStubReply(
-  text: string,
-  ctx: { studio: string; nodesCount: number; selectedNodeId: string | null },
-): string {
-  const lower = text.toLowerCase()
-  if (/graph|show|where/.test(lower)) {
-    return `From ${ctx.studio}, your graph currently has ${ctx.nodesCount} nodes. Click any object's "Open in Graph" to scope the inspector.`
-  }
-  if (/brand|voice|tone/.test(lower)) {
-    return `Brand settings live in /brand. The Voice tab covers tone, personality, and do/don't rules.`
-  }
-  if (/task|approval|work/.test(lower)) {
-    return `Try the unified Work surface — kanban, list, and timeline all on one page, with filters by role and status.`
-  }
-  return `I'd normally route this through aiRuntime and propose a Computer Mode draft. For now, treat this as a stub — the thread persists across Modes.`
-}

@@ -54,10 +54,10 @@ export function BlockersPanel({ productId }: Props) {
       {/* Header */}
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
-          <ShieldAlert className="w-3.5 h-3.5 text-[#F43F5E]" />
-          <span className="text-[12px] font-semibold text-[#94A3B8] uppercase tracking-wider">Blockers</span>
+          <ShieldAlert className="w-3.5 h-3.5 text-[var(--color-error)]" />
+          <span className="text-[12px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider">Blockers</span>
           {!isLoading && blockers.length > 0 && (
-            <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-[#F43F5E]/15 text-[#F43F5E] font-bold">
+            <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-[var(--color-error)]/15 text-[var(--color-error)] font-bold">
               {blockers.length}
             </span>
           )}
@@ -65,7 +65,7 @@ export function BlockersPanel({ productId }: Props) {
         <button
           onClick={() => refetch()}
           disabled={isLoading}
-          className="text-[#475569] hover:text-[#94A3B8] transition-colors disabled:opacity-40"
+          className="text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] transition-colors disabled:opacity-40"
         >
           <RefreshCw size={11} className={isLoading ? 'animate-spin' : ''} />
         </button>
@@ -73,22 +73,22 @@ export function BlockersPanel({ productId }: Props) {
 
       {/* Content */}
       {isLoading ? (
-        <div className="flex-1 flex items-center justify-center gap-2 text-[#475569]">
+        <div className="flex-1 flex items-center justify-center gap-2 text-[var(--text-tertiary)]">
           <Loader2 size={14} className="animate-spin" />
           <span className="text-[11px]">Scanning for blockers…</span>
         </div>
       ) : isEmpty ? (
         <div className="flex-1 flex flex-col items-center justify-center gap-2 text-center py-4">
-          <AlertTriangle size={22} className="text-[#334155]" />
-          <p className="text-[11px] text-[#475569]">No product graph yet — apply a template to get started.</p>
+          <AlertTriangle size={22} className="text-[var(--border-default)]" />
+          <p className="text-[11px] text-[var(--text-tertiary)]">No product graph yet — apply a template to get started.</p>
         </div>
       ) : allClear ? (
         <div className="flex-1 flex flex-col items-center justify-center gap-2 text-center py-4">
-          <div className="w-10 h-10 rounded-full bg-[#10B981]/15 border border-[#10B981]/30 flex items-center justify-center">
-            <CheckCircle2 size={20} className="text-[#10B981]" />
+          <div className="w-10 h-10 rounded-full bg-[var(--color-success)]/15 border border-[var(--color-success)]/30 flex items-center justify-center">
+            <CheckCircle2 size={20} className="text-[var(--color-success)]" />
           </div>
-          <p className="text-[12px] font-semibold text-[#F1F5F9]">No blockers!</p>
-          <p className="text-[10px] text-[#64748B]">Your product graph is complete across all studios.</p>
+          <p className="text-[12px] font-semibold text-[var(--text-primary)]">No blockers!</p>
+          <p className="text-[10px] text-[var(--text-tertiary)]">Your product graph is complete across all studios.</p>
         </div>
       ) : (
         <div className="flex-1 flex flex-col gap-1.5 overflow-y-auto pr-0.5">
@@ -111,7 +111,7 @@ export function BlockersPanel({ productId }: Props) {
                       {items.length}
                     </span>
                   </div>
-                  {isOpen ? <ChevronUp size={11} className="text-[#475569]" /> : <ChevronDown size={11} className="text-[#475569]" />}
+                  {isOpen ? <ChevronUp size={11} className="text-[var(--text-tertiary)]" /> : <ChevronDown size={11} className="text-[var(--text-tertiary)]" />}
                 </button>
 
                 {/* Items */}
@@ -135,14 +135,14 @@ export function BlockersPanel({ productId }: Props) {
                           >
                             <div className="w-1 h-1 rounded-full shrink-0" style={{ background: cfg.color }} />
                             <div className="flex-1 min-w-0">
-                              <p className="text-[10px] text-[#E2E8F0] leading-snug truncate">{blocker.title}</p>
-                              <p className="text-[9px] text-[#475569] mt-0.5">{blocker.studio}</p>
+                              <p className="text-[10px] text-[var(--text-primary)] leading-snug truncate">{blocker.title}</p>
+                              <p className="text-[9px] text-[var(--text-tertiary)] mt-0.5">{blocker.studio}</p>
                             </div>
                             <button
                               onClick={() =>
                                 router.push(`/${params.orgSlug}/${params.productSlug}/${blocker.route}`)
                               }
-                              className="shrink-0 flex items-center gap-0.5 text-[9px] text-[#475569] hover:text-[#3B82F6] opacity-0 group-hover:opacity-100 transition-all"
+                              className="shrink-0 flex items-center gap-0.5 text-[9px] text-[var(--text-tertiary)] hover:text-[var(--accent)] opacity-0 group-hover:opacity-100 transition-all"
                             >
                               Fix <ExternalLink size={8} />
                             </button>
@@ -160,10 +160,10 @@ export function BlockersPanel({ productId }: Props) {
 
       {/* Footer */}
       {!isLoading && !isEmpty && blockers.length > 0 && (
-        <div className="mt-3 pt-3 border-t border-white/[0.06] flex items-center gap-3 text-[10px] text-[#64748B]">
-          {errors.length > 0   && <span className="text-[#F43F5E]">{errors.length} error{errors.length > 1 ? 's' : ''}</span>}
-          {warnings.length > 0 && <span className="text-[#F59E0B]">{warnings.length} warning{warnings.length > 1 ? 's' : ''}</span>}
-          {infos.length > 0    && <span className="text-[#3B82F6]">{infos.length} info</span>}
+        <div className="mt-3 pt-3 border-t border-white/[0.06] flex items-center gap-3 text-[10px] text-[var(--text-tertiary)]">
+          {errors.length > 0   && <span className="text-[var(--color-error)]">{errors.length} error{errors.length > 1 ? 's' : ''}</span>}
+          {warnings.length > 0 && <span className="text-[var(--color-warning)]">{warnings.length} warning{warnings.length > 1 ? 's' : ''}</span>}
+          {infos.length > 0    && <span className="text-[var(--accent)]">{infos.length} info</span>}
         </div>
       )}
     </motion.div>

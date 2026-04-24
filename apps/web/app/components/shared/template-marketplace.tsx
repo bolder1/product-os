@@ -22,7 +22,24 @@ import {
 // Types
 // ---------------------------------------------------------------------------
 
-export type TemplateCategory = 'full-product' | 'brand' | 'components' | 'pages' | 'workflows' | 'design-system'
+export type TemplateCategory =
+  | 'landing-page'
+  | 'saas-app'
+  | 'ecommerce'
+  | 'dashboard'
+  | 'mobile-app'
+  | 'marketplace'
+  | 'blog-cms'
+  | 'portfolio'
+  | 'internal-tool'
+  | 'docs-site'
+  | 'auth-flow'
+  | 'onboarding'
+  | 'billing'
+  | 'analytics'
+  | 'admin-panel'
+
+export type Breakpoint = 'mobile' | 'tablet' | 'laptop' | 'desktop'
 
 export interface MarketplaceTemplate {
   id: string
@@ -36,15 +53,156 @@ export interface MarketplaceTemplate {
   preview: string
   nodeCount: number
   edgeCount: number
+  responsive: boolean
+  breakpoints: Breakpoint[]
   featured?: boolean
   isNew?: boolean
 }
 
+const ALL_BREAKPOINTS: Breakpoint[] = ['mobile', 'tablet', 'laptop', 'desktop']
+
 // ---------------------------------------------------------------------------
-// Mock marketplace data
+// Template generator — produces 100+ use-case focused, responsive templates
 // ---------------------------------------------------------------------------
 
-const marketplaceTemplates: MarketplaceTemplate[] = [
+function makeTemplates(): MarketplaceTemplate[] {
+  const authors = ['Product OS Team', 'Design Systems Co', 'Growth Labs', 'Component Factory', 'Commerce Studio', 'Mobile UX Lab', 'Data Viz Guild', 'Workflow Pro', 'Indie Maker']
+  const specs: Array<{ category: TemplateCategory; names: string[]; tagPool: string[] }> = [
+    {
+      category: 'landing-page',
+      tagPool: ['hero', 'cta', 'conversion', 'pricing', 'testimonials', 'marketing'],
+      names: ['SaaS Landing', 'Startup Hero', 'Product Launch', 'Waitlist Capture', 'Agency Landing', 'AI Product Launch', 'Mobile App Landing', 'Open Source Landing', 'Course Landing', 'Newsletter Landing'],
+    },
+    {
+      category: 'saas-app',
+      tagPool: ['auth', 'billing', 'dashboard', 'settings', 'multi-tenant', 'b2b'],
+      names: ['B2B SaaS Starter', 'Team Collaboration', 'Project Management', 'CRM Lite', 'Support Desk', 'Feedback Portal', 'HR SaaS', 'Knowledge Base SaaS'],
+    },
+    {
+      category: 'ecommerce',
+      tagPool: ['cart', 'checkout', 'catalog', 'shopify', 'orders', 'stripe'],
+      names: ['Storefront Pro', 'Headless Shop', 'Subscription Box', 'Digital Downloads', 'Wholesale Portal', 'Single Product Store', 'Multi-Vendor Shop'],
+    },
+    {
+      category: 'dashboard',
+      tagPool: ['charts', 'metrics', 'kpi', 'real-time', 'data-viz'],
+      names: ['Analytics Dashboard', 'Finance Dashboard', 'Ops Command Center', 'Customer Health Dashboard', 'Marketing Attribution', 'Sales Pipeline View', 'Product Usage Dashboard'],
+    },
+    {
+      category: 'mobile-app',
+      tagPool: ['mobile', 'gestures', 'native-feel', 'bottom-sheet', 'tabs'],
+      names: ['Mobile SaaS', 'Fitness Tracker', 'Meditation App', 'Social Feed', 'Delivery App', 'Ride Share', 'Finance Mobile'],
+    },
+    {
+      category: 'marketplace',
+      tagPool: ['listings', 'messaging', 'reviews', 'two-sided', 'vendors'],
+      names: ['Freelance Marketplace', 'Services Marketplace', 'Rental Marketplace', 'Handmade Goods', 'Talent Platform', 'Course Marketplace'],
+    },
+    {
+      category: 'blog-cms',
+      tagPool: ['blog', 'cms', 'articles', 'seo', 'mdx'],
+      names: ['Modern Blog', 'Magazine Layout', 'Editorial CMS', 'Tech Blog', 'Personal Journal', 'Company News'],
+    },
+    {
+      category: 'portfolio',
+      tagPool: ['portfolio', 'personal', 'case-studies', 'creative'],
+      names: ['Designer Portfolio', 'Developer Portfolio', 'Studio Showcase', 'Photography Portfolio', 'Writer Portfolio', 'Illustrator Portfolio', 'Architect Portfolio'],
+    },
+    {
+      category: 'internal-tool',
+      tagPool: ['admin', 'internal', 'workflows', 'forms', 'approvals'],
+      names: ['Ops Console', 'Content Moderation', 'Employee Directory', 'IT Ticketing', 'Procurement Tool', 'Inventory Tracker'],
+    },
+    {
+      category: 'docs-site',
+      tagPool: ['docs', 'reference', 'api', 'search', 'mdx'],
+      names: ['API Documentation', 'Developer Docs', 'Product Handbook', 'Internal Wiki', 'Changelog Site', 'Tutorial Site', 'Help Center'],
+    },
+    {
+      category: 'auth-flow',
+      tagPool: ['auth', 'login', 'signup', 'oauth', 'mfa'],
+      names: ['Passwordless Auth', 'OAuth Login', 'Enterprise SSO', 'MFA-Ready Signup', 'Magic Link Auth', 'Multi-step Signup', 'Invite-Based Auth'],
+    },
+    {
+      category: 'onboarding',
+      tagPool: ['onboarding', 'wizard', 'tour', 'checklist'],
+      names: ['Product Tour', 'Setup Wizard', 'Persona-Based Onboarding', 'Interactive Checklist', 'Progressive Onboarding'],
+    },
+    {
+      category: 'billing',
+      tagPool: ['billing', 'stripe', 'invoices', 'plans', 'usage'],
+      names: ['Subscription Billing', 'Usage-Based Billing', 'Invoice Manager', 'Plan Upgrade Flow', 'Metered Billing'],
+    },
+    {
+      category: 'analytics',
+      tagPool: ['analytics', 'events', 'funnel', 'retention', 'segmentation'],
+      names: ['Funnel Analytics', 'Retention Cohorts', 'Event Tracker', 'A/B Test Dashboard', 'User Segmentation'],
+    },
+    {
+      category: 'admin-panel',
+      tagPool: ['admin', 'users', 'roles', 'audit', 'rbac'],
+      names: ['User Admin Panel', 'Roles & Permissions', 'Audit Log Viewer', 'Feature Flag Admin', 'Team Management', 'Workspace Settings', 'Billing Admin'],
+    },
+  ]
+
+  const out: MarketplaceTemplate[] = []
+  let seed = 0
+  const rand = () => {
+    seed = (seed * 9301 + 49297) % 233280
+    return seed / 233280
+  }
+
+  for (const spec of specs) {
+    spec.names.forEach((name, idx) => {
+      const id = `tpl-${spec.category}-${slug(name)}`
+      const tagCount = 3 + Math.floor(rand() * 2)
+      const tags = shuffle(spec.tagPool, rand).slice(0, tagCount)
+      const nodeCount = 8 + Math.floor(rand() * 50)
+      const edgeCount = Math.floor(nodeCount * (0.8 + rand() * 0.6))
+      out.push({
+        id,
+        name,
+        description: `${name} — responsive ${spec.category.replace('-', ' ')} template with production-ready structure, optimized for mobile, tablet, laptop, and desktop.`,
+        category: spec.category,
+        author: authors[Math.floor(rand() * authors.length)] ?? 'Product OS Team',
+        downloads: 200 + Math.floor(rand() * 5000),
+        rating: Math.round((4 + rand()) * 10) / 10,
+        tags,
+        preview: `${nodeCount} nodes, ${edgeCount} edges`,
+        nodeCount,
+        edgeCount,
+        responsive: true,
+        breakpoints: ALL_BREAKPOINTS,
+        featured: idx === 0 && (spec.category === 'saas-app' || spec.category === 'landing-page' || spec.category === 'dashboard'),
+        isNew: idx === 1,
+      })
+    })
+  }
+
+  return out
+}
+
+function slug(s: string): string {
+  return s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+}
+
+function shuffle<T>(arr: T[], rand: () => number): T[] {
+  const copy = [...arr]
+  for (let i = copy.length - 1; i > 0; i--) {
+    const j = Math.floor(rand() * (i + 1))
+    ;[copy[i], copy[j]] = [copy[j]!, copy[i]!]
+  }
+  return copy
+}
+
+// ---------------------------------------------------------------------------
+// Marketplace data (generated)
+// ---------------------------------------------------------------------------
+
+const marketplaceTemplates: MarketplaceTemplate[] = makeTemplates()
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const _legacyTemplates: any[] = ([
   {
     id: 'tpl-saas-starter',
     name: 'SaaS Starter Kit',
@@ -181,19 +339,28 @@ const marketplaceTemplates: MarketplaceTemplate[] = [
     edgeCount: 8,
     featured: true,
   },
-]
+] as any[])
 
 // ---------------------------------------------------------------------------
 // Component
 // ---------------------------------------------------------------------------
 
 const categoryMeta: Record<TemplateCategory, { label: string; icon: React.ReactNode }> = {
-  'full-product': { label: 'Full Product', icon: <Package className="w-3 h-3" /> },
-  'brand': { label: 'Brand', icon: <Palette className="w-3 h-3" /> },
-  'components': { label: 'Components', icon: <Layers className="w-3 h-3" /> },
-  'pages': { label: 'Pages', icon: <Layout className="w-3 h-3" /> },
-  'workflows': { label: 'Workflows', icon: <GitFork className="w-3 h-3" /> },
-  'design-system': { label: 'Design System', icon: <FileText className="w-3 h-3" /> },
+  'landing-page': { label: 'Landing', icon: <Layout className="w-3 h-3" /> },
+  'saas-app': { label: 'SaaS App', icon: <Package className="w-3 h-3" /> },
+  'ecommerce': { label: 'E-Commerce', icon: <Package className="w-3 h-3" /> },
+  'dashboard': { label: 'Dashboard', icon: <Layers className="w-3 h-3" /> },
+  'mobile-app': { label: 'Mobile', icon: <Layout className="w-3 h-3" /> },
+  'marketplace': { label: 'Marketplace', icon: <Store className="w-3 h-3" /> },
+  'blog-cms': { label: 'Blog / CMS', icon: <FileText className="w-3 h-3" /> },
+  'portfolio': { label: 'Portfolio', icon: <Palette className="w-3 h-3" /> },
+  'internal-tool': { label: 'Internal Tool', icon: <GitFork className="w-3 h-3" /> },
+  'docs-site': { label: 'Docs', icon: <FileText className="w-3 h-3" /> },
+  'auth-flow': { label: 'Auth', icon: <GitFork className="w-3 h-3" /> },
+  'onboarding': { label: 'Onboarding', icon: <GitFork className="w-3 h-3" /> },
+  'billing': { label: 'Billing', icon: <Package className="w-3 h-3" /> },
+  'analytics': { label: 'Analytics', icon: <Layers className="w-3 h-3" /> },
+  'admin-panel': { label: 'Admin', icon: <GitFork className="w-3 h-3" /> },
 }
 
 interface TemplateMarketplaceProps {

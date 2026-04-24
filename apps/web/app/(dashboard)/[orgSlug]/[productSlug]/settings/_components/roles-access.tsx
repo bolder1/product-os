@@ -95,8 +95,8 @@ export function RolesAccess() {
       {/* Role matrix */}
       <div className="space-y-4">
         <div>
-          <h3 className="text-sm font-semibold text-[#E2E8F0]">Access Matrix</h3>
-          <p className="text-xs text-[#64748B] mt-0.5">
+          <h3 className="text-sm font-semibold text-[var(--text-primary)]">Access Matrix</h3>
+          <p className="text-xs text-[var(--text-tertiary)] mt-0.5">
             Toggle studio access for each role. Admin always has full access.
           </p>
         </div>
@@ -105,13 +105,13 @@ export function RolesAccess() {
           <table className="w-full text-left">
             <thead>
               <tr className="border-b border-white/[0.06]">
-                <th className="px-4 py-3 text-xs font-semibold text-[#94A3B8] bg-white/[0.02] sticky left-0 z-10 min-w-[100px]">
+                <th className="px-4 py-3 text-xs font-semibold text-[var(--text-secondary)] bg-white/[0.02] sticky left-0 z-10 min-w-[100px]">
                   Role
                 </th>
                 {STUDIOS.map((studio) => (
                   <th
                     key={studio}
-                    className="px-3 py-3 text-[0.625rem] font-semibold text-[#94A3B8] bg-white/[0.02] text-center whitespace-nowrap"
+                    className="px-3 py-3 text-[0.625rem] font-semibold text-[var(--text-secondary)] bg-white/[0.02] text-center whitespace-nowrap"
                   >
                     {studio}
                   </th>
@@ -126,7 +126,7 @@ export function RolesAccess() {
                     rowIdx % 2 === 0 ? 'bg-white/[0.01]' : ''
                   }`}
                 >
-                  <td className="px-4 py-2.5 text-xs font-medium text-[#CBD5E1] sticky left-0 z-10 bg-inherit">
+                  <td className="px-4 py-2.5 text-xs font-medium text-[var(--text-secondary)] sticky left-0 z-10 bg-inherit">
                     {role}
                   </td>
                   {STUDIOS.map((studio) => {
@@ -147,11 +147,11 @@ export function RolesAccess() {
                             <Check
                               size={14}
                               className={
-                                isAdmin ? 'text-[#10B981]/50' : 'text-[#10B981]'
+                                isAdmin ? 'text-[var(--color-success)]/50' : 'text-[var(--color-success)]'
                               }
                             />
                           ) : (
-                            <Minus size={14} className="text-[#334155]" />
+                            <Minus size={14} className="text-[var(--border-default)]" />
                           )}
                         </button>
                       </td>
@@ -167,19 +167,19 @@ export function RolesAccess() {
       {/* Access Requests */}
       <div className="space-y-4">
         <div className="flex items-center gap-2">
-          <ShieldAlert size={16} className="text-[#F59E0B]" />
-          <h3 className="text-sm font-semibold text-[#E2E8F0]">
+          <ShieldAlert size={16} className="text-[var(--color-warning)]" />
+          <h3 className="text-sm font-semibold text-[var(--text-primary)]">
             Access Requests
           </h3>
           {requests.length > 0 && (
-            <span className="px-1.5 py-0.5 rounded-md bg-[#F59E0B]/15 text-[#F59E0B] text-[0.625rem] font-medium">
+            <span className="px-1.5 py-0.5 rounded-md bg-[var(--color-warning)]/15 text-[var(--color-warning)] text-[0.625rem] font-medium">
               {requests.length}
             </span>
           )}
         </div>
 
         {requests.length === 0 ? (
-          <div className="flex items-center gap-2 px-4 py-6 rounded-lg bg-white/[0.02] border border-white/[0.05] text-[#64748B]">
+          <div className="flex items-center gap-2 px-4 py-6 rounded-lg bg-white/[0.02] border border-white/[0.05] text-[var(--text-tertiary)]">
             <ShieldCheck size={16} />
             <span className="text-sm">No pending access requests</span>
           </div>
@@ -192,31 +192,31 @@ export function RolesAccess() {
                 animate={{ opacity: 1, x: 0 }}
                 className="flex items-center gap-3 px-4 py-3 rounded-lg bg-white/[0.02] border border-white/[0.05]"
               >
-                <div className="w-8 h-8 rounded-full bg-[#F59E0B]/10 flex items-center justify-center text-[#F59E0B] text-xs font-medium">
+                <div className="w-8 h-8 rounded-full bg-[var(--color-warning)]/10 flex items-center justify-center text-[var(--color-warning)] text-xs font-medium">
                   {req.initials}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <span className="text-sm text-[#E2E8F0]">{req.user}</span>
-                    <span className="text-[0.625rem] text-[#64748B]">({req.role})</span>
+                    <span className="text-sm text-[var(--text-primary)]">{req.user}</span>
+                    <span className="text-[0.625rem] text-[var(--text-tertiary)]">({req.role})</span>
                   </div>
-                  <p className="text-xs text-[#64748B] mt-0.5">
-                    Requesting access to <span className="text-[#CBD5E1]">{req.studio}</span>
+                  <p className="text-xs text-[var(--text-tertiary)] mt-0.5">
+                    Requesting access to <span className="text-[var(--text-secondary)]">{req.studio}</span>
                   </p>
-                  <p className="text-[0.6875rem] text-[#475569] mt-1 italic">
+                  <p className="text-[0.6875rem] text-[var(--text-tertiary)] mt-1 italic">
                     &ldquo;{req.reason}&rdquo;
                   </p>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
                   <button
                     onClick={() => approveRequest(req)}
-                    className="px-3 py-1.5 rounded-md text-xs font-medium bg-[#10B981]/15 text-[#10B981] hover:bg-[#10B981]/25 transition-colors"
+                    className="px-3 py-1.5 rounded-md text-xs font-medium bg-[var(--color-success)]/15 text-[var(--color-success)] hover:bg-[var(--color-success)]/25 transition-colors"
                   >
                     Approve
                   </button>
                   <button
                     onClick={() => denyRequest(req.id)}
-                    className="px-3 py-1.5 rounded-md text-xs font-medium bg-[#F43F5E]/10 text-[#F43F5E] hover:bg-[#F43F5E]/20 transition-colors"
+                    className="px-3 py-1.5 rounded-md text-xs font-medium bg-[var(--color-error)]/10 text-[var(--color-error)] hover:bg-[var(--color-error)]/20 transition-colors"
                   >
                     Deny
                   </button>

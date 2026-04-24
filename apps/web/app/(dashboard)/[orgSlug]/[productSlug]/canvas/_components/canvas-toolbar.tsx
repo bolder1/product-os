@@ -75,8 +75,8 @@ export function CanvasToolbar({
             title={tool.label}
             className={`relative p-2 rounded-lg transition-colors ${
               isActive
-                ? 'text-[#F59E0B] bg-[#F59E0B]/10'
-                : 'text-[#94A3B8] hover:text-[#F1F5F9] hover:bg-white/[0.06]'
+                ? 'text-[var(--color-warning)] bg-[var(--color-warning)]/10'
+                : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-white/[0.06]'
             }`}
           >
             <Icon className="w-4 h-4" />
@@ -91,8 +91,8 @@ export function CanvasToolbar({
           title="Shapes"
           className={`flex items-center gap-0.5 p-2 rounded-lg transition-colors ${
             isShapeTool
-              ? 'text-[#F59E0B] bg-[#F59E0B]/10'
-              : 'text-[#94A3B8] hover:text-[#F1F5F9] hover:bg-white/[0.06]'
+              ? 'text-[var(--color-warning)] bg-[var(--color-warning)]/10'
+              : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-white/[0.06]'
           }`}
         >
           {(() => { const ShapeIcon = activeShapeIcon; return <ShapeIcon className="w-4 h-4" /> })()}
@@ -115,8 +115,8 @@ export function CanvasToolbar({
                   }}
                   className={`flex items-center gap-2 w-full px-3 py-1.5 rounded-md text-xs transition-colors ${
                     activeTool === shape.key
-                      ? 'text-[#F59E0B] bg-[#F59E0B]/10'
-                      : 'text-[#94A3B8] hover:text-[#F1F5F9] hover:bg-white/[0.06]'
+                      ? 'text-[var(--color-warning)] bg-[var(--color-warning)]/10'
+                      : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-white/[0.06]'
                   }`}
                 >
                   <Icon className="w-3.5 h-3.5" />
@@ -135,14 +135,14 @@ export function CanvasToolbar({
       <button
         onClick={onUndo}
         title="Undo"
-        className="p-2 rounded-lg text-[#94A3B8] hover:text-[#F1F5F9] hover:bg-white/[0.06] transition-colors"
+        className="p-2 rounded-lg text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-white/[0.06] transition-colors"
       >
         <Undo2 className="w-4 h-4" />
       </button>
       <button
         onClick={onRedo}
         title="Redo"
-        className="p-2 rounded-lg text-[#94A3B8] hover:text-[#F1F5F9] hover:bg-white/[0.06] transition-colors"
+        className="p-2 rounded-lg text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-white/[0.06] transition-colors"
       >
         <Redo2 className="w-4 h-4" />
       </button>
@@ -154,24 +154,24 @@ export function CanvasToolbar({
       <button
         onClick={onZoomOut}
         title="Zoom Out"
-        className="p-2 rounded-lg text-[#94A3B8] hover:text-[#F1F5F9] hover:bg-white/[0.06] transition-colors"
+        className="p-2 rounded-lg text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-white/[0.06] transition-colors"
       >
         <ZoomOut className="w-4 h-4" />
       </button>
-      <span className="text-[10px] font-mono text-[#64748B] w-10 text-center">
+      <span className="text-[10px] font-mono text-[var(--text-tertiary)] w-10 text-center">
         {Math.round(zoom * 100)}%
       </span>
       <button
         onClick={onZoomIn}
         title="Zoom In"
-        className="p-2 rounded-lg text-[#94A3B8] hover:text-[#F1F5F9] hover:bg-white/[0.06] transition-colors"
+        className="p-2 rounded-lg text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-white/[0.06] transition-colors"
       >
         <ZoomIn className="w-4 h-4" />
       </button>
       <button
         onClick={onZoomFit}
         title="Fit to Screen"
-        className="p-2 rounded-lg text-[#94A3B8] hover:text-[#F1F5F9] hover:bg-white/[0.06] transition-colors"
+        className="p-2 rounded-lg text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-white/[0.06] transition-colors"
       >
         <Maximize className="w-4 h-4" />
       </button>
@@ -183,7 +183,7 @@ export function CanvasToolbar({
       <motion.button
         whileHover={{ scale: 1.03 }}
         whileTap={{ scale: 0.97 }}
-        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-[#F59E0B] to-[#D97706] text-white text-xs font-medium"
+        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-[var(--color-warning)] to-[#D97706] text-white text-xs font-medium"
       >
         <Sparkles className="w-3.5 h-3.5" />
         AI Brainstorm

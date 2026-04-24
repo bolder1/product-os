@@ -51,8 +51,8 @@ export function ReleaseDetail({ release, productId, onDeploy }: ReleaseDetailPro
         <div>
           <div className="flex items-center gap-3 mb-1">
             <div className="flex items-center gap-1.5">
-              <Tag className="w-4 h-4 text-[#10B981]" />
-              <span className="text-lg font-mono font-bold text-[#F1F5F9]">
+              <Tag className="w-4 h-4 text-[var(--color-success)]" />
+              <span className="text-lg font-mono font-bold text-[var(--text-primary)]">
                 {release.version}
               </span>
             </div>
@@ -63,10 +63,10 @@ export function ReleaseDetail({ release, productId, onDeploy }: ReleaseDetailPro
               {status.label}
             </span>
           </div>
-          <h2 className="text-sm text-[#94A3B8]">{release.title}</h2>
-          <p className="text-xs text-[#64748B] mt-1">{release.date}</p>
+          <h2 className="text-sm text-[var(--text-secondary)]">{release.title}</h2>
+          <p className="text-xs text-[var(--text-tertiary)] mt-1">{release.date}</p>
         </div>
-        <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-[#8B5CF6] bg-[#8B5CF6]/10 hover:bg-[#8B5CF6]/20 border border-[#8B5CF6]/20 transition-colors">
+        <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-[var(--accent)] bg-[var(--accent)]/10 hover:bg-[var(--accent)]/20 border border-[var(--accent)]/20 transition-colors">
           <Sparkles className="w-3.5 h-3.5" />
           AI: Write release notes
         </button>
@@ -75,17 +75,17 @@ export function ReleaseDetail({ release, productId, onDeploy }: ReleaseDetailPro
       {/* Release notes */}
       <div>
         <div className="flex items-center gap-2 mb-3">
-          <FileText className="w-3.5 h-3.5 text-[#64748B]" />
-          <h3 className="text-xs font-medium text-[#94A3B8] uppercase tracking-wider">
+          <FileText className="w-3.5 h-3.5 text-[var(--text-tertiary)]" />
+          <h3 className="text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">
             Release Notes
           </h3>
         </div>
         <div className="rounded-xl bg-white/[0.02] border border-white/[0.06] p-4">
-          <div className="text-xs text-[#94A3B8] leading-relaxed whitespace-pre-line">
+          <div className="text-xs text-[var(--text-secondary)] leading-relaxed whitespace-pre-line">
             {release.notes.split('\\n').map((line, i) => {
               if (line.startsWith('### ')) {
                 return (
-                  <h4 key={i} className="text-sm font-semibold text-[#F1F5F9] mt-3 mb-2 first:mt-0">
+                  <h4 key={i} className="text-sm font-semibold text-[var(--text-primary)] mt-3 mb-2 first:mt-0">
                     {line.replace('### ', '')}
                   </h4>
                 )
@@ -95,15 +95,15 @@ export function ReleaseDetail({ release, productId, onDeploy }: ReleaseDetailPro
                 if (match) {
                   return (
                     <p key={i} className="ml-3 mb-1">
-                      <span className="text-[#F1F5F9] font-medium">{match[1]}</span>
-                      <span className="text-[#94A3B8]">: {match[2]}</span>
+                      <span className="text-[var(--text-primary)] font-medium">{match[1]}</span>
+                      <span className="text-[var(--text-secondary)]">: {match[2]}</span>
                     </p>
                   )
                 }
               }
               if (line.startsWith('- ')) {
                 return (
-                  <p key={i} className="ml-3 mb-1 text-[#94A3B8]">
+                  <p key={i} className="ml-3 mb-1 text-[var(--text-secondary)]">
                     {line}
                   </p>
                 )
@@ -120,7 +120,7 @@ export function ReleaseDetail({ release, productId, onDeploy }: ReleaseDetailPro
 
       {/* Changes */}
       <div>
-        <h3 className="text-xs font-medium text-[#94A3B8] uppercase tracking-wider mb-3">
+        <h3 className="text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider mb-3">
           Changes Included ({release.changes.length})
         </h3>
         <div className="space-y-1.5">
@@ -135,8 +135,8 @@ export function ReleaseDetail({ release, productId, onDeploy }: ReleaseDetailPro
                 className="flex items-center gap-3 px-3 py-2 rounded-lg bg-white/[0.02] border border-white/[0.06]"
               >
                 <span style={{ color: ct.color }}>{changeIcon(change.changeType)}</span>
-                <span className="text-xs text-[#F1F5F9] flex-1">{change.name}</span>
-                <span className="text-[10px] text-[#64748B] bg-white/[0.05] px-1.5 py-0.5 rounded">
+                <span className="text-xs text-[var(--text-primary)] flex-1">{change.name}</span>
+                <span className="text-[10px] text-[var(--text-tertiary)] bg-white/[0.05] px-1.5 py-0.5 rounded">
                   {change.type}
                 </span>
                 <span
@@ -160,7 +160,7 @@ export function ReleaseDetail({ release, productId, onDeploy }: ReleaseDetailPro
 
       {/* Deployment environment tabs + log */}
       <div>
-        <h3 className="text-xs font-medium text-[#94A3B8] uppercase tracking-wider mb-3">
+        <h3 className="text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider mb-3">
           Deployment
         </h3>
         <div className="rounded-xl bg-white/[0.02] border border-white/[0.06] p-4">
@@ -186,29 +186,29 @@ export function ReleaseDetail({ release, productId, onDeploy }: ReleaseDetailPro
           </div>
 
           {/* Deployment log */}
-          <div className="rounded-lg bg-[#060918] border border-white/[0.06] p-3 font-mono text-[10px] text-[#64748B] leading-5">
+          <div className="rounded-lg bg-[var(--bg-base)] border border-white/[0.06] p-3 font-mono text-[10px] text-[var(--text-tertiary)] leading-5">
             <p>$ deploy --version {release.version} --env {activeEnv.toLowerCase()}</p>
             {release.status === 'production' && (
               <>
-                <p className="text-[#10B981]">[OK] Build passed</p>
-                <p className="text-[#10B981]">[OK] Tests passed (142/142)</p>
-                <p className="text-[#10B981]">[OK] Deployed to production</p>
-                <p className="text-[#F1F5F9]">Release {release.version} is live</p>
+                <p className="text-[var(--color-success)]">[OK] Build passed</p>
+                <p className="text-[var(--color-success)]">[OK] Tests passed (142/142)</p>
+                <p className="text-[var(--color-success)]">[OK] Deployed to production</p>
+                <p className="text-[var(--text-primary)]">Release {release.version} is live</p>
               </>
             )}
             {release.status === 'staging' && (
               <>
-                <p className="text-[#10B981]">[OK] Build passed</p>
-                <p className="text-[#F59E0B]">[..] Running tests...</p>
+                <p className="text-[var(--color-success)]">[OK] Build passed</p>
+                <p className="text-[var(--color-warning)]">[..] Running tests...</p>
               </>
             )}
             {release.status === 'draft' && (
-              <p className="text-[#64748B]">Awaiting deployment...</p>
+              <p className="text-[var(--text-tertiary)]">Awaiting deployment...</p>
             )}
             {release.status === 'rolled-back' && (
               <>
-                <p className="text-[#F43F5E]">[ERR] Performance degradation detected</p>
-                <p className="text-[#F43F5E]">[ERR] Rolled back to previous version</p>
+                <p className="text-[var(--color-error)]">[ERR] Performance degradation detected</p>
+                <p className="text-[var(--color-error)]">[ERR] Rolled back to previous version</p>
               </>
             )}
           </div>

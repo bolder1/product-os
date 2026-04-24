@@ -4,7 +4,6 @@ import { use, useMemo, useState, useEffect } from 'react'
 import { Sidebar } from '../../../components/shell/sidebar'
 import { TopBar } from '../../../components/shell/topbar'
 import { TasksPanel } from '../../../components/shell/tasks-panel'
-import { AIAssistantPanel } from '../../../components/shared/ai-assistant-panel'
 import { VersionHistoryPanel } from '../../../components/shared/version-history-panel'
 import { CommentThread } from '../../../components/shared/comment-thread'
 import { ValidationPanel, ValidationTrigger } from '../../../components/shared/validation-panel'
@@ -20,7 +19,6 @@ import { ComputerModeStrip } from '../../../components/shared/computer-mode-stri
 import { GraphInspector } from '../../../components/shared/graph-inspector'
 import { Copilot } from '../../../components/shared/copilot'
 import { CommandPalette } from '../../../components/shared/command-palette'
-import { OpsPilot } from '../../../components/shared/ops-pilot'
 import { PromptGateHost } from '../../../components/shared/prompt-gate-host'
 import { useCommandPaletteStore } from '../../../lib/command-palette-store'
 import { createContext, useContext } from 'react'
@@ -129,12 +127,6 @@ function ProductLayoutInner({
 
   const commentEntityId = `${productId}-${currentStudio}`
   const dbProductId = product?.id
-
-  // Memoize contextHints so AIAssistantPanel doesn't get a new array ref every render
-  const contextHints = useMemo(
-    () => [product?.slug ?? productId, currentStudio],
-    [product?.slug, productId, currentStudio]
-  )
 
   // Update active studio in presence
   useEffect(() => {
@@ -247,11 +239,6 @@ function ProductLayoutInner({
         <ValidationPanel productId={productId} />
         <VersionHistoryPanel productId={productId} />
         <TasksPanel />
-        <AIAssistantPanel
-          studio={currentStudio}
-          productId={productId}
-          contextHints={contextHints}
-        />
         <ComputerModePanel
           studio={currentStudio}
           productId={dbProductId}
@@ -273,18 +260,8 @@ function ProductLayoutInner({
           orgSlug={orgSlug}
           productSlug={productSlug}
           currentStudio={currentStudio}
-          productId={dbProductId}
+          productId={productId}
         />
-
-        {/* ── OpsPilot AI Copilot ── */}
-        {dbProductId && (
-          <OpsPilot
-            productId={dbProductId}
-            currentStudio={currentStudio}
-            orgSlug={orgSlug}
-            productSlug={productSlug}
-          />
-        )}
 
         {/* ── Prompt gate (pre-flight surface for every prompt entry) ── */}
         <PromptGateHost />

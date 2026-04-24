@@ -10,6 +10,7 @@ import { useNotificationStore } from './notification-store'
 import { useActivityStore } from './activity-store'
 import { useApprovalStore } from './approval-store'
 import { useCommentStore } from './comment-store'
+import { useDecisionStore } from './decision-store'
 
 /**
  * Hydrates all Zustand stores from the real database via tRPC.
@@ -44,7 +45,7 @@ export function useDataSync(productId: string | undefined) {
       description: p.description ?? '',
       slug: p.slug,
       orgSlug: resolvedOrgSlug,
-      color: '#3B82F6',
+      color: 'var(--accent)',
       icon: p.icon ?? '🚀',
       status: p.status as 'draft' | 'active' | 'archived',
       createdAt: p.createdAt?.toISOString?.() ?? p.createdAt,
@@ -191,6 +192,48 @@ export function useDataSync(productId: string | undefined) {
     })
   }, [approvalsQuery.data])
 
+  // --- Decisions ---
+  // Gracefully falls back to localStorage store if the DB table doesn't exist yet.
+  // retry:false avoids console noise when the table hasn't been migrated yet.
+  const decisionsQuery = trpc.decision.list.useQuery(
+    { productId: productId! },
+    { enabled: !!user && !!productId, retry: false },
+  )
+
+  useEffect(() => {
+    if (!decisionsQuery.data) return
+    const dbDecisions = decisionsQuery.data.map((d: any) => ({
+      id: d.id,
+      productId: d.productId,
+      title: d.title,
+      rationale: d.rationale ?? '',
+      alternatives: d.alternatives ?? [],
+      status: d.status as 'proposed' | 'decided' | 'revisited' | 'superseded',
+      decidedBy: d.decidedBy ?? undefined,
+      decidedAt: d.decidedAt?.toISOString?.() ?? d.decidedAt ?? undefined,
+      supersededBy: d.supersededBy ?? undefined,
+      studio: d.studio ?? 'operate',
+      tags: d.tags ?? [],
+      relatedEntities: d.relatedEntities ?? [],
+      createdAt: d.createdAt?.toISOString?.() ?? d.createdAt,
+    }))
+    // Merge: keep local-only decisions (those not yet synced to DB) alongside DB ones
+    useDecisionStore.setState((s) => ({
+      decisions: [
+        ...dbDecisions,
+        // Keep local decisions that are NOT in DB yet (different id prefix)
+        ...s.decisions.filter(
+          (local) =>
+            local.productId === productId &&
+            local.id.startsWith('dec-') && // local-generated ids start with dec-
+            !dbDecisions.some((db: any) => db.id === local.id),
+        ),
+        // Keep decisions belonging to other products untouched
+        ...s.decisions.filter((local) => local.productId !== productId),
+      ],
+    }))
+  }, [decisionsQuery.data, productId])
+
   // --- Comments ---
   // Comments are per-node, so we won't bulk-load all. The comment panel will fetch on demand.
 
@@ -209,6 +252,7 @@ export function useDataSync(productId: string | undefined) {
       edgesQuery.refetch()
       tasksQuery.refetch()
       notifsQuery.refetch()
+      decisionsQuery.refetch()
     },
   }
 }

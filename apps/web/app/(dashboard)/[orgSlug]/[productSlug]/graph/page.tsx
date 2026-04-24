@@ -301,14 +301,14 @@ function LivingGraphNode({ data }: { data: Record<string, unknown> }) {
 
       {/* Orphan badge */}
       {isOrphan && !dimmed && (
-        <div className="absolute -bottom-0.5 -left-0.5 w-3.5 h-3.5 rounded-full bg-[#F97316] border-2 border-[#080C14] flex items-center justify-center">
+        <div className="absolute -bottom-0.5 -left-0.5 w-3.5 h-3.5 rounded-full bg-[var(--color-warning)] border-2 border-[#080C14] flex items-center justify-center">
           <Link2Off size={7} color="#fff" />
         </div>
       )}
 
       {/* Cycle badge */}
       {inCycle && !dimmed && (
-        <div className="absolute -bottom-0.5 -left-0.5 w-3.5 h-3.5 rounded-full bg-[#EF4444] border-2 border-[#080C14] flex items-center justify-center">
+        <div className="absolute -bottom-0.5 -left-0.5 w-3.5 h-3.5 rounded-full bg-[var(--color-error)] border-2 border-[#080C14] flex items-center justify-center">
           <AlertTriangle size={7} color="#fff" />
         </div>
       )}
@@ -327,8 +327,8 @@ function LivingGraphNode({ data }: { data: Record<string, unknown> }) {
         style={{ color: dimmed ? '#475569' : '#94A3B8' }}
       >
         {node.label}
-        {isOrphan && <span className="ml-1 text-[#F97316]">·orphan</span>}
-        {inCycle && <span className="ml-1 text-[#EF4444]">·cycle</span>}
+        {isOrphan && <span className="ml-1 text-[var(--color-warning)]">·orphan</span>}
+        {inCycle && <span className="ml-1 text-[var(--color-error)]">·cycle</span>}
       </div>
     </div>
   )
@@ -361,7 +361,7 @@ function SnapshotScrubber({
       <button
         onClick={onTogglePlay}
         className={`w-7 h-7 rounded-lg flex items-center justify-center transition-colors ${
-          playing ? 'bg-[#3B82F6] text-white' : 'bg-white/[0.06] text-[#64748B] hover:bg-white/[0.10]'
+          playing ? 'bg-[var(--accent)] text-white' : 'bg-white/[0.06] text-[var(--text-tertiary)] hover:bg-white/[0.10]'
         }`}
       >
         {playing ? <Pause size={13} /> : <Play size={13} />}
@@ -381,7 +381,7 @@ function SnapshotScrubber({
         />
       </div>
 
-      <div className="text-xs text-[#64748B] whitespace-nowrap min-w-[80px] text-right">
+      <div className="text-xs text-[var(--text-tertiary)] whitespace-nowrap min-w-[80px] text-right">
         {currentId === null
           ? 'Live'
           : snapshots.find((s) => s.id === currentId)?.takenAt
@@ -440,11 +440,11 @@ function NodeDetail({
               <div className="w-3 h-3 rounded-full" style={{ backgroundColor: color }} />
             </div>
             <div>
-              <p className="text-sm font-semibold text-[#F1F5F9]">{node.label}</p>
-              <p className="text-xs text-[#64748B] capitalize">{node.studio} studio</p>
+              <p className="text-sm font-semibold text-[var(--text-primary)]">{node.label}</p>
+              <p className="text-xs text-[var(--text-tertiary)] capitalize">{node.studio} studio</p>
             </div>
           </div>
-          <button onClick={onClose} className="text-[#64748B] hover:text-[#F1F5F9] transition-colors mt-0.5">
+          <button onClick={onClose} className="text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors mt-0.5">
             <X size={16} />
           </button>
         </div>
@@ -460,7 +460,7 @@ function NodeDetail({
             { label: 'Activity', value: node.recentActivity ? 'Recent' : 'Quiet' },
           ].map(({ label, value, color: c }) => (
             <div key={label} className="rounded-xl border border-white/[0.06] bg-white/[0.02] px-3 py-2.5">
-              <p className="text-[10px] text-[#64748B] mb-0.5">{label}</p>
+              <p className="text-[10px] text-[var(--text-tertiary)] mb-0.5">{label}</p>
               <p className="text-sm font-medium" style={{ color: c ?? '#F1F5F9' }}>{value}</p>
             </div>
           ))}
@@ -468,7 +468,7 @@ function NodeDetail({
 
         {/* Version timeline */}
         <div>
-          <p className="text-[10px] text-[#64748B] mb-2 uppercase tracking-wide font-semibold">Version History</p>
+          <p className="text-[10px] text-[var(--text-tertiary)] mb-2 uppercase tracking-wide font-semibold">Version History</p>
           <div className="flex flex-col gap-1.5">
             {versions.slice(0, 5).map((v) => (
               <div key={v.v} className="flex items-center gap-3">
@@ -476,10 +476,10 @@ function NodeDetail({
                   className="w-1.5 h-1.5 rounded-full shrink-0"
                   style={{ backgroundColor: v.v === node.version ? color : '#334155' }}
                 />
-                <span className="text-xs font-mono text-[#64748B]">v{v.v}</span>
-                <span className="text-xs text-[#475569] flex-1">{v.date}</span>
+                <span className="text-xs font-mono text-[var(--text-tertiary)]">v{v.v}</span>
+                <span className="text-xs text-[var(--text-tertiary)] flex-1">{v.date}</span>
                 {v.v === node.version && (
-                  <span className="text-[9px] font-semibold text-[#3B82F6] uppercase tracking-wide">Current</span>
+                  <span className="text-[9px] font-semibold text-[var(--accent)] uppercase tracking-wide">Current</span>
                 )}
               </div>
             ))}
@@ -499,7 +499,7 @@ function NodeDetail({
             <>
               {deps.length > 0 && (
                 <div>
-                  <p className="text-[10px] text-[#64748B] mb-2 uppercase tracking-wide font-semibold flex items-center gap-1.5">
+                  <p className="text-[10px] text-[var(--text-tertiary)] mb-2 uppercase tracking-wide font-semibold flex items-center gap-1.5">
                     <ArrowRight size={10} />
                     Dependencies ({deps.length})
                   </p>
@@ -507,9 +507,9 @@ function NodeDetail({
                     {deps.map((d) => (
                       <div key={d.id} className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-white/[0.02] border border-white/[0.04]">
                         <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: NODE_STUDIO_COLORS[d.studio] ?? '#64748B' }} />
-                        <span className="text-xs text-[#94A3B8] flex-1 truncate">{d.label}</span>
-                        <span className="text-[9px] text-[#475569] capitalize">{d.studio}</span>
-                        {cycleNodeIds.has(d.id) && <AlertTriangle size={9} className="text-[#EF4444] shrink-0" />}
+                        <span className="text-xs text-[var(--text-secondary)] flex-1 truncate">{d.label}</span>
+                        <span className="text-[9px] text-[var(--text-tertiary)] capitalize">{d.studio}</span>
+                        {cycleNodeIds.has(d.id) && <AlertTriangle size={9} className="text-[var(--color-error)] shrink-0" />}
                       </div>
                     ))}
                   </div>
@@ -518,7 +518,7 @@ function NodeDetail({
 
               {backlinks.length > 0 && (
                 <div>
-                  <p className="text-[10px] text-[#64748B] mb-2 uppercase tracking-wide font-semibold flex items-center gap-1.5">
+                  <p className="text-[10px] text-[var(--text-tertiary)] mb-2 uppercase tracking-wide font-semibold flex items-center gap-1.5">
                     <ArrowLeft size={10} />
                     Used by ({backlinks.length})
                   </p>
@@ -526,8 +526,8 @@ function NodeDetail({
                     {backlinks.map((b) => (
                       <div key={b.id} className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-white/[0.02] border border-white/[0.04]">
                         <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: NODE_STUDIO_COLORS[b.studio] ?? '#64748B' }} />
-                        <span className="text-xs text-[#94A3B8] flex-1 truncate">{b.label}</span>
-                        <span className="text-[9px] text-[#475569] capitalize">{b.studio}</span>
+                        <span className="text-xs text-[var(--text-secondary)] flex-1 truncate">{b.label}</span>
+                        <span className="text-[9px] text-[var(--text-tertiary)] capitalize">{b.studio}</span>
                       </div>
                     ))}
                   </div>
@@ -535,16 +535,16 @@ function NodeDetail({
               )}
 
               {orphanIds.has(node.id) && (
-                <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl border border-[#F97316]/30 bg-[#F97316]/08">
-                  <Link2Off size={12} className="text-[#F97316] shrink-0" />
-                  <p className="text-xs text-[#F97316]">Orphan node — no edges connect to or from this node.</p>
+                <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl border border-[var(--color-warning)]/30 bg-[var(--color-warning)]/08">
+                  <Link2Off size={12} className="text-[var(--color-warning)] shrink-0" />
+                  <p className="text-xs text-[var(--color-warning)]">Orphan node — no edges connect to or from this node.</p>
                 </div>
               )}
 
               {cycleNodeIds.has(node.id) && (
-                <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl border border-[#EF4444]/30 bg-[#EF4444]/08">
-                  <AlertTriangle size={12} className="text-[#EF4444] shrink-0" />
-                  <p className="text-xs text-[#EF4444]">Cycle detected — this node is part of a circular dependency.</p>
+                <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl border border-[var(--color-error)]/30 bg-[var(--color-error)]/08">
+                  <AlertTriangle size={12} className="text-[var(--color-error)] shrink-0" />
+                  <p className="text-xs text-[var(--color-error)]">Cycle detected — this node is part of a circular dependency.</p>
                 </div>
               )}
             </>
@@ -556,8 +556,8 @@ function NodeDetail({
           href={`/${orgSlug}/${productSlug}/${studioHref}`}
           className="flex items-center justify-between px-4 py-3 rounded-xl border border-white/[0.08] bg-white/[0.02] hover:bg-white/[0.04] transition-colors group"
         >
-          <span className="text-sm font-medium text-[#F1F5F9] capitalize">{studioHref} Studio</span>
-          <ExternalLink size={14} className="text-[#64748B] group-hover:text-[#F1F5F9] transition-colors" />
+          <span className="text-sm font-medium text-[var(--text-primary)] capitalize">{studioHref} Studio</span>
+          <ExternalLink size={14} className="text-[var(--text-tertiary)] group-hover:text-[#F1F5F9] transition-colors" />
         </a>
       </div>
     </motion.div>
@@ -576,12 +576,19 @@ export default function LivingGraphPage({
   const { user } = useAuth()
   const userRole = (user?.role ?? 'manager') as OrgRole
 
-  const { snapshotsByProduct, currentSnapshotId, setCurrentSnapshot, activeRole, setActiveRole } =
-    useLivingGraphStore()
+  const snapshotsByProduct = useLivingGraphStore((s) => s.snapshotsByProduct)
+  const currentSnapshotId  = useLivingGraphStore((s) => s.currentSnapshotId)
+  const setCurrentSnapshot = useLivingGraphStore((s) => s.setCurrentSnapshot)
+  const activeRole         = useLivingGraphStore((s) => s.activeRole)
+  const setActiveRole      = useLivingGraphStore((s) => s.setActiveRole)
 
   const effectiveRole = activeRole ?? userRole
   const roleFilter = ROLE_PRESETS[effectiveRole]
   const allowedStudios = roleFilter.studios // empty = all
+
+  // Derived graph health metrics — declared before buildNodes so the closure can reference them
+  const orphanIds = useMemo(() => findOrphans(MOCK_LIVING_NODES, MOCK_EDGES), [])
+  const cycleNodeIds = useMemo(() => findCycleNodes(MOCK_EDGES), [])
 
   // Build React Flow nodes + edges from mock data, filtered by role
   const buildNodes = useCallback(
@@ -629,9 +636,6 @@ export default function LivingGraphPage({
   const [hoveredEdgeId, setHoveredEdgeId] = useState<string | null>(null)
   const [edgeTooltipPos, setEdgeTooltipPos] = useState<{ x: number; y: number } | null>(null)
 
-  // Derived graph health metrics
-  const orphanIds = useMemo(() => findOrphans(MOCK_LIVING_NODES, MOCK_EDGES), [])
-  const cycleNodeIds = useMemo(() => findCycleNodes(MOCK_EDGES), [])
 
   const productSnapshots = snapshotsByProduct['current'] ?? []
 
@@ -668,10 +672,10 @@ export default function LivingGraphPage({
       <div className="flex items-center justify-between px-5 py-3 border-b border-white/[0.06] shrink-0 z-10">
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-[#3B82F6]/15 flex items-center justify-center">
-              <Activity size={14} className="text-[#3B82F6]" />
+            <div className="w-7 h-7 rounded-lg bg-[var(--accent)]/15 flex items-center justify-center">
+              <Activity size={14} className="text-[var(--accent)]" />
             </div>
-            <span className="text-sm font-semibold text-[#F1F5F9]">Living Graph</span>
+            <span className="text-sm font-semibold text-[var(--text-primary)]">Living Graph</span>
           </div>
 
           {/* Health pills */}
@@ -707,7 +711,7 @@ export default function LivingGraphPage({
               }
               useLivingGraphStore.getState().addSnapshot('current', snap)
             }}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-[#64748B] border border-white/[0.08] hover:bg-white/[0.04] hover:text-[#94A3B8] transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-[var(--text-tertiary)] border border-white/[0.08] hover:bg-white/[0.04] hover:text-[var(--text-secondary)] transition-colors"
           >
             <Camera size={12} />
             Snapshot
@@ -718,8 +722,8 @@ export default function LivingGraphPage({
             onClick={() => setRoleRailOpen((o) => !o)}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs border transition-colors ${
               roleRailOpen
-                ? 'bg-[#3B82F6] text-white border-transparent'
-                : 'text-[#64748B] border-white/[0.08] hover:bg-white/[0.04]'
+                ? 'bg-[var(--accent)] text-white border-transparent'
+                : 'text-[var(--text-tertiary)] border-white/[0.08] hover:bg-white/[0.04]'
             }`}
           >
             <Filter size={12} />
@@ -742,7 +746,7 @@ export default function LivingGraphPage({
               className="shrink-0 border-r border-white/[0.06] bg-[#0B0F1A] overflow-hidden flex flex-col"
             >
               <div className="px-4 py-3 border-b border-white/[0.06]">
-                <p className="text-[10px] font-semibold text-[#64748B] uppercase tracking-wide">View as Role</p>
+                <p className="text-[10px] font-semibold text-[var(--text-tertiary)] uppercase tracking-wide">View as Role</p>
               </div>
               <div className="flex-1 overflow-y-auto py-2 px-2 flex flex-col gap-1">
                 {(Object.entries(ROLE_META) as [OrgRole, typeof ROLE_META[OrgRole]][]).map(([role, meta]) => {
@@ -765,7 +769,7 @@ export default function LivingGraphPage({
                         >
                           {meta.label.split('—')[0].trim()}
                         </p>
-                        <p className="text-[10px] text-[#475569] truncate">
+                        <p className="text-[10px] text-[var(--text-tertiary)] truncate">
                           {meta.label.split('—')[1]?.trim() ?? ''}
                         </p>
                       </div>
@@ -780,14 +784,14 @@ export default function LivingGraphPage({
                 {activeRole && (
                   <button
                     onClick={() => setActiveRole(null)}
-                    className="flex items-center gap-1.5 text-xs text-[#64748B] hover:text-[#94A3B8] transition-colors"
+                    className="flex items-center gap-1.5 text-xs text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] transition-colors"
                   >
                     <RefreshCw size={11} />
                     Reset to my role
                   </button>
                 )}
                 {!activeRole && (
-                  <p className="text-[10px] text-[#475569]">Showing your role: {userRole}</p>
+                  <p className="text-[10px] text-[var(--text-tertiary)]">Showing your role: {userRole}</p>
                 )}
               </div>
             </motion.div>
@@ -843,7 +847,7 @@ export default function LivingGraphPage({
                   className="w-2.5 h-2.5 rounded-full"
                   style={{ backgroundColor: cfg.color }}
                 />
-                <span className="text-[10px] text-[#64748B]">{cfg.label}</span>
+                <span className="text-[10px] text-[var(--text-tertiary)]">{cfg.label}</span>
               </div>
             ))}
           </div>
@@ -863,16 +867,16 @@ export default function LivingGraphPage({
                   style={{ left: edgeTooltipPos.x + 12, top: edgeTooltipPos.y - 48 }}
                 >
                   <div className="rounded-xl border border-white/[0.12] bg-[#0B0F1A]/95 backdrop-blur-sm px-3 py-2.5 shadow-2xl max-w-[240px]">
-                    <p className="text-[10px] text-[#64748B] mb-1 uppercase tracking-wide font-semibold">Impact if removed</p>
-                    <p className="text-xs text-[#F1F5F9] font-medium leading-snug">
+                    <p className="text-[10px] text-[var(--text-tertiary)] mb-1 uppercase tracking-wide font-semibold">Impact if removed</p>
+                    <p className="text-xs text-[var(--text-primary)] font-medium leading-snug">
                       {impact.sourceLabel} → {impact.targetLabel}
                     </p>
                     {impact.affectedCount > 0 ? (
-                      <p className="text-[11px] text-[#F59E0B] mt-1">
+                      <p className="text-[11px] text-[var(--color-warning)] mt-1">
                         ⚠ {impact.affectedCount} downstream node{impact.affectedCount !== 1 ? 's' : ''} affected
                       </p>
                     ) : (
-                      <p className="text-[11px] text-[#10B981] mt-1">✓ No downstream dependencies</p>
+                      <p className="text-[11px] text-[var(--color-success)] mt-1">✓ No downstream dependencies</p>
                     )}
                   </div>
                 </motion.div>
@@ -882,16 +886,16 @@ export default function LivingGraphPage({
 
           {/* Current snapshot banner */}
           {currentSnapshotId && (
-            <div className="absolute top-3 left-1/2 -translate-x-1/2 flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#F59E0B]/15 border border-[#F59E0B]/30">
-              <Clock size={12} className="text-[#F59E0B]" />
-              <span className="text-xs text-[#F59E0B] font-medium">
+            <div className="absolute top-3 left-1/2 -translate-x-1/2 flex items-center gap-2 px-3 py-1.5 rounded-full bg-[var(--color-warning)]/15 border border-[var(--color-warning)]/30">
+              <Clock size={12} className="text-[var(--color-warning)]" />
+              <span className="text-xs text-[var(--color-warning)] font-medium">
                 Viewing snapshot — {productSnapshots.find((s) => s.id === currentSnapshotId)?.takenAt
                   ? new Date(productSnapshots.find((s) => s.id === currentSnapshotId)!.takenAt).toLocaleString()
                   : ''}
               </span>
               <button
                 onClick={() => setCurrentSnapshot(null)}
-                className="text-[#F59E0B] hover:text-white transition-colors"
+                className="text-[var(--color-warning)] hover:text-white transition-colors"
               >
                 <X size={12} />
               </button>

@@ -1,8 +1,13 @@
 'use client'
 
 import React, { useState, useMemo, useCallback } from 'react'
+import dynamic from 'next/dynamic'
 import { AIActionBar } from '../../../../components/primitives/ai-action-bar'
-import { SprintPlanner } from './_components/sprint-planner'
+
+const SprintPlanner = dynamic(
+  () => import('./_components/sprint-planner').then((m) => m.SprintPlanner),
+  { ssr: false }
+)
 import {
   Map,
   Plus,
@@ -72,18 +77,19 @@ const MILESTONE_STATUS: Record<MilestoneStatus, { label: string; icon: typeof Ci
   delayed: { label: 'Delayed', icon: AlertTriangle, color: 'var(--color-error)', bg: 'var(--color-error-muted)' },
 }
 
+// R20.6 — Priority = semantic state (true info). Type/milestone = uniform --accent.
 const PRIORITY_COLORS = {
-  critical: '#ef4444',
-  high: '#f59e0b',
-  medium: '#6398ff',
+  critical: 'var(--color-error)',
+  high: 'var(--color-warning)',
+  medium: 'var(--accent)',
   low: 'var(--text-tertiary)',
 }
 
-const ITEM_TYPE_COLORS = {
-  feature: '#6398ff',
-  bug: '#ef4444',
-  improvement: '#10b981',
-  'milestone-marker': '#8b5cf6',
+const ITEM_TYPE_PILL: Record<RoadmapItem['type'], string> = {
+  feature: 'bg-[var(--accent-subtle)] text-[var(--accent-text)]',
+  bug: 'bg-[var(--color-error-muted)] text-[var(--color-error)]',
+  improvement: 'bg-[var(--color-success-muted)] text-[var(--color-success)]',
+  'milestone-marker': 'bg-[var(--accent-subtle)] text-[var(--accent-text)]',
 }
 
 const QUARTER_MONTHS: Record<Quarter, string> = {
@@ -93,7 +99,8 @@ const QUARTER_MONTHS: Record<Quarter, string> = {
   Q4: 'Oct–Dec',
 }
 
-const MILESTONE_COLORS = ['#6398ff', '#ec4899', '#10b981', '#f59e0b', '#8b5cf6', '#06b6d4']
+// All milestones share --accent — visual distinction comes from title + quarter badge.
+const MILESTONE_ACCENT = 'var(--accent)'
 
 // ---------------------------------------------------------------------------
 // Default milestones (demo)
@@ -108,7 +115,7 @@ function defaultMilestones(productId: string): Milestone[] {
       quarter: 'Q1',
       year: 2026,
       status: 'completed',
-      color: '#6398ff',
+      color: MILESTONE_ACCENT,
       dueDate: '2026-03-31',
       items: [
         { id: 'i1', title: 'User authentication & onboarding', description: 'Login, signup, OAuth, session management', status: 'done', priority: 'critical', type: 'feature' },
@@ -124,7 +131,7 @@ function defaultMilestones(productId: string): Milestone[] {
       quarter: 'Q2',
       year: 2026,
       status: 'in-progress',
-      color: '#ec4899',
+      color: MILESTONE_ACCENT,
       dueDate: '2026-06-30',
       items: [
         { id: 'i5', title: 'Product Planner wizard', description: '7-step guided setup with AI suggestions', status: 'done', priority: 'critical', type: 'feature' },
@@ -141,7 +148,7 @@ function defaultMilestones(productId: string): Milestone[] {
       quarter: 'Q3',
       year: 2026,
       status: 'planned',
-      color: '#10b981',
+      color: MILESTONE_ACCENT,
       dueDate: '2026-09-30',
       items: [
         { id: 'i10', title: 'Design Studio full mode', description: 'Frames, layers, prototype linking, auto layout', status: 'todo', priority: 'critical', type: 'feature' },
@@ -158,7 +165,7 @@ function defaultMilestones(productId: string): Milestone[] {
       quarter: 'Q4',
       year: 2026,
       status: 'planned',
-      color: '#f59e0b',
+      color: MILESTONE_ACCENT,
       dueDate: '2026-12-31',
       items: [
         { id: 'i15', title: 'AI Skills Studio', description: 'Skill catalog, Computer Mode, execution history', status: 'todo', priority: 'high', type: 'feature' },
@@ -215,7 +222,7 @@ function AddMilestoneModal({
       quarter,
       year,
       status: 'planned',
-      color: MILESTONE_COLORS[colorIndex % MILESTONE_COLORS.length],
+      color: MILESTONE_ACCENT,
     })
     onClose()
   }
@@ -266,7 +273,7 @@ function AddMilestoneModal({
           <button onClick={onClose} className="px-4 py-2 text-sm rounded-lg hover:bg-[var(--bg-hover)] text-[var(--text-secondary)]">Cancel</button>
           <button onClick={handleSubmit} disabled={!title.trim()}
             className="px-4 py-2 text-sm rounded-xl font-medium disabled:opacity-40"
-            style={{ background: 'var(--accent-text)', color: '#fff' }}>
+            style={{ background: 'var(--accent-text)', color: 'var(--text-inverse)' }}>
             Create Milestone
           </button>
         </div>
@@ -318,7 +325,7 @@ function AddItemModal({ milestoneId, onAdd, onClose }: { milestoneId: string; on
           <button onClick={onClose} className="px-4 py-2 text-sm rounded-lg hover:bg-[var(--bg-hover)] text-[var(--text-secondary)]">Cancel</button>
           <button onClick={handleSubmit} disabled={!title.trim()}
             className="px-4 py-2 text-sm rounded-xl font-medium disabled:opacity-40"
-            style={{ background: 'var(--accent-text)', color: '#fff' }}>Add</button>
+            style={{ background: 'var(--accent-text)', color: 'var(--text-inverse)' }}>Add</button>
         </div>
       </div>
     </div>
@@ -349,10 +356,7 @@ function ItemCard({ item, onStatusToggle }: { item: RoadmapItem; onStatusToggle:
         {item.description && <p className="text-[10px] text-[var(--text-tertiary)] mt-0.5 truncate">{item.description}</p>}
       </div>
       <div className="flex items-center gap-1.5 flex-shrink-0">
-        <span
-          className="text-[10px] px-1.5 py-0.5 rounded font-medium capitalize"
-          style={{ color: ITEM_TYPE_COLORS[item.type], background: `${ITEM_TYPE_COLORS[item.type]}18` }}
-        >
+        <span className={`text-[10px] px-1.5 py-0.5 rounded font-medium capitalize ${ITEM_TYPE_PILL[item.type]}`}>
           {item.type === 'milestone-marker' ? '⚑' : item.type}
         </span>
         <div className="w-1.5 h-1.5 rounded-full" style={{ background: PRIORITY_COLORS[item.priority] }} title={item.priority} />
@@ -388,12 +392,9 @@ function MilestoneCard({
 
   return (
     <div
-      className="rounded-2xl border overflow-hidden transition-all"
-      style={{
-        borderColor: expanded ? milestone.color : 'var(--border-subtle)',
-        background: 'var(--bg-card)',
-        boxShadow: expanded ? `0 0 0 1px ${milestone.color}` : 'none',
-      }}
+      className={`rounded-2xl border overflow-hidden transition-all ${
+        expanded ? 'border-[var(--accent)] shadow-[0_0_0_1px_var(--accent)]' : 'border-[var(--border-subtle)]'
+      } bg-[var(--bg-card)]`}
     >
       {/* Header */}
       <div
@@ -401,13 +402,10 @@ function MilestoneCard({
         onClick={onToggle}
       >
         {/* Color dot */}
-        <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ background: milestone.color }} />
+        <div className="w-3 h-3 rounded-full flex-shrink-0 bg-[var(--accent)]" />
 
         {/* Quarter badge */}
-        <span
-          className="text-[10px] font-semibold px-2 py-0.5 rounded flex-shrink-0"
-          style={{ background: `${milestone.color}20`, color: milestone.color }}
-        >
+        <span className="text-[10px] font-semibold px-2 py-0.5 rounded flex-shrink-0 bg-[var(--accent-subtle)] text-[var(--accent-text)]">
           {milestone.quarter} {milestone.year}
         </span>
 
@@ -430,10 +428,10 @@ function MilestoneCard({
 
         {/* Progress */}
         <div className="flex items-center gap-2 flex-shrink-0">
-          <div className="w-16 h-1.5 rounded-full overflow-hidden" style={{ background: 'var(--border-subtle)' }}>
+          <div className="w-16 h-1.5 rounded-full overflow-hidden bg-[var(--border-subtle)]">
             <div
-              className="h-full rounded-full transition-all"
-              style={{ width: `${progress}%`, background: progress === 100 ? 'var(--color-success)' : milestone.color }}
+              className={`h-full rounded-full transition-all ${progress === 100 ? 'bg-[var(--color-success)]' : 'bg-[var(--accent)]'}`}
+              style={{ width: `${progress}%` }}
             />
           </div>
           <span className="text-[10px] text-[var(--text-tertiary)]">{doneCount}/{milestone.items.length}</span>
@@ -639,23 +637,14 @@ function GanttChart({ milestones }: { milestones: Milestone[] }) {
 
                 {/* Today line */}
                 <div
-                  className="absolute top-0 bottom-0 w-[1.5px] z-10 pointer-events-none"
-                  style={{
-                    left: `${todayMarker}%`,
-                    background: 'rgba(99,152,255,0.6)',
-                    boxShadow: '0 0 6px rgba(99,152,255,0.4)',
-                  }}
+                  className="absolute top-0 bottom-0 w-[1.5px] z-10 pointer-events-none bg-[var(--accent)]/60 shadow-[0_0_6px_var(--accent)]"
+                  style={{ left: `${todayMarker}%` }}
                 />
 
                 {/* Milestone bar */}
                 <div
-                  className="absolute top-1/2 -translate-y-1/2 h-[22px] rounded-full cursor-pointer transition-all group-hover:h-[26px] z-20"
-                  style={{
-                    left: `${left}%`,
-                    width: `${width}%`,
-                    background: `${milestone.color}22`,
-                    border: `1.5px solid ${milestone.color}66`,
-                  }}
+                  className="absolute top-1/2 -translate-y-1/2 h-[22px] rounded-full cursor-pointer transition-all group-hover:h-[26px] z-20 bg-[var(--accent)]/15 border-[1.5px] border-[var(--accent)]/40"
+                  style={{ left: `${left}%`, width: `${width}%` }}
                   onMouseEnter={(e) => {
                     const rect = e.currentTarget.getBoundingClientRect()
                     const containerRect = containerRef.current?.getBoundingClientRect()
@@ -669,22 +658,16 @@ function GanttChart({ milestones }: { milestones: Milestone[] }) {
                 >
                   {/* Progress fill */}
                   <div
-                    className="absolute inset-y-0 left-0 rounded-full transition-all"
-                    style={{
-                      width: `${prog}%`,
-                      background: `linear-gradient(90deg, ${milestone.color}55, ${milestone.color}88)`,
-                    }}
+                    className="absolute inset-y-0 left-0 rounded-full transition-all bg-[var(--accent)]/55"
+                    style={{ width: `${prog}%` }}
                   />
                   {/* Label inside bar */}
-                  <div className="absolute inset-0 flex items-center px-2.5 gap-1.5 overflow-hidden">
-                    <StatusIcon size={9} className="shrink-0" style={{ color: milestone.color }} />
-                    <span
-                      className="text-[9px] font-semibold truncate leading-none"
-                      style={{ color: milestone.color }}
-                    >
+                  <div className="absolute inset-0 flex items-center px-2.5 gap-1.5 overflow-hidden text-[var(--accent-text)]">
+                    <StatusIcon size={9} className="shrink-0" />
+                    <span className="text-[9px] font-semibold truncate leading-none">
                       {milestone.title}
                     </span>
-                    <span className="text-[9px] opacity-60 shrink-0" style={{ color: milestone.color }}>
+                    <span className="text-[9px] opacity-60 shrink-0">
                       {prog}%
                     </span>
                   </div>
@@ -692,8 +675,7 @@ function GanttChart({ milestones }: { milestones: Milestone[] }) {
                   {/* Due date diamond marker */}
                   {milestone.dueDate && (
                     <div
-                      className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 w-[10px] h-[10px] rotate-45 z-10"
-                      style={{ background: milestone.color }}
+                      className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 w-[10px] h-[10px] rotate-45 z-10 bg-[var(--accent)]"
                       title={`Due ${milestone.dueDate}`}
                     />
                   )}
@@ -704,20 +686,19 @@ function GanttChart({ milestones }: { milestones: Milestone[] }) {
                   className="absolute flex items-center gap-0.5 z-20"
                   style={{ left: `${left}%`, top: 'calc(50% + 14px)', transform: 'translateY(0)' }}
                 >
-                  {milestone.items.slice(0, 8).map((item) => (
-                    <div
-                      key={item.id}
-                      className="w-[5px] h-[5px] rounded-full"
-                      style={{
-                        background: item.status === 'done'
-                          ? milestone.color
-                          : item.status === 'in-progress'
-                            ? `${milestone.color}88`
-                            : 'var(--border-strong)',
-                      }}
-                      title={item.title}
-                    />
-                  ))}
+                  {milestone.items.slice(0, 8).map((item) => {
+                    const dotClass =
+                      item.status === 'done' ? 'bg-[var(--accent)]' :
+                      item.status === 'in-progress' ? 'bg-[var(--accent)]/50' :
+                      'bg-[var(--border-strong)]'
+                    return (
+                      <div
+                        key={item.id}
+                        className={`w-[5px] h-[5px] rounded-full ${dotClass}`}
+                        title={item.title}
+                      />
+                    )
+                  })}
                   {milestone.items.length > 8 && (
                     <span className="text-[8px] text-[var(--text-tertiary)]">+{milestone.items.length - 8}</span>
                   )}
@@ -726,10 +707,7 @@ function GanttChart({ milestones }: { milestones: Milestone[] }) {
 
               {/* Status badge */}
               <div className="w-[90px] shrink-0 pl-3 flex justify-end">
-                <span
-                  className="text-[9px] px-2 py-0.5 rounded-full font-medium"
-                  style={{ background: `${milestone.color}18`, color: milestone.color }}
-                >
+                <span className="text-[9px] px-2 py-0.5 rounded-full font-medium bg-[var(--accent-subtle)] text-[var(--accent-text)]">
                   {st.label}
                 </span>
               </div>
@@ -768,18 +746,15 @@ function GanttChart({ milestones }: { milestones: Milestone[] }) {
           className="absolute z-50 pointer-events-none"
           style={{ left: tooltip.x, top: tooltip.y, transform: 'translate(-50%, -100%)' }}
         >
-          <div
-            className="rounded-xl border border-[var(--border-default)] p-3 shadow-2xl min-w-[180px]"
-            style={{ background: 'var(--bg-overlay)' }}
-          >
+          <div className="rounded-xl border border-[var(--border-default)] p-3 shadow-2xl min-w-[180px] bg-[var(--bg-overlay)]">
             <div className="flex items-center gap-2 mb-1.5">
-              <div className="w-2.5 h-2.5 rounded-sm" style={{ background: tooltip.milestone.color }} />
+              <div className="w-2.5 h-2.5 rounded-sm bg-[var(--accent)]" />
               <span className="text-[11px] font-semibold text-[var(--text-primary)]">{tooltip.milestone.title}</span>
             </div>
             <p className="text-[10px] text-[var(--text-secondary)] mb-2 leading-relaxed">{tooltip.milestone.description}</p>
             <div className="flex items-center justify-between text-[9px]">
               <span className="text-[var(--text-tertiary)]">{tooltip.milestone.quarter} {tooltip.milestone.year}</span>
-              <span style={{ color: tooltip.milestone.color }}>{progressOf(tooltip.milestone.items)}% done</span>
+              <span className="text-[var(--accent-text)]">{progressOf(tooltip.milestone.items)}% done</span>
             </div>
             {tooltip.milestone.dueDate && (
               <p className="text-[9px] text-[var(--text-tertiary)] mt-1">Due {tooltip.milestone.dueDate}</p>
@@ -840,8 +815,10 @@ export default function RoadmapPage() {
   const [statusFilter, setStatusFilter] = useState<MilestoneStatus | 'all'>('all')
 
   // Live graph features — shown as unscheduled backlog items
-  const graphFeatures = useGraphStore((s) =>
-    s.nodes.filter((n) => n.productId === productId && n.kind === 'feature')
+  const graphNodes = useGraphStore((s) => s.nodes)
+  const graphFeatures = useMemo(
+    () => graphNodes.filter((n) => n.productId === productId && n.kind === 'feature'),
+    [graphNodes, productId]
   )
 
   // Features not yet pinned to any milestone
@@ -959,7 +936,7 @@ export default function RoadmapPage() {
           <button
             onClick={() => setShowAddMilestone(true)}
             className="flex items-center gap-2 px-4 py-2 text-xs font-medium rounded-xl transition-all hover:opacity-90"
-            style={{ background: 'var(--accent-text)', color: '#fff' }}>
+            style={{ background: 'var(--accent)', color: 'var(--text-inverse)' }}>
             <Plus className="w-3.5 h-3.5" />New Milestone
           </button>
         </div>
@@ -1014,7 +991,7 @@ export default function RoadmapPage() {
             <p className="text-xs text-[var(--text-tertiary)] mt-1">Create your first milestone to start planning your roadmap.</p>
             <button onClick={() => setShowAddMilestone(true)}
               className="mt-4 flex items-center gap-2 px-5 py-2.5 text-xs font-medium rounded-xl"
-              style={{ background: 'var(--accent-text)', color: '#fff' }}>
+              style={{ background: 'var(--accent-text)', color: 'var(--text-inverse)' }}>
               <Plus className="w-3.5 h-3.5" />New Milestone
             </button>
           </div>
@@ -1055,7 +1032,7 @@ export default function RoadmapPage() {
                   key={node.id}
                   className="group flex items-center gap-2 px-3 py-1.5 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-card)] hover:border-[var(--accent)] transition-all cursor-pointer"
                 >
-                  <div className="w-1.5 h-1.5 rounded-full bg-[#3B82F6]" />
+                  <div className="w-1.5 h-1.5 rounded-full bg-[var(--accent)]" />
                   <span className="text-[11px] text-[var(--text-primary)] font-medium">{node.label}</span>
                   {/* Quick-assign dropdown */}
                   <div className="hidden group-hover:flex items-center gap-1 ml-1">
@@ -1064,8 +1041,7 @@ export default function RoadmapPage() {
                         key={m.id}
                         title={`Add to ${m.title}`}
                         onClick={() => handleScheduleFeature(node.id, m.id)}
-                        className="w-4 h-4 rounded-full border-2 transition-transform hover:scale-125"
-                        style={{ borderColor: m.color, background: `${m.color}30` }}
+                        className="w-4 h-4 rounded-full border-2 transition-transform hover:scale-125 border-[var(--accent)] bg-[var(--accent)]/20"
                       />
                     ))}
                   </div>

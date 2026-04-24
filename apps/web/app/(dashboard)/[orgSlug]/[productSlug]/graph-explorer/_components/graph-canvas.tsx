@@ -176,19 +176,19 @@ export function GraphCanvas({
       <div className="absolute top-3 right-3 z-10 flex flex-col gap-1">
         <button
           onClick={() => zoom(0.8)}
-          className="w-8 h-8 rounded-lg bg-white/[0.06] border border-white/[0.08] flex items-center justify-center text-[#94A3B8] hover:bg-white/[0.1] transition-colors"
+          className="w-8 h-8 rounded-lg bg-white/[0.06] border border-white/[0.08] flex items-center justify-center text-[var(--text-secondary)] hover:bg-white/[0.1] transition-colors"
         >
           <ZoomIn className="w-4 h-4" />
         </button>
         <button
           onClick={() => zoom(1.2)}
-          className="w-8 h-8 rounded-lg bg-white/[0.06] border border-white/[0.08] flex items-center justify-center text-[#94A3B8] hover:bg-white/[0.1] transition-colors"
+          className="w-8 h-8 rounded-lg bg-white/[0.06] border border-white/[0.08] flex items-center justify-center text-[var(--text-secondary)] hover:bg-white/[0.1] transition-colors"
         >
           <ZoomOut className="w-4 h-4" />
         </button>
         <button
           onClick={resetView}
-          className="w-8 h-8 rounded-lg bg-white/[0.06] border border-white/[0.08] flex items-center justify-center text-[#94A3B8] hover:bg-white/[0.1] transition-colors"
+          className="w-8 h-8 rounded-lg bg-white/[0.06] border border-white/[0.08] flex items-center justify-center text-[var(--text-secondary)] hover:bg-white/[0.1] transition-colors"
         >
           <Maximize2 className="w-4 h-4" />
         </button>
@@ -325,7 +325,7 @@ export function GraphCanvas({
                   x={pos.x}
                   y={pos.y + NODE_RADIUS + 14}
                   textAnchor="middle"
-                  fill="#94A3B8"
+                  fill="var(--text-secondary)"
                   fontSize="10"
                   fontFamily="system-ui, sans-serif"
                   style={{ pointerEvents: 'none' }}

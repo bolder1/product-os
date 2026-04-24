@@ -13,7 +13,21 @@
    hierarchy, quiet motion. Feel like a document, not an IDE.
    ─────────────────────────────────────────────────────────────── */
 
-:root {
+/* ───────────────────────────────────────────────────────────────
+   R19 — Theme-scoped color tokens
+   Three themes share the same token names, so every component
+   that reads var(--bg-base) / var(--text-primary) / etc. re-themes
+   automatically when data-theme flips on <html>.
+
+   Dark is the default. Overrides at the top of the block-stack
+   ([data-theme="light"], [data-theme="dark-hc"]) win because of
+   selector equality with a later rule.
+   ─────────────────────────────────────────────────────────────── */
+
+:root,
+[data-theme="dark"] {
+  color-scheme: dark;
+
   /* ── Surface / Background ─────────────────────────────── */
   --bg-base: #0a0a0a;
   --bg-surface: #141414;
@@ -51,15 +65,159 @@
   --color-warning-muted: rgba(232, 168, 48, 0.12);
   --color-error: #ef5350;
   --color-error-muted: rgba(239, 83, 80, 0.12);
+  --color-error-border: rgba(239, 83, 80, 0.30);
   --color-info: #64b5f6;
+  --color-white: #ffffff;
 
   /* ── Text ─────────────────────────────────────────────── */
   --text-primary: #ebebee;
   --text-secondary: #9a9aa0;
-  --text-tertiary: #6e6e76;
+  --text-tertiary: #8a8a90; /* raised from #6e6e76 to clear WCAG AA on --bg-base */
   --text-accent: #6398ff;
   --text-inverse: #0a0a0a;
 
+  /* ── Scrollbar (theme-scoped) ─────────────────────────── */
+  --scrollbar-thumb: rgba(255, 255, 255, 0.07);
+  --scrollbar-thumb-hover: rgba(255, 255, 255, 0.14);
+
+  /* ── Overlay scrim ────────────────────────────────────── */
+  --overlay-scrim: rgba(0, 0, 0, 0.56);
+
+  /* ── Shadows (tuned for dark surface) ─────────────────── */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.20);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.03);
+  --shadow-panel: 0 0 0 1px rgba(255, 255, 255, 0.04), 0 8px 32px rgba(0, 0, 0, 0.40);
+  --shadow-dropdown: 0 12px 32px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(255, 255, 255, 0.05);
+  --shadow-float: 0 20px 60px rgba(0, 0, 0, 0.50), 0 0 0 1px rgba(255, 255, 255, 0.04);
+  --shadow-glow: 0 0 24px rgba(99, 152, 255, 0.18);
+}
+
+/* ── Light theme — inverted neutrals, same accent ─────────── */
+[data-theme="light"] {
+  color-scheme: light;
+
+  --bg-base: #ffffff;
+  --bg-surface: #f7f7f8;
+  --bg-elevated: #ffffff;
+  --bg-overlay: #ffffff;
+  --bg-inset: #f1f1f3;
+  --bg-workspace: #fafafa;
+  --bg-canvas: #f5f5f6;
+
+  --surface-default: #f7f7f8;
+  --surface-hover: #eeeef0;
+  --surface-active: #e4e4e7;
+  --surface-selected: rgba(99, 152, 255, 0.10);
+  --surface-selected-strong: rgba(99, 152, 255, 0.18);
+
+  --border-default: rgba(0, 0, 0, 0.08);
+  --border-strong: rgba(0, 0, 0, 0.14);
+  --border-subtle: rgba(0, 0, 0, 0.05);
+  --border-focus: rgba(99, 152, 255, 0.55);
+  --border-accent: rgba(99, 152, 255, 0.35);
+
+  --accent: #4a7fea;        /* slightly darker for contrast on white */
+  --accent-hover: #3a6fd8;
+  --accent-muted: rgba(74, 127, 234, 0.10);
+  --accent-text: #2563d3;   /* AA on #fff */
+  --accent-subtle: rgba(74, 127, 234, 0.06);
+  --accent-glow: rgba(74, 127, 234, 0.22);
+
+  --color-success: #0f9b56;
+  --color-success-muted: rgba(15, 155, 86, 0.10);
+  --color-warning: #a66a00;
+  --color-warning-muted: rgba(166, 106, 0, 0.10);
+  --color-error: #c0322f;
+  --color-error-muted: rgba(192, 50, 47, 0.10);
+  --color-error-border: rgba(192, 50, 47, 0.30);
+  --color-info: #1f6feb;
+  --color-white: #ffffff;
+
+  --text-primary: #141417;
+  --text-secondary: #4a4a52;
+  --text-tertiary: #6e6e76;
+  --text-accent: #2563d3;
+  --text-inverse: #ffffff;
+
+  --scrollbar-thumb: rgba(0, 0, 0, 0.15);
+  --scrollbar-thumb-hover: rgba(0, 0, 0, 0.28);
+
+  --overlay-scrim: rgba(20, 20, 23, 0.40);
+
+  --shadow-xs: 0 1px 2px rgba(20, 20, 23, 0.08);
+  --shadow-sm: 0 2px 8px rgba(20, 20, 23, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.04);
+  --shadow-panel: 0 0 0 1px rgba(0, 0, 0, 0.06), 0 8px 32px rgba(20, 20, 23, 0.10);
+  --shadow-dropdown: 0 12px 32px rgba(20, 20, 23, 0.14), 0 0 0 1px rgba(0, 0, 0, 0.06);
+  --shadow-float: 0 20px 60px rgba(20, 20, 23, 0.18), 0 0 0 1px rgba(0, 0, 0, 0.05);
+  --shadow-glow: 0 0 24px rgba(74, 127, 234, 0.20);
+}
+
+/* ── Dark High-Contrast — WCAG AAA target ─────────────────── */
+[data-theme="dark-hc"] {
+  color-scheme: dark;
+
+  --bg-base: #000000;
+  --bg-surface: #0a0a0a;
+  --bg-elevated: #141414;
+  --bg-overlay: #1c1c1c;
+  --bg-inset: #050505;
+  --bg-workspace: #000000;
+  --bg-canvas: #0a0a0a;
+
+  --surface-default: #0a0a0a;
+  --surface-hover: #1f1f20;
+  --surface-active: #2a2a2c;
+  --surface-selected: rgba(122, 168, 255, 0.16);
+  --surface-selected-strong: rgba(122, 168, 255, 0.26);
+
+  --border-default: rgba(255, 255, 255, 0.35);
+  --border-strong: rgba(255, 255, 255, 0.55);
+  --border-subtle: rgba(255, 255, 255, 0.22);
+  --border-focus: rgba(122, 168, 255, 0.85);
+  --border-accent: rgba(122, 168, 255, 0.55);
+
+  --accent: #7aa8ff;
+  --accent-hover: #a0c0ff;
+  --accent-muted: rgba(122, 168, 255, 0.22);
+  --accent-text: #a0c0ff;
+  --accent-subtle: rgba(122, 168, 255, 0.12);
+  --accent-glow: rgba(122, 168, 255, 0.45);
+
+  --color-success: #7ae0a8;
+  --color-success-muted: rgba(122, 224, 168, 0.22);
+  --color-warning: #f5c66c;
+  --color-warning-muted: rgba(245, 198, 108, 0.22);
+  --color-error: #ff8a86;
+  --color-error-muted: rgba(255, 138, 134, 0.22);
+  --color-error-border: rgba(255, 138, 134, 0.50);
+  --color-info: #9bd1ff;
+  --color-white: #ffffff;
+
+  --text-primary: #ffffff;
+  --text-secondary: #d0d0d8;
+  --text-tertiary: #a8a8b0;
+  --text-accent: #a0c0ff;
+  --text-inverse: #000000;
+
+  --scrollbar-thumb: rgba(255, 255, 255, 0.35);
+  --scrollbar-thumb-hover: rgba(255, 255, 255, 0.55);
+
+  --overlay-scrim: rgba(0, 0, 0, 0.72);
+
+  --shadow-xs: 0 0 0 1px rgba(255, 255, 255, 0.28);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.60), 0 0 0 1px rgba(255, 255, 255, 0.22);
+  --shadow-panel: 0 0 0 1px rgba(255, 255, 255, 0.30), 0 8px 32px rgba(0, 0, 0, 0.70);
+  --shadow-dropdown: 0 12px 32px rgba(0, 0, 0, 0.80), 0 0 0 1px rgba(255, 255, 255, 0.32);
+  --shadow-float: 0 20px 60px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(255, 255, 255, 0.30);
+  --shadow-glow: 0 0 24px rgba(122, 168, 255, 0.55);
+}
+
+/* ───────────────────────────────────────────────────────────────
+   Non-color tokens — typography, spacing, motion, layout.
+   Theme-independent: defined once.
+   ─────────────────────────────────────────────────────────────── */
+
+:root {
   /* ── Typography ───────────────────────────────────────── */
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
   --font-serif: 'Fraunces', 'Iowan Old Style', 'Palatino', Georgia, serif;
@@ -126,14 +284,6 @@
   --radius-lg: 14px;
   --radius-xl: 20px;
   --radius-full: 9999px;
-
-  /* ── Shadows (soft + depth, not heavy) ────────────────── */
-  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.20);
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.03);
-  --shadow-panel: 0 0 0 1px rgba(255, 255, 255, 0.04), 0 8px 32px rgba(0, 0, 0, 0.40);
-  --shadow-dropdown: 0 12px 32px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(255, 255, 255, 0.05);
-  --shadow-float: 0 20px 60px rgba(0, 0, 0, 0.50), 0 0 0 1px rgba(255, 255, 255, 0.04);
-  --shadow-glow: 0 0 24px rgba(99, 152, 255, 0.18);
 
   /* ── Motion (editorial: quieter, slower, no bounce) ───── */
   --duration-instant: 80ms;
@@ -252,12 +402,12 @@ body {
    ─────────────────────────────────────────────────────────────── */
 
 * { scrollbar-width: thin; scrollbar-color: transparent transparent; }
-*:hover { scrollbar-color: rgba(255, 255, 255, 0.07) transparent; }
+*:hover { scrollbar-color: var(--scrollbar-thumb) transparent; }
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: transparent; border-radius: 3px; transition: background var(--duration-fast); }
-*:hover::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.07); }
-::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.14); }
+*:hover::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); }
+::-webkit-scrollbar-thumb:hover { background: var(--scrollbar-thumb-hover); }
 ::-webkit-scrollbar-corner { background: transparent; }
 
 /* ───────────────────────────────────────────────────────────────
@@ -265,7 +415,7 @@ body {
    ─────────────────────────────────────────────────────────────── */
 
 ::selection {
-  background: rgba(99, 152, 255, 0.28);
+  background: var(--accent-muted);
   color: var(--text-primary);
 }
 
@@ -574,14 +724,14 @@ body {
 
 .tool-btn-primary {
   background: var(--accent);
-  color: #fff;
+  color: var(--color-white);
   border-color: var(--accent);
 }
 
 .tool-btn-primary:hover {
   background: var(--accent-hover);
   border-color: var(--accent-hover);
-  color: #fff;
+  color: var(--color-white);
 }
 
 .tool-btn-ghost {
@@ -604,7 +754,7 @@ body {
 
 .tool-btn-danger:hover {
   background: var(--color-error-muted);
-  border-color: rgba(239, 83, 80, 0.3);
+  border-color: var(--color-error-border);
   color: var(--color-error);
 }
 
@@ -844,7 +994,7 @@ body {
 .tool-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.56);
+  background: var(--overlay-scrim);
   backdrop-filter: blur(4px);
   z-index: var(--z-modal);
   animation: fadeIn var(--duration-fast) var(--ease-out);

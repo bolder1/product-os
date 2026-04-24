@@ -18,19 +18,19 @@ export function DangerZone() {
       className="space-y-6 max-w-2xl"
     >
       <div className="flex items-center gap-2">
-        <AlertTriangle size={16} className="text-[#F43F5E]" />
-        <h3 className="text-sm font-semibold text-[#F43F5E]">Danger Zone</h3>
+        <AlertTriangle size={16} className="text-[var(--color-error)]" />
+        <h3 className="text-sm font-semibold text-[var(--color-error)]">Danger Zone</h3>
       </div>
 
       {/* Transfer Ownership */}
       <div className="p-5 rounded-xl border border-white/[0.06] bg-white/[0.01] space-y-3">
         <div className="flex items-start gap-3">
-          <Shield size={18} className="text-[#F59E0B] mt-0.5 shrink-0" />
+          <Shield size={18} className="text-[var(--color-warning)] mt-0.5 shrink-0" />
           <div className="flex-1">
-            <h4 className="text-sm font-medium text-[#E2E8F0]">
+            <h4 className="text-sm font-medium text-[var(--text-primary)]">
               Transfer Ownership
             </h4>
-            <p className="text-xs text-[#64748B] mt-1 leading-relaxed">
+            <p className="text-xs text-[var(--text-tertiary)] mt-1 leading-relaxed">
               Transfer this product to another team member. They will become the
               owner with full admin permissions. You will be downgraded to a
               Manager role.
@@ -38,7 +38,7 @@ export function DangerZone() {
           </div>
         </div>
         <div className="flex items-center gap-3 ml-[30px]">
-          <select className="flex-1 px-3 py-2 rounded-lg bg-white/[0.04] border border-white/[0.08] text-sm text-[#F1F5F9] focus:outline-none focus:border-[#F59E0B]/50 transition-colors appearance-none cursor-pointer">
+          <select className="flex-1 px-3 py-2 rounded-lg bg-white/[0.04] border border-white/[0.08] text-sm text-[var(--text-primary)] focus:outline-none focus:border-[var(--color-warning)]/50 transition-colors appearance-none cursor-pointer">
             <option value="" className="bg-[#0f1629]">
               Select a team member...
             </option>
@@ -49,7 +49,7 @@ export function DangerZone() {
               Charlie Kim (BE Developer)
             </option>
           </select>
-          <button className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-medium text-[#F59E0B] border border-[#F59E0B]/30 hover:bg-[#F59E0B]/10 transition-colors">
+          <button className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-medium text-[var(--color-warning)] border border-[var(--color-warning)]/30 hover:bg-[var(--color-warning)]/10 transition-colors">
             <ArrowRight size={14} />
             Transfer
           </button>
@@ -59,12 +59,12 @@ export function DangerZone() {
       {/* Archive Product */}
       <div className="p-5 rounded-xl border border-white/[0.06] bg-white/[0.01] space-y-3">
         <div className="flex items-start gap-3">
-          <Archive size={18} className="text-[#F59E0B] mt-0.5 shrink-0" />
+          <Archive size={18} className="text-[var(--color-warning)] mt-0.5 shrink-0" />
           <div className="flex-1">
-            <h4 className="text-sm font-medium text-[#E2E8F0]">
+            <h4 className="text-sm font-medium text-[var(--text-primary)]">
               Archive Product
             </h4>
-            <p className="text-xs text-[#64748B] mt-1 leading-relaxed">
+            <p className="text-xs text-[var(--text-tertiary)] mt-1 leading-relaxed">
               Archiving hides the product from the sidebar and dashboard. Team
               members will lose access. You can unarchive at any time from your
               organization settings.
@@ -72,7 +72,7 @@ export function DangerZone() {
           </div>
         </div>
         <div className="ml-[30px]">
-          <button className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-medium text-[#F59E0B] border border-[#F59E0B]/30 hover:bg-[#F59E0B]/10 transition-colors">
+          <button className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-medium text-[var(--color-warning)] border border-[var(--color-warning)]/30 hover:bg-[var(--color-warning)]/10 transition-colors">
             <Archive size={14} />
             Archive this product
           </button>
@@ -80,18 +80,18 @@ export function DangerZone() {
       </div>
 
       {/* Delete Product */}
-      <div className="p-5 rounded-xl border border-[#F43F5E]/30 bg-[#F43F5E]/[0.03] space-y-3">
+      <div className="p-5 rounded-xl border border-[var(--color-error)]/30 bg-[var(--color-error)]/[0.03] space-y-3">
         <div className="flex items-start gap-3">
-          <Trash2 size={18} className="text-[#F43F5E] mt-0.5 shrink-0" />
+          <Trash2 size={18} className="text-[var(--color-error)] mt-0.5 shrink-0" />
           <div className="flex-1">
-            <h4 className="text-sm font-medium text-[#F43F5E]">
+            <h4 className="text-sm font-medium text-[var(--color-error)]">
               Delete Product
             </h4>
-            <p className="text-xs text-[#64748B] mt-1 leading-relaxed">
+            <p className="text-xs text-[var(--text-tertiary)] mt-1 leading-relaxed">
               Permanently delete this product and all of its data. This includes
               all studios, tasks, workflows, components, pages, designs, brand
               assets, and changelog history.{' '}
-              <span className="text-[#F43F5E] font-medium">
+              <span className="text-[var(--color-error)] font-medium">
                 This action cannot be undone.
               </span>
             </p>
@@ -101,7 +101,7 @@ export function DangerZone() {
           {!confirmDelete ? (
             <button
               onClick={() => setConfirmDelete(true)}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-medium text-[#F43F5E] border border-[#F43F5E]/40 hover:bg-[#F43F5E]/10 transition-colors"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-medium text-[var(--color-error)] border border-[var(--color-error)]/40 hover:bg-[var(--color-error)]/10 transition-colors"
             >
               <Trash2 size={14} />
               Delete this product
@@ -113,8 +113,8 @@ export function DangerZone() {
                 animate={{ opacity: 1, height: 'auto' }}
                 className="space-y-3"
               >
-                <p className="text-xs text-[#94A3B8]">
-                  Type <span className="font-mono text-[#F43F5E] font-medium">{PRODUCT_NAME}</span>{' '}
+                <p className="text-xs text-[var(--text-secondary)]">
+                  Type <span className="font-mono text-[var(--color-error)] font-medium">{PRODUCT_NAME}</span>{' '}
                   to confirm deletion:
                 </p>
                 <div className="flex items-center gap-3">
@@ -123,14 +123,14 @@ export function DangerZone() {
                     value={deleteInput}
                     onChange={(e) => setDeleteInput(e.target.value)}
                     placeholder={PRODUCT_NAME}
-                    className="flex-1 px-3 py-2 rounded-lg bg-white/[0.04] border border-[#F43F5E]/30 text-sm text-[#F1F5F9] placeholder-[#475569] focus:outline-none focus:border-[#F43F5E]/60 transition-colors"
+                    className="flex-1 px-3 py-2 rounded-lg bg-white/[0.04] border border-[var(--color-error)]/30 text-sm text-[var(--text-primary)] placeholder-[var(--text-tertiary)] focus:outline-none focus:border-[var(--color-error)]/60 transition-colors"
                   />
                   <button
                     disabled={deleteInput !== PRODUCT_NAME}
                     className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-medium transition-colors ${
                       deleteInput === PRODUCT_NAME
-                        ? 'bg-[#F43F5E] text-white hover:bg-[#E11D48]'
-                        : 'bg-[#F43F5E]/20 text-[#F43F5E]/50 cursor-not-allowed'
+                        ? 'bg-[var(--color-error)] text-white hover:bg-[#E11D48]'
+                        : 'bg-[var(--color-error)]/20 text-[var(--color-error)]/50 cursor-not-allowed'
                     }`}
                   >
                     <Trash2 size={14} />
@@ -141,7 +141,7 @@ export function DangerZone() {
                       setConfirmDelete(false)
                       setDeleteInput('')
                     }}
-                    className="px-3 py-2 rounded-lg text-xs text-[#64748B] hover:bg-white/[0.06] transition-colors"
+                    className="px-3 py-2 rounded-lg text-xs text-[var(--text-tertiary)] hover:bg-white/[0.06] transition-colors"
                   >
                     Cancel
                   </button>

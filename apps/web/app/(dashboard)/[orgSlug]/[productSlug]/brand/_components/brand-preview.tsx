@@ -51,12 +51,12 @@ export default function BrandPreview({ brandData }: BrandPreviewProps) {
     <div className="space-y-4">
       {/* Mode Toggle */}
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-[#F1F5F9]">Live Preview</h3>
+        <h3 className="text-sm font-semibold text-[var(--text-primary)]">Live Preview</h3>
         <div className="flex items-center gap-2 p-1 rounded-lg bg-white/[0.03] border border-white/[0.08]">
           <button
             onClick={() => setDarkMode(true)}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
-              darkMode ? 'bg-[#EC4899]/20 text-[#EC4899]' : 'text-[#64748B] hover:text-[#94A3B8]'
+              darkMode ? 'bg-[var(--accent)]/20 text-[var(--accent)]' : 'text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]'
             }`}
           >
             <Moon className="w-3 h-3" />
@@ -65,7 +65,7 @@ export default function BrandPreview({ brandData }: BrandPreviewProps) {
           <button
             onClick={() => setDarkMode(false)}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
-              !darkMode ? 'bg-[#EC4899]/20 text-[#EC4899]' : 'text-[#64748B] hover:text-[#94A3B8]'
+              !darkMode ? 'bg-[var(--accent)]/20 text-[var(--accent)]' : 'text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]'
             }`}
           >
             <Sun className="w-3 h-3" />

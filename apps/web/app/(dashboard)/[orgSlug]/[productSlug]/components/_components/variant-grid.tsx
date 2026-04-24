@@ -36,7 +36,7 @@ export function VariantGrid({
             onClick={() => onSelectVariant(variant.id)}
             className={`group relative rounded-xl border transition-colors cursor-pointer ${
               activeVariantId === variant.id
-                ? 'border-[#06B6D4]/40 bg-[#06B6D4]/5'
+                ? 'border-[var(--accent)]/40 bg-[var(--accent)]/5'
                 : 'border-white/[0.06] bg-white/[0.02] hover:border-white/[0.12]'
             }`}
           >
@@ -55,14 +55,14 @@ export function VariantGrid({
 
             {/* Footer */}
             <div className="flex items-center justify-between px-3 py-2.5 border-t border-white/[0.04]">
-              <span className="text-xs font-medium text-[#F1F5F9]">{variant.name}</span>
+              <span className="text-xs font-medium text-[var(--text-primary)]">{variant.name}</span>
               <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                 <button
                   onClick={(e) => {
                     e.stopPropagation()
                     onSelectVariant(variant.id)
                   }}
-                  className="p-1 rounded-md hover:bg-white/[0.06] text-[#64748B] hover:text-[#94A3B8] transition-colors"
+                  className="p-1 rounded-md hover:bg-white/[0.06] text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] transition-colors"
                 >
                   <Pencil className="w-3 h-3" />
                 </button>
@@ -71,7 +71,7 @@ export function VariantGrid({
                     e.stopPropagation()
                     onDeleteVariant(variant.id)
                   }}
-                  className="p-1 rounded-md hover:bg-red-500/10 text-[#64748B] hover:text-red-400 transition-colors"
+                  className="p-1 rounded-md hover:bg-red-500/10 text-[var(--text-tertiary)] hover:text-red-400 transition-colors"
                 >
                   <Trash2 className="w-3 h-3" />
                 </button>
@@ -87,12 +87,12 @@ export function VariantGrid({
         animate={{ opacity: 1 }}
         transition={{ delay: 0.3 }}
         onClick={onAddVariant}
-        className="flex flex-col items-center justify-center gap-2 h-[156px] rounded-xl border border-dashed border-white/[0.08] hover:border-[#06B6D4]/30 hover:bg-white/[0.02] transition-colors group"
+        className="flex flex-col items-center justify-center gap-2 h-[156px] rounded-xl border border-dashed border-white/[0.08] hover:border-[var(--accent)]/30 hover:bg-white/[0.02] transition-colors group"
       >
-        <div className="w-8 h-8 rounded-lg bg-[#06B6D4]/10 flex items-center justify-center group-hover:bg-[#06B6D4]/15 transition-colors">
-          <Plus className="w-4 h-4 text-[#06B6D4]" />
+        <div className="w-8 h-8 rounded-lg bg-[var(--accent)]/10 flex items-center justify-center group-hover:bg-[#06B6D4]/15 transition-colors">
+          <Plus className="w-4 h-4 text-[var(--accent)]" />
         </div>
-        <span className="text-xs text-[#64748B] group-hover:text-[#94A3B8] transition-colors">
+        <span className="text-xs text-[var(--text-tertiary)] group-hover:text-[#94A3B8] transition-colors">
           Add Variant
         </span>
       </motion.button>

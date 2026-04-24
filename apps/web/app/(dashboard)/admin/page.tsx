@@ -43,35 +43,35 @@ export default function AdminPage() {
   const ActiveComponent = tabContent[activeTab]
 
   return (
-    <div className="min-h-screen bg-[#060918]">
+    <div className="min-h-screen bg-[var(--bg-base)]">
       {/* Header */}
-      <header className="sticky top-0 z-40 border-b border-white/[0.06] bg-[#060918]/80 backdrop-blur-xl">
+      <header className="sticky top-0 z-40 border-b border-white/[0.06] bg-[var(--bg-base)]/80 backdrop-blur-xl">
         <div className="max-w-7xl mx-auto px-6">
           <div className="h-14 flex items-center justify-between">
             <div className="flex items-center gap-4">
               <a
                 href="/"
-                className="flex items-center gap-1.5 text-[#64748B] hover:text-[#94A3B8] transition text-sm"
+                className="flex items-center gap-1.5 text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] transition text-sm"
               >
                 <ArrowLeft className="w-4 h-4" />
                 Dashboard
               </a>
               <div className="w-px h-5 bg-white/[0.08]" />
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-lg bg-[#F43F5E]/12 flex items-center justify-center">
-                  <Shield className="w-4 h-4 text-[#F43F5E]" />
+                <div className="w-8 h-8 rounded-lg bg-[var(--color-error)]/12 flex items-center justify-center">
+                  <Shield className="w-4 h-4 text-[var(--color-error)]" />
                 </div>
                 <div>
-                  <h1 className="text-sm font-semibold text-[#F1F5F9]">Admin Panel</h1>
-                  <p className="text-[10px] text-[#64748B]">{user?.orgName || 'Organization'}</p>
+                  <h1 className="text-sm font-semibold text-[var(--text-primary)]">Admin Panel</h1>
+                  <p className="text-[10px] text-[var(--text-tertiary)]">{user?.orgName || 'Organization'}</p>
                 </div>
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-xs px-2 py-1 rounded-full bg-[#F43F5E]/10 text-[#F43F5E] font-medium">
+              <span className="text-xs px-2 py-1 rounded-full bg-[var(--color-error)]/10 text-[var(--color-error)] font-medium">
                 Admin
               </span>
-              <div className="w-7 h-7 rounded-full bg-gradient-to-br from-[#F43F5E] to-[#EC4899] flex items-center justify-center text-xs font-medium text-white">
+              <div className="w-7 h-7 rounded-full bg-gradient-to-br from-[var(--color-error)] to-[var(--accent)] flex items-center justify-center text-xs font-medium text-white">
                 {user?.name?.charAt(0)?.toUpperCase() || 'A'}
               </div>
             </div>
@@ -88,15 +88,15 @@ export default function AdminPage() {
                   onClick={() => setActiveTab(tab.key)}
                   className={`relative flex items-center gap-2 px-4 py-3 text-sm font-medium whitespace-nowrap transition ${
                     isActive
-                      ? 'text-[#F43F5E]'
-                      : 'text-[#64748B] hover:text-[#94A3B8]'
+                      ? 'text-[var(--color-error)]'
+                      : 'text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]'
                   }`}
                 >
                   <Icon className="w-4 h-4" />
                   {tab.label}
                   {isActive && (
                     <motion.div
-                      className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#F43F5E]"
+                      className="absolute bottom-0 left-0 right-0 h-0.5 bg-[var(--color-error)]"
                       layoutId="admin-tab-indicator"
                       transition={{ type: 'spring', stiffness: 400, damping: 30 }}
                     />

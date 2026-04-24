@@ -18,7 +18,7 @@ interface BranchGraphProps {
 const BRANCH_COLORS: Record<string, string> = {
   main: 'var(--accent)',
   develop: 'var(--accent)',
-  staging: '#c89530',
+  staging: 'var(--color-warning)',
 }
 
 function getBranchColor(name: string): string {

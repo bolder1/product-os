@@ -53,8 +53,8 @@ export function DependencyGraphMini() {
       className="bg-white/[0.03] border border-white/[0.08] rounded-xl p-5 flex flex-col h-full"
     >
       <div className="flex items-center gap-2 mb-3">
-        <GitBranch className="w-4 h-4 text-[#3B82F6]" />
-        <span className="text-sm font-medium text-[#94A3B8] uppercase tracking-wider">
+        <GitBranch className="w-4 h-4 text-[var(--accent)]" />
+        <span className="text-sm font-medium text-[var(--text-secondary)] uppercase tracking-wider">
           Dependency Graph
         </span>
       </div>
@@ -118,13 +118,13 @@ export function DependencyGraphMini() {
           {Object.entries(kindColors).map(([kind, color]) => (
             <div key={kind} className="flex items-center gap-1">
               <div className="w-2 h-2 rounded-full" style={{ backgroundColor: color }} />
-              <span className="text-[10px] text-[#64748B] capitalize">{kind}s</span>
+              <span className="text-[10px] text-[var(--text-tertiary)] capitalize">{kind}s</span>
             </div>
           ))}
         </div>
         <Link
           href={`/${params.orgSlug}/${params.productSlug}/graph-explorer`}
-          className="flex items-center gap-1 text-xs text-[#3B82F6] hover:text-[#60A5FA] transition-colors"
+          className="flex items-center gap-1 text-xs text-[var(--accent)] hover:text-[var(--accent)] transition-colors"
         >
           Open Graph Explorer
           <ArrowRight className="w-3 h-3" />

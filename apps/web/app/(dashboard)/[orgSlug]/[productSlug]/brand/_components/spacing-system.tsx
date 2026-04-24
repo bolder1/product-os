@@ -50,7 +50,7 @@ function EditableNumber({
         step={step ?? 1}
         min={min}
         max={max}
-        className="w-16 px-2 py-0.5 rounded bg-white/[0.06] border border-[#EC4899]/40 text-[#F1F5F9] text-xs font-mono focus:outline-none text-center"
+        className="w-16 px-2 py-0.5 rounded bg-white/[0.06] border border-[var(--accent)]/40 text-[var(--text-primary)] text-xs font-mono focus:outline-none text-center"
       />
     )
   }
@@ -61,7 +61,7 @@ function EditableNumber({
         setDraft(String(value))
         setEditing(true)
       }}
-      className="px-2 py-0.5 rounded bg-white/[0.03] border border-white/[0.08] text-[#94A3B8] text-xs font-mono hover:border-white/[0.15] transition-colors cursor-pointer"
+      className="px-2 py-0.5 rounded bg-white/[0.03] border border-white/[0.08] text-[var(--text-secondary)] text-xs font-mono hover:border-white/[0.15] transition-colors cursor-pointer"
     >
       {value}{unit}
     </button>
@@ -82,14 +82,14 @@ function SpacingRow({
   return (
     <div className="flex items-center gap-4 py-2">
       <div className="w-16 shrink-0 text-right">
-        <span className="text-xs font-mono text-[#94A3B8]">{token.multiplier}x</span>
+        <span className="text-xs font-mono text-[var(--text-secondary)]">{token.multiplier}x</span>
       </div>
       <div className="w-16 shrink-0 text-right">
-        <span className="text-xs font-mono text-[#64748B]">{token.value}px</span>
+        <span className="text-xs font-mono text-[var(--text-tertiary)]">{token.value}px</span>
       </div>
       <div className="flex-1">
         <motion.div
-          className="h-6 rounded bg-[#EC4899]/20 border border-[#EC4899]/30"
+          className="h-6 rounded bg-[var(--accent)]/20 border border-[var(--accent)]/30"
           initial={false}
           animate={{ width: `${Math.max(barWidth, 1)}%` }}
           transition={{ type: 'spring', stiffness: 300, damping: 30 }}
@@ -112,11 +112,11 @@ function RadiusPreview({
   return (
     <div className="flex flex-col items-center gap-2">
       <motion.div
-        className="w-16 h-16 bg-[#EC4899]/20 border border-[#EC4899]/40"
+        className="w-16 h-16 bg-[var(--accent)]/20 border border-[var(--accent)]/40"
         animate={{ borderRadius: radius.value >= 9999 ? '50%' : `${radius.value}px` }}
         transition={{ type: 'spring', stiffness: 300, damping: 25 }}
       />
-      <span className="text-xs font-semibold text-[#F1F5F9]">{radius.label}</span>
+      <span className="text-xs font-semibold text-[var(--text-primary)]">{radius.label}</span>
       <EditableNumber
         value={radius.value >= 9999 ? 9999 : radius.value}
         onChange={onUpdate}
@@ -145,8 +145,8 @@ function ShadowPreview({
         className="w-20 h-20 rounded-xl bg-white/[0.06] border border-white/[0.08]"
         style={{ boxShadow: shadow }}
       />
-      <span className="text-xs font-semibold text-[#F1F5F9]">{label}</span>
-      <span className="text-[10px] font-mono text-[#64748B] max-w-[120px] text-center truncate">
+      <span className="text-xs font-semibold text-[var(--text-primary)]">{label}</span>
+      <span className="text-[10px] font-mono text-[var(--text-tertiary)] max-w-[120px] text-center truncate">
         {shadow}
       </span>
     </div>
@@ -198,11 +198,11 @@ export default function SpacingSystem({ spacing, onChange }: SpacingSystemProps)
       <div className="p-4 rounded-xl border border-white/[0.08] bg-white/[0.03]">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
-            <Ruler className="w-4 h-4 text-[#EC4899]" />
-            <h3 className="text-sm font-semibold text-[#F1F5F9]">Base Unit</h3>
+            <Ruler className="w-4 h-4 text-[var(--accent)]" />
+            <h3 className="text-sm font-semibold text-[var(--text-primary)]">Base Unit</h3>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-xs text-[#64748B]">Base:</span>
+            <span className="text-xs text-[var(--text-tertiary)]">Base:</span>
             <EditableNumber
               value={spacing.baseUnit}
               onChange={handleBaseUnitChange}
@@ -224,8 +224,8 @@ export default function SpacingSystem({ spacing, onChange }: SpacingSystemProps)
       {/* Border Radius */}
       <div className="p-4 rounded-xl border border-white/[0.08] bg-white/[0.03]">
         <div className="flex items-center gap-2 mb-4">
-          <Square className="w-4 h-4 text-[#EC4899]" />
-          <h3 className="text-sm font-semibold text-[#F1F5F9]">Border Radius</h3>
+          <Square className="w-4 h-4 text-[var(--accent)]" />
+          <h3 className="text-sm font-semibold text-[var(--text-primary)]">Border Radius</h3>
         </div>
         <div className="flex gap-6 flex-wrap justify-center">
           {spacing.radii.map((r) => (
@@ -241,8 +241,8 @@ export default function SpacingSystem({ spacing, onChange }: SpacingSystemProps)
       {/* Shadow Previews */}
       <div className="p-4 rounded-xl border border-white/[0.08] bg-white/[0.03]">
         <div className="flex items-center gap-2 mb-4">
-          <Layers className="w-4 h-4 text-[#EC4899]" />
-          <h3 className="text-sm font-semibold text-[#F1F5F9]">Shadows</h3>
+          <Layers className="w-4 h-4 text-[var(--accent)]" />
+          <h3 className="text-sm font-semibold text-[var(--text-primary)]">Shadows</h3>
         </div>
         <div className="flex gap-6 flex-wrap justify-center">
           {Object.entries(shadowValues).map(([key, value]) => (

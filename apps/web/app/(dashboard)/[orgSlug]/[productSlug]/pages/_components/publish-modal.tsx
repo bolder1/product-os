@@ -58,10 +58,10 @@ export function PublishModal({ open, onClose, pageName, currentStatus, seoScore,
             {/* Header */}
             <div className="flex items-center justify-between p-4 border-b border-white/[0.06]">
               <div className="flex items-center gap-2">
-                {isPublished ? <Globe className="w-4 h-4 text-emerald-400" /> : <Rocket className="w-4 h-4 text-[#3B82F6]" />}
-                <span className="text-sm font-medium text-[#F1F5F9]">{isPublished ? 'Manage Publication' : 'Publish Page'}</span>
+                {isPublished ? <Globe className="w-4 h-4 text-emerald-400" /> : <Rocket className="w-4 h-4 text-[var(--accent)]" />}
+                <span className="text-sm font-medium text-[var(--text-primary)]">{isPublished ? 'Manage Publication' : 'Publish Page'}</span>
               </div>
-              <button onClick={onClose} className="p-1 rounded hover:bg-white/[0.06] text-[#64748B]">
+              <button onClick={onClose} className="p-1 rounded hover:bg-white/[0.06] text-[var(--text-tertiary)]">
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -70,8 +70,8 @@ export function PublishModal({ open, onClose, pageName, currentStatus, seoScore,
               {/* Page info */}
               <div className="flex items-center justify-between p-3 rounded-lg bg-white/[0.02] border border-white/[0.06]">
                 <div>
-                  <div className="text-[12px] font-medium text-[#F1F5F9]">{pageName}</div>
-                  <div className="text-[10px] text-[#64748B] mt-0.5">
+                  <div className="text-[12px] font-medium text-[var(--text-primary)]">{pageName}</div>
+                  <div className="text-[10px] text-[var(--text-tertiary)] mt-0.5">
                     Status: <span className={currentStatus === 'published' ? 'text-emerald-400' : 'text-amber-400'}>{currentStatus}</span>
                   </div>
                 </div>
@@ -99,7 +99,7 @@ export function PublishModal({ open, onClose, pageName, currentStatus, seoScore,
                     <button
                       onClick={() => setMode('now')}
                       className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-[11px] font-medium transition-colors ${
-                        mode === 'now' ? 'bg-[#3B82F6]/15 text-[#3B82F6] border border-[#3B82F6]/30' : 'bg-white/[0.03] text-[#64748B] border border-white/[0.06]'
+                        mode === 'now' ? 'bg-[var(--accent)]/15 text-[var(--accent)] border border-[var(--accent)]/30' : 'bg-white/[0.03] text-[var(--text-tertiary)] border border-white/[0.06]'
                       }`}
                     >
                       <Rocket className="w-3.5 h-3.5" /> Publish Now
@@ -107,7 +107,7 @@ export function PublishModal({ open, onClose, pageName, currentStatus, seoScore,
                     <button
                       onClick={() => setMode('schedule')}
                       className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-[11px] font-medium transition-colors ${
-                        mode === 'schedule' ? 'bg-[#8B5CF6]/15 text-[#8B5CF6] border border-[#8B5CF6]/30' : 'bg-white/[0.03] text-[#64748B] border border-white/[0.06]'
+                        mode === 'schedule' ? 'bg-[var(--accent)]/15 text-[var(--accent)] border border-[var(--accent)]/30' : 'bg-white/[0.03] text-[var(--text-tertiary)] border border-white/[0.06]'
                       }`}
                     >
                       <Clock className="w-3.5 h-3.5" /> Schedule
@@ -117,21 +117,21 @@ export function PublishModal({ open, onClose, pageName, currentStatus, seoScore,
                   {mode === 'schedule' && (
                     <div className="flex gap-2">
                       <div className="flex-1 space-y-1">
-                        <label className="text-[10px] text-[#64748B]">Date</label>
+                        <label className="text-[10px] text-[var(--text-tertiary)]">Date</label>
                         <input
                           type="date"
                           value={scheduledDate}
                           onChange={(e) => setScheduledDate(e.target.value)}
-                          className="w-full px-3 py-2 rounded-lg bg-white/[0.04] border border-white/[0.08] text-xs text-[#F1F5F9] focus:outline-none focus:border-[#8B5CF6]/40"
+                          className="w-full px-3 py-2 rounded-lg bg-white/[0.04] border border-white/[0.08] text-xs text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent)]/40"
                         />
                       </div>
                       <div className="flex-1 space-y-1">
-                        <label className="text-[10px] text-[#64748B]">Time</label>
+                        <label className="text-[10px] text-[var(--text-tertiary)]">Time</label>
                         <input
                           type="time"
                           value={scheduledTime}
                           onChange={(e) => setScheduledTime(e.target.value)}
-                          className="w-full px-3 py-2 rounded-lg bg-white/[0.04] border border-white/[0.08] text-xs text-[#F1F5F9] focus:outline-none focus:border-[#8B5CF6]/40"
+                          className="w-full px-3 py-2 rounded-lg bg-white/[0.04] border border-white/[0.08] text-xs text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent)]/40"
                         />
                       </div>
                     </div>
@@ -140,7 +140,7 @@ export function PublishModal({ open, onClose, pageName, currentStatus, seoScore,
                   <button
                     onClick={handlePublish}
                     disabled={mode === 'schedule' && (!scheduledDate || !scheduledTime)}
-                    className="w-full py-2.5 rounded-lg text-[12px] font-medium bg-[#3B82F6] text-white hover:bg-[#2563EB] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                    className="w-full py-2.5 rounded-lg text-[12px] font-medium bg-[var(--accent)] text-white hover:bg-[var(--accent)] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                   >
                     {mode === 'schedule' ? 'Schedule Publication' : 'Publish Now'}
                   </button>
@@ -149,13 +149,13 @@ export function PublishModal({ open, onClose, pageName, currentStatus, seoScore,
                 <>
                   {/* Unpublish */}
                   <div className="space-y-2">
-                    <label className="text-[10px] font-semibold uppercase tracking-wider text-[#64748B]">Reason (optional)</label>
+                    <label className="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-tertiary)]">Reason (optional)</label>
                     <textarea
                       value={unpublishReason}
                       onChange={(e) => setUnpublishReason(e.target.value)}
                       placeholder="Why are you unpublishing this page?"
                       rows={3}
-                      className="w-full px-3 py-2 rounded-lg bg-white/[0.04] border border-white/[0.08] text-xs text-[#F1F5F9] placeholder-[#64748B] focus:outline-none resize-none"
+                      className="w-full px-3 py-2 rounded-lg bg-white/[0.04] border border-white/[0.08] text-xs text-[var(--text-primary)] placeholder-[var(--text-tertiary)] focus:outline-none resize-none"
                     />
                   </div>
                   <button

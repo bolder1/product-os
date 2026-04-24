@@ -18,8 +18,8 @@ function LoadingSkeleton() {
   return (
     <div className="flex items-center justify-center min-h-screen" style={{ backgroundColor: '#060918' }}>
       <div className="flex flex-col items-center gap-4">
-        <div className="w-10 h-10 border-2 border-[#3B82F6] border-t-transparent rounded-full animate-spin" />
-        <p className="text-sm text-[#64748B]">Loading...</p>
+        <div className="w-10 h-10 border-2 border-[var(--accent)] border-t-transparent rounded-full animate-spin" />
+        <p className="text-sm text-[var(--text-tertiary)]">Loading...</p>
       </div>
     </div>
   )
@@ -37,7 +37,7 @@ function AccessDenied() {
             height="32"
             viewBox="0 0 24 24"
             fill="none"
-            stroke="#EF4444"
+            stroke="var(--color-error)"
             strokeWidth="2"
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -47,15 +47,15 @@ function AccessDenied() {
           </svg>
         </div>
         <div>
-          <h2 className="text-xl font-semibold text-[#F1F5F9] mb-2">Access Denied</h2>
-          <p className="text-sm text-[#94A3B8]">
+          <h2 className="text-xl font-semibold text-[var(--text-primary)] mb-2">Access Denied</h2>
+          <p className="text-sm text-[var(--text-secondary)]">
             You don&apos;t have permission to access this page. Contact your administrator
             if you believe this is an error.
           </p>
         </div>
         <button
           onClick={() => router.push('/')}
-          className="px-6 py-2.5 rounded-lg bg-[#3B82F6] text-white text-sm font-medium hover:bg-[#2563EB] transition-colors"
+          className="px-6 py-2.5 rounded-lg bg-[var(--accent)] text-white text-sm font-medium hover:bg-[var(--accent)] transition-colors"
         >
           Go to Dashboard
         </button>
@@ -65,7 +65,10 @@ function AccessDenied() {
 }
 
 export function ProtectedRoute({ children, allowedRoles, requiredStudio }: ProtectedRouteProps) {
-  const { user, isAuthenticated, isLoading, _hydrated } = useAuthStore()
+  const user            = useAuthStore((s) => s.user)
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
+  const isLoading       = useAuthStore((s) => s.isLoading)
+  const _hydrated       = useAuthStore((s) => s._hydrated)
   const router = useRouter()
 
   useEffect(() => {

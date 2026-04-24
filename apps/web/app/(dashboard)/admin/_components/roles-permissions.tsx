@@ -88,27 +88,21 @@ export default function RolesPermissions() {
               className="w-full flex items-center justify-between px-5 py-4 hover:bg-white/[0.02] transition"
             >
               <div className="flex items-center gap-4">
-                <div
-                  className="w-10 h-10 rounded-lg flex items-center justify-center"
-                  style={{ backgroundColor: `${config.color}12` }}
-                >
-                  <Icon className="w-5 h-5" style={{ color: config.color }} />
+                <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-[var(--accent-subtle)]">
+                  <Icon className="w-5 h-5 text-[var(--accent-text)]" />
                 </div>
                 <div className="text-left">
                   <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium text-[#F1F5F9]">{config.label}</span>
-                    <span
-                      className="text-[10px] px-1.5 py-0.5 rounded-full"
-                      style={{ backgroundColor: `${config.color}15`, color: config.color }}
-                    >
+                    <span className="text-sm font-medium text-[var(--text-primary)]">{config.label}</span>
+                    <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-[var(--accent-subtle)] text-[var(--accent-text)]">
                       {memberCounts[roleKey]} members
                     </span>
                   </div>
-                  <p className="text-xs text-[#64748B] mt-0.5">{config.description}</p>
+                  <p className="text-xs text-[var(--text-tertiary)] mt-0.5">{config.description}</p>
                 </div>
               </div>
               <motion.div animate={{ rotate: isExpanded ? 90 : 0 }} transition={{ duration: 0.2 }}>
-                <ChevronRight className="w-4 h-4 text-[#64748B]" />
+                <ChevronRight className="w-4 h-4 text-[var(--text-tertiary)]" />
               </motion.div>
             </button>
 
@@ -125,7 +119,7 @@ export default function RolesPermissions() {
                   <div className="px-5 pb-5 space-y-5 border-t border-white/[0.06] pt-4">
                     {/* Studio access toggles */}
                     <div>
-                      <h4 className="text-xs font-medium text-[#94A3B8] uppercase tracking-wider mb-3">Studio Access</h4>
+                      <h4 className="text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider mb-3">Studio Access</h4>
                       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
                         {allStudios.map((studio) => {
                           const hasAccess = config.studios.includes(studio.key)
@@ -151,7 +145,7 @@ export default function RolesPermissions() {
                                   </svg>
                                 )}
                               </div>
-                              <span className={`text-xs ${hasAccess ? 'text-[#F1F5F9]' : 'text-[#64748B]'}`}>
+                              <span className={`text-xs ${hasAccess ? 'text-[var(--text-primary)]' : 'text-[var(--text-tertiary)]'}`}>
                                 {studio.label}
                               </span>
                             </div>
@@ -162,7 +156,7 @@ export default function RolesPermissions() {
 
                     {/* Actions matrix */}
                     <div>
-                      <h4 className="text-xs font-medium text-[#94A3B8] uppercase tracking-wider mb-3">Allowed Actions</h4>
+                      <h4 className="text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider mb-3">Allowed Actions</h4>
                       <div className="flex flex-wrap gap-2">
                         {actions.map((action) => {
                           const isAllowed =
@@ -175,14 +169,14 @@ export default function RolesPermissions() {
                               key={action}
                               className={`flex items-center gap-2 px-3 py-2 rounded-lg border transition cursor-pointer ${
                                 isAllowed
-                                  ? 'border-[#3B82F6]/30 bg-[#3B82F6]/8'
+                                  ? 'border-[var(--accent)]/30 bg-[var(--accent)]/8'
                                   : 'border-white/[0.06] bg-white/[0.01]'
                               }`}
                             >
                               <div
                                 className={`w-3.5 h-3.5 rounded-sm border flex items-center justify-center transition ${
                                   isAllowed
-                                    ? 'border-[#3B82F6] bg-[#3B82F6]'
+                                    ? 'border-[var(--accent)] bg-[var(--accent)]'
                                     : 'border-white/20 bg-transparent'
                                 }`}
                               >
@@ -192,7 +186,7 @@ export default function RolesPermissions() {
                                   </svg>
                                 )}
                               </div>
-                              <span className={`text-xs ${isAllowed ? 'text-[#F1F5F9]' : 'text-[#64748B]'}`}>
+                              <span className={`text-xs ${isAllowed ? 'text-[var(--text-primary)]' : 'text-[var(--text-tertiary)]'}`}>
                                 {action}
                               </span>
                             </div>
@@ -204,11 +198,11 @@ export default function RolesPermissions() {
                     {/* Custom permissions toggle */}
                     <div className="flex items-center justify-between p-3 rounded-lg border border-white/[0.06] bg-white/[0.01]">
                       <div>
-                        <span className="text-sm text-[#F1F5F9]">Custom Permissions per Studio</span>
-                        <p className="text-xs text-[#64748B] mt-0.5">Override global actions for individual studios</p>
+                        <span className="text-sm text-[var(--text-primary)]">Custom Permissions per Studio</span>
+                        <p className="text-xs text-[var(--text-tertiary)] mt-0.5">Override global actions for individual studios</p>
                       </div>
                       <button className="relative w-10 h-5 rounded-full bg-white/[0.08] transition hover:bg-white/[0.12]">
-                        <div className="absolute left-0.5 top-0.5 w-4 h-4 rounded-full bg-[#64748B] transition" />
+                        <div className="absolute left-0.5 top-0.5 w-4 h-4 rounded-full bg-[var(--text-tertiary)] transition" />
                       </button>
                     </div>
                   </div>
@@ -221,7 +215,7 @@ export default function RolesPermissions() {
 
       {/* Create custom role button */}
       <motion.button
-        className="w-full flex items-center justify-center gap-2 px-4 py-4 rounded-xl border border-dashed border-white/[0.08] text-[#64748B] hover:text-[#94A3B8] hover:border-white/[0.15] hover:bg-white/[0.02] transition"
+        className="w-full flex items-center justify-center gap-2 px-4 py-4 rounded-xl border border-dashed border-white/[0.08] text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] hover:border-white/[0.15] hover:bg-white/[0.02] transition"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.5 }}

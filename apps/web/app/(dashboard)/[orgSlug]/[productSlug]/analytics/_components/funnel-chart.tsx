@@ -15,9 +15,9 @@ export function FunnelChart({ steps }: FunnelChartProps) {
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: 0.3 }}
-      className="rounded-xl border border-white/[0.08] bg-[#0a0f1e] p-5"
+      className="rounded-xl border border-white/[0.08] bg-[var(--bg-base)] p-5"
     >
-      <h3 className="text-sm font-medium text-[#F1F5F9] mb-5">Conversion Funnel</h3>
+      <h3 className="text-sm font-medium text-[var(--text-primary)] mb-5">Conversion Funnel</h3>
 
       <div className="flex flex-col gap-3">
         {steps.map((step, i) => {
@@ -33,7 +33,7 @@ export function FunnelChart({ steps }: FunnelChartProps) {
             >
               {/* Step label */}
               <div className="w-24 shrink-0 text-right">
-                <span className="text-sm text-[#94A3B8]">{step.name}</span>
+                <span className="text-sm text-[var(--text-secondary)]">{step.name}</span>
               </div>
 
               {/* Bar */}

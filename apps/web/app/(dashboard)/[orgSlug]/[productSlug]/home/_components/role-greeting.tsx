@@ -30,45 +30,45 @@ const ROLE_TAGLINES: Record<OrgRole, string> = {
   viewer:           'Stay informed on everything happening.',
 }
 
-const PRIMARY_STUDIOS: Record<OrgRole, Array<{ label: string; route: string; color: string }>> = {
+const PRIMARY_STUDIOS: Record<OrgRole, Array<{ label: string; route: string }>> = {
   admin:            [
-    { label: 'Control Tower', route: 'control-tower', color: '#3B82F6' },
-    { label: 'Graph Explorer', route: 'graph-explorer', color: '#8B5CF6' },
-    { label: 'Templates', route: 'templates', color: '#EC4899' },
+    { label: 'Control Tower', route: 'control-tower' },
+    { label: 'Graph Explorer', route: 'graph-explorer' },
+    { label: 'Templates', route: 'templates' },
   ],
   manager:          [
-    { label: 'Planner', route: 'planner', color: '#3B82F6' },
-    { label: 'Control Tower', route: 'control-tower', color: '#8B5CF6' },
-    { label: 'Releases', route: 'releases', color: '#10B981' },
+    { label: 'Planner', route: 'planner' },
+    { label: 'Control Tower', route: 'control-tower' },
+    { label: 'Releases', route: 'releases' },
   ],
   business_analyst: [
-    { label: 'Planner', route: 'planner', color: '#8B5CF6' },
-    { label: 'Canvas', route: 'canvas', color: '#3B82F6' },
-    { label: 'Analytics', route: 'analytics', color: '#F59E0B' },
+    { label: 'Planner', route: 'planner' },
+    { label: 'Canvas', route: 'canvas' },
+    { label: 'Analytics', route: 'analytics' },
   ],
   product_designer: [
-    { label: 'Brand', route: 'brand', color: '#EC4899' },
-    { label: 'Components', route: 'components', color: '#06B6D4' },
-    { label: 'Design', route: 'design', color: '#3B82F6' },
+    { label: 'Brand', route: 'brand' },
+    { label: 'Components', route: 'components' },
+    { label: 'Design', route: 'design' },
   ],
   frontend_dev:     [
-    { label: 'Components', route: 'components', color: '#06B6D4' },
-    { label: 'Handoff', route: 'handoff', color: '#F59E0B' },
-    { label: 'Code', route: 'code', color: '#10B981' },
+    { label: 'Components', route: 'components' },
+    { label: 'Handoff', route: 'handoff' },
+    { label: 'Code', route: 'code' },
   ],
   backend_dev:      [
-    { label: 'Workflows', route: 'workflows', color: '#10B981' },
-    { label: 'Code', route: 'code', color: '#06B6D4' },
-    { label: 'Handoff', route: 'handoff', color: '#F59E0B' },
+    { label: 'Workflows', route: 'workflows' },
+    { label: 'Code', route: 'code' },
+    { label: 'Handoff', route: 'handoff' },
   ],
   qa:               [
-    { label: 'Testing', route: 'testing', color: '#F59E0B' },
-    { label: 'Releases', route: 'releases', color: '#F43F5E' },
-    { label: 'Tasks', route: 'tasks', color: '#8B5CF6' },
+    { label: 'Testing', route: 'testing' },
+    { label: 'Releases', route: 'releases' },
+    { label: 'Tasks', route: 'tasks' },
   ],
   viewer:           [
-    { label: 'Control Tower', route: 'control-tower', color: '#3B82F6' },
-    { label: 'Analytics', route: 'analytics', color: '#8B5CF6' },
+    { label: 'Control Tower', route: 'control-tower' },
+    { label: 'Analytics', route: 'analytics' },
   ],
 }
 
@@ -93,62 +93,46 @@ export function RoleGreeting({ role, config, userName }: Props) {
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="relative rounded-2xl overflow-hidden border border-white/[0.08] p-5"
-      style={{
-        background: `linear-gradient(135deg, ${config.color}12 0%, ${config.color}06 50%, transparent 100%)`,
-        borderColor: `${config.color}25`,
-      }}
+      className="relative rounded-2xl overflow-hidden border border-[var(--border-default)] bg-[var(--accent-subtle)] p-5"
     >
       {/* Background orb */}
       <div
-        className="absolute -top-12 -right-12 w-40 h-40 rounded-full opacity-10 blur-3xl pointer-events-none"
-        style={{ backgroundColor: config.color }}
+        className="absolute -top-12 -right-12 w-40 h-40 rounded-full opacity-10 blur-3xl pointer-events-none bg-[var(--accent)]"
       />
 
       <div className="relative flex items-start justify-between gap-4">
         {/* Left: greeting + tagline */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
-            <div
-              className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0"
-              style={{ backgroundColor: `${config.color}20`, border: `1px solid ${config.color}30` }}
-            >
-              <Icon size={16} style={{ color: config.color }} />
+            <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 bg-[var(--accent-subtle)] border border-[var(--accent)]/30">
+              <Icon size={16} className="text-[var(--accent-text)]" />
             </div>
-            <span
-              className="text-[10px] font-semibold px-2 py-0.5 rounded-full uppercase tracking-wider"
-              style={{ backgroundColor: `${config.color}15`, color: config.color }}
-            >
+            <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full uppercase tracking-wider bg-[var(--accent-subtle)] text-[var(--accent-text)]">
               {config.label}
             </span>
           </div>
 
-          <h1 className="text-[18px] font-bold text-[#F1F5F9] mt-2">
+          <h1 className="text-[18px] font-bold text-[var(--text-primary)] mt-2">
             {greeting}{userName ? `, ${userName.split(' ')[0]}` : ''}
           </h1>
-          <p className="text-[12px] text-[#64748B] mt-0.5">{tagline}</p>
+          <p className="text-[12px] text-[var(--text-tertiary)] mt-0.5">{tagline}</p>
         </div>
 
         {/* Right: AI hint */}
-        <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-[#8B5CF6]/10 border border-[#8B5CF6]/20 shrink-0">
-          <Sparkles size={11} className="text-[#A78BFA]" />
-          <span className="text-[10px] text-[#C4B5FD]">Ask OpsPilot ⌘⇧O</span>
+        <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-[var(--accent-subtle)] border border-[var(--accent)]/20 shrink-0">
+          <Sparkles size={11} className="text-[var(--accent-text)]" />
+          <span className="text-[10px] text-[var(--accent-text)]">Ask OpsPilot ⌘⇧O</span>
         </div>
       </div>
 
       {/* Quick-jump studio pills */}
       <div className="flex items-center gap-2 mt-4 flex-wrap">
-        <span className="text-[10px] text-[#475569] uppercase tracking-wider">Your studios</span>
+        <span className="text-[10px] text-[var(--text-tertiary)] uppercase tracking-wider">Your studios</span>
         {studios.map((s) => (
           <button
             key={s.route}
             onClick={() => router.push(`/${params.orgSlug}/${params.productSlug}/${s.route}`)}
-            className="flex items-center gap-1.5 text-[11px] px-2.5 py-1 rounded-lg border transition-all hover:scale-[1.02]"
-            style={{
-              backgroundColor: `${s.color}12`,
-              borderColor: `${s.color}25`,
-              color: s.color,
-            }}
+            className="flex items-center gap-1.5 text-[11px] px-2.5 py-1 rounded-lg border border-[var(--border-default)] bg-[var(--bg-inset)] text-[var(--text-secondary)] hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)] transition-all hover:scale-[1.02]"
           >
             {s.label}
             <ArrowRight size={9} />

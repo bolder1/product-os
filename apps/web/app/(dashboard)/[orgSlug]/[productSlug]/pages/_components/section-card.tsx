@@ -184,7 +184,7 @@ export function SectionCard({
       onClick={onSelect}
       className={`group relative bg-white/[0.03] rounded-lg p-4 cursor-pointer transition-all ${
         isSelected
-          ? 'ring-1 ring-[#3B82F6]/50 bg-white/[0.05]'
+          ? 'ring-1 ring-[var(--accent)]/50 bg-white/[0.05]'
           : 'border border-white/[0.08] hover:border-white/[0.14]'
       }`}
     >
@@ -206,10 +206,10 @@ export function SectionCard({
 
         {/* Actions (shown on hover) */}
         <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-          <button className="p-1 rounded hover:bg-white/[0.06] text-[#64748B] hover:text-[#F1F5F9] cursor-grab transition-colors">
+          <button className="p-1 rounded hover:bg-white/[0.06] text-[var(--text-tertiary)] hover:text-[var(--text-primary)] cursor-grab transition-colors">
             <GripVertical className="w-3.5 h-3.5" />
           </button>
-          <button className="p-1 rounded hover:bg-white/[0.06] text-[#64748B] hover:text-[#3B82F6] transition-colors">
+          <button className="p-1 rounded hover:bg-white/[0.06] text-[var(--text-tertiary)] hover:text-[var(--accent)] transition-colors">
             <Pencil className="w-3.5 h-3.5" />
           </button>
           <button
@@ -217,7 +217,7 @@ export function SectionCard({
               e.stopPropagation()
               onDelete()
             }}
-            className="p-1 rounded hover:bg-red-500/10 text-[#64748B] hover:text-red-400 transition-colors"
+            className="p-1 rounded hover:bg-red-500/10 text-[var(--text-tertiary)] hover:text-red-400 transition-colors"
           >
             <Trash2 className="w-3.5 h-3.5" />
           </button>

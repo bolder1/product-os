@@ -103,27 +103,27 @@ export default function MemberManagement() {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div className="flex items-center gap-3 flex-1 w-full sm:w-auto">
           <div className="relative flex-1 max-w-sm">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#64748B]" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-tertiary)]" />
             <input
               type="text"
               placeholder="Search members..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 text-sm bg-white/[0.03] border border-white/[0.08] rounded-lg text-[#F1F5F9] placeholder:text-[#64748B] focus:border-[#3B82F6]/40 focus:outline-none focus:ring-1 focus:ring-[#3B82F6]/20 transition"
+              className="w-full pl-9 pr-4 py-2 text-sm bg-white/[0.03] border border-white/[0.08] rounded-lg text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:border-[var(--accent)]/40 focus:outline-none focus:ring-1 focus:ring-[var(--accent)]/20 transition"
             />
           </div>
           <div className="relative">
             <select
               value={roleFilter}
               onChange={(e) => setRoleFilter(e.target.value as OrgRole | 'all')}
-              className="appearance-none pl-3 pr-8 py-2 text-sm bg-white/[0.03] border border-white/[0.08] rounded-lg text-[#94A3B8] focus:border-[#3B82F6]/40 focus:outline-none transition cursor-pointer"
+              className="appearance-none pl-3 pr-8 py-2 text-sm bg-white/[0.03] border border-white/[0.08] rounded-lg text-[var(--text-secondary)] focus:border-[var(--accent)]/40 focus:outline-none transition cursor-pointer"
             >
               <option value="all">All Roles</option>
               {(Object.keys(roleConfigs) as OrgRole[]).map((role) => (
                 <option key={role} value={role}>{roleConfigs[role].label}</option>
               ))}
             </select>
-            <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-[#64748B] pointer-events-none" />
+            <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-tertiary)] pointer-events-none" />
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -133,8 +133,8 @@ export default function MemberManagement() {
               animate={{ opacity: 1, scale: 1 }}
               className="flex items-center gap-2"
             >
-              <span className="text-xs text-[#94A3B8]">{selectedIds.size} selected</span>
-              <button className="px-3 py-1.5 text-xs bg-white/[0.04] border border-white/[0.08] rounded-lg text-[#94A3B8] hover:bg-white/[0.06] transition">
+              <span className="text-xs text-[var(--text-secondary)]">{selectedIds.size} selected</span>
+              <button className="px-3 py-1.5 text-xs bg-white/[0.04] border border-white/[0.08] rounded-lg text-[var(--text-secondary)] hover:bg-white/[0.06] transition">
                 Change Role
               </button>
               <button className="px-3 py-1.5 text-xs bg-rose-500/10 border border-rose-500/20 rounded-lg text-rose-400 hover:bg-rose-500/20 transition">
@@ -144,7 +144,7 @@ export default function MemberManagement() {
           )}
           <button
             onClick={() => setShowInviteModal(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-[#3B82F6] hover:bg-[#3B82F6]/90 text-white text-sm font-medium rounded-lg transition-all hover:shadow-[0_0_20px_rgba(59,130,246,0.3)]"
+            className="flex items-center gap-2 px-4 py-2 bg-[var(--accent)] hover:bg-[var(--accent)]/90 text-white text-sm font-medium rounded-lg transition-all hover:shadow-[0_0_20px_rgba(59,130,246,0.3)]"
           >
             <UserPlus className="w-4 h-4" />
             Invite Member
@@ -162,14 +162,14 @@ export default function MemberManagement() {
                   type="checkbox"
                   checked={selectedIds.size === filtered.length && filtered.length > 0}
                   onChange={toggleAll}
-                  className="w-4 h-4 rounded border-white/20 bg-white/[0.04] accent-[#3B82F6]"
+                  className="w-4 h-4 rounded border-white/20 bg-white/[0.04] accent-[var(--accent)]"
                 />
               </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-[#64748B] uppercase tracking-wider">Member</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-[#64748B] uppercase tracking-wider hidden md:table-cell">Role</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-[#64748B] uppercase tracking-wider hidden lg:table-cell">Status</th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-[#64748B] uppercase tracking-wider hidden lg:table-cell">Joined</th>
-              <th className="px-4 py-3 text-right text-xs font-medium text-[#64748B] uppercase tracking-wider">Actions</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-[var(--text-tertiary)] uppercase tracking-wider">Member</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-[var(--text-tertiary)] uppercase tracking-wider hidden md:table-cell">Role</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-[var(--text-tertiary)] uppercase tracking-wider hidden lg:table-cell">Status</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-[var(--text-tertiary)] uppercase tracking-wider hidden lg:table-cell">Joined</th>
+              <th className="px-4 py-3 text-right text-xs font-medium text-[var(--text-tertiary)] uppercase tracking-wider">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -189,28 +189,22 @@ export default function MemberManagement() {
                       type="checkbox"
                       checked={selectedIds.has(member.id)}
                       onChange={() => toggleSelect(member.id)}
-                      className="w-4 h-4 rounded border-white/20 bg-white/[0.04] accent-[#3B82F6]"
+                      className="w-4 h-4 rounded border-white/20 bg-white/[0.04] accent-[var(--accent)]"
                     />
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
-                      <div
-                        className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium text-white flex-shrink-0"
-                        style={{ backgroundColor: `${rc.color}40` }}
-                      >
+                      <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium text-[var(--color-white)] flex-shrink-0 bg-[var(--accent)]">
                         {member.avatar}
                       </div>
                       <div className="min-w-0">
-                        <div className="text-sm font-medium text-[#F1F5F9] truncate">{member.name}</div>
-                        <div className="text-xs text-[#64748B] truncate">{member.email}</div>
+                        <div className="text-sm font-medium text-[var(--text-primary)] truncate">{member.name}</div>
+                        <div className="text-xs text-[var(--text-tertiary)] truncate">{member.email}</div>
                       </div>
                     </div>
                   </td>
                   <td className="px-4 py-3 hidden md:table-cell">
-                    <span
-                      className="text-xs px-2 py-1 rounded-full font-medium"
-                      style={{ backgroundColor: `${rc.color}15`, color: rc.color }}
-                    >
+                    <span className="text-xs px-2 py-1 rounded-full font-medium bg-[var(--accent-subtle)] text-[var(--accent-text)]">
                       {rc.label}
                     </span>
                   </td>
@@ -220,13 +214,13 @@ export default function MemberManagement() {
                     </span>
                   </td>
                   <td className="px-4 py-3 hidden lg:table-cell">
-                    <span className="text-xs text-[#64748B]">{member.joinedDate}</span>
+                    <span className="text-xs text-[var(--text-tertiary)]">{member.joinedDate}</span>
                   </td>
                   <td className="px-4 py-3 text-right">
                     <div className="relative inline-block">
                       <button
                         onClick={() => setActionMenuId(actionMenuId === member.id ? null : member.id)}
-                        className="p-1.5 rounded-lg text-[#64748B] hover:text-[#94A3B8] hover:bg-white/[0.04] transition"
+                        className="p-1.5 rounded-lg text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] hover:bg-white/[0.04] transition"
                       >
                         <MoreHorizontal className="w-4 h-4" />
                       </button>
@@ -238,7 +232,7 @@ export default function MemberManagement() {
                             exit={{ opacity: 0, scale: 0.95 }}
                             className="absolute right-0 top-full mt-1 w-40 py-1 bg-[#0c1029] border border-white/[0.08] rounded-lg shadow-xl z-10"
                           >
-                            <button className="w-full flex items-center gap-2 px-3 py-2 text-sm text-[#94A3B8] hover:bg-white/[0.04] transition">
+                            <button className="w-full flex items-center gap-2 px-3 py-2 text-sm text-[var(--text-secondary)] hover:bg-white/[0.04] transition">
                               <Edit3 className="w-3.5 h-3.5" /> Edit Role
                             </button>
                             <button className="w-full flex items-center gap-2 px-3 py-2 text-sm text-amber-400 hover:bg-white/[0.04] transition">
@@ -259,8 +253,8 @@ export default function MemberManagement() {
         </table>
         {filtered.length === 0 && (
           <div className="flex flex-col items-center py-12 text-center">
-            <Users className="w-8 h-8 text-[#1E293B] mb-2" />
-            <p className="text-sm text-[#4A5568]">No members found</p>
+            <Users className="w-8 h-8 text-[var(--bg-surface)] mb-2" />
+            <p className="text-sm text-[var(--text-tertiary)]">No members found</p>
           </div>
         )}
       </div>
@@ -283,10 +277,10 @@ export default function MemberManagement() {
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex items-center justify-between mb-6">
-                <h3 className="text-lg font-semibold text-[#F1F5F9]">Invite Member</h3>
+                <h3 className="text-lg font-semibold text-[var(--text-primary)]">Invite Member</h3>
                 <button
                   onClick={() => setShowInviteModal(false)}
-                  className="p-1 rounded-lg text-[#64748B] hover:text-[#94A3B8] hover:bg-white/[0.04] transition"
+                  className="p-1 rounded-lg text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] hover:bg-white/[0.04] transition"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -294,34 +288,34 @@ export default function MemberManagement() {
 
               <div className="space-y-4">
                 <div>
-                  <label className="block text-xs font-medium text-[#94A3B8] mb-1.5">Email Address</label>
+                  <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1.5">Email Address</label>
                   <input
                     type="email"
                     placeholder="colleague@company.com"
                     value={inviteEmail}
                     onChange={(e) => setInviteEmail(e.target.value)}
-                    className="w-full px-3 py-2.5 text-sm bg-white/[0.03] border border-white/[0.08] rounded-lg text-[#F1F5F9] placeholder:text-[#64748B] focus:border-[#3B82F6]/40 focus:outline-none focus:ring-1 focus:ring-[#3B82F6]/20 transition"
+                    className="w-full px-3 py-2.5 text-sm bg-white/[0.03] border border-white/[0.08] rounded-lg text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:border-[var(--accent)]/40 focus:outline-none focus:ring-1 focus:ring-[var(--accent)]/20 transition"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-[#94A3B8] mb-1.5">Role</label>
+                  <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1.5">Role</label>
                   <div className="relative">
                     <select
                       value={inviteRole}
                       onChange={(e) => setInviteRole(e.target.value as OrgRole)}
-                      className="w-full appearance-none px-3 py-2.5 text-sm bg-white/[0.03] border border-white/[0.08] rounded-lg text-[#F1F5F9] focus:border-[#3B82F6]/40 focus:outline-none transition cursor-pointer"
+                      className="w-full appearance-none px-3 py-2.5 text-sm bg-white/[0.03] border border-white/[0.08] rounded-lg text-[var(--text-primary)] focus:border-[var(--accent)]/40 focus:outline-none transition cursor-pointer"
                     >
                       {(Object.keys(roleConfigs) as OrgRole[]).map((role) => (
                         <option key={role} value={role}>{roleConfigs[role].label}</option>
                       ))}
                     </select>
-                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#64748B] pointer-events-none" />
+                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-tertiary)] pointer-events-none" />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-[#94A3B8] mb-2">Custom Studio Access</label>
+                  <label className="block text-xs font-medium text-[var(--text-secondary)] mb-2">Custom Studio Access</label>
                   <div className="grid grid-cols-3 gap-1.5 max-h-40 overflow-y-auto pr-1">
                     {allStudios.map((studio) => (
                       <button
@@ -329,8 +323,8 @@ export default function MemberManagement() {
                         onClick={() => toggleInviteStudio(studio)}
                         className={`flex items-center gap-1.5 px-2 py-1.5 text-xs rounded-lg border transition ${
                           inviteStudios.has(studio)
-                            ? 'border-[#3B82F6]/40 bg-[#3B82F6]/10 text-[#3B82F6]'
-                            : 'border-white/[0.06] bg-white/[0.02] text-[#64748B] hover:bg-white/[0.04]'
+                            ? 'border-[var(--accent)]/40 bg-[var(--accent)]/10 text-[var(--accent)]'
+                            : 'border-white/[0.06] bg-white/[0.02] text-[var(--text-tertiary)] hover:bg-white/[0.04]'
                         }`}
                       >
                         {inviteStudios.has(studio) && <Check className="w-3 h-3" />}
@@ -344,11 +338,11 @@ export default function MemberManagement() {
               <div className="flex items-center gap-3 mt-6">
                 <button
                   onClick={() => setShowInviteModal(false)}
-                  className="flex-1 px-4 py-2.5 text-sm border border-white/[0.08] rounded-lg text-[#94A3B8] hover:bg-white/[0.04] transition"
+                  className="flex-1 px-4 py-2.5 text-sm border border-white/[0.08] rounded-lg text-[var(--text-secondary)] hover:bg-white/[0.04] transition"
                 >
                   Cancel
                 </button>
-                <button className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-[#3B82F6] hover:bg-[#3B82F6]/90 text-white text-sm font-medium rounded-lg transition-all hover:shadow-[0_0_20px_rgba(59,130,246,0.3)]">
+                <button className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-[var(--accent)] hover:bg-[var(--accent)]/90 text-white text-sm font-medium rounded-lg transition-all hover:shadow-[0_0_20px_rgba(59,130,246,0.3)]">
                   <UserPlus className="w-4 h-4" />
                   Send Invite
                 </button>

@@ -70,12 +70,12 @@ export function ConflictPreviewStep({
   if (conflicts.length === 0) {
     return (
       <div className="p-5 flex flex-col items-center gap-3 text-center py-8">
-        <div className="w-12 h-12 rounded-full bg-[#10B981]/15 border border-[#10B981]/30 flex items-center justify-center">
-          <CheckCircle2 size={22} className="text-[#10B981]" />
+        <div className="w-12 h-12 rounded-full bg-[var(--color-success)]/15 border border-[var(--color-success)]/30 flex items-center justify-center">
+          <CheckCircle2 size={22} className="text-[var(--color-success)]" />
         </div>
         <div>
           <p className="text-[13px] font-semibold text-[var(--text-primary)]">No conflicts</p>
-          <p className="text-[11px] text-[#64748B] mt-1">
+          <p className="text-[11px] text-[var(--text-tertiary)] mt-1">
             All {totalNodes} nodes from <strong>{bundleName}</strong> are new — nothing in your graph will be changed.
           </p>
         </div>
@@ -91,7 +91,7 @@ export function ConflictPreviewStep({
         <div className="text-[11px] leading-relaxed">
           <span className="font-semibold text-amber-300">{conflicts.length} conflict{conflicts.length > 1 ? 's' : ''} found.</span>
           {' '}
-          <span className="text-[#94A3B8]">
+          <span className="text-[var(--text-secondary)]">
             {newNodes} nodes are new. For each conflict, choose how to proceed.
           </span>
         </div>
@@ -99,12 +99,12 @@ export function ConflictPreviewStep({
 
       {/* Resolve-all shortcuts */}
       <div className="flex items-center gap-2">
-        <span className="text-[10px] text-[#64748B]">Resolve all:</span>
+        <span className="text-[10px] text-[var(--text-tertiary)]">Resolve all:</span>
         {RESOLUTION_OPTIONS.map((opt) => (
           <button
             key={opt.key}
             onClick={() => onResolveAll(opt.key)}
-            className="flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium border border-white/[0.08] hover:border-white/[0.18] text-[#94A3B8] hover:text-[var(--text-primary)] transition-all"
+            className="flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium border border-white/[0.08] hover:border-white/[0.18] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all"
             style={{ color: opt.color }}
           >
             {opt.icon}
@@ -136,7 +136,7 @@ export function ConflictPreviewStep({
                 >
                   {conflict.kind}
                 </span>
-                <span className="text-[9px] text-[#475569] shrink-0 ml-auto">already exists</span>
+                <span className="text-[9px] text-[var(--text-tertiary)] shrink-0 ml-auto">already exists</span>
               </div>
 
               {/* Resolution picker */}
@@ -148,7 +148,7 @@ export function ConflictPreviewStep({
                     className={`flex-1 flex flex-col items-center gap-0.5 py-1.5 rounded-lg border text-[9px] font-medium transition-all ${
                       current === opt.key
                         ? 'border-current bg-current/10'
-                        : 'border-white/[0.07] bg-transparent text-[#64748B] hover:border-white/[0.15]'
+                        : 'border-white/[0.07] bg-transparent text-[var(--text-tertiary)] hover:border-white/[0.15]'
                     }`}
                     style={current === opt.key ? { color: opt.color, borderColor: opt.color } : {}}
                     title={opt.desc}
@@ -160,7 +160,7 @@ export function ConflictPreviewStep({
               </div>
 
               {/* Resolution description */}
-              <p className="text-[9px] text-[#475569]">
+              <p className="text-[9px] text-[var(--text-tertiary)]">
                 {RESOLUTION_OPTIONS.find((o) => o.key === current)?.desc}
               </p>
             </motion.div>

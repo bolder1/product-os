@@ -79,17 +79,17 @@ export function AiInsights({ productId }: Props) {
       {/* Header */}
       <div className="flex items-center justify-between gap-2 mb-4">
         <div className="flex items-center gap-2">
-          <Sparkles className="w-4 h-4 text-[#8B5CF6]" />
-          <span className="text-sm font-medium text-[#94A3B8] uppercase tracking-wider">AI Health Recs</span>
+          <Sparkles className="w-4 h-4 text-[var(--accent)]" />
+          <span className="text-sm font-medium text-[var(--text-secondary)] uppercase tracking-wider">AI Health Recs</span>
         </div>
         <div className="flex items-center gap-2">
-          {timeAgo && <span className="text-[9px] text-[#334155]">{timeAgo}</span>}
+          {timeAgo && <span className="text-[9px] text-[var(--border-default)]">{timeAgo}</span>}
           {hasGenerated && (
             <button
               onClick={handleGenerate}
               disabled={recsMutation.isPending}
               title="Regenerate"
-              className="text-[#475569] hover:text-[#8B5CF6] transition-colors disabled:opacity-40"
+              className="text-[var(--text-tertiary)] hover:text-[var(--accent)] transition-colors disabled:opacity-40"
             >
               <RefreshCw size={11} className={recsMutation.isPending ? 'animate-spin' : ''} />
             </button>
@@ -101,33 +101,33 @@ export function AiInsights({ productId }: Props) {
       {recsMutation.isPending ? (
         <div className="flex-1 flex flex-col items-center justify-center gap-3">
           <div className="relative w-10 h-10">
-            <div className="absolute inset-0 rounded-full border-2 border-[#8B5CF6]/20 border-t-[#8B5CF6] animate-spin" />
-            <Sparkles size={14} className="absolute inset-0 m-auto text-[#8B5CF6]" />
+            <div className="absolute inset-0 rounded-full border-2 border-[var(--accent)]/20 border-t-[var(--accent)] animate-spin" />
+            <Sparkles size={14} className="absolute inset-0 m-auto text-[var(--accent)]" />
           </div>
-          <p className="text-[11px] text-[#64748B] text-center">Analysing your product graph…</p>
+          <p className="text-[11px] text-[var(--text-tertiary)] text-center">Analysing your product graph…</p>
         </div>
       ) : recsMutation.isError ? (
         <div className="flex-1 flex flex-col items-center justify-center gap-2 text-center">
-          <AlertCircle size={20} className="text-[#F43F5E]" />
-          <p className="text-[11px] text-[#F43F5E]">Analysis failed</p>
-          <p className="text-[10px] text-[#475569]">{recsMutation.error.message}</p>
-          <button onClick={handleGenerate} className="text-[10px] text-[#8B5CF6] hover:text-[#A78BFA] mt-1">Try again</button>
+          <AlertCircle size={20} className="text-[var(--color-error)]" />
+          <p className="text-[11px] text-[var(--color-error)]">Analysis failed</p>
+          <p className="text-[10px] text-[var(--text-tertiary)]">{recsMutation.error.message}</p>
+          <button onClick={handleGenerate} className="text-[10px] text-[var(--accent)] hover:text-[var(--accent)] mt-1">Try again</button>
         </div>
       ) : !hasGenerated ? (
         <div className="flex-1 flex flex-col items-center justify-center gap-3 text-center">
-          <div className="w-12 h-12 rounded-full bg-[#8B5CF6]/10 border border-[#8B5CF6]/20 flex items-center justify-center">
-            <Sparkles size={20} className="text-[#8B5CF6]" />
+          <div className="w-12 h-12 rounded-full bg-[var(--accent)]/10 border border-[var(--accent)]/20 flex items-center justify-center">
+            <Sparkles size={20} className="text-[var(--accent)]" />
           </div>
           <div>
-            <p className="text-[12px] font-medium text-[#E2E8F0]">AI Health Analysis</p>
-            <p className="text-[10px] text-[#64748B] mt-1 max-w-[180px]">
+            <p className="text-[12px] font-medium text-[var(--text-primary)]">AI Health Analysis</p>
+            <p className="text-[10px] text-[var(--text-tertiary)] mt-1 max-w-[180px]">
               Analyse your live product graph for gaps, risks, and suggestions.
             </p>
           </div>
           <button
             onClick={handleGenerate}
             disabled={!productId}
-            className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-[#8B5CF6]/20 border border-[#8B5CF6]/30 text-[#C4B5FD] text-[11px] font-medium hover:bg-[#8B5CF6]/30 disabled:opacity-40 transition-all"
+            className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-[var(--accent)]/20 border border-[var(--accent)]/30 text-[var(--accent)] text-[11px] font-medium hover:bg-[var(--accent)]/30 disabled:opacity-40 transition-all"
           >
             <Sparkles size={12} />
             Run Analysis
@@ -150,7 +150,7 @@ export function AiInsights({ productId }: Props) {
                 >
                   <div className="w-2 h-2 rounded-full mt-1.5 shrink-0" style={{ backgroundColor: color }} />
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs text-[#F1F5F9] leading-relaxed">{insight.text}</p>
+                    <p className="text-xs text-[var(--text-primary)] leading-relaxed">{insight.text}</p>
                     <div className="flex items-center justify-between mt-1.5">
                       <span className="text-[10px] font-medium px-1.5 py-0.5 rounded" style={{ backgroundColor: color + '15', color }}>
                         {label}
@@ -158,7 +158,7 @@ export function AiInsights({ productId }: Props) {
                       {insight.studio && (
                         <button
                           onClick={() => handleAction(insight.studio)}
-                          className="flex items-center gap-0.5 text-[10px] text-[#3B82F6] hover:text-[#60A5FA] transition-colors"
+                          className="flex items-center gap-0.5 text-[10px] text-[var(--accent)] hover:text-[var(--accent)] transition-colors"
                         >
                           {insight.action}
                           <ArrowRight className="w-2.5 h-2.5" />
@@ -176,7 +176,7 @@ export function AiInsights({ productId }: Props) {
       {hasGenerated && !recsMutation.isPending && (
         <button
           onClick={handleGenerate}
-          className="mt-3 pt-3 border-t border-white/[0.06] flex items-center justify-center gap-1.5 text-xs text-[#8B5CF6] hover:text-[#A78BFA] transition-colors font-medium"
+          className="mt-3 pt-3 border-t border-white/[0.06] flex items-center justify-center gap-1.5 text-xs text-[var(--accent)] hover:text-[var(--accent)] transition-colors font-medium"
         >
           <Sparkles className="w-3 h-3" />
           Regenerate

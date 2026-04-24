@@ -24,16 +24,13 @@ export function RoleSwitcher({ currentRole, onChange }: Props) {
     <div className="relative">
       <button
         onClick={() => setOpen((v) => !v)}
-        className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-white/[0.04] border border-white/[0.06] hover:bg-white/[0.06] transition-colors"
+        className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-[var(--bg-inset)] border border-[var(--border-default)] hover:bg-[var(--surface-hover)] transition-colors"
       >
-        <span className="text-[10px] text-[#64748B]">Viewing as</span>
-        <span
-          className="text-[10px] font-semibold px-1.5 py-0.5 rounded"
-          style={{ backgroundColor: `${config.color}20`, color: config.color }}
-        >
+        <span className="text-[10px] text-[var(--text-tertiary)]">Viewing as</span>
+        <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-[var(--accent-subtle)] text-[var(--accent-text)]">
           {config.label}
         </span>
-        <ChevronDown size={10} className={`text-[#475569] transition-transform ${open ? 'rotate-180' : ''}`} />
+        <ChevronDown size={10} className={`text-[var(--text-tertiary)] transition-transform ${open ? 'rotate-180' : ''}`} />
       </button>
 
       <AnimatePresence>
@@ -45,7 +42,7 @@ export function RoleSwitcher({ currentRole, onChange }: Props) {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -4, scale: 0.97 }}
               transition={{ duration: 0.12 }}
-              className="absolute right-0 top-full mt-1 z-20 w-[200px] rounded-xl bg-[#0D1117] border border-white/[0.1] shadow-2xl overflow-hidden py-1"
+              className="absolute right-0 top-full mt-1 z-20 w-[200px] rounded-xl bg-[var(--bg-surface-raised)] border border-[var(--border-default)] shadow-2xl overflow-hidden py-1"
             >
               {ROLE_ORDER.map((r) => {
                 const cfg = roleConfigs[r]
@@ -54,11 +51,11 @@ export function RoleSwitcher({ currentRole, onChange }: Props) {
                   <button
                     key={r}
                     onClick={() => { onChange(r); setOpen(false) }}
-                    className="w-full flex items-center gap-2.5 px-3 py-2 hover:bg-white/[0.04] transition-colors text-left"
+                    className="w-full flex items-center gap-2.5 px-3 py-2 hover:bg-[var(--surface-hover)] transition-colors text-left"
                   >
-                    <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: cfg.color }} />
-                    <span className="flex-1 text-[11px] text-[#94A3B8]">{cfg.label}</span>
-                    {isActive && <Check size={10} className="text-[#10B981]" />}
+                    <div className={`w-2 h-2 rounded-full shrink-0 ${isActive ? 'bg-[var(--accent)]' : 'bg-[var(--text-tertiary)]'}`} />
+                    <span className="flex-1 text-[11px] text-[var(--text-secondary)]">{cfg.label}</span>
+                    {isActive && <Check size={10} className="text-[var(--accent)]" />}
                   </button>
                 )
               })}

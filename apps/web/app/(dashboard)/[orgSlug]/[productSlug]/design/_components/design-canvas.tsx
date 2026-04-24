@@ -106,10 +106,10 @@ export default function DesignCanvas({
     return (
       <div className="flex-1 flex items-center justify-center">
         <div className="text-center space-y-3">
-          <div className="w-12 h-12 rounded-xl bg-[#8B5CF6]/10 flex items-center justify-center mx-auto">
-            <Maximize2 className="w-5 h-5 text-[#8B5CF6]" />
+          <div className="w-12 h-12 rounded-xl bg-[var(--accent)]/10 flex items-center justify-center mx-auto">
+            <Maximize2 className="w-5 h-5 text-[var(--accent)]" />
           </div>
-          <p className="text-sm text-[#64748B]">Select a screen to start designing</p>
+          <p className="text-sm text-[var(--text-tertiary)]">Select a screen to start designing</p>
         </div>
       </div>
     )
@@ -157,7 +157,7 @@ export default function DesignCanvas({
           >
             {/* Screen name label */}
             <div
-              className="absolute -top-7 left-0 text-[11px] text-[#64748B] font-medium truncate"
+              className="absolute -top-7 left-0 text-[11px] text-[var(--text-tertiary)] font-medium truncate"
               style={{ maxWidth: screen.width }}
             >
               {screen.name}
@@ -224,23 +224,23 @@ export default function DesignCanvas({
           onClick={handleZoomOut}
           className="p-1.5 rounded-lg hover:bg-white/[0.06] transition-colors"
         >
-          <ZoomOut className="w-4 h-4 text-[#94A3B8]" />
+          <ZoomOut className="w-4 h-4 text-[var(--text-secondary)]" />
         </button>
-        <span className="text-[11px] text-[#94A3B8] font-mono min-w-[40px] text-center select-none">
+        <span className="text-[11px] text-[var(--text-secondary)] font-mono min-w-[40px] text-center select-none">
           {Math.round(zoom * 100)}%
         </span>
         <button
           onClick={handleZoomIn}
           className="p-1.5 rounded-lg hover:bg-white/[0.06] transition-colors"
         >
-          <ZoomIn className="w-4 h-4 text-[#94A3B8]" />
+          <ZoomIn className="w-4 h-4 text-[var(--text-secondary)]" />
         </button>
         <div className="w-px h-4 bg-white/[0.08] mx-0.5" />
         <button
           onClick={handleFit}
           className="p-1.5 rounded-lg hover:bg-white/[0.06] transition-colors"
         >
-          <Maximize2 className="w-4 h-4 text-[#94A3B8]" />
+          <Maximize2 className="w-4 h-4 text-[var(--text-secondary)]" />
         </button>
       </div>
 
@@ -249,7 +249,7 @@ export default function DesignCanvas({
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         onClick={() => setPaletteOpen(true)}
-        className="absolute bottom-4 right-4 z-20 flex items-center gap-2 px-3 py-2 bg-[#8B5CF6] hover:bg-[#7C3AED] text-white text-xs font-medium rounded-xl shadow-lg shadow-violet-500/20 transition-colors"
+        className="absolute bottom-4 right-4 z-20 flex items-center gap-2 px-3 py-2 bg-[var(--accent)] hover:bg-[var(--accent)] text-white text-xs font-medium rounded-xl shadow-lg shadow-violet-500/20 transition-colors"
       >
         <Plus className="w-3.5 h-3.5" />
         Add Element

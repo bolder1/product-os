@@ -74,8 +74,8 @@ function TreeItem({
         onClick={() => onSelectPage(node.page.id)}
         className={`group flex items-center w-full px-2 py-1.5 rounded-md text-left transition-colors ${
           isSelected
-            ? 'bg-[#3B82F6]/15 text-[#3B82F6]'
-            : 'text-[#94A3B8] hover:bg-white/[0.04] hover:text-[#F1F5F9]'
+            ? 'bg-[var(--accent)]/15 text-[var(--accent)]'
+            : 'text-[var(--text-secondary)] hover:bg-white/[0.04] hover:text-[var(--text-primary)]'
         }`}
         style={{ paddingLeft: `${8 + depth * 16}px` }}
         whileTap={{ scale: 0.98 }}
@@ -90,7 +90,7 @@ function TreeItem({
               e.stopPropagation()
               toggleExpanded(node.page.id)
             }}
-            className="mr-1 flex-shrink-0 hover:text-[#F1F5F9] transition-colors"
+            className="mr-1 flex-shrink-0 hover:text-[var(--text-primary)] transition-colors"
           >
             <motion.div
               animate={{ rotate: isExpanded ? 90 : 0 }}
@@ -172,13 +172,13 @@ export function PageTree({
   }
 
   return (
-    <div className="flex flex-col h-full bg-[#0a0f1e] border-r border-white/[0.06]">
+    <div className="flex flex-col h-full bg-[var(--bg-base)] border-r border-white/[0.06]">
       {/* Header */}
       <div className="flex items-center justify-between px-3 py-3 border-b border-white/[0.06]">
-        <span className="text-xs font-semibold text-[#64748B] uppercase tracking-wider">
+        <span className="text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wider">
           Sitemap
         </span>
-        <span className="text-[10px] text-[#64748B]">{pages.length} pages</span>
+        <span className="text-[10px] text-[var(--text-tertiary)]">{pages.length} pages</span>
       </div>
 
       {/* Tree */}
@@ -200,7 +200,7 @@ export function PageTree({
       <div className="px-3 py-3 border-t border-white/[0.06]">
         <button
           onClick={onAddPage}
-          className="flex items-center justify-center gap-1.5 w-full px-3 py-2 rounded-lg text-xs font-medium text-[#3B82F6] bg-[#3B82F6]/10 hover:bg-[#3B82F6]/20 transition-colors"
+          className="flex items-center justify-center gap-1.5 w-full px-3 py-2 rounded-lg text-xs font-medium text-[var(--accent)] bg-[var(--accent)]/10 hover:bg-[var(--accent)]/20 transition-colors"
         >
           <Plus className="w-3.5 h-3.5" />
           Add Page

@@ -38,15 +38,15 @@ export default function AISuggestPanel({ currentStep, onApplySuggestion }: AISug
   const suggestions = mockSuggestions[currentStep] || []
 
   const confidenceColor = (c: number) => {
-    if (c >= 90) return 'text-[#10B981] bg-[#10B981]/10'
-    if (c >= 80) return 'text-[#F59E0B] bg-[#F59E0B]/10'
-    return 'text-[#94A3B8] bg-white/[0.05]'
+    if (c >= 90) return 'text-[var(--color-success)] bg-[var(--color-success)]/10'
+    if (c >= 80) return 'text-[var(--color-warning)] bg-[var(--color-warning)]/10'
+    return 'text-[var(--text-secondary)] bg-white/[0.05]'
   }
 
   return (
     <div className="relative h-full flex">
       {/* Violet gradient border on the left */}
-      <div className="w-px bg-gradient-to-b from-[#8B5CF6]/40 via-[#8B5CF6]/10 to-transparent" />
+      <div className="w-px bg-gradient-to-b from-[var(--accent)]/40 via-[var(--accent)]/10 to-transparent" />
 
       <AnimatePresence mode="wait">
         {collapsed ? (
@@ -58,9 +58,9 @@ export default function AISuggestPanel({ currentStep, onApplySuggestion }: AISug
             onClick={() => setCollapsed(false)}
             className="flex flex-col items-center gap-2 py-6 px-2 hover:bg-white/[0.03] transition-colors"
           >
-            <Sparkles className="w-4 h-4 text-[#8B5CF6]" />
-            <ChevronLeft className="w-3 h-3 text-[#64748B]" />
-            <span className="text-[10px] text-[#64748B] writing-mode-vertical [writing-mode:vertical-lr] rotate-180">
+            <Sparkles className="w-4 h-4 text-[var(--accent)]" />
+            <ChevronLeft className="w-3 h-3 text-[var(--text-tertiary)]" />
+            <span className="text-[10px] text-[var(--text-tertiary)] writing-mode-vertical [writing-mode:vertical-lr] rotate-180">
               AI Suggestions
             </span>
           </motion.button>
@@ -76,34 +76,34 @@ export default function AISuggestPanel({ currentStep, onApplySuggestion }: AISug
             {/* Header */}
             <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.08]">
               <div className="flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-[#8B5CF6]" />
-                <span className="text-sm font-medium text-[#F1F5F9]">AI Suggestions</span>
+                <Sparkles className="w-4 h-4 text-[var(--accent)]" />
+                <span className="text-sm font-medium text-[var(--text-primary)]">AI Suggestions</span>
               </div>
               <button
                 onClick={() => setCollapsed(true)}
                 className="p-1 rounded-md hover:bg-white/[0.05] transition-colors"
               >
-                <ChevronRight className="w-4 h-4 text-[#64748B]" />
+                <ChevronRight className="w-4 h-4 text-[var(--text-tertiary)]" />
               </button>
             </div>
 
             {/* Streaming indicator */}
-            <div className="px-4 py-2 flex items-center gap-2 text-xs text-[#8B5CF6]">
+            <div className="px-4 py-2 flex items-center gap-2 text-xs text-[var(--accent)]">
               <div className="flex gap-0.5">
                 <motion.span
                   animate={{ opacity: [0.3, 1, 0.3] }}
                   transition={{ duration: 1.2, repeat: Infinity, delay: 0 }}
-                  className="w-1 h-1 rounded-full bg-[#8B5CF6]"
+                  className="w-1 h-1 rounded-full bg-[var(--accent)]"
                 />
                 <motion.span
                   animate={{ opacity: [0.3, 1, 0.3] }}
                   transition={{ duration: 1.2, repeat: Infinity, delay: 0.2 }}
-                  className="w-1 h-1 rounded-full bg-[#8B5CF6]"
+                  className="w-1 h-1 rounded-full bg-[var(--accent)]"
                 />
                 <motion.span
                   animate={{ opacity: [0.3, 1, 0.3] }}
                   transition={{ duration: 1.2, repeat: Infinity, delay: 0.4 }}
-                  className="w-1 h-1 rounded-full bg-[#8B5CF6]"
+                  className="w-1 h-1 rounded-full bg-[var(--accent)]"
                 />
               </div>
               <span>Analyzing your input...</span>
@@ -117,9 +117,9 @@ export default function AISuggestPanel({ currentStep, onApplySuggestion }: AISug
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.1 }}
-                  className="bg-white/[0.03] border border-white/[0.08] rounded-xl p-3 group hover:border-[#8B5CF6]/30 transition-all"
+                  className="bg-white/[0.03] border border-white/[0.08] rounded-xl p-3 group hover:border-[var(--accent)]/30 transition-all"
                 >
-                  <p className="text-sm text-[#94A3B8] leading-relaxed mb-2">{suggestion.text}</p>
+                  <p className="text-sm text-[var(--text-secondary)] leading-relaxed mb-2">{suggestion.text}</p>
                   <div className="flex items-center justify-between">
                     <span
                       className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${confidenceColor(suggestion.confidence)}`}
@@ -128,7 +128,7 @@ export default function AISuggestPanel({ currentStep, onApplySuggestion }: AISug
                     </span>
                     <button
                       onClick={() => onApplySuggestion?.(suggestion.text)}
-                      className="flex items-center gap-1 text-xs text-[#8B5CF6] opacity-0 group-hover:opacity-100 transition-opacity hover:text-[#8B5CF6]/80"
+                      className="flex items-center gap-1 text-xs text-[var(--accent)] opacity-0 group-hover:opacity-100 transition-opacity hover:text-[var(--accent)]/80"
                     >
                       <Zap className="w-3 h-3" />
                       Apply
@@ -146,7 +146,7 @@ export default function AISuggestPanel({ currentStep, onApplySuggestion }: AISug
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   placeholder="Ask AI anything about your product..."
-                  className="flex-1 bg-transparent text-sm text-[#F1F5F9] placeholder:text-[#64748B] outline-none"
+                  className="flex-1 bg-transparent text-sm text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] outline-none"
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' && query.trim()) {
                       setQuery('')
@@ -154,7 +154,7 @@ export default function AISuggestPanel({ currentStep, onApplySuggestion }: AISug
                   }}
                 />
                 <button
-                  className="p-1 rounded-md hover:bg-white/[0.05] transition-colors text-[#64748B] hover:text-[#8B5CF6]"
+                  className="p-1 rounded-md hover:bg-white/[0.05] transition-colors text-[var(--text-tertiary)] hover:text-[var(--accent)]"
                   onClick={() => {
                     if (query.trim()) setQuery('')
                   }}

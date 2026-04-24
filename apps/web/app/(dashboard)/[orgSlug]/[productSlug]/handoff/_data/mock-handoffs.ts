@@ -28,7 +28,7 @@ export const mockHandoffs: HandoffItem[] = [
     name: 'Button',
     type: 'component',
     completeness: 95,
-    previewColor: '#3B82F6',
+    previewColor: 'var(--accent)',
     specs: [
       { property: 'padding', type: 'spacing', value: '10px 20px', description: 'Internal padding for default size' },
       { property: 'border-radius', type: 'radius', value: '12px', description: 'Rounded corners for pill shape' },
@@ -38,8 +38,8 @@ export const mockHandoffs: HandoffItem[] = [
       { property: 'min-width', type: 'spacing', value: '80px', description: 'Minimum touch target width' },
     ],
     tokens: [
-      { name: '--btn-primary', value: '#3B82F6', type: 'color' },
-      { name: '--btn-hover', value: '#2563EB', type: 'color' },
+      { name: '--btn-primary', value: 'var(--accent)', type: 'color' },
+      { name: '--btn-hover', value: 'var(--accent)', type: 'color' },
       { name: '--btn-radius', value: '12px', type: 'radius' },
       { name: '--btn-padding', value: '10px 20px', type: 'spacing' },
     ],
@@ -55,7 +55,7 @@ export const mockHandoffs: HandoffItem[] = [
     name: 'Card',
     type: 'component',
     completeness: 80,
-    previewColor: '#10B981',
+    previewColor: 'var(--color-success)',
     specs: [
       { property: 'padding', type: 'spacing', value: '24px', description: 'Internal card padding' },
       { property: 'border-radius', type: 'radius', value: '16px', description: 'Card corner radius' },
@@ -80,7 +80,7 @@ export const mockHandoffs: HandoffItem[] = [
     name: 'Header',
     type: 'component',
     completeness: 100,
-    previewColor: '#8B5CF6',
+    previewColor: 'var(--accent)',
     specs: [
       { property: 'height', type: 'spacing', value: '64px', description: 'Fixed header height' },
       { property: 'padding-x', type: 'spacing', value: '24px', description: 'Horizontal padding' },
@@ -104,7 +104,7 @@ export const mockHandoffs: HandoffItem[] = [
     name: 'Login Form',
     type: 'page',
     completeness: 70,
-    previewColor: '#F59E0B',
+    previewColor: 'var(--color-warning)',
     specs: [
       { property: 'max-width', type: 'spacing', value: '400px', description: 'Form container max width' },
       { property: 'gap', type: 'spacing', value: '16px', description: 'Space between form fields' },
@@ -113,7 +113,7 @@ export const mockHandoffs: HandoffItem[] = [
     tokens: [
       { name: '--input-bg', value: 'rgba(255,255,255,0.05)', type: 'color' },
       { name: '--input-border', value: 'rgba(255,255,255,0.1)', type: 'color' },
-      { name: '--input-focus', value: '#3B82F6', type: 'color' },
+      { name: '--input-focus', value: 'var(--accent)', type: 'color' },
     ],
     criteria: [
       { text: 'Email and password fields with validation', done: true },
@@ -127,7 +127,7 @@ export const mockHandoffs: HandoffItem[] = [
     name: 'Dashboard',
     type: 'page',
     completeness: 60,
-    previewColor: '#06B6D4',
+    previewColor: 'var(--accent)',
     specs: [
       { property: 'grid-columns', type: 'spacing', value: '4', description: 'Stats grid columns' },
       { property: 'gap', type: 'spacing', value: '24px', description: 'Section gap spacing' },
@@ -135,7 +135,7 @@ export const mockHandoffs: HandoffItem[] = [
     ],
     tokens: [
       { name: '--stat-card-bg', value: 'rgba(255,255,255,0.03)', type: 'color' },
-      { name: '--chart-line', value: '#06B6D4', type: 'color' },
+      { name: '--chart-line', value: 'var(--accent)', type: 'color' },
       { name: '--section-gap', value: '24px', type: 'spacing' },
     ],
     criteria: [
@@ -150,7 +150,7 @@ export const mockHandoffs: HandoffItem[] = [
     name: 'Sidebar',
     type: 'component',
     completeness: 90,
-    previewColor: '#EC4899',
+    previewColor: 'var(--accent)',
     specs: [
       { property: 'width', type: 'spacing', value: '256px', description: 'Fixed sidebar width' },
       { property: 'padding', type: 'spacing', value: '12px', description: 'Nav item area padding' },
@@ -161,7 +161,7 @@ export const mockHandoffs: HandoffItem[] = [
       { name: '--sidebar-bg', value: '#0a0f1e', type: 'color' },
       { name: '--sidebar-width', value: '256px', type: 'spacing' },
       { name: '--nav-active', value: 'rgba(6,182,212,0.1)', type: 'color' },
-      { name: '--nav-text', value: '#94A3B8', type: 'color' },
+      { name: '--nav-text', value: 'var(--text-secondary)', type: 'color' },
     ],
     criteria: [
       { text: 'Collapsible with icon-only mode', done: true },
@@ -175,7 +175,7 @@ export const mockHandoffs: HandoffItem[] = [
     name: 'Modal',
     type: 'component',
     completeness: 85,
-    previewColor: '#F43F5E',
+    previewColor: 'var(--color-error)',
     specs: [
       { property: 'max-width', type: 'spacing', value: '512px', description: 'Default modal max-width' },
       { property: 'padding', type: 'spacing', value: '24px', description: 'Modal content padding' },
@@ -210,8 +210,8 @@ export const mockHandoffs: HandoffItem[] = [
     tokens: [
       { name: '--input-bg', value: 'rgba(255,255,255,0.05)', type: 'color' },
       { name: '--input-border', value: 'rgba(255,255,255,0.1)', type: 'color' },
-      { name: '--input-focus', value: '#3B82F6', type: 'color' },
-      { name: '--input-error', value: '#F43F5E', type: 'color' },
+      { name: '--input-focus', value: 'var(--accent)', type: 'color' },
+      { name: '--input-error', value: 'var(--color-error)', type: 'color' },
     ],
     criteria: [
       { text: 'Supports label, placeholder, and helper text', done: true },

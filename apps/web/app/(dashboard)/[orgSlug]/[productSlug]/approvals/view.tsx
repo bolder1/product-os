@@ -74,8 +74,8 @@ const PRIORITY_COLORS: Record<string, string> = {
 }
 
 const TYPE_COLORS: Record<string, string> = {
-  release: 'bg-[#a78bfa]/10 text-[#a78bfa]',
-  design: 'bg-[#f472b6]/10 text-[#f472b6]',
+  release: 'bg-[var(--accent)]/10 text-[var(--accent)]',
+  design: 'bg-[var(--accent)]/10 text-[var(--accent)]',
   workflow: 'bg-[#818cf8]/10 text-[#818cf8]',
   page: 'bg-[var(--color-success-muted)] text-[var(--color-success)]',
   component: 'bg-[#fb923c]/10 text-[#fb923c]',

@@ -37,15 +37,15 @@ const studioLabels: Record<StudioKey, string> = {
 }
 
 function getScoreColor(score: number) {
-  if (score >= 70) return { text: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20', ring: '#10B981' }
-  if (score >= 40) return { text: 'text-amber-400', bg: 'bg-amber-500/10', border: 'border-amber-500/20', ring: '#F59E0B' }
-  return { text: 'text-rose-400', bg: 'bg-rose-500/10', border: 'border-rose-500/20', ring: '#F43F5E' }
+  if (score >= 70) return { text: 'text-[var(--color-success)]', bg: 'bg-[var(--color-success-muted)]', border: 'border-[var(--color-success-border)]', ring: 'var(--color-success)' }
+  if (score >= 40) return { text: 'text-[var(--color-warning)]', bg: 'bg-[var(--color-warning-muted)]', border: 'border-[var(--color-warning-border)]', ring: 'var(--color-warning)' }
+  return { text: 'text-[var(--color-error)]', bg: 'bg-[var(--color-error-muted)]', border: 'border-[var(--color-error-border)]', ring: 'var(--color-error)' }
 }
 
 function getScoreIcon(score: number) {
-  if (score >= 70) return <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-  if (score >= 40) return <AlertTriangle className="w-3.5 h-3.5 text-amber-400" />
-  return <AlertCircle className="w-3.5 h-3.5 text-rose-400" />
+  if (score >= 70) return <CheckCircle2 className="w-3.5 h-3.5 text-[var(--color-success)]" />
+  if (score >= 40) return <AlertTriangle className="w-3.5 h-3.5 text-[var(--color-warning)]" />
+  return <AlertCircle className="w-3.5 h-3.5 text-[var(--color-error)]" />
 }
 
 function getScoreLabel(score: number) {
@@ -111,9 +111,9 @@ export function StudioHealthBadge({ productId, studio, showDetails = false }: St
           {issues.slice(0, 3).map((issue) => (
             <div key={issue.id} className="flex items-start gap-1.5">
               {issue.severity === 'error' ? (
-                <AlertCircle className="w-3 h-3 text-rose-400 mt-0.5 shrink-0" />
+                <AlertCircle className="w-3 h-3 text-[var(--color-error)] mt-0.5 shrink-0" />
               ) : issue.severity === 'warning' ? (
-                <AlertTriangle className="w-3 h-3 text-amber-400 mt-0.5 shrink-0" />
+                <AlertTriangle className="w-3 h-3 text-[var(--color-warning)] mt-0.5 shrink-0" />
               ) : (
                 <TrendingUp className="w-3 h-3 text-[var(--accent-text)] mt-0.5 shrink-0" />
               )}

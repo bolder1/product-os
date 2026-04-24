@@ -240,7 +240,7 @@ export function NodeAISuggestPanel({
       {/* Header */}
       <div className="flex items-center gap-2 px-3 py-2.5 border-b border-[var(--border-default)] bg-[var(--bg-surface)] shrink-0">
         <div className="w-5 h-5 rounded-md flex items-center justify-center" style={{ backgroundColor: '#8B5CF620' }}>
-          <Sparkles size={11} className="text-[#8B5CF6]" />
+          <Sparkles size={11} className="text-[var(--accent)]" />
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-[11px] font-semibold text-[var(--text-primary)]">AI Suggestions</p>
@@ -292,11 +292,11 @@ export function NodeAISuggestPanel({
           <div className="flex flex-col items-center justify-center gap-3 py-10">
             <div className="relative w-10 h-10">
               <svg className="absolute inset-0 animate-spin" style={{ animationDuration: '1.8s' }} viewBox="0 0 40 40" fill="none">
-                <circle cx="20" cy="20" r="16" stroke="#8B5CF6" strokeWidth="2" strokeOpacity="0.15" />
-                <path d="M20 4 A16 16 0 0 1 36 20" stroke="#8B5CF6" strokeWidth="2.5" strokeLinecap="round" />
+                <circle cx="20" cy="20" r="16" stroke="var(--accent)" strokeWidth="2" strokeOpacity="0.15" />
+                <path d="M20 4 A16 16 0 0 1 36 20" stroke="var(--accent)" strokeWidth="2.5" strokeLinecap="round" />
               </svg>
               <div className="absolute inset-0 flex items-center justify-center">
-                <Sparkles size={14} className="text-[#8B5CF6]" />
+                <Sparkles size={14} className="text-[var(--accent)]" />
               </div>
             </div>
             <p className="text-[11px] text-[var(--text-secondary)]">Analyzing node…</p>
@@ -326,8 +326,8 @@ export function NodeAISuggestPanel({
           <div className="flex flex-col gap-2">
             {/* Summary */}
             {result?.summary && (
-              <div className="flex items-start gap-2 px-2.5 py-2 rounded-lg bg-[#8B5CF6]/8 border border-[#8B5CF6]/15 mb-1">
-                <CheckCircle2 size={11} className="text-[#8B5CF6] shrink-0 mt-0.5" />
+              <div className="flex items-start gap-2 px-2.5 py-2 rounded-lg bg-[var(--accent)]/8 border border-[var(--accent)]/15 mb-1">
+                <CheckCircle2 size={11} className="text-[var(--accent)] shrink-0 mt-0.5" />
                 <p className="text-[10px] text-[var(--text-secondary)] leading-relaxed">{result.summary}</p>
               </div>
             )}
@@ -350,8 +350,8 @@ export function NodeAISuggestPanel({
         {/* Success — raw text fallback */}
         {mutation.isSuccess && suggestions.length === 0 && rawText && (
           <div className="flex flex-col gap-2">
-            <div className="flex items-start gap-2 px-2.5 py-2 rounded-lg bg-[#8B5CF6]/8 border border-[#8B5CF6]/15">
-              <Sparkles size={11} className="text-[#8B5CF6] shrink-0 mt-0.5" />
+            <div className="flex items-start gap-2 px-2.5 py-2 rounded-lg bg-[var(--accent)]/8 border border-[var(--accent)]/15">
+              <Sparkles size={11} className="text-[var(--accent)] shrink-0 mt-0.5" />
               <p className="text-[10px] text-[var(--text-secondary)] leading-relaxed whitespace-pre-wrap">{rawText}</p>
             </div>
           </div>
@@ -360,7 +360,7 @@ export function NodeAISuggestPanel({
         {/* Success — no suggestions */}
         {mutation.isSuccess && suggestions.length === 0 && !rawText && (
           <div className="flex flex-col items-center gap-2 py-8 text-center">
-            <CheckCircle2 size={18} className="text-[#10B981]" />
+            <CheckCircle2 size={18} className="text-[var(--color-success)]" />
             <p className="text-[11px] text-[var(--text-secondary)]">Node looks great!</p>
             <p className="text-[10px] text-[var(--text-tertiary)] max-w-[160px]">
               No missing connections or issues found for this node.

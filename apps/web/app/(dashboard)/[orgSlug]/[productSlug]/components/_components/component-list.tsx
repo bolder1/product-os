@@ -38,13 +38,13 @@ export function ComponentList({ components, selectedId, onSelect, onAddNew }: Co
       {/* Search */}
       <div className="p-3 border-b border-white/[0.06]">
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#64748B]" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[var(--text-tertiary)]" />
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search components..."
-            className="w-full pl-9 pr-3 py-2 rounded-lg bg-white/[0.03] border border-white/[0.08] text-sm text-[#F1F5F9] placeholder:text-[#64748B] focus:outline-none focus:border-[#06B6D4]/50 transition-colors"
+            className="w-full pl-9 pr-3 py-2 rounded-lg bg-white/[0.03] border border-white/[0.08] text-sm text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:outline-none focus:border-[var(--accent)]/50 transition-colors"
           />
         </div>
       </div>
@@ -57,8 +57,8 @@ export function ComponentList({ components, selectedId, onSelect, onAddNew }: Co
             onClick={() => setActiveCategory(cat)}
             className={`px-2.5 py-1 rounded-md text-xs font-medium whitespace-nowrap transition-colors ${
               activeCategory === cat
-                ? 'bg-[#06B6D4]/15 text-[#06B6D4]'
-                : 'text-[#64748B] hover:text-[#94A3B8] hover:bg-white/[0.03]'
+                ? 'bg-[var(--accent)]/15 text-[var(--accent)]'
+                : 'text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] hover:bg-white/[0.03]'
             }`}
           >
             {cat}
@@ -79,7 +79,7 @@ export function ComponentList({ components, selectedId, onSelect, onAddNew }: Co
               onClick={() => onSelect(comp.id)}
               className={`w-full flex items-center gap-3 p-3 rounded-lg text-left transition-colors group ${
                 selectedId === comp.id
-                  ? 'border-l-2 border-[#06B6D4] bg-white/[0.04]'
+                  ? 'border-l-2 border-[var(--accent)] bg-white/[0.04]'
                   : 'border-l-2 border-transparent hover:bg-white/[0.03]'
               }`}
             >
@@ -94,8 +94,8 @@ export function ComponentList({ components, selectedId, onSelect, onAddNew }: Co
 
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium text-[#F1F5F9] truncate">{comp.name}</span>
-                  <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-white/[0.06] text-[#64748B] shrink-0">
+                  <span className="text-sm font-medium text-[var(--text-primary)] truncate">{comp.name}</span>
+                  <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-white/[0.06] text-[var(--text-tertiary)] shrink-0">
                     {comp.variants.length}v
                   </span>
                 </div>
@@ -109,7 +109,7 @@ export function ComponentList({ components, selectedId, onSelect, onAddNew }: Co
                   >
                     {comp.category}
                   </span>
-                  <span className="text-[10px] text-[#64748B]">{comp.usageCount} uses</span>
+                  <span className="text-[10px] text-[var(--text-tertiary)]">{comp.usageCount} uses</span>
                 </div>
               </div>
             </motion.button>
@@ -122,12 +122,12 @@ export function ComponentList({ components, selectedId, onSelect, onAddNew }: Co
           animate={{ opacity: 1 }}
           transition={{ delay: 0.3 }}
           onClick={onAddNew}
-          className="w-full flex items-center gap-3 p-3 rounded-lg border border-dashed border-white/[0.08] hover:border-[#06B6D4]/30 hover:bg-white/[0.02] transition-colors group"
+          className="w-full flex items-center gap-3 p-3 rounded-lg border border-dashed border-white/[0.08] hover:border-[var(--accent)]/30 hover:bg-white/[0.02] transition-colors group"
         >
-          <div className="w-8 h-8 rounded-lg bg-[#06B6D4]/10 flex items-center justify-center">
-            <Plus className="w-4 h-4 text-[#06B6D4]" />
+          <div className="w-8 h-8 rounded-lg bg-[var(--accent)]/10 flex items-center justify-center">
+            <Plus className="w-4 h-4 text-[var(--accent)]" />
           </div>
-          <span className="text-sm text-[#64748B] group-hover:text-[#94A3B8] transition-colors">
+          <span className="text-sm text-[var(--text-tertiary)] group-hover:text-[#94A3B8] transition-colors">
             Add Component
           </span>
         </motion.button>

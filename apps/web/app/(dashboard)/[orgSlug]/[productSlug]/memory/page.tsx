@@ -21,6 +21,7 @@ import {
   MessageSquare,
   Download,
 } from 'lucide-react'
+import { useShallow } from 'zustand/react/shallow'
 import { useProductMemoryStore, type MemoryAsset, kindFromFilename } from '../../../../lib/product-memory-store'
 
 // ---------------------------------------------------------------------------
@@ -53,12 +54,12 @@ const STATUS_META: Record<MemoryAsset['status'], { label: string; color: string;
 }
 
 const KIND_ICON: Record<MemoryAsset['kind'], React.ReactNode> = {
-  pdf:    <FileText size={18} className="text-[#EF4444]" />,
-  docx:   <FileText size={18} className="text-[#3B82F6]" />,
-  md:     <FileText size={18} className="text-[#8B5CF6]" />,
-  txt:    <FileText size={18} className="text-[#64748B]" />,
-  image:  <ImageIcon size={18} className="text-[#F59E0B]" />,
-  other:  <File size={18} className="text-[#64748B]" />,
+  pdf:    <FileText size={18} className="text-[var(--color-error)]" />,
+  docx:   <FileText size={18} className="text-[var(--accent)]" />,
+  md:     <FileText size={18} className="text-[var(--accent)]" />,
+  txt:    <FileText size={18} className="text-[var(--text-tertiary)]" />,
+  image:  <ImageIcon size={18} className="text-[var(--color-warning)]" />,
+  other:  <File size={18} className="text-[var(--text-tertiary)]" />,
 }
 
 // ---------------------------------------------------------------------------
@@ -118,11 +119,11 @@ function AssetDrawer({ asset, onClose }: { asset: MemoryAsset; onClose: () => vo
         <div className="flex items-center gap-3">
           {KIND_ICON[asset.kind]}
           <div>
-            <p className="text-sm font-medium text-[#F1F5F9] truncate max-w-[260px]">{asset.filename}</p>
-            <p className="text-xs text-[#64748B]">{formatBytes(asset.size)} · {timeAgo(asset.createdAt)}</p>
+            <p className="text-sm font-medium text-[var(--text-primary)] truncate max-w-[260px]">{asset.filename}</p>
+            <p className="text-xs text-[var(--text-tertiary)]">{formatBytes(asset.size)} · {timeAgo(asset.createdAt)}</p>
           </div>
         </div>
-        <button onClick={onClose} className="text-[#64748B] hover:text-[#F1F5F9] transition-colors">
+        <button onClick={onClose} className="text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors">
           <X size={18} />
         </button>
       </div>
@@ -131,7 +132,7 @@ function AssetDrawer({ asset, onClose }: { asset: MemoryAsset; onClose: () => vo
       <div className="flex-1 overflow-y-auto px-5 py-4 flex flex-col gap-5">
         {/* Status */}
         <div className="flex items-center justify-between">
-          <span className="text-xs text-[#64748B]">Status</span>
+          <span className="text-xs text-[var(--text-tertiary)]">Status</span>
           <StatusPill status={asset.status} />
         </div>
 
@@ -144,8 +145,8 @@ function AssetDrawer({ asset, onClose }: { asset: MemoryAsset; onClose: () => vo
             { label: 'Size', value: formatBytes(asset.size) },
           ].map(({ label, value }) => (
             <div key={label} className="rounded-xl border border-white/[0.06] bg-white/[0.02] px-3 py-2.5">
-              <p className="text-[10px] text-[#64748B] mb-0.5">{label}</p>
-              <p className="text-sm font-medium text-[#F1F5F9]">{value}</p>
+              <p className="text-[10px] text-[var(--text-tertiary)] mb-0.5">{label}</p>
+              <p className="text-sm font-medium text-[var(--text-primary)]">{value}</p>
             </div>
           ))}
         </div>
@@ -153,12 +154,12 @@ function AssetDrawer({ asset, onClose }: { asset: MemoryAsset; onClose: () => vo
         {/* Sample chunks */}
         {asset.status === 'ready' && (
           <div>
-            <p className="text-xs text-[#64748B] mb-2 font-medium uppercase tracking-wide">Sample Chunks</p>
+            <p className="text-xs text-[var(--text-tertiary)] mb-2 font-medium uppercase tracking-wide">Sample Chunks</p>
             <div className="flex flex-col gap-2">
               {[1, 2, 3].map((i) => (
                 <div key={i} className="rounded-lg border border-white/[0.06] bg-white/[0.02] px-3 py-2.5">
-                  <p className="text-[10px] text-[#64748B] mb-1">Chunk {i}</p>
-                  <p className="text-xs text-[#94A3B8] leading-relaxed line-clamp-3">
+                  <p className="text-[10px] text-[var(--text-tertiary)] mb-1">Chunk {i}</p>
+                  <p className="text-xs text-[var(--text-secondary)] leading-relaxed line-clamp-3">
                     This is a representative text chunk from {asset.filename}, demonstrating how your document
                     has been split into searchable segments for vector retrieval. Each chunk overlaps slightly
                     with its neighbours for better context preservation.
@@ -172,11 +173,11 @@ function AssetDrawer({ asset, onClose }: { asset: MemoryAsset; onClose: () => vo
         {/* Used in */}
         {asset.status === 'ready' && (
           <div>
-            <p className="text-xs text-[#64748B] mb-2 font-medium uppercase tracking-wide">Used In</p>
+            <p className="text-xs text-[var(--text-tertiary)] mb-2 font-medium uppercase tracking-wide">Used In</p>
             <div className="flex flex-col gap-1.5">
               {['Plan Mode intake', 'Brand Voice generation', 'Onboarding summary'].map((use) => (
-                <div key={use} className="flex items-center gap-2 text-xs text-[#94A3B8]">
-                  <Sparkles size={11} className="text-[#8B5CF6]" />
+                <div key={use} className="flex items-center gap-2 text-xs text-[var(--text-secondary)]">
+                  <Sparkles size={11} className="text-[var(--accent)]" />
                   {use}
                 </div>
               ))}
@@ -187,11 +188,11 @@ function AssetDrawer({ asset, onClose }: { asset: MemoryAsset; onClose: () => vo
 
       {/* Footer actions */}
       <div className="px-5 py-4 border-t border-white/[0.08] flex gap-2">
-        <button className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-medium border border-white/[0.08] text-[#94A3B8] hover:bg-white/[0.04] transition-colors">
+        <button className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-medium border border-white/[0.08] text-[var(--text-secondary)] hover:bg-white/[0.04] transition-colors">
           <Download size={13} />
           Download
         </button>
-        <button className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium border border-[#EF4444]/30 text-[#EF4444] hover:bg-[#EF4444]/10 transition-colors">
+        <button className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium border border-[var(--color-error)]/30 text-[var(--color-error)] hover:bg-[var(--color-error)]/10 transition-colors">
           <Trash2 size={13} />
           Delete
         </button>
@@ -221,12 +222,12 @@ function AskMemoryPanel({ assets }: { assets: MemoryAsset[] }) {
   return (
     <div className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-5">
       <div className="flex items-center gap-2 mb-4">
-        <div className="w-7 h-7 rounded-lg bg-[#8B5CF6]/20 flex items-center justify-center">
-          <Brain size={14} className="text-[#8B5CF6]" />
+        <div className="w-7 h-7 rounded-lg bg-[var(--accent)]/20 flex items-center justify-center">
+          <Brain size={14} className="text-[var(--accent)]" />
         </div>
         <div>
-          <p className="text-sm font-medium text-[#F1F5F9]">Ask Your Memory</p>
-          <p className="text-xs text-[#64748B]">Retrieves relevant chunks · summarised with citations</p>
+          <p className="text-sm font-medium text-[var(--text-primary)]">Ask Your Memory</p>
+          <p className="text-xs text-[var(--text-tertiary)]">Retrieves relevant chunks · summarised with citations</p>
         </div>
       </div>
 
@@ -236,15 +237,15 @@ function AskMemoryPanel({ assets }: { assets: MemoryAsset[] }) {
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && handleAsk()}
           placeholder="What does this product do? Who are the target users?"
-          className="flex-1 px-3 py-2.5 rounded-lg bg-white/[0.03] border border-white/[0.08] text-sm text-[#F1F5F9] placeholder:text-[#475569] focus:border-[#8B5CF6]/50 focus:outline-none focus:ring-1 focus:ring-[#8B5CF6]/30 transition"
+          className="flex-1 px-3 py-2.5 rounded-lg bg-white/[0.03] border border-white/[0.08] text-sm text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:border-[var(--accent)]/50 focus:outline-none focus:ring-1 focus:ring-[var(--accent)]/30 transition"
         />
         <button
           onClick={handleAsk}
           disabled={!query.trim() || loading}
           className={`px-4 rounded-lg text-sm font-medium transition-colors flex items-center gap-1.5 ${
             query.trim() && !loading
-              ? 'bg-[#8B5CF6] text-white hover:bg-[#7C3AED]'
-              : 'bg-white/[0.06] text-[#64748B] cursor-not-allowed'
+              ? 'bg-[var(--accent)] text-white hover:bg-[var(--accent)]'
+              : 'bg-white/[0.06] text-[var(--text-tertiary)] cursor-not-allowed'
           }`}
         >
           {loading ? <Loader2 size={14} className="animate-spin" /> : <Search size={14} />}
@@ -258,9 +259,9 @@ function AskMemoryPanel({ assets }: { assets: MemoryAsset[] }) {
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
-            className="mt-4 flex items-center gap-2 text-xs text-[#64748B]"
+            className="mt-4 flex items-center gap-2 text-xs text-[var(--text-tertiary)]"
           >
-            <Loader2 size={13} className="animate-spin text-[#8B5CF6]" />
+            <Loader2 size={13} className="animate-spin text-[var(--accent)]" />
             Searching embeddings · assembling answer…
           </motion.div>
         )}
@@ -273,16 +274,16 @@ function AskMemoryPanel({ assets }: { assets: MemoryAsset[] }) {
             className="mt-4 flex flex-col gap-3"
           >
             {results.length === 0 ? (
-              <p className="text-sm text-[#64748B]">No relevant chunks found. Try uploading more documents.</p>
+              <p className="text-sm text-[var(--text-tertiary)]">No relevant chunks found. Try uploading more documents.</p>
             ) : (
               <>
                 {/* AI summary */}
-                <div className="rounded-xl border border-[#8B5CF6]/20 bg-[#8B5CF6]/05 p-3">
+                <div className="rounded-xl border border-[var(--accent)]/20 bg-[var(--accent)]/05 p-3">
                   <div className="flex items-center gap-1.5 mb-2">
-                    <Sparkles size={12} className="text-[#8B5CF6]" />
-                    <span className="text-[10px] font-semibold text-[#8B5CF6] uppercase tracking-wide">AI Summary</span>
+                    <Sparkles size={12} className="text-[var(--accent)]" />
+                    <span className="text-[10px] font-semibold text-[var(--accent)] uppercase tracking-wide">AI Summary</span>
                   </div>
-                  <p className="text-sm text-[#CBD5E1] leading-relaxed">
+                  <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
                     Based on your uploaded documents, {results.map((r) => `"${r.source}"`).join(', ')} contain
                     relevant information about "{query}". The documents collectively describe your product's core
                     value proposition, target audience, and key capabilities.
@@ -294,10 +295,10 @@ function AskMemoryPanel({ assets }: { assets: MemoryAsset[] }) {
                   {results.map((r, i) => (
                     <div key={i} className="rounded-lg border border-white/[0.06] bg-white/[0.02] px-3 py-2.5">
                       <div className="flex items-center justify-between mb-1.5">
-                        <span className="text-[10px] font-medium text-[#8B5CF6]">{r.source}</span>
-                        <span className="text-[10px] text-[#64748B]">{(r.score * 100).toFixed(0)}% match</span>
+                        <span className="text-[10px] font-medium text-[var(--accent)]">{r.source}</span>
+                        <span className="text-[10px] text-[var(--text-tertiary)]">{(r.score * 100).toFixed(0)}% match</span>
                       </div>
-                      <p className="text-xs text-[#94A3B8] leading-relaxed line-clamp-3">{r.text}</p>
+                      <p className="text-xs text-[var(--text-secondary)] leading-relaxed line-clamp-3">{r.text}</p>
                     </div>
                   ))}
                 </div>
@@ -333,7 +334,7 @@ function DropZone({ onFiles }: { onFiles: (files: File[]) => void }) {
       onClick={() => inputRef.current?.click()}
       className={`rounded-2xl border-2 border-dashed cursor-pointer transition-all flex flex-col items-center justify-center gap-3 py-10 px-6 ${
         dragging
-          ? 'border-[#8B5CF6]/60 bg-[#8B5CF6]/08'
+          ? 'border-[var(--accent)]/60 bg-[var(--accent)]/08'
           : 'border-white/[0.08] bg-white/[0.02] hover:border-white/[0.14] hover:bg-white/[0.03]'
       }`}
     >
@@ -346,17 +347,17 @@ function DropZone({ onFiles }: { onFiles: (files: File[]) => void }) {
         onChange={(e) => { if (e.target.files) onFiles(Array.from(e.target.files)) }}
       />
       <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-colors ${
-        dragging ? 'bg-[#8B5CF6]/20' : 'bg-white/[0.04]'
+        dragging ? 'bg-[var(--accent)]/20' : 'bg-white/[0.04]'
       }`}>
-        <Upload size={22} className={dragging ? 'text-[#8B5CF6]' : 'text-[#64748B]'} />
+        <Upload size={22} className={dragging ? 'text-[var(--accent)]' : 'text-[var(--text-tertiary)]'} />
       </div>
       <div className="text-center">
-        <p className="text-sm font-medium text-[#F1F5F9]">Drop files here or click to browse</p>
-        <p className="text-xs text-[#64748B] mt-1">PDF, DOCX, MD, TXT, Images · Max 50 MB each</p>
+        <p className="text-sm font-medium text-[var(--text-primary)]">Drop files here or click to browse</p>
+        <p className="text-xs text-[var(--text-tertiary)] mt-1">PDF, DOCX, MD, TXT, Images · Max 50 MB each</p>
       </div>
       <div className="flex gap-2 flex-wrap justify-center">
         {['PDF', 'DOCX', 'MD', 'TXT', 'PNG', 'JPG'].map((ext) => (
-          <span key={ext} className="px-2 py-0.5 rounded-md bg-white/[0.04] text-[10px] text-[#64748B] font-mono">
+          <span key={ext} className="px-2 py-0.5 rounded-md bg-white/[0.04] text-[10px] text-[var(--text-tertiary)] font-mono">
             .{ext.toLowerCase()}
           </span>
         ))}
@@ -370,7 +371,7 @@ function DropZone({ onFiles }: { onFiles: (files: File[]) => void }) {
 // ---------------------------------------------------------------------------
 
 export default function MemoryPage() {
-  const { assets, addAsset, removeAsset } = useProductMemoryStore()
+  const { assets, addAsset, removeAsset } = useProductMemoryStore(useShallow((s) => s))
   const [selectedAsset, setSelectedAsset] = useState<MemoryAsset | null>(null)
   const [search, setSearch] = useState('')
   const [tab, setTab] = useState<'files' | 'ask'>('files')
@@ -416,30 +417,30 @@ export default function MemoryPage() {
       {/* Header */}
       <div className="flex items-center justify-between px-6 py-4 border-b border-white/[0.06]">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-[#8B5CF6]/15 flex items-center justify-center">
-            <Database size={18} className="text-[#8B5CF6]" />
+          <div className="w-9 h-9 rounded-xl bg-[var(--accent)]/15 flex items-center justify-center">
+            <Database size={18} className="text-[var(--accent)]" />
           </div>
           <div>
-            <h1 className="text-base font-semibold text-[#F1F5F9]">Product Memory</h1>
-            <p className="text-xs text-[#64748B]">Upload docs · AI retrieves relevant context across studios</p>
+            <h1 className="text-base font-semibold text-[var(--text-primary)]">Product Memory</h1>
+            <p className="text-xs text-[var(--text-tertiary)]">Upload docs · AI retrieves relevant context across studios</p>
           </div>
         </div>
 
         {/* Stats */}
         <div className="flex items-center gap-4">
           <div className="text-right">
-            <p className="text-xs text-[#64748B]">Ready</p>
-            <p className="text-sm font-semibold text-[#10B981]">{readyCount}</p>
+            <p className="text-xs text-[var(--text-tertiary)]">Ready</p>
+            <p className="text-sm font-semibold text-[var(--color-success)]">{readyCount}</p>
           </div>
           {processingCount > 0 && (
             <div className="text-right">
-              <p className="text-xs text-[#64748B]">Processing</p>
-              <p className="text-sm font-semibold text-[#F59E0B]">{processingCount}</p>
+              <p className="text-xs text-[var(--text-tertiary)]">Processing</p>
+              <p className="text-sm font-semibold text-[var(--color-warning)]">{processingCount}</p>
             </div>
           )}
           <div className="text-right">
-            <p className="text-xs text-[#64748B]">Total</p>
-            <p className="text-sm font-semibold text-[#F1F5F9]">{productAssets.length}</p>
+            <p className="text-xs text-[var(--text-tertiary)]">Total</p>
+            <p className="text-sm font-semibold text-[var(--text-primary)]">{productAssets.length}</p>
           </div>
         </div>
       </div>
@@ -452,14 +453,14 @@ export default function MemoryPage() {
             onClick={() => setTab(t)}
             className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
               tab === t
-                ? 'bg-white/[0.06] text-[#F1F5F9]'
-                : 'text-[#64748B] hover:text-[#94A3B8]'
+                ? 'bg-white/[0.06] text-[var(--text-primary)]'
+                : 'text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]'
             }`}
           >
             {t === 'files' ? <Database size={14} /> : <MessageSquare size={14} />}
             {t === 'files' ? 'Files' : 'Ask Memory'}
             {t === 'files' && productAssets.length > 0 && (
-              <span className="ml-1 px-1.5 py-0.5 rounded-full bg-white/[0.08] text-[10px] text-[#94A3B8]">
+              <span className="ml-1 px-1.5 py-0.5 rounded-full bg-white/[0.08] text-[10px] text-[var(--text-secondary)]">
                 {productAssets.length}
               </span>
             )}
@@ -477,12 +478,12 @@ export default function MemoryPage() {
             {/* Search */}
             {productAssets.length > 0 && (
               <div className="relative">
-                <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#64748B]" />
+                <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-tertiary)]" />
                 <input
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder="Search files…"
-                  className="w-full pl-9 pr-4 py-2 rounded-lg bg-white/[0.03] border border-white/[0.08] text-sm text-[#F1F5F9] placeholder:text-[#475569] focus:border-white/[0.14] focus:outline-none transition"
+                  className="w-full pl-9 pr-4 py-2 rounded-lg bg-white/[0.03] border border-white/[0.08] text-sm text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:border-white/[0.14] focus:outline-none transition"
                 />
               </div>
             )}
@@ -495,7 +496,7 @@ export default function MemoryPage() {
                   animate={{ opacity: 1 }}
                   className="text-center py-8"
                 >
-                  <p className="text-sm text-[#64748B]">No files yet. Drop your product docs above to get started.</p>
+                  <p className="text-sm text-[var(--text-tertiary)]">No files yet. Drop your product docs above to get started.</p>
                 </motion.div>
               )}
 
@@ -518,10 +519,10 @@ export default function MemoryPage() {
                   {/* Info */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-0.5">
-                      <p className="text-sm font-medium text-[#F1F5F9] truncate">{asset.filename}</p>
+                      <p className="text-sm font-medium text-[var(--text-primary)] truncate">{asset.filename}</p>
                       <StatusPill status={asset.status} />
                     </div>
-                    <p className="text-xs text-[#64748B]">
+                    <p className="text-xs text-[var(--text-tertiary)]">
                       {formatBytes(asset.size)} · {timeAgo(asset.createdAt)}
                     </p>
                   </div>
@@ -530,7 +531,7 @@ export default function MemoryPage() {
                   {['parsing', 'embedding'].includes(asset.status) && (
                     <div className="w-24 h-1.5 rounded-full bg-white/[0.06] overflow-hidden">
                       <motion.div
-                        className="h-full rounded-full bg-[#8B5CF6]"
+                        className="h-full rounded-full bg-[var(--accent)]"
                         animate={{ width: ['20%', '85%', '20%'] }}
                         transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
                       />
@@ -541,11 +542,11 @@ export default function MemoryPage() {
                   <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                     <button
                       onClick={(e) => { e.stopPropagation(); removeAsset(asset.id) }}
-                      className="w-7 h-7 rounded-md flex items-center justify-center text-[#64748B] hover:text-[#EF4444] hover:bg-[#EF4444]/10 transition-colors"
+                      className="w-7 h-7 rounded-md flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--color-error)] hover:bg-[var(--color-error)]/10 transition-colors"
                     >
                       <Trash2 size={13} />
                     </button>
-                    <div className="w-7 h-7 rounded-md flex items-center justify-center text-[#64748B]">
+                    <div className="w-7 h-7 rounded-md flex items-center justify-center text-[var(--text-tertiary)]">
                       <ChevronRight size={14} />
                     </div>
                   </div>
@@ -555,7 +556,7 @@ export default function MemoryPage() {
 
             {/* Empty search state */}
             {filtered.length === 0 && productAssets.length > 0 && (
-              <p className="text-sm text-[#64748B] text-center py-4">No files match "{search}"</p>
+              <p className="text-sm text-[var(--text-tertiary)] text-center py-4">No files match "{search}"</p>
             )}
           </div>
         )}
@@ -564,12 +565,12 @@ export default function MemoryPage() {
           <div className="max-w-3xl">
             {(productAssets as MemoryAsset[]).filter((a: MemoryAsset) => a.status === 'ready').length === 0 ? (
               <div className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-8 text-center">
-                <Database size={32} className="text-[#64748B] mx-auto mb-3" />
-                <p className="text-sm font-medium text-[#F1F5F9] mb-1">No documents ready yet</p>
-                <p className="text-xs text-[#64748B]">Upload and process at least one document on the Files tab, then come back to ask questions.</p>
+                <Database size={32} className="text-[var(--text-tertiary)] mx-auto mb-3" />
+                <p className="text-sm font-medium text-[var(--text-primary)] mb-1">No documents ready yet</p>
+                <p className="text-xs text-[var(--text-tertiary)]">Upload and process at least one document on the Files tab, then come back to ask questions.</p>
                 <button
                   onClick={() => setTab('files')}
-                  className="mt-4 px-4 py-2 rounded-lg bg-[#8B5CF6] text-white text-sm font-medium hover:bg-[#7C3AED] transition-colors"
+                  className="mt-4 px-4 py-2 rounded-lg bg-[var(--accent)] text-white text-sm font-medium hover:bg-[var(--accent)] transition-colors"
                 >
                   Go to Files
                 </button>

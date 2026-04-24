@@ -194,9 +194,9 @@ function RunModal({
 
         {/* Budget warning */}
         {wouldExceedBudget && (
-          <div className="flex items-center gap-2 px-5 py-2.5 bg-[#F59E0B]/10 border-b border-[#F59E0B]/20">
-            <AlertTriangle className="w-3.5 h-3.5 text-[#F59E0B] flex-shrink-0" />
-            <p className="text-[11px] text-[#F59E0B]">
+          <div className="flex items-center gap-2 px-5 py-2.5 bg-[var(--color-warning)]/10 border-b border-[var(--color-warning)]/20">
+            <AlertTriangle className="w-3.5 h-3.5 text-[var(--color-warning)] flex-shrink-0" />
+            <p className="text-[11px] text-[var(--color-warning)]">
               This run may exceed today&apos;s budget cap (${capToday.toFixed(2)} limit, ${usedToday.toFixed(2)} used).
             </p>
           </div>
@@ -529,12 +529,12 @@ export default function SkillsView() {
 
       {/* Budget alert bar */}
       {showBudgetAlert && (
-        <div className="flex items-center gap-2 px-6 py-2 bg-[#F59E0B]/10 border-b border-[#F59E0B]/20 flex-shrink-0">
-          <AlertTriangle className="w-3.5 h-3.5 text-[#F59E0B] flex-shrink-0" />
-          <p className="text-[11px] text-[#F59E0B] flex-1">
+        <div className="flex items-center gap-2 px-6 py-2 bg-[var(--color-warning)]/10 border-b border-[var(--color-warning)]/20 flex-shrink-0">
+          <AlertTriangle className="w-3.5 h-3.5 text-[var(--color-warning)] flex-shrink-0" />
+          <p className="text-[11px] text-[var(--color-warning)] flex-1">
             Daily AI budget at {Math.round(budgetPct * 100)}% — ${usedToday.toFixed(2)} of ${capToday.toFixed(2)} used today.
           </p>
-          <div className="h-1.5 w-24 rounded-full bg-[#F59E0B]/20 overflow-hidden">
+          <div className="h-1.5 w-24 rounded-full bg-[var(--color-warning)]/20 overflow-hidden">
             <div
               className="h-full rounded-full"
               style={{ width: `${Math.min(100, budgetPct * 100)}%`, background: budgetPct >= 1 ? '#F43F5E' : '#F59E0B' }}

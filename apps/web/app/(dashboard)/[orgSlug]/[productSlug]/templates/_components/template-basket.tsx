@@ -66,9 +66,9 @@ export function TemplateBasket({ items, onRemove, onApplyAll, disabled }: Props)
               <div className="flex items-center gap-1.5">
                 <ShoppingBasket size={12} className="text-[var(--accent-text)]" />
                 <span className="text-[11px] font-semibold text-[var(--text-primary)]">Apply Basket</span>
-                <span className="text-[9px] text-[#64748B]">{totalNodes} nodes total</span>
+                <span className="text-[9px] text-[var(--text-tertiary)]">{totalNodes} nodes total</span>
               </div>
-              <button onClick={() => setExpanded(false)} className="text-[#475569] hover:text-[#94A3B8]">
+              <button onClick={() => setExpanded(false)} className="text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]">
                 <X size={12} />
               </button>
             </div>
@@ -85,11 +85,11 @@ export function TemplateBasket({ items, onRemove, onApplyAll, disabled }: Props)
                     <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: color }} />
                     <div className="flex-1 min-w-0">
                       <p className="text-[11px] text-[var(--text-primary)] truncate">{item.name}</p>
-                      <p className="text-[9px] text-[#475569]">{item.nodeCount} nodes</p>
+                      <p className="text-[9px] text-[var(--text-tertiary)]">{item.nodeCount} nodes</p>
                     </div>
                     <button
                       onClick={() => onRemove(item.id)}
-                      className="shrink-0 opacity-0 group-hover:opacity-100 text-[#475569] hover:text-red-400 transition-all"
+                      className="shrink-0 opacity-0 group-hover:opacity-100 text-[var(--text-tertiary)] hover:text-red-400 transition-all"
                     >
                       <X size={11} />
                     </button>
@@ -100,7 +100,7 @@ export function TemplateBasket({ items, onRemove, onApplyAll, disabled }: Props)
 
             {/* Footer */}
             <div className="px-3 py-2.5 border-t border-white/[0.07] flex items-center gap-2">
-              <div className="flex-1 text-[10px] text-[#64748B]">
+              <div className="flex-1 text-[10px] text-[var(--text-tertiary)]">
                 {items.length} template{items.length > 1 ? 's' : ''} · ~{totalNodes} nodes
               </div>
               <button

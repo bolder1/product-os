@@ -59,10 +59,10 @@ export default function SignupPage() {
   }
 
   const inputClass = (field: string) =>
-    `w-full pl-10 pr-4 py-2.5 rounded-lg bg-white/[0.03] border text-[#F1F5F9] placeholder:text-[#64748B] focus:outline-none focus:ring-1 transition ${
+    `w-full pl-10 pr-4 py-2.5 rounded-lg bg-[var(--bg-inset)] border text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:outline-none focus:ring-1 transition ${
       errors[field]
-        ? 'border-red-500/60 focus:border-red-500/60 focus:ring-red-500/30'
-        : 'border-white/[0.08] focus:border-[#3B82F6]/50 focus:ring-[#3B82F6]/30'
+        ? 'border-[var(--color-error-border)] focus:border-[var(--color-error)] focus:ring-[var(--color-error-muted)]'
+        : 'border-[var(--border-default)] focus:border-[var(--border-focus)] focus:ring-[var(--accent-muted)]'
     }`
 
   return (
@@ -72,24 +72,23 @@ export default function SignupPage() {
       transition={{ duration: 0.4 }}
       className="w-full max-w-md"
     >
-      <div className="rounded-2xl border border-white/[0.08] bg-white/[0.03] backdrop-blur-xl p-8">
+      <div className="rounded-2xl border border-[var(--border-default)] bg-[var(--bg-surface)] backdrop-blur-xl p-8 shadow-[var(--shadow-panel)]">
         {/* Logo + Tagline */}
         <div className="flex flex-col items-center gap-3 mb-8">
           <div
-            className="w-14 h-14 rounded-xl border border-white/10 bg-white/[0.03] flex items-center justify-center"
-            style={{ boxShadow: '0 0 32px rgba(59,130,246,0.15)' }}
+            className="w-14 h-14 rounded-xl border border-[var(--border-default)] bg-[var(--bg-inset)] flex items-center justify-center shadow-[var(--shadow-glow)]"
           >
             <svg width="28" height="28" viewBox="0 0 32 32" fill="none">
-              <circle cx="16" cy="8" r="3" fill="#3B82F6" />
-              <circle cx="8" cy="22" r="3" fill="#8B5CF6" />
-              <circle cx="24" cy="22" r="3" fill="#06B6D4" />
-              <line x1="16" y1="11" x2="8" y2="19" stroke="rgba(59,130,246,0.4)" strokeWidth="1.5" />
-              <line x1="16" y1="11" x2="24" y2="19" stroke="rgba(139,92,246,0.4)" strokeWidth="1.5" />
-              <line x1="11" y1="22" x2="21" y2="22" stroke="rgba(6,182,212,0.4)" strokeWidth="1.5" />
+              <circle cx="16" cy="8" r="3" fill="var(--accent)" />
+              <circle cx="8" cy="22" r="3" fill="var(--accent)" fillOpacity="0.7" />
+              <circle cx="24" cy="22" r="3" fill="var(--accent)" fillOpacity="0.85" />
+              <line x1="16" y1="11" x2="8" y2="19" stroke="var(--accent)" strokeOpacity="0.4" strokeWidth="1.5" />
+              <line x1="16" y1="11" x2="24" y2="19" stroke="var(--accent)" strokeOpacity="0.4" strokeWidth="1.5" />
+              <line x1="11" y1="22" x2="21" y2="22" stroke="var(--accent)" strokeOpacity="0.4" strokeWidth="1.5" />
             </svg>
           </div>
-          <h1 className="text-2xl font-semibold text-[#F1F5F9]">Create your account</h1>
-          <p className="text-sm text-[#94A3B8]">Get started with Product OS</p>
+          <h1 className="text-2xl font-semibold text-[var(--text-primary)]">Create your account</h1>
+          <p className="text-sm text-[var(--text-secondary)]">Get started with Product OS</p>
         </div>
 
         {/* Form-level error */}
@@ -97,9 +96,9 @@ export default function SignupPage() {
           <motion.div
             initial={{ opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/20"
+            className="mb-4 p-3 rounded-lg bg-[var(--color-error-muted)] border border-[var(--color-error-border)]"
           >
-            <p className="text-sm text-red-400">{errors.form}</p>
+            <p className="text-sm text-[var(--color-error)]">{errors.form}</p>
           </motion.div>
         )}
 
@@ -108,7 +107,7 @@ export default function SignupPage() {
           {/* Full Name */}
           <div>
             <div className="relative">
-              <UserIcon size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#64748B]" />
+              <UserIcon size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-tertiary)]" />
               <input
                 type="text"
                 placeholder="Full name"
@@ -118,14 +117,14 @@ export default function SignupPage() {
               />
             </div>
             {errors.name && (
-              <motion.p initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} className="text-xs text-red-400 mt-1.5 ml-1">{errors.name}</motion.p>
+              <motion.p initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} className="text-xs text-[var(--color-error)] mt-1.5 ml-1">{errors.name}</motion.p>
             )}
           </div>
 
           {/* Email */}
           <div>
             <div className="relative">
-              <Mail size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#64748B]" />
+              <Mail size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-tertiary)]" />
               <input
                 type="email"
                 placeholder="Email address"
@@ -135,14 +134,14 @@ export default function SignupPage() {
               />
             </div>
             {errors.email && (
-              <motion.p initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} className="text-xs text-red-400 mt-1.5 ml-1">{errors.email}</motion.p>
+              <motion.p initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} className="text-xs text-[var(--color-error)] mt-1.5 ml-1">{errors.email}</motion.p>
             )}
           </div>
 
           {/* Password */}
           <div>
             <div className="relative">
-              <Lock size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#64748B]" />
+              <Lock size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-tertiary)]" />
               <input
                 type={showPassword ? 'text' : 'password'}
                 placeholder="Password"
@@ -153,20 +152,20 @@ export default function SignupPage() {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#64748B] hover:text-[#94A3B8] transition-colors"
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] transition-colors"
               >
                 {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
               </button>
             </div>
             {errors.password && (
-              <motion.p initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} className="text-xs text-red-400 mt-1.5 ml-1">{errors.password}</motion.p>
+              <motion.p initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} className="text-xs text-[var(--color-error)] mt-1.5 ml-1">{errors.password}</motion.p>
             )}
           </div>
 
           {/* Confirm Password */}
           <div>
             <div className="relative">
-              <Lock size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#64748B]" />
+              <Lock size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-tertiary)]" />
               <input
                 type={showConfirm ? 'text' : 'password'}
                 placeholder="Confirm password"
@@ -177,13 +176,13 @@ export default function SignupPage() {
               <button
                 type="button"
                 onClick={() => setShowConfirm(!showConfirm)}
-                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#64748B] hover:text-[#94A3B8] transition-colors"
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] transition-colors"
               >
                 {showConfirm ? <EyeOff size={16} /> : <Eye size={16} />}
               </button>
             </div>
             {errors.confirmPassword && (
-              <motion.p initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} className="text-xs text-red-400 mt-1.5 ml-1">{errors.confirmPassword}</motion.p>
+              <motion.p initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} className="text-xs text-[var(--color-error)] mt-1.5 ml-1">{errors.confirmPassword}</motion.p>
             )}
           </div>
 
@@ -193,7 +192,7 @@ export default function SignupPage() {
             disabled={isSubmitting}
             whileHover={{ scale: 1.01 }}
             whileTap={{ scale: 0.99 }}
-            className="w-full py-2.5 rounded-lg bg-[#3B82F6] text-white font-medium hover:bg-[#2563EB] disabled:opacity-60 disabled:cursor-not-allowed transition-colors mt-1"
+            className="w-full py-2.5 rounded-lg bg-[var(--accent)] text-[var(--color-white)] font-medium hover:bg-[var(--accent-hover)] disabled:opacity-60 disabled:cursor-not-allowed transition-colors mt-1"
           >
             {isSubmitting ? 'Creating account...' : 'Create Account'}
           </motion.button>
@@ -201,9 +200,9 @@ export default function SignupPage() {
 
         {/* Divider */}
         <div className="flex items-center gap-3 my-6">
-          <div className="flex-1 h-px bg-white/[0.08]" />
-          <span className="text-xs text-[#64748B]">or</span>
-          <div className="flex-1 h-px bg-white/[0.08]" />
+          <div className="flex-1 h-px bg-[var(--border-default)]" />
+          <span className="text-xs text-[var(--text-tertiary)]">or</span>
+          <div className="flex-1 h-px bg-[var(--border-default)]" />
         </div>
 
         {/* OAuth buttons */}
@@ -211,7 +210,7 @@ export default function SignupPage() {
           <button
             type="button"
             onClick={() => setErrors((p) => ({ ...p, form: 'Google sign-up is coming soon. Use email/password above.' }))}
-            className="w-full flex items-center justify-center gap-2.5 py-2.5 rounded-lg border border-white/[0.08] bg-white/[0.02] text-[#94A3B8] font-medium hover:bg-white/[0.05] transition-colors"
+            className="w-full flex items-center justify-center gap-2.5 py-2.5 rounded-lg border border-[var(--border-default)] bg-[var(--bg-inset)] text-[var(--text-secondary)] font-medium hover:bg-[var(--surface-hover)] transition-colors"
           >
             <svg width="18" height="18" viewBox="0 0 24 24">
               <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
@@ -224,7 +223,7 @@ export default function SignupPage() {
           <button
             type="button"
             onClick={() => setErrors((p) => ({ ...p, form: 'GitHub sign-up is coming soon. Use email/password above.' }))}
-            className="w-full flex items-center justify-center gap-2.5 py-2.5 rounded-lg border border-white/[0.08] bg-white/[0.02] text-[#94A3B8] font-medium hover:bg-white/[0.05] transition-colors"
+            className="w-full flex items-center justify-center gap-2.5 py-2.5 rounded-lg border border-[var(--border-default)] bg-[var(--bg-inset)] text-[var(--text-secondary)] font-medium hover:bg-[var(--surface-hover)] transition-colors"
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
               <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/>
@@ -234,9 +233,9 @@ export default function SignupPage() {
         </div>
 
         {/* Sign in link */}
-        <p className="text-center text-sm text-[#94A3B8] mt-6">
+        <p className="text-center text-sm text-[var(--text-secondary)] mt-6">
           Already have an account?{' '}
-          <Link href="/login" className="text-[#3B82F6] hover:text-[#60A5FA] font-medium transition-colors">
+          <Link href="/login" className="text-[var(--accent-text)] hover:text-[var(--accent-hover)] font-medium transition-colors">
             Sign in
           </Link>
         </p>

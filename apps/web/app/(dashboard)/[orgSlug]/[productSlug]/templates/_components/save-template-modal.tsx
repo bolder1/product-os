@@ -67,7 +67,7 @@ export function SaveAsTemplateModal({ productId, nodeCount, onClose, onSaved }: 
             <Save size={14} className="text-[var(--accent-text)]" />
             <span className="text-[13px] font-semibold text-[var(--text-primary)]">Save as Template</span>
           </div>
-          <button onClick={onClose} className="text-[#475569] hover:text-[#94A3B8] transition-colors">
+          <button onClick={onClose} className="text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] transition-colors">
             <X size={14} />
           </button>
         </div>
@@ -79,19 +79,19 @@ export function SaveAsTemplateModal({ productId, nodeCount, onClose, onSaved }: 
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ type: 'spring', damping: 12, stiffness: 200 }}
-              className="w-14 h-14 rounded-full bg-[#10B981]/15 border border-[#10B981]/30 flex items-center justify-center"
+              className="w-14 h-14 rounded-full bg-[var(--color-success)]/15 border border-[var(--color-success)]/30 flex items-center justify-center"
             >
-              <CheckCircle2 size={24} className="text-[#10B981]" />
+              <CheckCircle2 size={24} className="text-[var(--color-success)]" />
             </motion.div>
             <div>
               <p className="text-[14px] font-bold text-[var(--text-primary)]">"{name}" saved!</p>
-              <p className="text-[11px] text-[#64748B] mt-1">
+              <p className="text-[11px] text-[var(--text-tertiary)] mt-1">
                 Your template is now available in My Templates.
               </p>
             </div>
             <button
               onClick={() => { onSaved(name); onClose() }}
-              className="px-5 py-2 rounded-xl bg-[#10B981] text-white text-[11px] font-medium hover:bg-[#059669] transition-colors"
+              className="px-5 py-2 rounded-xl bg-[var(--color-success)] text-white text-[11px] font-medium hover:bg-[var(--color-success)] transition-colors"
             >
               Done
             </button>
@@ -99,36 +99,36 @@ export function SaveAsTemplateModal({ productId, nodeCount, onClose, onSaved }: 
         ) : (
           /* Form */
           <div className="p-5 space-y-4">
-            <p className="text-[11px] text-[#64748B]">
+            <p className="text-[11px] text-[var(--text-tertiary)]">
               This will capture all {nodeCount} nodes and their edges from your current product graph into a reusable template.
             </p>
 
             {/* Name */}
             <div className="space-y-1.5">
-              <label className="text-[10px] font-medium text-[#94A3B8] uppercase tracking-wide">Template name *</label>
+              <label className="text-[10px] font-medium text-[var(--text-secondary)] uppercase tracking-wide">Template name *</label>
               <input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="e.g. My SaaS Blueprint"
-                className="w-full px-3 py-2 rounded-lg bg-white/[0.03] border border-white/[0.08] text-[12px] text-[var(--text-primary)] outline-none focus:border-[var(--accent)]/40 placeholder:text-[#334155]"
+                className="w-full px-3 py-2 rounded-lg bg-white/[0.03] border border-white/[0.08] text-[12px] text-[var(--text-primary)] outline-none focus:border-[var(--accent)]/40 placeholder:text-[var(--border-default)]"
               />
             </div>
 
             {/* Description */}
             <div className="space-y-1.5">
-              <label className="text-[10px] font-medium text-[#94A3B8] uppercase tracking-wide">Description</label>
+              <label className="text-[10px] font-medium text-[var(--text-secondary)] uppercase tracking-wide">Description</label>
               <textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="What does this template cover?"
                 rows={2}
-                className="w-full px-3 py-2 rounded-lg bg-white/[0.03] border border-white/[0.08] text-[12px] text-[var(--text-primary)] outline-none focus:border-[var(--accent)]/40 placeholder:text-[#334155] resize-none"
+                className="w-full px-3 py-2 rounded-lg bg-white/[0.03] border border-white/[0.08] text-[12px] text-[var(--text-primary)] outline-none focus:border-[var(--accent)]/40 placeholder:text-[var(--border-default)] resize-none"
               />
             </div>
 
             {/* Category */}
             <div className="space-y-1.5">
-              <label className="text-[10px] font-medium text-[#94A3B8] uppercase tracking-wide">Category</label>
+              <label className="text-[10px] font-medium text-[var(--text-secondary)] uppercase tracking-wide">Category</label>
               <div className="flex flex-wrap gap-1.5">
                 {CATEGORIES.map((cat) => (
                   <button
@@ -137,7 +137,7 @@ export function SaveAsTemplateModal({ productId, nodeCount, onClose, onSaved }: 
                     className={`px-2.5 py-1 rounded-lg text-[10px] font-medium border transition-all ${
                       category === cat.key
                         ? 'border-[var(--accent)]/50 bg-[var(--accent)]/10 text-[var(--accent-text)]'
-                        : 'border-white/[0.08] text-[#64748B] hover:border-white/[0.15] hover:text-[#94A3B8]'
+                        : 'border-white/[0.08] text-[var(--text-tertiary)] hover:border-white/[0.15] hover:text-[var(--text-secondary)]'
                     }`}
                   >
                     {cat.label}
@@ -148,12 +148,12 @@ export function SaveAsTemplateModal({ productId, nodeCount, onClose, onSaved }: 
 
             {/* Tags */}
             <div className="space-y-1.5">
-              <label className="text-[10px] font-medium text-[#94A3B8] uppercase tracking-wide">Tags <span className="normal-case text-[#475569]">(comma separated)</span></label>
+              <label className="text-[10px] font-medium text-[var(--text-secondary)] uppercase tracking-wide">Tags <span className="normal-case text-[var(--text-tertiary)]">(comma separated)</span></label>
               <input
                 value={tags}
                 onChange={(e) => setTags(e.target.value)}
                 placeholder="auth, billing, dashboard"
-                className="w-full px-3 py-2 rounded-lg bg-white/[0.03] border border-white/[0.08] text-[12px] text-[var(--text-primary)] outline-none focus:border-[var(--accent)]/40 placeholder:text-[#334155]"
+                className="w-full px-3 py-2 rounded-lg bg-white/[0.03] border border-white/[0.08] text-[12px] text-[var(--text-primary)] outline-none focus:border-[var(--accent)]/40 placeholder:text-[var(--border-default)]"
               />
             </div>
 
@@ -169,13 +169,13 @@ export function SaveAsTemplateModal({ productId, nodeCount, onClose, onSaved }: 
               {isPublic ? (
                 <Globe size={14} className="text-[var(--accent-text)] shrink-0" />
               ) : (
-                <Lock size={14} className="text-[#64748B] shrink-0" />
+                <Lock size={14} className="text-[var(--text-tertiary)] shrink-0" />
               )}
               <div className="text-left">
-                <p className={`text-[11px] font-medium ${isPublic ? 'text-[var(--accent-text)]' : 'text-[#94A3B8]'}`}>
+                <p className={`text-[11px] font-medium ${isPublic ? 'text-[var(--accent-text)]' : 'text-[var(--text-secondary)]'}`}>
                   {isPublic ? 'Public — visible to all orgs' : 'Private — only your org'}
                 </p>
-                <p className="text-[9px] text-[#475569] mt-0.5">Click to toggle visibility</p>
+                <p className="text-[9px] text-[var(--text-tertiary)] mt-0.5">Click to toggle visibility</p>
               </div>
             </button>
 
@@ -185,7 +185,7 @@ export function SaveAsTemplateModal({ productId, nodeCount, onClose, onSaved }: 
 
             {/* Actions */}
             <div className="flex items-center gap-2 pt-1">
-              <button onClick={onClose} className="flex-1 py-2 rounded-xl border border-white/[0.08] text-[11px] text-[#64748B] hover:text-[#94A3B8] hover:border-white/[0.15] transition-all">
+              <button onClick={onClose} className="flex-1 py-2 rounded-xl border border-white/[0.08] text-[11px] text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] hover:border-white/[0.15] transition-all">
                 Cancel
               </button>
               <button

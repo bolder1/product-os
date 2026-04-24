@@ -27,12 +27,12 @@ export function ReleaseTimeline({
         initial={{ opacity: 0, y: -8 }}
         animate={{ opacity: 1, y: 0 }}
         onClick={onNewRelease}
-        className="flex items-center gap-3 p-3 mb-2 rounded-xl border border-dashed border-[#10B981]/30 bg-[#10B981]/5 hover:bg-[#10B981]/10 transition-colors group"
+        className="flex items-center gap-3 p-3 mb-2 rounded-xl border border-dashed border-[var(--color-success)]/30 bg-[var(--color-success)]/5 hover:bg-[var(--color-success)]/10 transition-colors group"
       >
-        <div className="w-[22px] h-[22px] rounded-full bg-[#10B981]/20 flex items-center justify-center flex-shrink-0 z-10">
-          <Plus className="w-3 h-3 text-[#10B981]" />
+        <div className="w-[22px] h-[22px] rounded-full bg-[var(--color-success)]/20 flex items-center justify-center flex-shrink-0 z-10">
+          <Plus className="w-3 h-3 text-[var(--color-success)]" />
         </div>
-        <span className="text-xs font-medium text-[#10B981] group-hover:text-[#34D399] transition-colors">
+        <span className="text-xs font-medium text-[var(--color-success)] group-hover:text-[#34D399] transition-colors">
           New Release
         </span>
       </motion.button>
@@ -51,7 +51,7 @@ export function ReleaseTimeline({
             onClick={() => onSelect(release.id)}
             className={`flex items-start gap-3 p-3 rounded-xl transition-all text-left ${
               isSelected
-                ? 'bg-[#10B981]/10 border border-[#10B981]/30'
+                ? 'bg-[var(--color-success)]/10 border border-[var(--color-success)]/30'
                 : 'hover:bg-white/[0.03] border border-transparent'
             }`}
           >
@@ -75,8 +75,8 @@ export function ReleaseTimeline({
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-1">
                 <div className="flex items-center gap-1.5">
-                  <Tag className="w-3 h-3 text-[#10B981]" />
-                  <span className="text-xs font-mono font-semibold text-[#F1F5F9]">
+                  <Tag className="w-3 h-3 text-[var(--color-success)]" />
+                  <span className="text-xs font-mono font-semibold text-[var(--text-primary)]">
                     {release.version}
                   </span>
                 </div>
@@ -87,12 +87,12 @@ export function ReleaseTimeline({
                   {status.label}
                 </span>
               </div>
-              <p className="text-xs text-[#94A3B8] truncate">{release.title}</p>
-              <p className="text-[10px] text-[#64748B] mt-1">{release.date}</p>
+              <p className="text-xs text-[var(--text-secondary)] truncate">{release.title}</p>
+              <p className="text-[10px] text-[var(--text-tertiary)] mt-1">{release.date}</p>
             </div>
 
             {/* Changes count */}
-            <span className="text-[10px] text-[#64748B] bg-white/[0.05] px-1.5 py-0.5 rounded-full flex-shrink-0 mt-1">
+            <span className="text-[10px] text-[var(--text-tertiary)] bg-white/[0.05] px-1.5 py-0.5 rounded-full flex-shrink-0 mt-1">
               {release.changes.length}
             </span>
           </motion.button>

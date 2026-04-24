@@ -34,12 +34,12 @@ export const mockApprovals: Approval[] = [
     objectName: 'User Auth Feature',
     objectType: 'feature',
     status: 'approved',
-    requester: { name: 'Surajit Das', initials: 'SD', color: '#8B5CF6' },
+    requester: { name: 'Surajit Das', initials: 'SD', color: 'var(--accent)' },
     approvers: [
       {
         name: 'Priya Sharma',
         initials: 'PS',
-        color: '#3B82F6',
+        color: 'var(--accent)',
         decision: 'approved',
         comment: 'Auth flow looks solid. LGTM.',
         decidedAt: '2026-03-27T14:30:00Z',
@@ -47,7 +47,7 @@ export const mockApprovals: Approval[] = [
       {
         name: 'Arjun Mehta',
         initials: 'AM',
-        color: '#10B981',
+        color: 'var(--color-success)',
         decision: 'approved',
         comment: 'Tested against edge cases. Approved.',
         decidedAt: '2026-03-27T16:10:00Z',
@@ -68,12 +68,12 @@ export const mockApprovals: Approval[] = [
     objectName: 'Dashboard Component',
     objectType: 'component',
     status: 'pending',
-    requester: { name: 'Priya Sharma', initials: 'PS', color: '#3B82F6' },
+    requester: { name: 'Priya Sharma', initials: 'PS', color: 'var(--accent)' },
     approvers: [
       {
         name: 'Surajit Das',
         initials: 'SD',
-        color: '#8B5CF6',
+        color: 'var(--accent)',
         decision: 'approved',
         comment: 'Looks great, nice animations.',
         decidedAt: '2026-03-28T11:20:00Z',
@@ -81,7 +81,7 @@ export const mockApprovals: Approval[] = [
       {
         name: 'Neha Gupta',
         initials: 'NG',
-        color: '#F43F5E',
+        color: 'var(--color-error)',
         decision: 'pending',
       },
     ],
@@ -98,12 +98,12 @@ export const mockApprovals: Approval[] = [
     objectName: 'Brand Color Palette',
     objectType: 'palette',
     status: 'changes_requested',
-    requester: { name: 'Neha Gupta', initials: 'NG', color: '#F43F5E' },
+    requester: { name: 'Neha Gupta', initials: 'NG', color: 'var(--color-error)' },
     approvers: [
       {
         name: 'Surajit Das',
         initials: 'SD',
-        color: '#8B5CF6',
+        color: 'var(--accent)',
         decision: 'changes_requested',
         comment: 'Contrast ratio fails WCAG AA on secondary colors. Please adjust.',
         decidedAt: '2026-03-28T15:45:00Z',
@@ -122,11 +122,11 @@ export const mockApprovals: Approval[] = [
     objectName: 'API Schema v2',
     objectType: 'schema',
     status: 'pending',
-    requester: { name: 'Arjun Mehta', initials: 'AM', color: '#10B981' },
+    requester: { name: 'Arjun Mehta', initials: 'AM', color: 'var(--color-success)' },
     approvers: [
-      { name: 'Surajit Das', initials: 'SD', color: '#8B5CF6', decision: 'pending' },
-      { name: 'Priya Sharma', initials: 'PS', color: '#3B82F6', decision: 'pending' },
-      { name: 'Neha Gupta', initials: 'NG', color: '#F43F5E', decision: 'pending' },
+      { name: 'Surajit Das', initials: 'SD', color: 'var(--accent)', decision: 'pending' },
+      { name: 'Priya Sharma', initials: 'PS', color: 'var(--accent)', decision: 'pending' },
+      { name: 'Neha Gupta', initials: 'NG', color: 'var(--color-error)', decision: 'pending' },
     ],
     routing: 'parallel',
     message: 'Breaking schema changes for v2 API. Need all leads to sign off before migration.',
@@ -140,12 +140,12 @@ export const mockApprovals: Approval[] = [
     objectName: 'Mobile Nav Component',
     objectType: 'component',
     status: 'rejected',
-    requester: { name: 'Surajit Das', initials: 'SD', color: '#8B5CF6' },
+    requester: { name: 'Surajit Das', initials: 'SD', color: 'var(--accent)' },
     approvers: [
       {
         name: 'Neha Gupta',
         initials: 'NG',
-        color: '#F43F5E',
+        color: 'var(--color-error)',
         decision: 'rejected',
         comment: 'Navigation pattern conflicts with the design system. Needs rework.',
         decidedAt: '2026-03-27T13:00:00Z',
@@ -165,12 +165,12 @@ export const mockApprovals: Approval[] = [
     objectName: 'Pricing Page Layout',
     objectType: 'page',
     status: 'approved',
-    requester: { name: 'Priya Sharma', initials: 'PS', color: '#3B82F6' },
+    requester: { name: 'Priya Sharma', initials: 'PS', color: 'var(--accent)' },
     approvers: [
       {
         name: 'Surajit Das',
         initials: 'SD',
-        color: '#8B5CF6',
+        color: 'var(--accent)',
         decision: 'approved',
         comment: 'Clean layout. Ship it.',
         decidedAt: '2026-03-25T10:00:00Z',
@@ -178,7 +178,7 @@ export const mockApprovals: Approval[] = [
       {
         name: 'Arjun Mehta',
         initials: 'AM',
-        color: '#10B981',
+        color: 'var(--color-success)',
         decision: 'approved',
         comment: 'Pricing tiers look good.',
         decidedAt: '2026-03-25T11:30:00Z',
@@ -186,7 +186,7 @@ export const mockApprovals: Approval[] = [
       {
         name: 'Neha Gupta',
         initials: 'NG',
-        color: '#F43F5E',
+        color: 'var(--color-error)',
         decision: 'approved',
         comment: 'Approved from design side.',
         decidedAt: '2026-03-25T14:00:00Z',
@@ -217,9 +217,9 @@ export const mockGraphNodes = [
 ]
 
 export const mockTeamMembers = [
-  { id: 'tm-1', name: 'Surajit Das', initials: 'SD', color: '#8B5CF6' },
-  { id: 'tm-2', name: 'Priya Sharma', initials: 'PS', color: '#3B82F6' },
-  { id: 'tm-3', name: 'Arjun Mehta', initials: 'AM', color: '#10B981' },
-  { id: 'tm-4', name: 'Neha Gupta', initials: 'NG', color: '#F43F5E' },
-  { id: 'tm-5', name: 'Rohan Patel', initials: 'RP', color: '#F59E0B' },
+  { id: 'tm-1', name: 'Surajit Das', initials: 'SD', color: 'var(--accent)' },
+  { id: 'tm-2', name: 'Priya Sharma', initials: 'PS', color: 'var(--accent)' },
+  { id: 'tm-3', name: 'Arjun Mehta', initials: 'AM', color: 'var(--color-success)' },
+  { id: 'tm-4', name: 'Neha Gupta', initials: 'NG', color: 'var(--color-error)' },
+  { id: 'tm-5', name: 'Rohan Patel', initials: 'RP', color: 'var(--color-warning)' },
 ]

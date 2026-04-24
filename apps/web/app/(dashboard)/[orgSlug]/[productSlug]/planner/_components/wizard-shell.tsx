@@ -100,8 +100,8 @@ export default function WizardShell({
             disabled={isFirstStep}
             className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${
               isFirstStep
-                ? 'opacity-30 cursor-not-allowed text-[#64748B]'
-                : 'bg-white/[0.05] border border-white/[0.08] text-[#94A3B8] hover:bg-white/[0.08] hover:text-[#F1F5F9]'
+                ? 'opacity-30 cursor-not-allowed text-[var(--text-tertiary)]'
+                : 'bg-white/[0.05] border border-white/[0.08] text-[var(--text-secondary)] hover:bg-white/[0.08] hover:text-[var(--text-primary)]'
             }`}
           >
             <ChevronLeft className="w-4 h-4" />
@@ -109,7 +109,7 @@ export default function WizardShell({
           </motion.button>
 
           {/* Center: Step counter */}
-          <span className="text-xs text-[#64748B]">
+          <span className="text-xs text-[var(--text-tertiary)]">
             Step {currentStep} of {totalSteps}
           </span>
 
@@ -120,7 +120,7 @@ export default function WizardShell({
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.97 }}
                 onClick={onSkip}
-                className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm text-[#64748B] hover:text-[#94A3B8] transition-colors"
+                className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] transition-colors"
               >
                 Skip
                 <SkipForward className="w-3.5 h-3.5" />
@@ -132,7 +132,7 @@ export default function WizardShell({
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.97 }}
                 onClick={onNext}
-                className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium bg-[#8B5CF6] text-white hover:bg-[#8B5CF6]/90 transition-all"
+                className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium bg-[var(--accent)] text-white hover:bg-[var(--accent)]/90 transition-all"
               >
                 Next
                 <ChevronRight className="w-4 h-4" />

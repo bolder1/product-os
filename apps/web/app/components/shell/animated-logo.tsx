@@ -16,10 +16,10 @@ export function AnimatedLogo({ size = 'compact' }: AnimatedLogoProps) {
       xmlns="http://www.w3.org/2000/svg"
       className="transition-transform duration-200 hover:scale-110"
     >
-      <rect x="2" y="2" width="7" height="7" rx="2" fill="#6398ff" />
-      <rect x="11" y="2" width="7" height="7" rx="2" fill="#6398ff" fillOpacity="0.45" />
-      <rect x="2" y="11" width="7" height="7" rx="2" fill="#6398ff" fillOpacity="0.45" />
-      <rect x="11" y="11" width="7" height="7" rx="2" fill="#6398ff" fillOpacity="0.2" />
+      <rect x="2" y="2" width="7" height="7" rx="2" fill="var(--accent)" />
+      <rect x="11" y="2" width="7" height="7" rx="2" fill="var(--accent)" fillOpacity="0.45" />
+      <rect x="2" y="11" width="7" height="7" rx="2" fill="var(--accent)" fillOpacity="0.45" />
+      <rect x="11" y="11" width="7" height="7" rx="2" fill="var(--accent)" fillOpacity="0.2" />
     </svg>
   )
 }

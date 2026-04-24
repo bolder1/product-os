@@ -75,12 +75,12 @@ export function UploadModal({ open, onClose, onUpload }: UploadModalProps) {
             {/* Header */}
             <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.06]">
               <div className="flex items-center gap-2">
-                <Upload className="w-4 h-4 text-[#EC4899]" />
-                <span className="text-sm font-medium text-[#F1F5F9]">Upload Asset</span>
+                <Upload className="w-4 h-4 text-[var(--accent)]" />
+                <span className="text-sm font-medium text-[var(--text-primary)]">Upload Asset</span>
               </div>
               <button
                 onClick={resetAndClose}
-                className="p-1 rounded text-[#64748B] hover:text-[#94A3B8] transition-colors"
+                className="p-1 rounded text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] transition-colors"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -99,18 +99,18 @@ export function UploadModal({ open, onClose, onUpload }: UploadModalProps) {
                   onClick={() => inputRef.current?.click()}
                   className={`flex flex-col items-center justify-center gap-3 p-8 rounded-xl border-2 border-dashed transition-colors cursor-pointer ${
                     dragOver
-                      ? 'border-[#EC4899] bg-[#EC4899]/5'
+                      ? 'border-[var(--accent)] bg-[var(--accent)]/5'
                       : 'border-white/[0.12] hover:border-white/[0.2] bg-white/[0.02]'
                   }`}
                 >
-                  <div className="w-12 h-12 rounded-xl bg-[#EC4899]/10 flex items-center justify-center">
-                    <Image className="w-6 h-6 text-[#EC4899]" />
+                  <div className="w-12 h-12 rounded-xl bg-[var(--accent)]/10 flex items-center justify-center">
+                    <Image className="w-6 h-6 text-[var(--accent)]" />
                   </div>
                   <div className="text-center">
-                    <p className="text-sm text-[#F1F5F9]">
-                      Drop file here or <span className="text-[#EC4899]">browse</span>
+                    <p className="text-sm text-[var(--text-primary)]">
+                      Drop file here or <span className="text-[var(--accent)]">browse</span>
                     </p>
-                    <p className="text-xs text-[#64748B] mt-1">SVG, PNG, JPG, GIF, WEBP</p>
+                    <p className="text-xs text-[var(--text-tertiary)] mt-1">SVG, PNG, JPG, GIF, WEBP</p>
                   </div>
                   <input
                     ref={inputRef}
@@ -125,14 +125,14 @@ export function UploadModal({ open, onClose, onUpload }: UploadModalProps) {
                 </div>
               ) : (
                 <div className="flex items-center gap-3 p-3 rounded-xl border border-white/[0.08] bg-white/[0.03]">
-                  <div className="w-14 h-14 rounded-lg bg-gradient-to-br from-[#EC4899] to-[#DB2777] shrink-0" />
+                  <div className="w-14 h-14 rounded-lg bg-gradient-to-br from-[var(--accent)] to-[#DB2777] shrink-0" />
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm text-[#F1F5F9] truncate">{file.name}</p>
-                    <p className="text-xs text-[#10B981]">Ready to upload</p>
+                    <p className="text-sm text-[var(--text-primary)] truncate">{file.name}</p>
+                    <p className="text-xs text-[var(--color-success)]">Ready to upload</p>
                   </div>
                   <button
                     onClick={() => setFile(null)}
-                    className="p-1 rounded text-[#64748B] hover:text-red-400 transition-colors"
+                    className="p-1 rounded text-[var(--text-tertiary)] hover:text-red-400 transition-colors"
                   >
                     <X className="w-4 h-4" />
                   </button>
@@ -141,31 +141,31 @@ export function UploadModal({ open, onClose, onUpload }: UploadModalProps) {
 
               {/* Name */}
               <div className="space-y-1.5">
-                <label className="text-xs text-[#94A3B8]">Name</label>
+                <label className="text-xs text-[var(--text-secondary)]">Name</label>
                 <input
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Asset name"
-                  className="w-full px-3 py-2 rounded-lg border border-white/[0.08] bg-white/[0.03] text-sm text-[#F1F5F9] placeholder-[#64748B] outline-none focus:border-[#EC4899]/40"
+                  className="w-full px-3 py-2 rounded-lg border border-white/[0.08] bg-white/[0.03] text-sm text-[var(--text-primary)] placeholder-[var(--text-tertiary)] outline-none focus:border-[var(--accent)]/40"
                 />
               </div>
 
               {/* Tags */}
               <div className="space-y-1.5">
                 <div className="flex items-center gap-1.5">
-                  <Tag className="w-3 h-3 text-[#64748B]" />
-                  <label className="text-xs text-[#94A3B8]">Tags</label>
+                  <Tag className="w-3 h-3 text-[var(--text-tertiary)]" />
+                  <label className="text-xs text-[var(--text-secondary)]">Tags</label>
                 </div>
                 <div className="flex items-center gap-2 flex-wrap">
                   {tags.map((tag) => (
                     <span
                       key={tag}
-                      className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-white/[0.06] text-xs text-[#94A3B8]"
+                      className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-white/[0.06] text-xs text-[var(--text-secondary)]"
                     >
                       {tag}
                       <button
                         onClick={() => setTags((prev) => prev.filter((t) => t !== tag))}
-                        className="text-[#64748B] hover:text-red-400"
+                        className="text-[var(--text-tertiary)] hover:text-red-400"
                       >
                         <X className="w-3 h-3" />
                       </button>
@@ -176,7 +176,7 @@ export function UploadModal({ open, onClose, onUpload }: UploadModalProps) {
                     onChange={(e) => setTagInput(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && handleAddTag()}
                     placeholder="Add tag..."
-                    className="px-2 py-0.5 rounded-md bg-transparent border border-dashed border-white/[0.1] text-xs text-[#94A3B8] placeholder-[#64748B] outline-none focus:border-[#EC4899]/40 w-24"
+                    className="px-2 py-0.5 rounded-md bg-transparent border border-dashed border-white/[0.1] text-xs text-[var(--text-secondary)] placeholder-[var(--text-tertiary)] outline-none focus:border-[var(--accent)]/40 w-24"
                   />
                 </div>
               </div>
@@ -187,7 +187,7 @@ export function UploadModal({ open, onClose, onUpload }: UploadModalProps) {
                 whileTap={{ scale: 0.98 }}
                 onClick={handleSubmit}
                 disabled={!name.trim()}
-                className="w-full py-2.5 rounded-xl bg-[#EC4899] text-white text-sm font-medium hover:bg-[#DB2777] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                className="w-full py-2.5 rounded-xl bg-[var(--accent)] text-white text-sm font-medium hover:bg-[#DB2777] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 Upload Asset
               </motion.button>

@@ -12,10 +12,10 @@ interface AssetGridProps {
 }
 
 const typeBadgeColors: Record<GraphicAsset['type'], string> = {
-  illustration: 'bg-[#F59E0B]/10 text-[#F59E0B]',
-  icon: 'bg-[#3B82F6]/10 text-[#3B82F6]',
-  photo: 'bg-[#10B981]/10 text-[#10B981]',
-  logo: 'bg-[#EC4899]/10 text-[#EC4899]',
+  illustration: 'bg-[var(--color-warning)]/10 text-[var(--color-warning)]',
+  icon: 'bg-[var(--accent)]/10 text-[var(--accent)]',
+  photo: 'bg-[var(--color-success)]/10 text-[var(--color-success)]',
+  logo: 'bg-[var(--accent)]/10 text-[var(--accent)]',
 }
 
 const containerVariants = {
@@ -35,10 +35,10 @@ export function AssetGrid({ assets, view, onSelect, onDelete }: AssetGridProps) 
   if (assets.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center">
-        <div className="w-12 h-12 rounded-xl bg-[#EC4899]/10 flex items-center justify-center mb-3">
-          <span className="text-[#EC4899] text-lg">0</span>
+        <div className="w-12 h-12 rounded-xl bg-[var(--accent)]/10 flex items-center justify-center mb-3">
+          <span className="text-[var(--accent)] text-lg">0</span>
         </div>
-        <p className="text-sm text-[#94A3B8]">No assets found</p>
+        <p className="text-sm text-[var(--text-secondary)]">No assets found</p>
       </div>
     )
   }
@@ -67,8 +67,8 @@ export function AssetGrid({ assets, view, onSelect, onDelete }: AssetGridProps) 
             />
             {/* Info */}
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-[#F1F5F9] truncate">{asset.name}</p>
-              <p className="text-xs text-[#64748B]">
+              <p className="text-sm font-medium text-[var(--text-primary)] truncate">{asset.name}</p>
+              <p className="text-xs text-[var(--text-tertiary)]">
                 {asset.width} x {asset.height} &middot; {asset.size}
               </p>
             </div>
@@ -84,7 +84,7 @@ export function AssetGrid({ assets, view, onSelect, onDelete }: AssetGridProps) 
                 onClick={(e) => {
                   e.stopPropagation()
                 }}
-                className="p-1.5 rounded-md text-[#94A3B8] hover:text-[#F1F5F9] hover:bg-white/[0.06] transition-colors"
+                className="p-1.5 rounded-md text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-white/[0.06] transition-colors"
               >
                 <Download className="w-3.5 h-3.5" />
               </button>
@@ -93,7 +93,7 @@ export function AssetGrid({ assets, view, onSelect, onDelete }: AssetGridProps) 
                   e.stopPropagation()
                   onDelete(asset.id)
                 }}
-                className="p-1.5 rounded-md text-[#94A3B8] hover:text-red-400 hover:bg-red-500/10 transition-colors"
+                className="p-1.5 rounded-md text-[var(--text-secondary)] hover:text-red-400 hover:bg-red-500/10 transition-colors"
               >
                 <Trash2 className="w-3.5 h-3.5" />
               </button>
@@ -161,8 +161,8 @@ export function AssetGrid({ assets, view, onSelect, onDelete }: AssetGridProps) 
             </div>
             {/* Info */}
             <div className="p-3">
-              <p className="text-sm font-medium text-[#F1F5F9] truncate">{asset.name}</p>
-              <p className="text-xs text-[#64748B] mt-0.5">
+              <p className="text-sm font-medium text-[var(--text-primary)] truncate">{asset.name}</p>
+              <p className="text-xs text-[var(--text-tertiary)] mt-0.5">
                 {asset.width} x {asset.height} &middot; {asset.size}
               </p>
             </div>

@@ -31,11 +31,11 @@ function Field({
   multiline?: boolean
 }) {
   const baseClass =
-    'w-full px-3 py-2 rounded-lg bg-white/[0.04] border border-white/[0.08] text-xs text-[#F1F5F9] placeholder-[#64748B] focus:outline-none focus:border-[#3B82F6]/40 focus:ring-1 focus:ring-[#3B82F6]/20 transition-colors'
+    'w-full px-3 py-2 rounded-lg bg-white/[0.04] border border-white/[0.08] text-xs text-[var(--text-primary)] placeholder-[var(--text-tertiary)] focus:outline-none focus:border-[var(--accent)]/40 focus:ring-1 focus:ring-[var(--accent)]/20 transition-colors'
 
   return (
     <div className="space-y-1.5">
-      <label className="text-[10px] font-semibold uppercase tracking-wider text-[#64748B]">
+      <label className="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-tertiary)]">
         {label}
       </label>
       {multiline ? (
@@ -70,13 +70,13 @@ function Toggle({
 }) {
   return (
     <div className="flex items-center justify-between">
-      <span className="text-[10px] font-semibold uppercase tracking-wider text-[#64748B]">
+      <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-tertiary)]">
         {label}
       </span>
       <button
         onClick={() => onChange(!value)}
         className={`relative w-8 h-4.5 rounded-full transition-colors ${
-          value ? 'bg-[#3B82F6]' : 'bg-white/[0.1]'
+          value ? 'bg-[var(--accent)]' : 'bg-white/[0.1]'
         }`}
       >
         <span
@@ -178,12 +178,12 @@ function FeaturesFields({
             className="space-y-1.5 p-2.5 rounded-lg bg-white/[0.02] border border-white/[0.06]"
           >
             <div className="flex items-center justify-between">
-              <span className="text-[10px] font-medium text-[#94A3B8]">
+              <span className="text-[10px] font-medium text-[var(--text-secondary)]">
                 Feature {i + 1}
               </span>
               <button
                 onClick={() => removeFeature(i)}
-                className="p-0.5 rounded hover:bg-red-500/10 text-[#64748B] hover:text-red-400 transition-colors"
+                className="p-0.5 rounded hover:bg-red-500/10 text-[var(--text-tertiary)] hover:text-red-400 transition-colors"
               >
                 <Trash2 className="w-3 h-3" />
               </button>
@@ -212,7 +212,7 @@ function FeaturesFields({
       {features.length < 6 && (
         <button
           onClick={addFeature}
-          className="flex items-center gap-1 text-xs text-[#3B82F6] hover:text-[#60A5FA] transition-colors"
+          className="flex items-center gap-1 text-xs text-[var(--accent)] hover:text-[var(--accent)] transition-colors"
         >
           <Plus className="w-3 h-3" />
           Add Feature
@@ -328,12 +328,12 @@ function PricingFields({
             className="space-y-1.5 p-2.5 rounded-lg bg-white/[0.02] border border-white/[0.06]"
           >
             <div className="flex items-center justify-between">
-              <span className="text-[10px] font-medium text-[#94A3B8]">
+              <span className="text-[10px] font-medium text-[var(--text-secondary)]">
                 Plan {i + 1}
               </span>
               <button
                 onClick={() => removePlan(i)}
-                className="p-0.5 rounded hover:bg-red-500/10 text-[#64748B] hover:text-red-400 transition-colors"
+                className="p-0.5 rounded hover:bg-red-500/10 text-[var(--text-tertiary)] hover:text-red-400 transition-colors"
               >
                 <Trash2 className="w-3 h-3" />
               </button>
@@ -369,7 +369,7 @@ function PricingFields({
       {plans.length < 3 && (
         <button
           onClick={addPlan}
-          className="flex items-center gap-1 text-xs text-[#3B82F6] hover:text-[#60A5FA] transition-colors"
+          className="flex items-center gap-1 text-xs text-[var(--accent)] hover:text-[var(--accent)] transition-colors"
         >
           <Plus className="w-3 h-3" />
           Add Plan
@@ -481,11 +481,11 @@ export function SectionProperties({
           >
             {section.type}
           </span>
-          <span className="text-xs text-[#64748B]">Properties</span>
+          <span className="text-xs text-[var(--text-tertiary)]">Properties</span>
         </div>
         <button
           onClick={onClose}
-          className="p-1 rounded hover:bg-white/[0.06] text-[#64748B] hover:text-[#F1F5F9] transition-colors"
+          className="p-1 rounded hover:bg-white/[0.06] text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors"
         >
           <X className="w-4 h-4" />
         </button>
@@ -497,14 +497,14 @@ export function SectionProperties({
         <div className="space-y-3">{renderFields()}</div>
 
         {/* AI button */}
-        <button className="flex items-center justify-center gap-1.5 w-full px-3 py-2.5 rounded-lg text-xs font-medium text-[#8B5CF6] bg-[#8B5CF6]/10 hover:bg-[#8B5CF6]/20 transition-colors">
+        <button className="flex items-center justify-center gap-1.5 w-full px-3 py-2.5 rounded-lg text-xs font-medium text-[var(--accent)] bg-[var(--accent)]/10 hover:bg-[var(--accent)]/20 transition-colors">
           <Sparkles className="w-3.5 h-3.5" />
           AI: Write Content
         </button>
 
         {/* SEO section */}
         <div className="pt-3 border-t border-white/[0.06] space-y-3">
-          <span className="text-[10px] font-semibold uppercase tracking-wider text-[#64748B]">
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-tertiary)]">
             SEO
           </span>
           <Field

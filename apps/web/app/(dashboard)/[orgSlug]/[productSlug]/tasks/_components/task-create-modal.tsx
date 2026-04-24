@@ -29,17 +29,17 @@ function SelectField({
 
   return (
     <div className="relative">
-      <label className="block text-xs font-medium text-[#94A3B8] mb-1.5">{label}</label>
+      <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1.5">{label}</label>
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className="w-full flex items-center justify-between px-3 py-2 rounded-lg border border-white/[0.08] bg-white/[0.03] text-sm text-[#F1F5F9] hover:border-white/[0.15] transition-colors"
+        className="w-full flex items-center justify-between px-3 py-2 rounded-lg border border-white/[0.08] bg-white/[0.03] text-sm text-[var(--text-primary)] hover:border-white/[0.15] transition-colors"
       >
         <div className="flex items-center gap-2">
           <span className="w-2 h-2 rounded-full" style={{ backgroundColor: current.color }} />
           {current.label}
         </div>
-        <ChevronDown className={`w-3.5 h-3.5 text-[#64748B] transition-transform ${open ? 'rotate-180' : ''}`} />
+        <ChevronDown className={`w-3.5 h-3.5 text-[var(--text-tertiary)] transition-transform ${open ? 'rotate-180' : ''}`} />
       </button>
 
       {open && (
@@ -55,7 +55,7 @@ function SelectField({
                   setOpen(false)
                 }}
                 className={`flex items-center gap-2 w-full px-3 py-2 text-left text-sm hover:bg-white/[0.05] transition-colors ${
-                  opt === value ? 'text-[#F1F5F9]' : 'text-[#94A3B8]'
+                  opt === value ? 'text-[var(--text-primary)]' : 'text-[var(--text-secondary)]'
                 }`}
               >
                 <span className="w-2 h-2 rounded-full" style={{ backgroundColor: c.color }} />
@@ -136,10 +136,10 @@ export function TaskCreateModal({ open, onClose, onCreate }: TaskCreateModalProp
           >
             {/* Header */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-white/[0.06]">
-              <h2 className="text-base font-semibold text-[#F1F5F9]">New Task</h2>
+              <h2 className="text-base font-semibold text-[var(--text-primary)]">New Task</h2>
               <button
                 onClick={onClose}
-                className="w-7 h-7 rounded-lg flex items-center justify-center text-[#64748B] hover:text-[#F1F5F9] hover:bg-white/[0.05] transition-colors"
+                className="w-7 h-7 rounded-lg flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:bg-white/[0.05] transition-colors"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -149,26 +149,26 @@ export function TaskCreateModal({ open, onClose, onCreate }: TaskCreateModalProp
             <div className="px-6 py-5 space-y-4">
               {/* Title */}
               <div>
-                <label className="block text-xs font-medium text-[#94A3B8] mb-1.5">Title</label>
+                <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1.5">Title</label>
                 <input
                   type="text"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="What needs to be done?"
-                  className="w-full px-3 py-2 rounded-lg border border-white/[0.08] bg-white/[0.03] text-sm text-[#F1F5F9] placeholder:text-[#64748B] focus:outline-none focus:border-[#3B82F6]/50 focus:ring-1 focus:ring-[#3B82F6]/20 transition-colors"
+                  className="w-full px-3 py-2 rounded-lg border border-white/[0.08] bg-white/[0.03] text-sm text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:outline-none focus:border-[var(--accent)]/50 focus:ring-1 focus:ring-[var(--accent)]/20 transition-colors"
                   autoFocus
                 />
               </div>
 
               {/* Description */}
               <div>
-                <label className="block text-xs font-medium text-[#94A3B8] mb-1.5">Description</label>
+                <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1.5">Description</label>
                 <textarea
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="Add details about this task..."
                   rows={3}
-                  className="w-full px-3 py-2 rounded-lg border border-white/[0.08] bg-white/[0.03] text-sm text-[#F1F5F9] placeholder:text-[#64748B] focus:outline-none focus:border-[#3B82F6]/50 focus:ring-1 focus:ring-[#3B82F6]/20 transition-colors resize-none"
+                  className="w-full px-3 py-2 rounded-lg border border-white/[0.08] bg-white/[0.03] text-sm text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:outline-none focus:border-[var(--accent)]/50 focus:ring-1 focus:ring-[var(--accent)]/20 transition-colors resize-none"
                 />
               </div>
 
@@ -193,22 +193,22 @@ export function TaskCreateModal({ open, onClose, onCreate }: TaskCreateModalProp
               {/* Assignee & Due date row */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-medium text-[#94A3B8] mb-1.5">Assignee</label>
+                  <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1.5">Assignee</label>
                   <input
                     type="text"
                     value={assignee}
                     onChange={(e) => setAssignee(e.target.value)}
                     placeholder="Name"
-                    className="w-full px-3 py-2 rounded-lg border border-white/[0.08] bg-white/[0.03] text-sm text-[#F1F5F9] placeholder:text-[#64748B] focus:outline-none focus:border-[#3B82F6]/50 focus:ring-1 focus:ring-[#3B82F6]/20 transition-colors"
+                    className="w-full px-3 py-2 rounded-lg border border-white/[0.08] bg-white/[0.03] text-sm text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:outline-none focus:border-[var(--accent)]/50 focus:ring-1 focus:ring-[var(--accent)]/20 transition-colors"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-[#94A3B8] mb-1.5">Due Date</label>
+                  <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1.5">Due Date</label>
                   <input
                     type="date"
                     value={dueDate}
                     onChange={(e) => setDueDate(e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg border border-white/[0.08] bg-white/[0.03] text-sm text-[#F1F5F9] focus:outline-none focus:border-[#3B82F6]/50 focus:ring-1 focus:ring-[#3B82F6]/20 transition-colors [color-scheme:dark]"
+                    className="w-full px-3 py-2 rounded-lg border border-white/[0.08] bg-white/[0.03] text-sm text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent)]/50 focus:ring-1 focus:ring-[var(--accent)]/20 transition-colors [color-scheme:dark]"
                   />
                 </div>
               </div>
@@ -219,7 +219,7 @@ export function TaskCreateModal({ open, onClose, onCreate }: TaskCreateModalProp
               {/* AI placeholder */}
               <button
                 type="button"
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-[#3B82F6] bg-[#3B82F6]/10 hover:bg-[#3B82F6]/20 transition-colors"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-[var(--accent)] bg-[var(--accent)]/10 hover:bg-[var(--accent)]/20 transition-colors"
               >
                 <Sparkles className="w-3.5 h-3.5" />
                 AI: Auto-assign
@@ -228,14 +228,14 @@ export function TaskCreateModal({ open, onClose, onCreate }: TaskCreateModalProp
               <div className="flex items-center gap-2">
                 <button
                   onClick={onClose}
-                  className="px-4 py-2 rounded-lg text-sm text-[#94A3B8] hover:text-[#F1F5F9] hover:bg-white/[0.05] transition-colors"
+                  className="px-4 py-2 rounded-lg text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-white/[0.05] transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleCreate}
                   disabled={!title.trim()}
-                  className="px-4 py-2 rounded-lg text-sm font-medium text-white bg-[#3B82F6] hover:bg-[#2563EB] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                  className="px-4 py-2 rounded-lg text-sm font-medium text-white bg-[var(--accent)] hover:bg-[var(--accent)] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                 >
                   Create Task
                 </button>

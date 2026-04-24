@@ -70,11 +70,11 @@ export function OpenTasks() {
     >
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <ListTodo className="w-4 h-4 text-[#F59E0B]" />
-          <span className="text-sm font-medium text-[#94A3B8] uppercase tracking-wider">
+          <ListTodo className="w-4 h-4 text-[var(--color-warning)]" />
+          <span className="text-sm font-medium text-[var(--text-secondary)] uppercase tracking-wider">
             Open Tasks
           </span>
-          <span className="text-xs bg-[#F59E0B]/10 text-[#F59E0B] px-2 py-0.5 rounded-full font-medium">
+          <span className="text-xs bg-[var(--color-warning)]/10 text-[var(--color-warning)] px-2 py-0.5 rounded-full font-medium">
             {totalOpen}
           </span>
         </div>
@@ -95,10 +95,10 @@ export function OpenTasks() {
               title={statusLabels[task.status]}
             />
             <div className="flex-1 min-w-0">
-              <p className="text-sm text-[#F1F5F9] truncate">{task.title}</p>
+              <p className="text-sm text-[var(--text-primary)] truncate">{task.title}</p>
               <div className="flex items-center gap-2 mt-0.5">
-                <span className="text-[10px] text-[#64748B]">{task.assignee}</span>
-                <span className="text-[10px] text-[#64748B]">Due {task.due}</span>
+                <span className="text-[10px] text-[var(--text-tertiary)]">{task.assignee}</span>
+                <span className="text-[10px] text-[var(--text-tertiary)]">Due {task.due}</span>
               </div>
             </div>
             <span
@@ -116,7 +116,7 @@ export function OpenTasks() {
 
       <Link
         href={`/${params.orgSlug}/${params.productSlug}/tasks`}
-        className="flex items-center justify-center gap-1 mt-3 pt-3 border-t border-white/[0.06] text-xs text-[#3B82F6] hover:text-[#60A5FA] transition-colors"
+        className="flex items-center justify-center gap-1 mt-3 pt-3 border-t border-white/[0.06] text-xs text-[var(--accent)] hover:text-[var(--accent)] transition-colors"
       >
         View All Tasks
         <ArrowRight className="w-3 h-3" />

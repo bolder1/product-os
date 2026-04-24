@@ -154,8 +154,8 @@ export default function StepReviewLaunch({
     <div className="space-y-8">
       {/* ── Header ── */}
       <div>
-        <h2 className="text-2xl font-bold text-[#F1F5F9] mb-2">Review & Launch</h2>
-        <p className="text-[#94A3B8] text-sm">
+        <h2 className="text-2xl font-bold text-[var(--text-primary)] mb-2">Review & Launch</h2>
+        <p className="text-[var(--text-secondary)] text-sm">
           Review your product plan and the auto-generated task breakdown. Customize tasks, then launch.
         </p>
       </div>
@@ -169,20 +169,20 @@ export default function StepReviewLaunch({
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.04 }}
             onClick={() => onEditStep(card.step)}
-            className="bg-white/[0.03] border border-white/[0.08] rounded-xl p-3 text-left hover:border-[#8B5CF6]/30 transition-all group"
+            className="bg-white/[0.03] border border-white/[0.08] rounded-xl p-3 text-left hover:border-[var(--accent)]/30 transition-all group"
           >
             <div className="flex items-center justify-between mb-1.5">
               <div
                 className={`w-7 h-7 rounded-lg flex items-center justify-center ${
-                  card.empty ? 'bg-white/[0.05] text-[#64748B]' : 'bg-[#8B5CF6]/10 text-[#8B5CF6]'
+                  card.empty ? 'bg-white/[0.05] text-[var(--text-tertiary)]' : 'bg-[var(--accent)]/10 text-[var(--accent)]'
                 }`}
               >
                 {card.icon}
               </div>
-              <Edit3 className="w-3 h-3 text-[#64748B] opacity-0 group-hover:opacity-100 transition-opacity" />
+              <Edit3 className="w-3 h-3 text-[var(--text-tertiary)] opacity-0 group-hover:opacity-100 transition-opacity" />
             </div>
-            <p className="text-[10px] font-medium text-[#64748B] uppercase tracking-wider">{card.label}</p>
-            <p className={`text-xs mt-0.5 ${card.empty ? 'text-[#64748B] italic' : 'text-[#F1F5F9]'}`}>
+            <p className="text-[10px] font-medium text-[var(--text-tertiary)] uppercase tracking-wider">{card.label}</p>
+            <p className={`text-xs mt-0.5 ${card.empty ? 'text-[var(--text-tertiary)] italic' : 'text-[var(--text-primary)]'}`}>
               {card.value}
             </p>
           </motion.button>
@@ -192,7 +192,7 @@ export default function StepReviewLaunch({
       {/* ── Divider ── */}
       <div className="flex items-center gap-3">
         <div className="flex-1 h-px bg-white/[0.06]" />
-        <span className="text-[10px] font-medium text-[#64748B] uppercase tracking-wider">
+        <span className="text-[10px] font-medium text-[var(--text-tertiary)] uppercase tracking-wider">
           Auto-Generated Tasks ({generatedTasks.length})
         </span>
         <div className="flex-1 h-px bg-white/[0.06]" />
@@ -200,7 +200,7 @@ export default function StepReviewLaunch({
 
       {/* ── Task Breakdown by Role ── */}
       {generatedTasks.length === 0 ? (
-        <div className="text-center py-8 text-[#64748B] text-sm">
+        <div className="text-center py-8 text-[var(--text-tertiary)] text-sm">
           Add features in Step 2 to auto-generate tasks.
         </div>
       ) : (
@@ -232,15 +232,15 @@ export default function StepReviewLaunch({
                     {role}
                   </span>
 
-                  <span className="text-xs text-[#64748B]">
+                  <span className="text-xs text-[var(--text-tertiary)]">
                     {roleTasks.length} task{roleTasks.length !== 1 ? 's' : ''}
                   </span>
 
                   <div className="ml-auto">
                     {isExpanded ? (
-                      <ChevronUp className="w-4 h-4 text-[#64748B]" />
+                      <ChevronUp className="w-4 h-4 text-[var(--text-tertiary)]" />
                     ) : (
-                      <ChevronDown className="w-4 h-4 text-[#64748B]" />
+                      <ChevronDown className="w-4 h-4 text-[var(--text-tertiary)]" />
                     )}
                   </div>
                 </button>
@@ -264,10 +264,10 @@ export default function StepReviewLaunch({
                             transition={{ delay: taskIndex * 0.03 }}
                             className="flex items-center gap-2 py-2 px-3 rounded-lg hover:bg-white/[0.02] transition-colors group"
                           >
-                            <p className="text-sm text-[#F1F5F9] flex-1 min-w-0">{task.title}</p>
+                            <p className="text-sm text-[var(--text-primary)] flex-1 min-w-0">{task.title}</p>
 
                             {/* Feature link */}
-                            <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/[0.05] text-[#64748B] flex-shrink-0 max-w-[120px] truncate">
+                            <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/[0.05] text-[var(--text-tertiary)] flex-shrink-0 max-w-[120px] truncate">
                               {task.feature}
                             </span>
 
@@ -277,7 +277,7 @@ export default function StepReviewLaunch({
                             {showCustomize && (
                               <button
                                 onClick={() => removeTask(task.id)}
-                                className="text-[10px] text-[#F43F5E]/60 hover:text-[#F43F5E] transition-colors flex-shrink-0"
+                                className="text-[10px] text-[var(--color-error)]/60 hover:text-[var(--color-error)] transition-colors flex-shrink-0"
                               >
                                 Remove
                               </button>
@@ -299,13 +299,13 @@ export default function StepReviewLaunch({
         <div className="flex items-center gap-3">
           <button
             onClick={() => setShowCustomize(!showCustomize)}
-            className="flex items-center gap-2 px-4 py-2.5 bg-white/[0.05] border border-white/[0.08] rounded-xl text-sm text-[#94A3B8] hover:bg-white/[0.08] transition-colors"
+            className="flex items-center gap-2 px-4 py-2.5 bg-white/[0.05] border border-white/[0.08] rounded-xl text-sm text-[var(--text-secondary)] hover:bg-white/[0.08] transition-colors"
           >
             <Settings className="w-4 h-4" />
             {showCustomize ? 'Done Customizing' : 'Customize Tasks'}
           </button>
 
-          <button className="flex items-center gap-2 px-4 py-2.5 bg-white/[0.05] border border-white/[0.08] rounded-xl text-sm text-[#94A3B8] hover:bg-white/[0.08] transition-colors">
+          <button className="flex items-center gap-2 px-4 py-2.5 bg-white/[0.05] border border-white/[0.08] rounded-xl text-sm text-[var(--text-secondary)] hover:bg-white/[0.08] transition-colors">
             <UserPlus className="w-4 h-4" />
             Assign Team Members
           </button>
@@ -318,7 +318,7 @@ export default function StepReviewLaunch({
         whileTap={isLaunching ? {} : { scale: 0.98 }}
         onClick={isLaunching ? undefined : onLaunch}
         disabled={isLaunching}
-        className="w-full flex items-center justify-center gap-2 px-5 py-4 rounded-xl text-sm text-white font-semibold bg-gradient-to-r from-[#8B5CF6] to-[#7C3AED] hover:from-[#8B5CF6]/90 hover:to-[#7C3AED]/90 transition-all shadow-lg shadow-[#8B5CF6]/20 disabled:opacity-60 disabled:cursor-not-allowed"
+        className="w-full flex items-center justify-center gap-2 px-5 py-4 rounded-xl text-sm text-white font-semibold bg-gradient-to-r from-[var(--accent)] to-[var(--accent)] hover:from-[var(--accent)]/90 hover:to-[var(--accent)]/90 transition-all shadow-lg shadow-[var(--accent)]/20 disabled:opacity-60 disabled:cursor-not-allowed"
       >
         {isLaunching ? (
           <>

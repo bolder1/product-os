@@ -54,16 +54,16 @@ export default function ElementPalette({ open, onClose, onAddElement }: ElementP
             className="absolute bottom-16 left-1/2 -translate-x-1/2 z-50 w-[380px] bg-[#0d1129]/95 backdrop-blur-xl border border-white/[0.08] rounded-2xl shadow-2xl overflow-hidden"
           >
             <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.06]">
-              <span className="text-sm font-semibold text-[#F1F5F9]">Add Element</span>
+              <span className="text-sm font-semibold text-[var(--text-primary)]">Add Element</span>
               <button onClick={onClose} className="p-1 rounded-lg hover:bg-white/[0.06] transition-colors">
-                <X className="w-4 h-4 text-[#64748B]" />
+                <X className="w-4 h-4 text-[var(--text-tertiary)]" />
               </button>
             </div>
 
             <div className="p-3 max-h-[360px] overflow-y-auto space-y-4">
               {grouped.map(({ category, items }) => (
                 <div key={category}>
-                  <p className="text-[10px] uppercase tracking-widest text-[#64748B] font-semibold mb-2 px-1">
+                  <p className="text-[10px] uppercase tracking-widest text-[var(--text-tertiary)] font-semibold mb-2 px-1">
                     {category}
                   </p>
                   <div className="grid grid-cols-4 gap-1.5">
@@ -80,8 +80,8 @@ export default function ElementPalette({ open, onClose, onAddElement }: ElementP
                           }}
                           className="flex flex-col items-center gap-1.5 py-2.5 px-1 rounded-lg hover:bg-white/[0.04] transition-colors"
                         >
-                          <Icon className="w-4 h-4 text-[#94A3B8]" />
-                          <span className="text-[10px] text-[#94A3B8] font-medium">{item.type}</span>
+                          <Icon className="w-4 h-4 text-[var(--text-secondary)]" />
+                          <span className="text-[10px] text-[var(--text-secondary)] font-medium">{item.type}</span>
                         </motion.button>
                       )
                     })}

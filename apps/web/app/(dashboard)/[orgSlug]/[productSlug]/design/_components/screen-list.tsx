@@ -51,7 +51,7 @@ export default function ScreenList({ screens, selectedScreenId, onSelectScreen, 
   return (
     <div className="h-full flex flex-col overflow-hidden">
       <div className="shrink-0 px-3 py-3 border-b border-white/[0.08]">
-        <p className="text-[10px] uppercase tracking-widest text-[#64748B] font-semibold">Screens</p>
+        <p className="text-[10px] uppercase tracking-widest text-[var(--text-tertiary)] font-semibold">Screens</p>
       </div>
 
       <div className="flex-1 overflow-y-auto px-2 py-2 space-y-4 scrollbar-thin scrollbar-thumb-white/10">
@@ -62,8 +62,8 @@ export default function ScreenList({ screens, selectedScreenId, onSelectScreen, 
           return (
             <div key={category}>
               <div className="flex items-center gap-1.5 px-1 mb-2">
-                <Icon className="w-3 h-3 text-[#64748B]" />
-                <span className="text-[10px] uppercase tracking-wider text-[#64748B] font-medium">
+                <Icon className="w-3 h-3 text-[var(--text-tertiary)]" />
+                <span className="text-[10px] uppercase tracking-wider text-[var(--text-tertiary)] font-medium">
                   {cfg.label}
                 </span>
               </div>
@@ -119,10 +119,10 @@ export default function ScreenList({ screens, selectedScreenId, onSelectScreen, 
                       </div>
 
                       <div className="flex items-center justify-between">
-                        <span className={`text-xs font-medium truncate ${isSelected ? 'text-[#F1F5F9]' : 'text-[#94A3B8]'}`}>
+                        <span className={`text-xs font-medium truncate ${isSelected ? 'text-[var(--text-primary)]' : 'text-[var(--text-secondary)]'}`}>
                           {screen.name}
                         </span>
-                        <span className="text-[9px] text-[#64748B] bg-white/[0.04] px-1.5 py-0.5 rounded-md font-mono">
+                        <span className="text-[9px] text-[var(--text-tertiary)] bg-white/[0.04] px-1.5 py-0.5 rounded-md font-mono">
                           {screen.width}x{screen.height}
                         </span>
                       </div>
@@ -141,8 +141,8 @@ export default function ScreenList({ screens, selectedScreenId, onSelectScreen, 
           onClick={onAddScreen}
           className="w-full flex flex-col items-center justify-center gap-2 py-6 rounded-lg border border-dashed border-white/[0.12] hover:border-violet-500/40 hover:bg-white/[0.02] transition-colors"
         >
-          <Plus className="w-5 h-5 text-[#64748B]" />
-          <span className="text-xs text-[#64748B]">Add Screen</span>
+          <Plus className="w-5 h-5 text-[var(--text-tertiary)]" />
+          <span className="text-xs text-[var(--text-tertiary)]">Add Screen</span>
         </motion.button>
       </div>
     </div>

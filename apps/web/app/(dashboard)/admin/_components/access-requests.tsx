@@ -126,8 +126,8 @@ export default function AccessRequests() {
         custom={0}
       >
         <div>
-          <h3 className="text-sm font-medium text-[#F1F5F9]">Pending Requests</h3>
-          <p className="text-xs text-[#64748B] mt-0.5">{pendingRequests.length} requests awaiting review</p>
+          <h3 className="text-sm font-medium text-[var(--text-primary)]">Pending Requests</h3>
+          <p className="text-xs text-[var(--text-tertiary)] mt-0.5">{pendingRequests.length} requests awaiting review</p>
         </div>
         <button className="flex items-center gap-2 px-3 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-lg text-emerald-400 text-sm hover:bg-emerald-500/20 transition">
           <Check className="w-4 h-4" />
@@ -153,7 +153,7 @@ export default function AccessRequests() {
                   {request.avatar}
                 </div>
                 <div>
-                  <div className="text-sm font-medium text-[#F1F5F9]">{request.userName}</div>
+                  <div className="text-sm font-medium text-[var(--text-primary)]">{request.userName}</div>
                   <span
                     className="text-[10px] px-1.5 py-0.5 rounded-full font-medium"
                     style={{
@@ -165,20 +165,20 @@ export default function AccessRequests() {
                   </span>
                 </div>
               </div>
-              <div className="flex items-center gap-1 text-xs text-[#4A5568]">
+              <div className="flex items-center gap-1 text-xs text-[var(--text-tertiary)]">
                 <Clock className="w-3 h-3" />
                 {request.timestamp}
               </div>
             </div>
 
             <div className="mb-3">
-              <div className="text-xs text-[#64748B] mb-1">Requesting access to</div>
-              <span className="text-sm font-medium text-[#3B82F6] bg-[#3B82F6]/10 px-2 py-1 rounded-lg">
+              <div className="text-xs text-[var(--text-tertiary)] mb-1">Requesting access to</div>
+              <span className="text-sm font-medium text-[var(--accent)] bg-[var(--accent)]/10 px-2 py-1 rounded-lg">
                 {request.requestedStudio}
               </span>
             </div>
 
-            <p className="text-xs text-[#94A3B8] leading-relaxed mb-4 line-clamp-2">
+            <p className="text-xs text-[var(--text-secondary)] leading-relaxed mb-4 line-clamp-2">
               &ldquo;{request.reason}&rdquo;
             </p>
 
@@ -200,7 +200,7 @@ export default function AccessRequests() {
       <motion.div variants={fadeUp} custom={5}>
         <button
           onClick={() => setShowHistory(!showHistory)}
-          className="flex items-center gap-2 text-sm text-[#64748B] hover:text-[#94A3B8] transition mb-3"
+          className="flex items-center gap-2 text-sm text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] transition mb-3"
         >
           <motion.div animate={{ rotate: showHistory ? 180 : 0 }} transition={{ duration: 0.2 }}>
             <ChevronDown className="w-4 h-4" />
@@ -222,16 +222,16 @@ export default function AccessRequests() {
                 }`}
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-white/[0.06] flex items-center justify-center text-xs font-medium text-[#94A3B8]">
+                  <div className="w-8 h-8 rounded-full bg-white/[0.06] flex items-center justify-center text-xs font-medium text-[var(--text-secondary)]">
                     {decision.avatar}
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="text-sm text-[#F1F5F9]">{decision.userName}</span>
-                      <span className="text-xs text-[#64748B]">requested</span>
-                      <span className="text-sm text-[#3B82F6]">{decision.requestedStudio}</span>
+                      <span className="text-sm text-[var(--text-primary)]">{decision.userName}</span>
+                      <span className="text-xs text-[var(--text-tertiary)]">requested</span>
+                      <span className="text-sm text-[var(--accent)]">{decision.requestedStudio}</span>
                     </div>
-                    <div className="text-xs text-[#4A5568] mt-0.5">
+                    <div className="text-xs text-[var(--text-tertiary)] mt-0.5">
                       by {decision.decidedBy} &middot; {decision.timestamp}
                     </div>
                   </div>

@@ -71,12 +71,12 @@ export function TaskCard({ task, index, onDragStart }: TaskCardProps) {
       className="group cursor-grab active:cursor-grabbing rounded-xl border border-white/[0.08] bg-white/[0.03] p-4 transition-all duration-200 hover:border-white/[0.15] hover:bg-white/[0.05] hover:shadow-[0_0_20px_rgba(59,130,246,0.06)] hover:-translate-y-0.5"
     >
       {/* Title */}
-      <h4 className="text-sm font-semibold text-[#F1F5F9] leading-snug mb-1">
+      <h4 className="text-sm font-semibold text-[var(--text-primary)] leading-snug mb-1">
         {task.title}
       </h4>
 
       {/* Description preview */}
-      <p className="text-xs text-[#64748B] leading-relaxed truncate mb-3">
+      <p className="text-xs text-[var(--text-tertiary)] leading-relaxed truncate mb-3">
         {task.description}
       </p>
 
@@ -98,20 +98,14 @@ export function TaskCard({ task, index, onDragStart }: TaskCardProps) {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           {/* Priority badge */}
-          <span
-            className="text-[10px] font-medium px-2 py-0.5 rounded-full"
-            style={{
-              color: priority.color,
-              backgroundColor: `${priority.color}15`,
-            }}
-          >
+          <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${priority.pill}`}>
             {priority.label}
           </span>
         </div>
 
         <div className="flex items-center gap-2">
           {/* Due date */}
-          <div className="flex items-center gap-1 text-[10px] text-[#64748B]">
+          <div className="flex items-center gap-1 text-[10px] text-[var(--text-tertiary)]">
             <Calendar className="w-3 h-3" />
             <span>{new Date(task.dueDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
           </div>

@@ -72,7 +72,7 @@ export default function EntityEditor({ entity, allEntities, onChange, onDelete }
           <input
             value={entity.name}
             onChange={(e) => update({ name: e.target.value })}
-            className="flex-1 text-xl font-semibold bg-transparent text-[#F1F5F9] outline-none border-b border-transparent focus:border-emerald-500/40 pb-1 transition-colors"
+            className="flex-1 text-xl font-semibold bg-transparent text-[var(--text-primary)] outline-none border-b border-transparent focus:border-emerald-500/40 pb-1 transition-colors"
             placeholder="Entity name"
           />
           <ViewInGraphLink nodeId={entity.id} />
@@ -81,17 +81,17 @@ export default function EntityEditor({ entity, allEntities, onChange, onDelete }
           value={entity.description}
           onChange={(e) => update({ description: e.target.value })}
           rows={2}
-          className="text-sm bg-white/[0.03] rounded-lg border border-white/[0.08] p-3 text-[#94A3B8] outline-none resize-none focus:border-emerald-500/40 transition-colors"
+          className="text-sm bg-white/[0.03] rounded-lg border border-white/[0.08] p-3 text-[var(--text-secondary)] outline-none resize-none focus:border-emerald-500/40 transition-colors"
           placeholder="Entity description..."
         />
       </div>
 
       {/* Fields table */}
       <div className="flex flex-col gap-2">
-        <h3 className="text-sm font-medium text-[#F1F5F9]">Fields</h3>
+        <h3 className="text-sm font-medium text-[var(--text-primary)]">Fields</h3>
         <div className="rounded-lg border border-white/[0.08] overflow-hidden">
           {/* Header row */}
-          <div className="grid grid-cols-[1fr_130px_60px_36px] gap-2 px-3 py-2 bg-white/[0.04] text-[10px] uppercase tracking-wider text-[#64748B]">
+          <div className="grid grid-cols-[1fr_130px_60px_36px] gap-2 px-3 py-2 bg-white/[0.04] text-[10px] uppercase tracking-wider text-[var(--text-tertiary)]">
             <span>Name</span>
             <span>Type</span>
             <span className="text-center">Required</span>
@@ -107,16 +107,16 @@ export default function EntityEditor({ entity, allEntities, onChange, onDelete }
               <input
                 value={field.name}
                 onChange={(e) => updateField(idx, { name: e.target.value })}
-                className="bg-transparent text-sm text-[#F1F5F9] outline-none"
+                className="bg-transparent text-sm text-[var(--text-primary)] outline-none"
                 placeholder="field_name"
               />
               <select
                 value={field.type}
                 onChange={(e) => updateField(idx, { type: e.target.value as FieldType })}
-                className="bg-white/[0.05] text-sm text-[#94A3B8] rounded px-1 py-0.5 outline-none border border-white/[0.08]"
+                className="bg-white/[0.05] text-sm text-[var(--text-secondary)] rounded px-1 py-0.5 outline-none border border-white/[0.08]"
               >
                 {FIELD_TYPES.map((t) => (
-                  <option key={t} value={t} className="bg-[#0c1022]">
+                  <option key={t} value={t} className="bg-[var(--bg-inset)]">
                     {t}
                   </option>
                 ))}
@@ -131,7 +131,7 @@ export default function EntityEditor({ entity, allEntities, onChange, onDelete }
               </label>
               <button
                 onClick={() => removeField(idx)}
-                className="flex items-center justify-center text-[#64748B] hover:text-red-400 transition-colors"
+                className="flex items-center justify-center text-[var(--text-tertiary)] hover:text-red-400 transition-colors"
               >
                 <Trash2 className="w-3.5 h-3.5" />
               </button>
@@ -140,7 +140,7 @@ export default function EntityEditor({ entity, allEntities, onChange, onDelete }
         </div>
         <button
           onClick={addField}
-          className="flex items-center gap-1.5 text-xs text-[#64748B] hover:text-emerald-400 transition-colors self-start mt-1"
+          className="flex items-center gap-1.5 text-xs text-[var(--text-tertiary)] hover:text-emerald-400 transition-colors self-start mt-1"
         >
           <Plus className="w-3.5 h-3.5" /> Add Field
         </button>
@@ -148,7 +148,7 @@ export default function EntityEditor({ entity, allEntities, onChange, onDelete }
 
       {/* Relations */}
       <div className="flex flex-col gap-2">
-        <h3 className="text-sm font-medium text-[#F1F5F9]">Relations</h3>
+        <h3 className="text-sm font-medium text-[var(--text-primary)]">Relations</h3>
         <div className="flex flex-col gap-2">
           {entity.relations.map((rel, idx) => (
             <div
@@ -158,18 +158,18 @@ export default function EntityEditor({ entity, allEntities, onChange, onDelete }
               <input
                 value={rel.name}
                 onChange={(e) => updateRelation(idx, { name: e.target.value })}
-                className="bg-transparent text-sm text-[#F1F5F9] outline-none w-28"
+                className="bg-transparent text-sm text-[var(--text-primary)] outline-none w-28"
                 placeholder="name"
               />
               <select
                 value={rel.targetEntityId}
                 onChange={(e) => updateRelation(idx, { targetEntityId: e.target.value })}
-                className="bg-white/[0.05] text-sm text-[#94A3B8] rounded px-1.5 py-0.5 outline-none border border-white/[0.08] flex-1"
+                className="bg-white/[0.05] text-sm text-[var(--text-secondary)] rounded px-1.5 py-0.5 outline-none border border-white/[0.08] flex-1"
               >
                 {allEntities
                   .filter((e) => e.id !== entity.id)
                   .map((e) => (
-                    <option key={e.id} value={e.id} className="bg-[#0c1022]">
+                    <option key={e.id} value={e.id} className="bg-[var(--bg-inset)]">
                       {e.name}
                     </option>
                   ))}
@@ -177,17 +177,17 @@ export default function EntityEditor({ entity, allEntities, onChange, onDelete }
               <select
                 value={rel.cardinality}
                 onChange={(e) => updateRelation(idx, { cardinality: e.target.value as Cardinality })}
-                className="bg-white/[0.05] text-sm text-[#94A3B8] rounded px-1.5 py-0.5 outline-none border border-white/[0.08]"
+                className="bg-white/[0.05] text-sm text-[var(--text-secondary)] rounded px-1.5 py-0.5 outline-none border border-white/[0.08]"
               >
                 {CARDINALITIES.map((t) => (
-                  <option key={t} value={t} className="bg-[#0c1022]">
+                  <option key={t} value={t} className="bg-[var(--bg-inset)]">
                     {t}
                   </option>
                 ))}
               </select>
               <button
                 onClick={() => removeRelation(idx)}
-                className="text-[#64748B] hover:text-red-400 transition-colors"
+                className="text-[var(--text-tertiary)] hover:text-red-400 transition-colors"
               >
                 <Trash2 className="w-3.5 h-3.5" />
               </button>
@@ -196,7 +196,7 @@ export default function EntityEditor({ entity, allEntities, onChange, onDelete }
         </div>
         <button
           onClick={addRelation}
-          className="flex items-center gap-1.5 text-xs text-[#64748B] hover:text-emerald-400 transition-colors self-start mt-1"
+          className="flex items-center gap-1.5 text-xs text-[var(--text-tertiary)] hover:text-emerald-400 transition-colors self-start mt-1"
         >
           <Plus className="w-3.5 h-3.5" /> Add Relation
         </button>

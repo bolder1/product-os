@@ -13,6 +13,7 @@ import { useBudgetStore } from '../../lib/budget-store'
 import { UserMenu } from './user-menu'
 import { ModeSwitcher } from './mode-switcher'
 import { RoleSelector } from './role-selector'
+import { ThemeSwitcher } from './theme-switcher'
 
 function timeAgo(dateStr: string): string {
   const seconds = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000)
@@ -156,6 +157,9 @@ export function TopBar({ extraRight }: TopBarProps = {}) {
         >
           <Network size={14} />
         </button>
+
+        {/* Theme (R19) */}
+        <ThemeSwitcher />
 
         {/* Notifications */}
         <div className="relative" ref={notifRef}>

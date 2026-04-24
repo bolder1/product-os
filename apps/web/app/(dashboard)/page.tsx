@@ -4,298 +4,67 @@ import { useState, useMemo, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import {
   Plus,
-  Lightbulb,
-  Hammer,
-  Rocket,
-  Activity,
   Search,
   Bell,
   Settings,
   ArrowRight,
-  LayoutGrid,
-  GitBranch,
-  Sparkles,
   Clock,
-  FileText,
-  Layers,
-  Zap,
-  CheckCircle2,
-  AlertTriangle,
-  TrendingUp,
   Shield,
-  Code2,
-  Palette,
-  Bug,
-  BarChart3,
-  Briefcase,
-  Server,
-  Eye,
-  Component,
+  Store,
 } from 'lucide-react'
 import { useAuth } from '../lib/auth-context'
 import { roleConfigs, type OrgRole } from '../lib/role-config'
 import { useProductStore } from '../lib/product-store'
-import { useActivityStore, type ActivityType } from '../lib/activity-store'
-import { useTaskStore } from '../lib/task-store'
 import { useNotificationStore } from '../lib/notification-store'
 import { useCommandPaletteStore } from '../lib/command-palette-store'
 import { trpc } from '../lib/trpc'
-import RoleTaskSummary from './_components/role-task-summary'
-import StudioShortcuts from './_components/studio-shortcuts'
+import { Shield as ShieldIcon, Briefcase, BarChart3, Bug, Palette, Code2, Server, Eye } from 'lucide-react'
 import CreateProductModal from './_components/create-product-modal'
+import QuickStartTemplates from './_components/quick-start-templates'
+import TodaysAITasks from './_components/todays-ai-tasks'
+import { TemplateMarketplace } from '../components/shared/template-marketplace'
 
-/* ── Role icon map ── */
 const roleIconMap: Record<string, React.ElementType> = {
-  Shield, Briefcase, BarChart3, Bug, Palette, Code2, Server, Eye,
+  Shield: ShieldIcon, Briefcase, BarChart3, Bug, Palette, Code2, Server, Eye,
 }
 
-/* ── Role-specific quick link categories ── */
-const roleCategoryAccess: Record<OrgRole, string[]> = {
-  admin: ['plan', 'build', 'ship', 'operate'],
-  manager: ['plan', 'build', 'ship', 'operate'],
-  business_analyst: ['plan', 'operate'],
-  product_designer: ['build', 'operate'],
-  frontend_dev: ['build', 'ship', 'operate'],
-  backend_dev: ['build', 'ship', 'operate'],
-  qa: ['ship', 'operate'],
-  viewer: ['operate'],
-}
-
-/* ── Role-specific overview stats ── */
-const roleStats: Record<OrgRole, Array<{ label: string; value: string; icon: React.ElementType; color: string }>> = {
-  admin: [
-    { label: 'Total Members', value: '24', icon: Layers, color: '#3B82F6' },
-    { label: 'Active Products', value: '7', icon: CheckCircle2, color: '#10B981' },
-    { label: 'Pending Requests', value: '4', icon: AlertTriangle, color: '#F59E0B' },
-    { label: 'AI Actions Today', value: '18', icon: Sparkles, color: '#8B5CF6' },
-  ],
-  manager: [
-    { label: 'Active Products', value: '7', icon: Layers, color: '#3B82F6' },
-    { label: 'Open Tasks', value: '12', icon: CheckCircle2, color: '#10B981' },
-    { label: 'Pending Approvals', value: '5', icon: AlertTriangle, color: '#F59E0B' },
-    { label: 'Sprint Progress', value: '68%', icon: TrendingUp, color: '#8B5CF6' },
-  ],
-  business_analyst: [
-    { label: 'Canvases', value: '6', icon: Layers, color: '#8B5CF6' },
-    { label: 'Requirements', value: '34', icon: FileText, color: '#3B82F6' },
-    { label: 'Pending Reviews', value: '3', icon: AlertTriangle, color: '#F59E0B' },
-    { label: 'Analytics Reports', value: '8', icon: BarChart3, color: '#10B981' },
-  ],
-  product_designer: [
-    { label: 'Components', value: '24', icon: Component, color: '#06B6D4' },
-    { label: 'Screens', value: '8', icon: Layers, color: '#EC4899' },
-    { label: 'Brand Assets', value: '42', icon: Palette, color: '#F43F5E' },
-    { label: 'Design Tokens', value: '156', icon: Sparkles, color: '#8B5CF6' },
-  ],
-  frontend_dev: [
-    { label: 'Open PRs', value: '3', icon: GitBranch, color: '#06B6D4' },
-    { label: 'Build Status', value: 'Passing', icon: CheckCircle2, color: '#10B981' },
-    { label: 'Components', value: '18', icon: Component, color: '#3B82F6' },
-    { label: 'Handoff Items', value: '5', icon: FileText, color: '#8B5CF6' },
-  ],
-  backend_dev: [
-    { label: 'Open PRs', value: '2', icon: GitBranch, color: '#10B981' },
-    { label: 'Build Status', value: 'Passing', icon: CheckCircle2, color: '#10B981' },
-    { label: 'Workflows', value: '9', icon: Activity, color: '#3B82F6' },
-    { label: 'API Endpoints', value: '24', icon: Server, color: '#8B5CF6' },
-  ],
-  qa: [
-    { label: 'Test Suites', value: '12', icon: Bug, color: '#F59E0B' },
-    { label: 'Pass Rate', value: '94%', icon: CheckCircle2, color: '#10B981' },
-    { label: 'Open Bugs', value: '7', icon: AlertTriangle, color: '#F43F5E' },
-    { label: 'Next Release', value: 'v2.1', icon: Rocket, color: '#3B82F6' },
-  ],
-  viewer: [
-    { label: 'Active Products', value: '7', icon: Layers, color: '#3B82F6' },
-    { label: 'Recent Updates', value: '14', icon: Activity, color: '#10B981' },
-    { label: 'Reports', value: '5', icon: BarChart3, color: '#8B5CF6' },
-    { label: 'Announcements', value: '2', icon: Bell, color: '#F59E0B' },
-  ],
-}
-
-// Products are now sourced from useProductStore
-
-const quickLinks = [
-  {
-    key: 'plan',
-    label: 'Plan',
-    description: 'Define product vision, goals, and user journeys',
-    icon: Lightbulb,
-    color: '#8B5CF6',
-    studios: ['Product Planner', 'Template Gallery', 'Canvas'],
-    href: 'planner',
-  },
-  {
-    key: 'build',
-    label: 'Build',
-    description: 'Design systems, components, workflows, and pages',
-    icon: Hammer,
-    color: '#3B82F6',
-    studios: ['Brand', 'Components', 'Design', 'Workflow', 'Pages', 'Graphics'],
-    href: 'brand',
-  },
-  {
-    key: 'ship',
-    label: 'Ship',
-    description: 'Generate code, handoff specs, and manage releases',
-    icon: Rocket,
-    color: '#10B981',
-    studios: ['Code', 'Handoff', 'Releases', 'Testing'],
-    href: 'code',
-  },
-  {
-    key: 'operate',
-    label: 'Operate',
-    description: 'Track tasks, approvals, analytics, and notifications',
-    icon: Activity,
-    color: '#F59E0B',
-    studios: ['Tasks', 'Approvals', 'Notifications', 'Analytics'],
-    href: 'tasks',
-  },
-]
-
-// Recent activity is now sourced from useActivityStore
-
-/* ── Animations ── */
 const fadeUp = {
-  hidden: { opacity: 0, y: 20 },
+  hidden: { opacity: 0, y: 16 },
   visible: (i: number) => ({
     opacity: 1,
     y: 0,
-    transition: { delay: i * 0.08, duration: 0.5, ease: [0.16, 1, 0.3, 1] as [number, number, number, number] },
+    transition: { delay: i * 0.06, duration: 0.45, ease: [0.16, 1, 0.3, 1] as [number, number, number, number] },
   }),
 }
 
 const stagger = {
-  visible: { transition: { staggerChildren: 0.06 } },
-}
-
-/* ── Empty State SVG ── */
-function EmptyStateIllustration() {
-  return (
-    <motion.svg
-      width="320"
-      height="240"
-      viewBox="0 0 320 240"
-      fill="none"
-      initial={{ opacity: 0, scale: 0.9 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] as [number, number, number, number] }}
-    >
-      {/* Background grid */}
-      <defs>
-        <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse">
-          <path d="M 32 0 L 0 0 0 32" fill="none" stroke="rgba(59,130,246,0.06)" strokeWidth="0.5" />
-        </pattern>
-        <radialGradient id="centerGrad" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stopColor="#6398ff" />
-          <stop offset="100%" stopColor="#8b5cf6" />
-        </radialGradient>
-      </defs>
-      <rect width="320" height="240" fill="url(#grid)" />
-
-      {/* Central node cluster */}
-      <motion.circle
-        cx="160" cy="100" r="24"
-        fill="rgba(99,152,255,0.12)" stroke="rgba(99,152,255,0.35)" strokeWidth="1.5"
-        initial={{ scale: 0 }} animate={{ scale: 1 }}
-        transition={{ delay: 0.3, type: 'spring', stiffness: 200 }}
-      />
-      <motion.circle
-        cx="160" cy="100" r="8"
-        fill="url(#centerGrad)"
-        initial={{ scale: 0 }} animate={{ scale: 1 }}
-        transition={{ delay: 0.5, type: 'spring', stiffness: 300 }}
-      />
-
-      {/* Orbiting nodes */}
-      {[
-        { cx: 80, cy: 70, color: '#8B5CF6', delay: 0.6 },
-        { cx: 240, cy: 70, color: '#06B6D4', delay: 0.7 },
-        { cx: 100, cy: 160, color: '#10B981', delay: 0.8 },
-        { cx: 220, cy: 160, color: '#F59E0B', delay: 0.9 },
-        { cx: 160, cy: 200, color: '#EC4899', delay: 1.0 },
-      ].map((node, i) => (
-        <g key={i}>
-          <motion.line
-            x1="160" y1="100" x2={node.cx} y2={node.cy}
-            stroke={`${node.color}30`} strokeWidth="1" strokeDasharray="4 4"
-            initial={{ pathLength: 0 }} animate={{ pathLength: 1 }}
-            transition={{ delay: node.delay, duration: 0.6 }}
-          />
-          <motion.circle
-            cx={node.cx} cy={node.cy} r="6"
-            fill={`${node.color}20`} stroke={`${node.color}60`} strokeWidth="1"
-            initial={{ scale: 0 }} animate={{ scale: 1 }}
-            transition={{ delay: node.delay + 0.2, type: 'spring', stiffness: 200 }}
-          />
-          <motion.circle
-            cx={node.cx} cy={node.cy} r="3"
-            fill={node.color}
-            initial={{ scale: 0 }} animate={{ scale: 1 }}
-            transition={{ delay: node.delay + 0.3, type: 'spring', stiffness: 300 }}
-          />
-        </g>
-      ))}
-
-      {/* Pulse ring 1 */}
-      <motion.circle
-        cx="160" cy="100" r="24"
-        fill="none" stroke="rgba(99,152,255,0.2)" strokeWidth="1"
-        initial={{ scale: 1, opacity: 0.5 }}
-        animate={{ scale: 2, opacity: 0 }}
-        transition={{ duration: 2, repeat: Infinity, ease: 'easeOut' }}
-      />
-      {/* Pulse ring 2 — larger, slower, purple tint */}
-      <motion.circle
-        cx="160" cy="100" r="24"
-        fill="none" stroke="rgba(139,92,246,0.15)" strokeWidth="1"
-        initial={{ scale: 1.2, opacity: 0.4 }}
-        animate={{ scale: 3, opacity: 0 }}
-        transition={{ duration: 3, repeat: Infinity, ease: 'easeOut', delay: 1 }}
-      />
-    </motion.svg>
-  )
-}
-
-/* ── Activity type icons/colors ── */
-const activityIconMap: Partial<Record<ActivityType, { icon: React.ElementType; color: string }>> = {
-  task_created: { icon: CheckCircle2, color: '#3B82F6' },
-  task_completed: { icon: CheckCircle2, color: '#10B981' },
-  product_created: { icon: Layers, color: '#8B5CF6' },
-  plan_created: { icon: Lightbulb, color: '#8B5CF6' },
-  brand_updated: { icon: Palette, color: '#EC4899' },
-  component_created: { icon: Component, color: '#06B6D4' },
-  page_published: { icon: FileText, color: '#10B981' },
-  release_created: { icon: Rocket, color: '#F59E0B' },
-  ai_skill_used: { icon: Sparkles, color: '#8B5CF6' },
-  comment_added: { icon: FileText, color: '#64748B' },
-  member_joined: { icon: Activity, color: '#3B82F6' },
+  visible: { transition: { staggerChildren: 0.05 } },
 }
 
 export default function DashboardHome() {
   const [searchQuery, setSearchQuery] = useState('')
   const [modalOpen, setModalOpen] = useState(false)
+  const [marketplaceOpen, setMarketplaceOpen] = useState(false)
   const openCommandPalette = useCommandPaletteStore((s) => s.open)
   const { user } = useAuth()
-  const orgSlug = user?.orgSlug ||
+  const orgSlug =
+    user?.orgSlug ||
     user?.email?.split('@')[0]?.toLowerCase().replace(/[^a-z0-9]/g, '-') ||
     'my-org'
   const allProducts = useProductStore((s) => s.products)
+  const unreadCount = useNotificationStore((s) => s.unreadCount)
 
-  // Hydrate product store from DB on dashboard load
   const productsQuery = trpc.product.list.useQuery({}, { enabled: !!user })
   useEffect(() => {
     if (!user) return
-
-    const resolvedOrgSlug = user.orgSlug ||
+    const resolvedOrgSlug =
+      user.orgSlug ||
       user.email?.split('@')[0]?.toLowerCase().replace(/[^a-z0-9]/g, '-') ||
       'my-org'
 
-    // Patch any legacy products in localStorage that have empty orgSlug
     useProductStore.setState((state) => ({
       products: state.products.map((p) =>
-        p.orgSlug === '' ? { ...p, orgSlug: resolvedOrgSlug } : p
+        p.orgSlug === '' ? { ...p, orgSlug: resolvedOrgSlug } : p,
       ),
     }))
 
@@ -316,117 +85,83 @@ export default function DashboardHome() {
     useProductStore.setState({ products: dbProducts })
   }, [productsQuery.data, user])
 
-  // Match on orgSlug OR on products with empty orgSlug (legacy products before org fix)
   const storeProducts = useMemo(
     () => allProducts.filter((p) => p.orgSlug === orgSlug || p.orgSlug === ''),
     [allProducts, orgSlug],
   )
   const hasProducts = storeProducts.length > 0
 
-  // Real store data — use stable selectors that return primitives or stable references
-  const allActivities = useActivityStore((s) => s.activities)
-  const recentActivities = allActivities.slice(0, 10)
-  const allTasks = useTaskStore((s) => s.tasks)
-  const unreadCount = useNotificationStore((s) => s.unreadCount)
-  const openTasks = allTasks.filter((t) => t.status !== 'done').length
-  const pendingApprovals = allTasks.filter((t) => t.status === 'in_review').length
-
   const userRole: OrgRole = user?.role ?? 'viewer'
   const rc = roleConfigs[userRole]
   const RoleIcon = roleIconMap[rc.icon] || Eye
 
-  // Override stats with real data when available
-  const baseStats = user ? roleStats[userRole] : [
-    { label: 'Active Products', value: '0', icon: Layers, color: '#3B82F6' },
-    { label: 'Open Tasks', value: '0', icon: CheckCircle2, color: '#10B981' },
-    { label: 'Pending Approvals', value: '0', icon: AlertTriangle, color: '#F59E0B' },
-    { label: 'AI Actions Today', value: '0', icon: Sparkles, color: '#8B5CF6' },
-  ]
-  const stats = baseStats.map((s) => {
-    if (s.label === 'Active Products' && storeProducts.length > 0) return { ...s, value: String(storeProducts.length) }
-    if (s.label === 'Open Tasks' && openTasks > 0) return { ...s, value: String(openTasks) }
-    if (s.label === 'Pending Approvals' && pendingApprovals > 0) return { ...s, value: String(pendingApprovals) }
-    return s
-  })
-
-  const visibleCategories = user ? roleCategoryAccess[userRole] : ['plan', 'build', 'ship', 'operate']
-  const filteredQuickLinks = quickLinks.filter((l) => visibleCategories.includes(l.key))
-
   return (
-    <div className="min-h-screen bg-[#060918]">
+    <div className="min-h-screen bg-[var(--bg-base)]">
       {/* Top bar */}
-      <header className="sticky top-0 z-40 border-b border-white/[0.06] bg-[#060918]/80 backdrop-blur-xl">
+      <header className="sticky top-0 z-40 border-b border-white/[0.06] bg-[var(--bg-base)]/80 backdrop-blur-xl">
         <div className="max-w-7xl mx-auto px-6 h-14 flex items-center justify-between">
-          {/* Logo */}
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg border border-white/10 bg-white/[0.03] flex items-center justify-center"
-              style={{ boxShadow: '0 0 20px rgba(59,130,246,0.12)' }}>
+            <div
+              className="w-8 h-8 rounded-lg border border-white/10 bg-white/[0.03] flex items-center justify-center"
+              style={{ boxShadow: '0 0 20px rgba(59,130,246,0.12)' }}
+            >
               <svg width="16" height="16" viewBox="0 0 32 32" fill="none">
-                <circle cx="16" cy="8" r="3" fill="#3B82F6" />
-                <circle cx="8" cy="22" r="3" fill="#8B5CF6" />
-                <circle cx="24" cy="22" r="3" fill="#06B6D4" />
+                <circle cx="16" cy="8" r="3" fill="var(--accent)" />
+                <circle cx="8" cy="22" r="3" fill="var(--accent)" />
+                <circle cx="24" cy="22" r="3" fill="var(--accent)" />
                 <line x1="16" y1="11" x2="8" y2="19" stroke="rgba(59,130,246,0.4)" strokeWidth="1.5" />
                 <line x1="16" y1="11" x2="24" y2="19" stroke="rgba(139,92,246,0.4)" strokeWidth="1.5" />
                 <line x1="11" y1="22" x2="21" y2="22" stroke="rgba(6,182,212,0.4)" strokeWidth="1.5" />
               </svg>
             </div>
-            <span className="text-sm font-semibold text-[#F1F5F9]">Product OS</span>
+            <span className="text-sm font-semibold text-[var(--text-primary)]">Product OS</span>
           </div>
 
-          {/* Search */}
           <div className="flex-1 max-w-md mx-8">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#64748B]" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-tertiary)]" />
               <input
                 type="text"
                 placeholder="Search products, studios, templates..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onFocus={(e) => { e.target.blur(); openCommandPalette(); }}
-                className="w-full pl-9 pr-4 py-2 text-sm bg-white/[0.03] border border-white/[0.08] rounded-lg text-[#F1F5F9] placeholder:text-[#64748B] focus:border-[#3B82F6]/40 focus:outline-none focus:ring-1 focus:ring-[#3B82F6]/20 transition cursor-pointer"
+                className="w-full pl-9 pr-4 py-2 text-sm bg-white/[0.03] border border-white/[0.08] rounded-lg text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:border-[var(--accent)]/40 focus:outline-none focus:ring-1 focus:ring-[var(--accent)]/20 transition cursor-pointer"
               />
             </div>
           </div>
 
-          {/* Actions */}
           <div className="flex items-center gap-2">
-            <button className="p-2 rounded-lg text-[#64748B] hover:text-[#94A3B8] hover:bg-white/[0.04] transition relative">
+            <button className="p-2 rounded-lg text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] hover:bg-white/[0.04] transition relative">
               <Bell className="w-4 h-4" />
               {unreadCount > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-[#F43F5E] text-white text-[9px] font-bold flex items-center justify-center">
+                <span className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-[var(--color-error)] text-white text-[9px] font-bold flex items-center justify-center">
                   {unreadCount > 9 ? '9+' : unreadCount}
                 </span>
               )}
             </button>
-            <button className="p-2 rounded-lg text-[#64748B] hover:text-[#94A3B8] hover:bg-white/[0.04] transition">
+            <button className="p-2 rounded-lg text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] hover:bg-white/[0.04] transition">
               <Settings className="w-4 h-4" />
             </button>
-            <div
-              className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-medium text-white ml-1"
-              style={{
-                background: user
-                  ? `linear-gradient(135deg, ${rc.color}, ${rc.color}99)`
-                  : 'linear-gradient(135deg, #3B82F6, #8B5CF6)',
-              }}
-            >
+            <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-medium text-[var(--color-white)] ml-1 bg-[var(--accent)]">
               {user?.name?.charAt(0)?.toUpperCase() || 'S'}
             </div>
           </div>
         </div>
       </header>
 
-      {/* Main content */}
+      {/* Main */}
       <motion.main
         className="max-w-7xl mx-auto px-6 py-8"
         initial="hidden"
         animate="visible"
         variants={stagger}
       >
-        {/* Welcome + Create */}
+        {/* Welcome */}
         <motion.div className="flex items-start justify-between mb-10" variants={fadeUp} custom={0}>
           <div>
             <div className="flex items-center gap-3">
-              <h1 className="text-2xl font-semibold text-[#F1F5F9]">
+              <h1 className="text-2xl font-semibold text-[var(--text-primary)]">
                 {(() => {
                   const h = new Date().getHours()
                   const greeting = h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening'
@@ -440,33 +175,36 @@ export default function DashboardHome() {
                 })()}
               </h1>
               {user && (
-                <span
-                  className="text-xs px-2.5 py-1 rounded-full font-medium flex items-center gap-1.5"
-                  style={{ backgroundColor: `${rc.color}15`, color: rc.color }}
-                >
+                <span className="text-xs px-2.5 py-1 rounded-full font-medium flex items-center gap-1.5 bg-[var(--accent-subtle)] text-[var(--accent-text)]">
                   <RoleIcon className="w-3 h-3" />
                   {rc.label}
                 </span>
               )}
             </div>
-            <p className="text-[#94A3B8] mt-1">
+            <p className="text-[var(--text-secondary)] mt-1">
               {user ? `${user.orgName || 'Your'} unified product workspace` : 'Your unified product workspace'}
             </p>
           </div>
           <div className="flex items-center gap-2">
-            {/* Admin panel link for admin role */}
             {user && (userRole === 'admin' || userRole === 'manager') && (
               <a
                 href="/admin"
-                className="flex items-center gap-2 px-4 py-2.5 bg-[#F43F5E]/10 border border-[#F43F5E]/20 text-[#F43F5E] text-sm font-medium rounded-lg transition-all hover:bg-[#F43F5E]/20 hover:shadow-[0_0_20px_rgba(244,63,94,0.15)]"
+                className="flex items-center gap-2 px-4 py-2.5 bg-[var(--color-error)]/10 border border-[var(--color-error)]/20 text-[var(--color-error)] text-sm font-medium rounded-lg transition-all hover:bg-[var(--color-error)]/20 hover:shadow-[0_0_20px_rgba(244,63,94,0.15)]"
               >
                 <Shield className="w-4 h-4" />
                 Admin Panel
               </a>
             )}
             <button
+              onClick={() => setMarketplaceOpen(true)}
+              className="flex items-center gap-2 px-4 py-2.5 bg-white/[0.04] border border-white/[0.08] hover:bg-white/[0.08] text-[var(--text-primary)] text-sm font-medium rounded-lg transition-all"
+            >
+              <Store className="w-4 h-4" />
+              Marketplace
+            </button>
+            <button
               onClick={() => setModalOpen(true)}
-              className="flex items-center gap-2 px-4 py-2.5 bg-[#3B82F6] hover:bg-[#3B82F6]/90 text-white text-sm font-medium rounded-lg transition-all hover:shadow-[0_0_20px_rgba(59,130,246,0.3)]"
+              className="flex items-center gap-2 px-4 py-2.5 bg-[var(--accent)] hover:bg-[var(--accent)]/90 text-white text-sm font-medium rounded-lg transition-all hover:shadow-[0_0_20px_rgba(59,130,246,0.3)]"
             >
               <Plus className="w-4 h-4" />
               New Product
@@ -474,64 +212,12 @@ export default function DashboardHome() {
           </div>
         </motion.div>
 
-        {/* Overview Stats — role-specific */}
+        {/* All Products */}
         <motion.section className="mb-10" variants={fadeUp} custom={1}>
-          <h2 className="text-xs font-medium text-[#64748B] uppercase tracking-wider mb-4">Overview</h2>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-            {stats.map((stat, i) => {
-              const Icon = stat.icon
-              return (
-                <motion.div
-                  key={stat.label}
-                  className="relative p-4 rounded-xl border border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.04] hover:border-white/[0.1] transition-all group overflow-hidden"
-                  variants={fadeUp}
-                  custom={i + 2}
-                  style={{ borderTop: `1px solid ${stat.color}40` }}
-                >
-                  {/* Background glow on hover */}
-                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-                    style={{ background: `radial-gradient(circle at 80% 20%, ${stat.color}06 0%, transparent 70%)` }} />
-
-                  <div className="relative flex items-center gap-3">
-                    <div
-                      className="w-9 h-9 rounded-lg flex items-center justify-center"
-                      style={{ backgroundColor: `${stat.color}10` }}
-                    >
-                      <Icon className="w-4 h-4" style={{ color: stat.color }} />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="text-xl font-semibold text-[#F1F5F9]">{stat.value}</div>
-                      <div className="text-xs text-[#64748B]">{stat.label}</div>
-                    </div>
-                    {/* Decorative sparkline SVG */}
-                    <svg width="36" height="20" viewBox="0 0 36 20" fill="none" className="opacity-40 group-hover:opacity-70 transition-opacity flex-shrink-0">
-                      <polyline
-                        points="0,16 6,12 12,14 18,8 24,10 30,4 36,6"
-                        stroke={stat.color} strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"
-                      />
-                    </svg>
-                  </div>
-                </motion.div>
-              )
-            })}
-          </div>
-        </motion.section>
-
-        {/* My Tasks — role-specific (only when logged in) */}
-        {user && (
-          <motion.section className="mb-10" variants={fadeUp} custom={3}>
-            <RoleTaskSummary role={userRole} />
-          </motion.section>
-        )}
-
-        {/* Products / Empty State */}
-        <motion.section className="mb-10" variants={fadeUp} custom={4}>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xs font-medium text-[#64748B] uppercase tracking-wider">Your Products</h2>
+            <h2 className="text-xs font-medium text-[var(--text-tertiary)] uppercase tracking-wider">All Products</h2>
             {hasProducts && (
-              <button className="text-xs text-[#3B82F6] hover:text-[#3B82F6]/80 flex items-center gap-1 transition">
-                View all <ArrowRight className="w-3 h-3" />
-              </button>
+              <span className="text-xs text-[var(--text-tertiary)]">{storeProducts.length} total</span>
             )}
           </div>
 
@@ -549,10 +235,10 @@ export default function DashboardHome() {
                   }}
                   transition={{ duration: 0.2 }}
                 >
-                  {/* Subtle colour bleed on hover */}
-                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-                    style={{ background: `radial-gradient(circle at 90% 10%, ${product.color}09 0%, transparent 60%)` }} />
-
+                  <div
+                    className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                    style={{ background: `radial-gradient(circle at 90% 10%, ${product.color}09 0%, transparent 60%)` }}
+                  />
                   <div className="relative flex items-start justify-between mb-3">
                     <div
                       className="w-10 h-10 rounded-lg flex items-center justify-center text-lg"
@@ -562,225 +248,86 @@ export default function DashboardHome() {
                     </div>
                     <span className={`text-xs px-2 py-0.5 rounded-full ${
                       product.status === 'active'
-                        ? 'bg-[#10B981]/10 text-[#10B981]'
-                        : 'bg-white/[0.06] text-[#64748B]'
+                        ? 'bg-[var(--color-success)]/10 text-[var(--color-success)]'
+                        : product.status === 'draft'
+                          ? 'bg-[var(--color-warning)]/10 text-[var(--color-warning)]'
+                          : 'bg-white/[0.06] text-[var(--text-tertiary)]'
                     }`}>
                       {product.status}
                     </span>
                   </div>
-                  <h3 className="font-medium text-[#F1F5F9] group-hover:text-white transition">{product.name}</h3>
+                  <h3 className="font-medium text-[var(--text-primary)] group-hover:text-white transition">{product.name}</h3>
                   {product.description && (
-                    <p className="text-xs text-[#64748B] mt-1 line-clamp-2">{product.description}</p>
+                    <p className="text-xs text-[var(--text-tertiary)] mt-1 line-clamp-2">{product.description}</p>
                   )}
-                  <div className="relative flex items-center gap-1 mt-3 text-xs text-[#4A5568]">
+                  <div className="relative flex items-center gap-1 mt-3 text-xs text-[var(--text-tertiary)]">
                     <Clock className="w-3 h-3" />
                     {new Date(product.createdAt).toLocaleDateString()}
                   </div>
                 </motion.a>
               ))}
 
-              {/* New product card */}
               <button
                 onClick={() => setModalOpen(true)}
                 className="p-5 rounded-xl border border-dashed border-white/[0.08] bg-transparent hover:bg-white/[0.02] hover:border-white/[0.15] transition-all flex flex-col items-center justify-center gap-2 min-h-[160px]"
               >
                 <div className="w-10 h-10 rounded-lg bg-white/[0.04] border border-white/[0.08] flex items-center justify-center">
-                  <Plus className="w-5 h-5 text-[#64748B]" />
+                  <Plus className="w-5 h-5 text-[var(--text-tertiary)]" />
                 </div>
-                <span className="text-sm text-[#64748B]">Create new product</span>
+                <span className="text-sm text-[var(--text-tertiary)]">Create new product</span>
               </button>
             </div>
           ) : (
-            /* Empty state */
-            <div className="flex flex-col items-center justify-center py-12 rounded-2xl border border-white/[0.06] bg-white/[0.01]">
-              <EmptyStateIllustration />
-              <motion.div
-                className="flex flex-col items-center gap-3 mt-6"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 1.2, duration: 0.5 }}
+            <div className="flex flex-col items-center justify-center py-10 rounded-2xl border border-dashed border-white/[0.08] bg-white/[0.01]">
+              <p className="text-sm text-[var(--text-secondary)]">No products yet — pick a Quick Start template below to begin.</p>
+              <button
+                onClick={() => setModalOpen(true)}
+                className="mt-4 flex items-center gap-2 px-4 py-2 bg-[var(--accent)] hover:bg-[var(--accent)]/90 text-white text-sm font-medium rounded-lg transition-all"
               >
-                <h3 className="text-lg font-medium text-[#F1F5F9]">No products yet</h3>
-                <p className="text-sm text-[#64748B] text-center max-w-sm">
-                  Create your first product to start building with the unified product graph.
-                </p>
-                <button
-                  onClick={() => setModalOpen(true)}
-                  className="mt-2 flex items-center gap-2 px-5 py-2.5 bg-[#3B82F6] hover:bg-[#3B82F6]/90 text-white text-sm font-medium rounded-lg transition-all hover:shadow-[0_0_20px_rgba(59,130,246,0.3)]"
-                >
-                  <Plus className="w-4 h-4" />
-                  Create Product
-                </button>
-              </motion.div>
+                <Plus className="w-4 h-4" />
+                Or start from scratch
+              </button>
             </div>
           )}
         </motion.section>
 
-        {/* Quick Links — filtered by role */}
-        <motion.section className="mb-10" variants={fadeUp} custom={5}>
-          <h2 className="text-xs font-medium text-[#64748B] uppercase tracking-wider mb-4">Quick Links</h2>
-          <div className={`grid grid-cols-1 sm:grid-cols-2 ${filteredQuickLinks.length >= 4 ? 'lg:grid-cols-4' : filteredQuickLinks.length === 3 ? 'lg:grid-cols-3' : 'lg:grid-cols-2'} gap-4`}>
-            {filteredQuickLinks.map((link, i) => {
-              const Icon = link.icon
-              return (
-                <motion.div
-                  key={link.key}
-                  className="group relative p-5 rounded-xl border border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.04] hover:border-white/[0.12] transition-all cursor-pointer overflow-hidden"
-                  variants={fadeUp}
-                  custom={i + 6}
-                  whileHover={{ y: -2 }}
-                >
-                  {/* Subtle glow */}
-                  <div
-                    className="absolute top-0 right-0 w-24 h-24 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-2xl"
-                    style={{ background: `radial-gradient(circle, ${link.color}15, transparent 70%)` }}
-                  />
-
-                  <div className="relative">
-                    <motion.div
-                      className="w-10 h-10 rounded-lg flex items-center justify-center mb-3"
-                      style={{ backgroundColor: `${link.color}12` }}
-                      whileHover={{ rotate: 6, scale: 1.1, backgroundColor: `${link.color}20` }}
-                      transition={{ type: 'spring', stiffness: 300, damping: 15 }}
-                    >
-                      <Icon className="w-5 h-5" style={{ color: link.color }} />
-                    </motion.div>
-                    <h3 className="font-medium text-[#F1F5F9] mb-1">{link.label}</h3>
-                    <p className="text-xs text-[#64748B] leading-relaxed mb-3">{link.description}</p>
-                    <div className="flex flex-wrap gap-1">
-                      {link.studios.slice(0, 3).map((studio) => (
-                        <span key={studio} className="text-[10px] px-1.5 py-0.5 rounded bg-white/[0.04] text-[#94A3B8]">
-                          {studio}
-                        </span>
-                      ))}
-                      {link.studios.length > 3 && (
-                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-white/[0.04] text-[#64748B]">
-                          +{link.studios.length - 3}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </motion.div>
-              )
-            })}
-          </div>
-        </motion.section>
-
-        {/* Studio Shortcuts — role-filtered (only when logged in) */}
-        {user && (
-          <motion.section className="mb-10" variants={fadeUp} custom={7}>
-            <StudioShortcuts
-              role={userRole}
-              orgSlug={orgSlug}
-              productSlug={storeProducts[0]?.slug ?? 'my-product'}
-            />
+        {/* Quick Start (shown when no products) */}
+        {!hasProducts && (
+          <motion.section className="mb-10" variants={fadeUp} custom={2}>
+            <QuickStartTemplates />
           </motion.section>
         )}
 
-        {/* Recent Activity + Tips */}
-        <motion.section variants={fadeUp} custom={8}>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            {/* Recent Activity */}
-            <div className="p-5 rounded-xl border border-white/[0.06] bg-white/[0.02]">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xs font-medium text-[#64748B] uppercase tracking-wider">Recent Activity</h2>
-                <Clock className="w-3.5 h-3.5 text-[#4A5568]" />
-              </div>
-              {recentActivities.length > 0 ? (
-                <div className="flex flex-col gap-3">
-                  {recentActivities.map((item) => {
-                    const meta = activityIconMap[item.type] || { icon: Activity, color: '#64748B' }
-                    const Icon = meta.icon
-                    const timeAgo = (() => {
-                      const diff = Date.now() - new Date(item.timestamp).getTime()
-                      const mins = Math.floor(diff / 60000)
-                      if (mins < 1) return 'Just now'
-                      if (mins < 60) return `${mins}m ago`
-                      const hrs = Math.floor(mins / 60)
-                      if (hrs < 24) return `${hrs}h ago`
-                      return `${Math.floor(hrs / 24)}d ago`
-                    })()
-                    return (
-                      <div key={item.id} className="flex items-start gap-3">
-                        <div className="w-7 h-7 rounded-md flex items-center justify-center flex-shrink-0" style={{ backgroundColor: `${meta.color}10` }}>
-                          <Icon className="w-3.5 h-3.5" style={{ color: meta.color }} />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm text-[#94A3B8] truncate">{item.title}</p>
-                          <p className="text-xs text-[#4A5568] mt-0.5">{timeAgo}</p>
-                        </div>
-                      </div>
-                    )
-                  })}
-                </div>
-              ) : (
-                <div className="flex flex-col items-center justify-center py-8 text-center">
-                  <Clock className="w-8 h-8 text-[#1E293B] mb-2" />
-                  <p className="text-sm text-[#4A5568]">No activity yet</p>
-                  <p className="text-xs text-[#334155] mt-1">Your recent actions will appear here</p>
-                </div>
-              )}
+        {/* Today's AI Tasks + Marketplace CTA */}
+        <motion.section variants={fadeUp} custom={3}>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <div className="lg:col-span-2">
+              <TodaysAITasks orgSlug={orgSlug} />
             </div>
-
-            {/* Getting Started / Tips */}
-            <div className="p-5 rounded-xl border border-white/[0.06] bg-white/[0.02]">
-              <div className="flex items-center justify-between mb-3">
-                <h2 className="text-xs font-medium text-[#64748B] uppercase tracking-wider">Getting Started</h2>
-                <Zap className="w-3.5 h-3.5 text-[#F59E0B]" />
-              </div>
-              {/* Progress bar */}
-              <div className="mb-4">
-                <div className="flex justify-between text-[10px] text-[#64748B] mb-1">
-                  <span>0 of 4 steps complete</span>
-                  <span>0%</span>
+            <button
+              onClick={() => setMarketplaceOpen(true)}
+              className="group relative p-5 rounded-xl border border-white/[0.08] bg-gradient-to-br from-[var(--accent)]/[0.08] to-[var(--accent)]/[0.04] hover:from-[var(--accent)]/[0.12] hover:to-[var(--accent)]/[0.08] transition-all text-left overflow-hidden"
+            >
+              <div className="absolute -top-6 -right-6 w-32 h-32 rounded-full bg-[var(--accent)]/10 blur-3xl group-hover:bg-[#8B5CF6]/20 transition" />
+              <div className="relative">
+                <div className="w-10 h-10 rounded-lg bg-[var(--accent)]/15 flex items-center justify-center mb-3">
+                  <Store className="w-5 h-5 text-[var(--accent)]" />
                 </div>
-                <div className="h-1 rounded-full bg-white/[0.06] overflow-hidden">
-                  <motion.div
-                    className="h-full rounded-full"
-                    style={{ background: 'linear-gradient(90deg, #6398ff, #8b5cf6)' }}
-                    initial={{ width: '0%' }}
-                    animate={{ width: '0%' }}
-                    transition={{ duration: 0.5, ease: 'easeOut' }}
-                  />
-                </div>
-              </div>
-              <div className="flex flex-col gap-3">
-                {[
-                  { step: '1', text: 'Create a new product or start from a template', done: false, color: '#3B82F6' },
-                  { step: '2', text: 'Use the Planner to define goals and features', done: false, color: '#8B5CF6' },
-                  { step: '3', text: 'Build your brand, components, and pages', done: false, color: '#06B6D4' },
-                  { step: '4', text: 'Ship with generated code and dev handoff specs', done: false, color: '#10B981' },
-                ].map((item) => (
-                  <div key={item.step} className="flex items-center gap-3 group">
-                    <div
-                      className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-medium flex-shrink-0 border"
-                      style={{
-                        borderColor: item.done ? '#10B981' : `${item.color}30`,
-                        backgroundColor: item.done ? '#10B98115' : `${item.color}08`,
-                        color: item.done ? '#10B981' : item.color,
-                      }}
-                    >
-                      {item.done ? <CheckCircle2 className="w-4 h-4" /> : item.step}
-                    </div>
-                    <p className={`text-sm ${item.done ? 'text-[#4A5568] line-through' : 'text-[#94A3B8]'}`}>
-                      {item.text}
-                    </p>
-                  </div>
-                ))}
-              </div>
-              <div className="mt-4 pt-4 border-t border-white/[0.06] flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-[#8B5CF6]" />
-                <p className="text-xs text-[#64748B]">
-                  AI assists you at every step — from planning to shipping
+                <h3 className="text-sm font-medium text-[var(--text-primary)]">Browse Marketplace</h3>
+                <p className="text-xs text-[var(--text-secondary)] mt-1 leading-relaxed">
+                  100+ responsive templates organized by use case — from landing pages to full SaaS apps.
                 </p>
+                <div className="flex items-center gap-1 mt-3 text-xs text-[var(--accent)] group-hover:translate-x-0.5 transition-transform">
+                  Open marketplace <ArrowRight className="w-3 h-3" />
+                </div>
               </div>
-            </div>
+            </button>
           </div>
         </motion.section>
       </motion.main>
 
-      {/* Create Product Modal */}
       <CreateProductModal open={modalOpen} onClose={() => setModalOpen(false)} />
+      <TemplateMarketplace open={marketplaceOpen} onClose={() => setMarketplaceOpen(false)} />
     </div>
   )
 }

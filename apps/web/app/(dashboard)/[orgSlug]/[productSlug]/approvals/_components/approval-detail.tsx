@@ -10,10 +10,10 @@ const statusConfig: Record<
   Approval['status'],
   { color: string; bg: string; label: string }
 > = {
-  pending: { color: '#F59E0B', bg: 'bg-[#F59E0B]/10', label: 'Pending' },
-  approved: { color: '#10B981', bg: 'bg-[#10B981]/10', label: 'Approved' },
-  rejected: { color: '#F43F5E', bg: 'bg-[#F43F5E]/10', label: 'Rejected' },
-  changes_requested: { color: '#3B82F6', bg: 'bg-[#3B82F6]/10', label: 'Changes Requested' },
+  pending: { color: '#F59E0B', bg: 'bg-[var(--color-warning)]/10', label: 'Pending' },
+  approved: { color: '#10B981', bg: 'bg-[var(--color-success)]/10', label: 'Approved' },
+  rejected: { color: '#F43F5E', bg: 'bg-[var(--color-error)]/10', label: 'Rejected' },
+  changes_requested: { color: '#3B82F6', bg: 'bg-[var(--accent)]/10', label: 'Changes Requested' },
 }
 
 const typeLabels: Record<string, string> = {
@@ -92,13 +92,13 @@ export function ApprovalDetail({ approval, onClose, onAction }: ApprovalDetailPr
           exit={{ opacity: 0, scale: 0.95, y: 12 }}
           transition={{ duration: 0.25, type: 'spring', stiffness: 300, damping: 30 }}
           onClick={(e) => e.stopPropagation()}
-          className="relative w-full max-w-2xl max-h-[85vh] overflow-y-auto bg-[#0A0F1E] border border-white/[0.08] rounded-2xl shadow-2xl"
+          className="relative w-full max-w-2xl max-h-[85vh] overflow-y-auto bg-[var(--bg-base)] border border-white/[0.08] rounded-2xl shadow-2xl"
         >
           {/* Header */}
-          <div className="sticky top-0 z-10 flex items-start justify-between gap-4 p-6 pb-4 bg-[#0A0F1E] border-b border-white/[0.08]">
+          <div className="sticky top-0 z-10 flex items-start justify-between gap-4 p-6 pb-4 bg-[var(--bg-base)] border-b border-white/[0.08]">
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-1">
-                <span className="text-[10px] font-medium uppercase tracking-wider px-2 py-0.5 rounded-full bg-white/[0.06] text-[#94A3B8]">
+                <span className="text-[10px] font-medium uppercase tracking-wider px-2 py-0.5 rounded-full bg-white/[0.06] text-[var(--text-secondary)]">
                   {typeLabels[approval.objectType] ?? approval.objectType}
                 </span>
                 <span
@@ -109,12 +109,12 @@ export function ApprovalDetail({ approval, onClose, onAction }: ApprovalDetailPr
                   {status.label}
                 </span>
               </div>
-              <h2 className="text-lg font-semibold text-[#F1F5F9]">{approval.objectName}</h2>
-              <p className="text-xs text-[#64748B] mt-1">Created {formatDate(approval.createdAt)}</p>
+              <h2 className="text-lg font-semibold text-[var(--text-primary)]">{approval.objectName}</h2>
+              <p className="text-xs text-[var(--text-tertiary)] mt-1">Created {formatDate(approval.createdAt)}</p>
             </div>
             <button
               onClick={onClose}
-              className="p-1.5 rounded-lg text-[#64748B] hover:text-[#F1F5F9] hover:bg-white/[0.06] transition-colors"
+              className="p-1.5 rounded-lg text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:bg-white/[0.06] transition-colors"
             >
               <X className="w-4 h-4" />
             </button>
@@ -131,12 +131,12 @@ export function ApprovalDetail({ approval, onClose, onAction }: ApprovalDetailPr
                   {approval.requester.initials}
                 </div>
                 <div>
-                  <span className="text-sm font-medium text-[#F1F5F9]">{approval.requester.name}</span>
-                  <span className="text-xs text-[#64748B] ml-2">Requester</span>
+                  <span className="text-sm font-medium text-[var(--text-primary)]">{approval.requester.name}</span>
+                  <span className="text-xs text-[var(--text-tertiary)] ml-2">Requester</span>
                 </div>
               </div>
-              <p className="text-sm text-[#94A3B8] leading-relaxed">{approval.message}</p>
-              <div className="flex items-center gap-2 mt-3 text-xs text-[#64748B]">
+              <p className="text-sm text-[var(--text-secondary)] leading-relaxed">{approval.message}</p>
+              <div className="flex items-center gap-2 mt-3 text-xs text-[var(--text-tertiary)]">
                 <Users className="w-3 h-3" />
                 <span className="capitalize">{approval.routing}</span>
                 <ArrowRight className="w-3 h-3" />
@@ -146,7 +146,7 @@ export function ApprovalDetail({ approval, onClose, onAction }: ApprovalDetailPr
 
             {/* Approvers */}
             <div>
-              <h3 className="text-xs font-medium text-[#64748B] uppercase tracking-wider mb-3">Approvers</h3>
+              <h3 className="text-xs font-medium text-[var(--text-tertiary)] uppercase tracking-wider mb-3">Approvers</h3>
               <div className="flex flex-col gap-2">
                 {approval.approvers.map((a, i) => (
                   <motion.div
@@ -164,7 +164,7 @@ export function ApprovalDetail({ approval, onClose, onAction }: ApprovalDetailPr
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className="text-sm font-medium text-[#F1F5F9]">{a.name}</span>
+                        <span className="text-sm font-medium text-[var(--text-primary)]">{a.name}</span>
                         <span
                           className="text-[10px] font-medium rounded-full px-2 py-0.5"
                           style={{
@@ -176,10 +176,10 @@ export function ApprovalDetail({ approval, onClose, onAction }: ApprovalDetailPr
                         </span>
                       </div>
                       {a.comment && (
-                        <p className="text-xs text-[#94A3B8] mt-1 leading-relaxed">{a.comment}</p>
+                        <p className="text-xs text-[var(--text-secondary)] mt-1 leading-relaxed">{a.comment}</p>
                       )}
                       {a.decidedAt && (
-                        <p className="text-[10px] text-[#64748B] mt-1">{formatDate(a.decidedAt)}</p>
+                        <p className="text-[10px] text-[var(--text-tertiary)] mt-1">{formatDate(a.decidedAt)}</p>
                       )}
                     </div>
                   </motion.div>
@@ -189,39 +189,39 @@ export function ApprovalDetail({ approval, onClose, onAction }: ApprovalDetailPr
 
             {/* Timeline */}
             <div>
-              <h3 className="text-xs font-medium text-[#64748B] uppercase tracking-wider mb-3">Timeline</h3>
+              <h3 className="text-xs font-medium text-[var(--text-tertiary)] uppercase tracking-wider mb-3">Timeline</h3>
               <ApprovalTimeline events={approval.timeline} />
             </div>
 
             {/* Action section (only for pending approvals) */}
             {approval.status === 'pending' && (
               <div className="border-t border-white/[0.08] pt-5">
-                <h3 className="text-xs font-medium text-[#64748B] uppercase tracking-wider mb-3">Your Decision</h3>
+                <h3 className="text-xs font-medium text-[var(--text-tertiary)] uppercase tracking-wider mb-3">Your Decision</h3>
                 <textarea
                   value={comment}
                   onChange={(e) => setComment(e.target.value)}
                   placeholder="Add a comment with your decision..."
                   rows={3}
-                  className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-4 py-3 text-sm text-[#F1F5F9] placeholder-[#64748B] resize-none focus:outline-none focus:border-[#F59E0B]/40 transition-colors"
+                  className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-4 py-3 text-sm text-[var(--text-primary)] placeholder-[var(--text-tertiary)] resize-none focus:outline-none focus:border-[var(--color-warning)]/40 transition-colors"
                 />
                 <div className="flex items-center gap-2 mt-3">
                   <button
                     onClick={() => handleAction('approve')}
-                    className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium text-white bg-[#10B981] hover:bg-[#059669] transition-colors"
+                    className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium text-white bg-[var(--color-success)] hover:bg-[var(--color-success)] transition-colors"
                   >
                     <Check className="w-3.5 h-3.5" />
                     Approve
                   </button>
                   <button
                     onClick={() => handleAction('changes_requested')}
-                    className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium text-white bg-[#3B82F6] hover:bg-[#2563EB] transition-colors"
+                    className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium text-white bg-[var(--accent)] hover:bg-[var(--accent)] transition-colors"
                   >
                     <MessageSquare className="w-3.5 h-3.5" />
                     Request Changes
                   </button>
                   <button
                     onClick={() => handleAction('reject')}
-                    className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium text-white bg-[#F43F5E] hover:bg-[#E11D48] transition-colors"
+                    className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium text-white bg-[var(--color-error)] hover:bg-[#E11D48] transition-colors"
                   >
                     <X className="w-3.5 h-3.5" />
                     Reject

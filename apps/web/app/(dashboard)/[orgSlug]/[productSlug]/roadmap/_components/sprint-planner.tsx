@@ -140,10 +140,10 @@ function TaskCard({
       exit={{ opacity: 0, scale: 0.96 }}
       className="group flex items-start gap-2.5 p-3 rounded-xl border border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.04] hover:border-white/[0.10] transition-all cursor-grab"
     >
-      <GripVertical size={13} className="text-[#334155] mt-0.5 shrink-0 group-hover:text-[#64748B] transition-colors" />
+      <GripVertical size={13} className="text-[var(--border-default)] mt-0.5 shrink-0 group-hover:text-[#64748B] transition-colors" />
 
       <div className="flex-1 min-w-0">
-        <p className="text-xs font-medium text-[#F1F5F9] mb-1.5 leading-relaxed">{task.title}</p>
+        <p className="text-xs font-medium text-[var(--text-primary)] mb-1.5 leading-relaxed">{task.title}</p>
         <div className="flex items-center gap-1.5 flex-wrap">
           {/* Priority */}
           <span
@@ -153,20 +153,20 @@ function TaskCard({
             {priority.label}
           </span>
           {/* Estimate */}
-          <span className="text-[10px] text-[#64748B] flex items-center gap-0.5">
+          <span className="text-[10px] text-[var(--text-tertiary)] flex items-center gap-0.5">
             <Clock size={9} />
             {task.estimate}h
           </span>
           {/* Assignee */}
           {task.assignee && (
-            <span className="text-[10px] text-[#64748B] flex items-center gap-0.5">
+            <span className="text-[10px] text-[var(--text-tertiary)] flex items-center gap-0.5">
               <User size={9} />
               {task.assignee}
             </span>
           )}
           {/* Tags */}
           {task.tags.slice(0, 2).map((t) => (
-            <span key={t} className="text-[9px] px-1.5 py-0.5 rounded bg-white/[0.04] text-[#64748B]">{t}</span>
+            <span key={t} className="text-[9px] px-1.5 py-0.5 rounded bg-white/[0.04] text-[var(--text-tertiary)]">{t}</span>
           ))}
         </div>
       </div>
@@ -176,7 +176,7 @@ function TaskCard({
         {onMove && (
           <button
             onClick={() => onMove(task.sprintId)}
-            className="w-6 h-6 rounded-md flex items-center justify-center text-[#64748B] hover:text-[#3B82F6] hover:bg-[#3B82F6]/10 transition-colors"
+            className="w-6 h-6 rounded-md flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--accent)] hover:bg-[var(--accent)]/10 transition-colors"
             title={task.sprintId ? 'Move to backlog' : 'Add to sprint'}
           >
             {task.sprintId ? <ChevronRight size={11} className="rotate-180" /> : <ChevronRight size={11} />}
@@ -185,7 +185,7 @@ function TaskCard({
         {onRemove && (
           <button
             onClick={onRemove}
-            className="w-6 h-6 rounded-md flex items-center justify-center text-[#64748B] hover:text-[#EF4444] hover:bg-[#EF4444]/10 transition-colors"
+            className="w-6 h-6 rounded-md flex items-center justify-center text-[var(--text-tertiary)] hover:text-[var(--color-error)] hover:bg-[var(--color-error)]/10 transition-colors"
           >
             <X size={11} />
           </button>
@@ -207,7 +207,7 @@ function CapacityBar({ used, total, assignees }: { used: number; total: number; 
   return (
     <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
       <div className="flex items-center justify-between mb-2">
-        <span className="text-xs font-medium text-[#F1F5F9]">Sprint Capacity</span>
+        <span className="text-xs font-medium text-[var(--text-primary)]">Sprint Capacity</span>
         <span className="text-xs font-mono" style={{ color }}>
           {used}h / {total}h {over && '⚠ Over capacity'}
         </span>
@@ -225,14 +225,14 @@ function CapacityBar({ used, total, assignees }: { used: number; total: number; 
       <div className="flex flex-col gap-1.5">
         {Object.entries(assignees).map(([name, hours]) => (
           <div key={name} className="flex items-center gap-2">
-            <span className="text-[10px] text-[#64748B] w-14 shrink-0">{name}</span>
+            <span className="text-[10px] text-[var(--text-tertiary)] w-14 shrink-0">{name}</span>
             <div className="flex-1 h-1.5 rounded-full bg-white/[0.06] overflow-hidden">
               <div
-                className="h-full rounded-full bg-[#6398ff]"
+                className="h-full rounded-full bg-[var(--accent)]"
                 style={{ width: `${Math.min((hours / (total / Object.keys(assignees).length)) * 100, 100)}%` }}
               />
             </div>
-            <span className="text-[10px] text-[#64748B] w-6 text-right">{hours}h</span>
+            <span className="text-[10px] text-[var(--text-tertiary)] w-6 text-right">{hours}h</span>
           </div>
         ))}
       </div>
@@ -266,18 +266,18 @@ function ApprovalGate({
 
   if (sprint.approvalStatus === 'approved') {
     return (
-      <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-[#10B981]/10 border border-[#10B981]/20">
-        <CheckCircle2 size={14} className="text-[#10B981]" />
-        <span className="text-xs font-medium text-[#10B981]">Sprint approved — committed to delivery</span>
+      <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-[var(--color-success)]/10 border border-[var(--color-success)]/20">
+        <CheckCircle2 size={14} className="text-[var(--color-success)]" />
+        <span className="text-xs font-medium text-[var(--color-success)]">Sprint approved — committed to delivery</span>
       </div>
     )
   }
 
   if (sprint.approvalStatus === 'pending') {
     return (
-      <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-[#F59E0B]/10 border border-[#F59E0B]/20">
-        <Clock size={14} className="text-[#F59E0B]" />
-        <span className="text-xs font-medium text-[#F59E0B]">Awaiting manager approval…</span>
+      <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-[var(--color-warning)]/10 border border-[var(--color-warning)]/20">
+        <Clock size={14} className="text-[var(--color-warning)]" />
+        <span className="text-xs font-medium text-[var(--color-warning)]">Awaiting manager approval…</span>
       </div>
     )
   }
@@ -285,10 +285,10 @@ function ApprovalGate({
   return (
     <div className="rounded-xl border border-white/[0.08] bg-white/[0.02] p-4">
       <div className="flex items-center gap-2 mb-3">
-        <ShieldCheck size={15} className="text-[#8B5CF6]" />
-        <span className="text-sm font-medium text-[#F1F5F9]">Commit Sprint for Approval</span>
+        <ShieldCheck size={15} className="text-[var(--accent)]" />
+        <span className="text-sm font-medium text-[var(--text-primary)]">Commit Sprint for Approval</span>
       </div>
-      <p className="text-xs text-[#64748B] mb-3 leading-relaxed">
+      <p className="text-xs text-[var(--text-tertiary)] mb-3 leading-relaxed">
         Once you commit this sprint, it will be sent to your manager for approval before tasks move to "In Progress".
       </p>
       <textarea
@@ -296,15 +296,15 @@ function ApprovalGate({
         onChange={(e) => setComment(e.target.value)}
         placeholder="Add a note for your manager (optional)…"
         rows={2}
-        className="w-full px-3 py-2 rounded-lg bg-white/[0.03] border border-white/[0.08] text-xs text-[#F1F5F9] placeholder:text-[#475569] focus:border-[#8B5CF6]/50 focus:outline-none resize-none transition mb-2"
+        className="w-full px-3 py-2 rounded-lg bg-white/[0.03] border border-white/[0.08] text-xs text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:border-[var(--accent)]/50 focus:outline-none resize-none transition mb-2"
       />
       <button
         onClick={submitRequest}
         disabled={requesting}
         className={`w-full flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-medium transition-colors ${
           requesting
-            ? 'bg-white/[0.06] text-[#64748B] cursor-not-allowed'
-            : 'bg-[#8B5CF6] text-white hover:bg-[#7C3AED]'
+            ? 'bg-white/[0.06] text-[var(--text-tertiary)] cursor-not-allowed'
+            : 'bg-[var(--accent)] text-white hover:bg-[var(--accent)]'
         }`}
       >
         {requesting ? <Loader2 size={13} className="animate-spin" /> : <Send size={13} />}
@@ -354,8 +354,8 @@ function SprintColumn({
       <div className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-4">
         <div className="flex items-start justify-between mb-1">
           <div>
-            <p className="text-sm font-semibold text-[#F1F5F9]">{sprint.name}</p>
-            <p className="text-xs text-[#64748B] mt-0.5">{dateLabel}</p>
+            <p className="text-sm font-semibold text-[var(--text-primary)]">{sprint.name}</p>
+            <p className="text-xs text-[var(--text-tertiary)] mt-0.5">{dateLabel}</p>
           </div>
           {approvalMeta && (
             <span
@@ -381,8 +381,8 @@ function SprintColumn({
           <div key={status}>
             <div className="flex items-center gap-1.5 mb-1.5 px-1">
               <span style={{ color: cfg.color }}>{cfg.icon}</span>
-              <span className="text-[10px] font-semibold uppercase tracking-wide text-[#64748B]">{cfg.label}</span>
-              <span className="text-[10px] text-[#475569]">({group.length})</span>
+              <span className="text-[10px] font-semibold uppercase tracking-wide text-[var(--text-tertiary)]">{cfg.label}</span>
+              <span className="text-[10px] text-[var(--text-tertiary)]">({group.length})</span>
             </div>
             <div className="flex flex-col gap-1.5">
               <AnimatePresence>
@@ -396,7 +396,7 @@ function SprintColumn({
               </AnimatePresence>
               {group.length === 0 && (
                 <div className="h-10 rounded-xl border border-dashed border-white/[0.05] flex items-center justify-center">
-                  <span className="text-[10px] text-[#334155]">Drop tasks here</span>
+                  <span className="text-[10px] text-[var(--border-default)]">Drop tasks here</span>
                 </div>
               )}
             </div>
@@ -471,24 +471,24 @@ export function SprintPlanner() {
         <div className="px-4 py-3 border-b border-white/[0.06]">
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-2">
-              <Flag size={14} className="text-[#64748B]" />
-              <span className="text-sm font-semibold text-[#F1F5F9]">Backlog</span>
-              <span className="text-xs text-[#64748B] px-1.5 py-0.5 rounded-full bg-white/[0.06]">{backlogTasks.length}</span>
+              <Flag size={14} className="text-[var(--text-tertiary)]" />
+              <span className="text-sm font-semibold text-[var(--text-primary)]">Backlog</span>
+              <span className="text-xs text-[var(--text-tertiary)] px-1.5 py-0.5 rounded-full bg-white/[0.06]">{backlogTasks.length}</span>
             </div>
             <button
               onClick={generateAITasks}
               disabled={generating}
               className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-medium transition-colors ${
                 generating
-                  ? 'bg-white/[0.04] text-[#64748B] cursor-not-allowed'
-                  : 'bg-[#8B5CF6]/15 text-[#8B5CF6] hover:bg-[#8B5CF6]/25'
+                  ? 'bg-white/[0.04] text-[var(--text-tertiary)] cursor-not-allowed'
+                  : 'bg-[var(--accent)]/15 text-[var(--accent)] hover:bg-[var(--accent)]/25'
               }`}
             >
               {generating ? <Loader2 size={10} className="animate-spin" /> : <Sparkles size={10} />}
               {generating ? 'Generating…' : 'AI suggest'}
             </button>
           </div>
-          <p className="text-[10px] text-[#475569]">Drag tasks into sprints or click → to move them</p>
+          <p className="text-[10px] text-[var(--text-tertiary)]">Drag tasks into sprints or click → to move them</p>
         </div>
 
         <div className="flex-1 overflow-y-auto px-3 py-3 flex flex-col gap-1.5">
@@ -506,7 +506,7 @@ export function SprintPlanner() {
           </AnimatePresence>
           {backlogTasks.length === 0 && (
             <div className="flex-1 flex items-center justify-center">
-              <p className="text-xs text-[#475569] text-center">All tasks are in sprints</p>
+              <p className="text-xs text-[var(--text-tertiary)] text-center">All tasks are in sprints</p>
             </div>
           )}
         </div>
@@ -528,7 +528,7 @@ export function SprintPlanner() {
 
           {/* Add sprint */}
           <div className="flex flex-col gap-3 min-w-[220px] w-[220px]">
-            <button className="flex items-center justify-center gap-2 p-4 rounded-2xl border border-dashed border-white/[0.08] text-[#64748B] hover:border-white/[0.14] hover:text-[#94A3B8] hover:bg-white/[0.02] transition-all text-sm">
+            <button className="flex items-center justify-center gap-2 p-4 rounded-2xl border border-dashed border-white/[0.08] text-[var(--text-tertiary)] hover:border-white/[0.14] hover:text-[var(--text-secondary)] hover:bg-white/[0.02] transition-all text-sm">
               <Plus size={15} />
               New Sprint
             </button>

@@ -20,7 +20,7 @@ interface TestSuitesProps {
 const statusIcon: Record<TestCase['status'], React.ReactNode> = {
   passed: <CheckCircle2 className="w-4 h-4 text-emerald-400" />,
   failed: <XCircle className="w-4 h-4 text-rose-400" />,
-  skipped: <MinusCircle className="w-4 h-4 text-[#64748B]" />,
+  skipped: <MinusCircle className="w-4 h-4 text-[var(--text-tertiary)]" />,
 }
 
 const suiteStatusColor: Record<TestSuite['status'], string> = {
@@ -58,7 +58,7 @@ export function TestSuites({ suites }: TestSuitesProps) {
               onClick={() => toggle(suite.id)}
               className="w-full flex items-center gap-3 px-4 py-3.5 hover:bg-white/[0.02] transition-colors"
             >
-              <div className="text-[#64748B]">
+              <div className="text-[var(--text-tertiary)]">
                 {isOpen ? (
                   <ChevronDown className="w-4 h-4" />
                 ) : (
@@ -67,10 +67,10 @@ export function TestSuites({ suites }: TestSuitesProps) {
               </div>
 
               <div className="flex-1 flex items-center gap-3 min-w-0">
-                <span className="text-sm font-medium text-[#F1F5F9] truncate">
+                <span className="text-sm font-medium text-[var(--text-primary)] truncate">
                   {suite.name}
                 </span>
-                <span className="text-xs text-[#64748B]">{total} tests</span>
+                <span className="text-xs text-[var(--text-tertiary)]">{total} tests</span>
                 <span
                   className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${suiteStatusColor[suite.status]}`}
                 >
@@ -92,13 +92,13 @@ export function TestSuites({ suites }: TestSuitesProps) {
                     />
                   )}
                 </div>
-                <span className="text-xs text-[#94A3B8] w-10 text-right">
+                <span className="text-xs text-[var(--text-secondary)] w-10 text-right">
                   {Math.round(passRate)}%
                 </span>
               </div>
 
               {/* Last run */}
-              <div className="flex items-center gap-1 text-xs text-[#64748B] shrink-0">
+              <div className="flex items-center gap-1 text-xs text-[var(--text-tertiary)] shrink-0">
                 <Clock className="w-3 h-3" />
                 {suite.lastRun}
               </div>
@@ -108,7 +108,7 @@ export function TestSuites({ suites }: TestSuitesProps) {
                 onClick={(e) => e.stopPropagation()}
                 className="shrink-0"
               >
-                <button className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs text-[#F43F5E] bg-[#F43F5E]/10 hover:bg-[#F43F5E]/20 transition-colors">
+                <button className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs text-[var(--color-error)] bg-[var(--color-error)]/10 hover:bg-[var(--color-error)]/20 transition-colors">
                   <Play className="w-3 h-3" />
                   Run
                 </button>
@@ -135,11 +135,11 @@ export function TestSuites({ suites }: TestSuitesProps) {
                         className="flex items-center gap-3 py-2 px-2 rounded-lg hover:bg-white/[0.02]"
                       >
                         {statusIcon[test.status]}
-                        <span className="flex-1 text-sm text-[#94A3B8]">
+                        <span className="flex-1 text-sm text-[var(--text-secondary)]">
                           {test.name}
                         </span>
                         {test.duration > 0 && (
-                          <span className="text-xs text-[#64748B]">
+                          <span className="text-xs text-[var(--text-tertiary)]">
                             {test.duration}ms
                           </span>
                         )}

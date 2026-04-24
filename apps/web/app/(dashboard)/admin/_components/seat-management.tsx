@@ -62,10 +62,10 @@ export default function SeatManagement() {
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="text-lg font-semibold text-[#F1F5F9]">{planInfo.name}</h3>
+                <h3 className="text-lg font-semibold text-[var(--text-primary)]">{planInfo.name}</h3>
                 <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 font-medium">Current Plan</span>
               </div>
-              <p className="text-sm text-[#64748B] mt-0.5">Renews {planInfo.renewalDate}</p>
+              <p className="text-sm text-[var(--text-tertiary)] mt-0.5">Renews {planInfo.renewalDate}</p>
             </div>
           </div>
           <button className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-sm font-medium rounded-lg transition-all hover:shadow-[0_0_20px_rgba(245,158,11,0.3)]">
@@ -77,8 +77,8 @@ export default function SeatManagement() {
         {/* Seat usage bar */}
         <div className="mt-6">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-[#94A3B8]">Seats Used</span>
-            <span className="text-sm font-medium text-[#F1F5F9]">
+            <span className="text-sm text-[var(--text-secondary)]">Seats Used</span>
+            <span className="text-sm font-medium text-[var(--text-primary)]">
               {planInfo.usedSeats} / {planInfo.totalSeats}
             </span>
           </div>
@@ -89,7 +89,7 @@ export default function SeatManagement() {
                   ? 'bg-gradient-to-r from-rose-500 to-rose-400'
                   : usedPercentage > 70
                   ? 'bg-gradient-to-r from-amber-500 to-amber-400'
-                  : 'bg-gradient-to-r from-[#3B82F6] to-[#06B6D4]'
+                  : 'bg-gradient-to-r from-[var(--accent)] to-[var(--accent)]'
               }`}
               initial={{ width: 0 }}
               animate={{ width: `${usedPercentage}%` }}
@@ -97,8 +97,8 @@ export default function SeatManagement() {
             />
           </div>
           <div className="flex items-center justify-between mt-1.5">
-            <span className="text-xs text-[#4A5568]">{Math.round(usedPercentage)}% used</span>
-            <span className="text-xs text-[#4A5568]">{planInfo.totalSeats - planInfo.usedSeats} available</span>
+            <span className="text-xs text-[var(--text-tertiary)]">{Math.round(usedPercentage)}% used</span>
+            <span className="text-xs text-[var(--text-tertiary)]">{planInfo.totalSeats - planInfo.usedSeats} available</span>
           </div>
         </div>
       </motion.div>
@@ -127,17 +127,17 @@ export default function SeatManagement() {
         custom={2}
       >
         <div className="px-5 py-3 border-b border-white/[0.06]">
-          <h3 className="text-sm font-medium text-[#F1F5F9]">Seat Allocation by Role</h3>
+          <h3 className="text-sm font-medium text-[var(--text-primary)]">Seat Allocation by Role</h3>
         </div>
         <table className="w-full">
           <thead>
             <tr className="border-b border-white/[0.06]">
-              <th className="px-5 py-3 text-left text-xs font-medium text-[#64748B] uppercase tracking-wider">Role</th>
-              <th className="px-5 py-3 text-left text-xs font-medium text-[#64748B] uppercase tracking-wider">Allocated</th>
-              <th className="px-5 py-3 text-left text-xs font-medium text-[#64748B] uppercase tracking-wider">Used</th>
-              <th className="px-5 py-3 text-left text-xs font-medium text-[#64748B] uppercase tracking-wider">Available</th>
-              <th className="px-5 py-3 text-left text-xs font-medium text-[#64748B] uppercase tracking-wider hidden sm:table-cell">Usage</th>
-              <th className="px-5 py-3 text-right text-xs font-medium text-[#64748B] uppercase tracking-wider">Action</th>
+              <th className="px-5 py-3 text-left text-xs font-medium text-[var(--text-tertiary)] uppercase tracking-wider">Role</th>
+              <th className="px-5 py-3 text-left text-xs font-medium text-[var(--text-tertiary)] uppercase tracking-wider">Allocated</th>
+              <th className="px-5 py-3 text-left text-xs font-medium text-[var(--text-tertiary)] uppercase tracking-wider">Used</th>
+              <th className="px-5 py-3 text-left text-xs font-medium text-[var(--text-tertiary)] uppercase tracking-wider">Available</th>
+              <th className="px-5 py-3 text-left text-xs font-medium text-[var(--text-tertiary)] uppercase tracking-wider hidden sm:table-cell">Usage</th>
+              <th className="px-5 py-3 text-right text-xs font-medium text-[var(--text-tertiary)] uppercase tracking-wider">Action</th>
             </tr>
           </thead>
           <tbody>
@@ -157,16 +157,13 @@ export default function SeatManagement() {
                 >
                   <td className="px-5 py-3.5">
                     <div className="flex items-center gap-2">
-                      <span
-                        className="text-xs px-2 py-1 rounded-full font-medium"
-                        style={{ backgroundColor: `${rc.color}15`, color: rc.color }}
-                      >
+                      <span className="text-xs px-2 py-1 rounded-full font-medium bg-[var(--accent-subtle)] text-[var(--accent-text)]">
                         {rc.label}
                       </span>
                     </div>
                   </td>
-                  <td className="px-5 py-3.5 text-sm text-[#F1F5F9]">{seat.allocated}</td>
-                  <td className="px-5 py-3.5 text-sm text-[#F1F5F9]">{seat.used}</td>
+                  <td className="px-5 py-3.5 text-sm text-[var(--text-primary)]">{seat.allocated}</td>
+                  <td className="px-5 py-3.5 text-sm text-[var(--text-primary)]">{seat.used}</td>
                   <td className="px-5 py-3.5">
                     <span className={`text-sm font-medium ${isOver ? 'text-rose-400' : 'text-emerald-400'}`}>
                       {isOver ? `${available} (overage)` : available}
@@ -183,7 +180,7 @@ export default function SeatManagement() {
                     </div>
                   </td>
                   <td className="px-5 py-3.5 text-right">
-                    <button className="flex items-center gap-1 px-2.5 py-1.5 text-xs text-[#94A3B8] border border-white/[0.08] rounded-lg hover:bg-white/[0.04] transition ml-auto">
+                    <button className="flex items-center gap-1 px-2.5 py-1.5 text-xs text-[var(--text-secondary)] border border-white/[0.08] rounded-lg hover:bg-white/[0.04] transition ml-auto">
                       <Settings2 className="w-3 h-3" />
                       Adjust
                     </button>

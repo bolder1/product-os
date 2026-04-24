@@ -30,7 +30,7 @@ export function NotificationFilters({ active, onChange, counts }: NotificationFi
             key={filter.key}
             onClick={() => onChange(filter.key)}
             className={`relative px-3 py-2.5 text-xs font-medium transition-colors ${
-              isActive ? 'text-[#94A3B8]' : 'text-[#64748B] hover:text-[#94A3B8]'
+              isActive ? 'text-[var(--text-secondary)]' : 'text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]'
             }`}
           >
             {filter.label}
@@ -38,8 +38,8 @@ export function NotificationFilters({ active, onChange, counts }: NotificationFi
               <span
                 className={`ml-1.5 text-[10px] px-1.5 py-0.5 rounded-full ${
                   isActive
-                    ? 'bg-white/[0.08] text-[#F1F5F9]'
-                    : 'bg-white/[0.04] text-[#64748B]'
+                    ? 'bg-white/[0.08] text-[var(--text-primary)]'
+                    : 'bg-white/[0.04] text-[var(--text-tertiary)]'
                 }`}
               >
                 {count}
@@ -48,7 +48,7 @@ export function NotificationFilters({ active, onChange, counts }: NotificationFi
             {isActive && (
               <motion.div
                 layoutId="notification-tab-indicator"
-                className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#94A3B8] rounded-full"
+                className="absolute bottom-0 left-0 right-0 h-0.5 bg-[var(--text-secondary)] rounded-full"
                 transition={{ type: 'spring', stiffness: 400, damping: 30 }}
               />
             )}

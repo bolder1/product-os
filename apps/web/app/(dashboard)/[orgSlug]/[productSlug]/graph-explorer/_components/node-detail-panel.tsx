@@ -272,7 +272,7 @@ export function NodeDetailPanel({
             onClick={() => setAiOpen((p) => !p)}
             className={`flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-medium transition-all ${
               aiOpen
-                ? 'bg-[#8B5CF6]/15 text-[#C4B5FD] ring-1 ring-[#8B5CF6]/30'
+                ? 'bg-[var(--accent)]/15 text-[var(--accent)] ring-1 ring-[var(--accent)]/30'
                 : 'text-[var(--accent-text)] hover:bg-[var(--accent-bg)]'
             }`}
           >

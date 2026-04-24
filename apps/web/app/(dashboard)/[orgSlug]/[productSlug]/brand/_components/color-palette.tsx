@@ -111,13 +111,13 @@ function InlineColorPicker({
           type="text"
           value={hex}
           onChange={(e) => handleHexChange(e.target.value)}
-          className="w-28 px-3 py-1.5 rounded-lg bg-white/[0.03] border border-white/[0.08] text-[#F1F5F9] text-sm font-mono focus:outline-none focus:border-[#EC4899]/50"
+          className="w-28 px-3 py-1.5 rounded-lg bg-white/[0.03] border border-white/[0.08] text-[var(--text-primary)] text-sm font-mono focus:outline-none focus:border-[var(--accent)]/50"
           placeholder="#000000"
         />
       </div>
       <button
         onClick={onClose}
-        className="w-full py-1.5 rounded-lg bg-white/[0.06] text-[#94A3B8] text-xs hover:bg-white/[0.1] transition-colors"
+        className="w-full py-1.5 rounded-lg bg-white/[0.06] text-[var(--text-secondary)] text-xs hover:bg-white/[0.1] transition-colors"
       >
         Done
       </button>
@@ -149,8 +149,8 @@ function ColorGroupCard({
     <div className="p-4 rounded-xl border border-white/[0.08] bg-white/[0.03]">
       <div className="flex items-center justify-between mb-3">
         <div>
-          <h3 className="text-sm font-semibold text-[#F1F5F9]">{group.label}</h3>
-          <p className="text-xs text-[#64748B] mt-0.5">{group.semantic}</p>
+          <h3 className="text-sm font-semibold text-[var(--text-primary)]">{group.label}</h3>
+          <p className="text-xs text-[var(--text-tertiary)] mt-0.5">{group.semantic}</p>
         </div>
         <div className="relative">
           <ColorSwatch
@@ -197,7 +197,7 @@ function ColorGroupCard({
                 )}
               </AnimatePresence>
             </motion.button>
-            <span className="text-[9px] text-[#64748B] font-mono">{key}</span>
+            <span className="text-[9px] text-[var(--text-tertiary)] font-mono">{key}</span>
           </div>
         ))}
       </div>
@@ -219,14 +219,14 @@ function ContrastChecker({ colorGroups }: { colorGroups: ColorGroup[] }) {
 
   return (
     <div className="p-4 rounded-xl border border-white/[0.08] bg-white/[0.03]">
-      <h3 className="text-sm font-semibold text-[#F1F5F9] mb-3">Contrast Checker</h3>
+      <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-3">Contrast Checker</h3>
       <div className="flex gap-4 mb-3">
         <div className="flex-1">
-          <label className="text-xs text-[#64748B] mb-1 block">Foreground</label>
+          <label className="text-xs text-[var(--text-tertiary)] mb-1 block">Foreground</label>
           <select
             value={fgIdx}
             onChange={(e) => setFgIdx(Number(e.target.value))}
-            className="w-full px-3 py-1.5 rounded-lg bg-white/[0.03] border border-white/[0.08] text-[#F1F5F9] text-sm focus:outline-none focus:border-[#EC4899]/50"
+            className="w-full px-3 py-1.5 rounded-lg bg-white/[0.03] border border-white/[0.08] text-[var(--text-primary)] text-sm focus:outline-none focus:border-[var(--accent)]/50"
           >
             {colorGroups.map((g, i) => (
               <option key={g.id} value={i} className="bg-[#0C1024]">
@@ -236,11 +236,11 @@ function ContrastChecker({ colorGroups }: { colorGroups: ColorGroup[] }) {
           </select>
         </div>
         <div className="flex-1">
-          <label className="text-xs text-[#64748B] mb-1 block">Background</label>
+          <label className="text-xs text-[var(--text-tertiary)] mb-1 block">Background</label>
           <select
             value={bgIdx}
             onChange={(e) => setBgIdx(Number(e.target.value))}
-            className="w-full px-3 py-1.5 rounded-lg bg-white/[0.03] border border-white/[0.08] text-[#F1F5F9] text-sm focus:outline-none focus:border-[#EC4899]/50"
+            className="w-full px-3 py-1.5 rounded-lg bg-white/[0.03] border border-white/[0.08] text-[var(--text-primary)] text-sm focus:outline-none focus:border-[var(--accent)]/50"
           >
             {colorGroups.map((g, i) => (
               <option key={g.id} value={i} className="bg-[#0C1024]">
@@ -298,16 +298,16 @@ function CSSExport({ colorGroups }: { colorGroups: ColorGroup[] }) {
   return (
     <div className="p-4 rounded-xl border border-white/[0.08] bg-white/[0.03]">
       <div className="flex items-center justify-between mb-3">
-        <h3 className="text-sm font-semibold text-[#F1F5F9]">CSS Variables</h3>
+        <h3 className="text-sm font-semibold text-[var(--text-primary)]">CSS Variables</h3>
         <button
           onClick={handleCopy}
-          className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/[0.06] text-[#94A3B8] text-xs hover:bg-white/[0.1] transition-colors"
+          className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/[0.06] text-[var(--text-secondary)] text-xs hover:bg-white/[0.1] transition-colors"
         >
           {copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
           {copied ? 'Copied' : 'Copy'}
         </button>
       </div>
-      <pre className="text-[11px] leading-relaxed text-[#94A3B8] font-mono overflow-x-auto max-h-48 overflow-y-auto p-3 rounded-lg bg-white/[0.02]">
+      <pre className="text-[11px] leading-relaxed text-[var(--text-secondary)] font-mono overflow-x-auto max-h-48 overflow-y-auto p-3 rounded-lg bg-white/[0.02]">
         {fullCSS}
       </pre>
     </div>
@@ -357,7 +357,7 @@ export default function ColorPalette({ colorGroups, onChange }: ColorPaletteProp
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
         onClick={handleAddGroup}
-        className="w-full py-3 rounded-xl border border-dashed border-white/[0.12] bg-white/[0.02] text-[#94A3B8] text-sm flex items-center justify-center gap-2 hover:bg-white/[0.04] hover:border-[#EC4899]/30 transition-colors"
+        className="w-full py-3 rounded-xl border border-dashed border-white/[0.12] bg-white/[0.02] text-[var(--text-secondary)] text-sm flex items-center justify-center gap-2 hover:bg-white/[0.04] hover:border-[var(--accent)]/30 transition-colors"
       >
         <Plus className="w-4 h-4" />
         Add Custom Color Group

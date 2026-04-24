@@ -30,13 +30,13 @@ export default function EntityList({ entities, selectedId, onSelect, onAdd }: En
             }`}
           >
             <div className="flex items-center justify-between mb-1">
-              <span className="text-sm font-medium text-[#F1F5F9]">{entity.name}</span>
-              <span className="flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded-full bg-white/[0.06] text-[#94A3B8] font-medium">
+              <span className="text-sm font-medium text-[var(--text-primary)]">{entity.name}</span>
+              <span className="flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded-full bg-white/[0.06] text-[var(--text-secondary)] font-medium">
                 <Database className="w-2.5 h-2.5" />
                 {entity.fields.length} fields
               </span>
             </div>
-            <p className="text-xs text-[#64748B] line-clamp-1">{entity.description}</p>
+            <p className="text-xs text-[var(--text-tertiary)] line-clamp-1">{entity.description}</p>
           </motion.button>
         ))}
       </AnimatePresence>
@@ -44,7 +44,7 @@ export default function EntityList({ entities, selectedId, onSelect, onAdd }: En
       {/* Add Entity card */}
       <button
         onClick={onAdd}
-        className="flex items-center justify-center gap-2 py-3 rounded-lg border border-dashed border-white/[0.1] text-[#64748B] text-sm hover:text-emerald-400 hover:border-emerald-500/30 transition-colors mt-1"
+        className="flex items-center justify-center gap-2 py-3 rounded-lg border border-dashed border-white/[0.1] text-[var(--text-tertiary)] text-sm hover:text-emerald-400 hover:border-emerald-500/30 transition-colors mt-1"
       >
         <Plus className="w-4 h-4" />
         Add Entity

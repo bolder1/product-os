@@ -54,7 +54,7 @@ function renderMarkdown(text: string) {
   const parts = text.split(/(\*\*[^*]+\*\*)/g)
   return parts.map((part, i) => {
     if (part.startsWith('**') && part.endsWith('**')) {
-      return <strong key={i} className="font-semibold text-[#F1F5F9]">{part.slice(2, -2)}</strong>
+      return <strong key={i} className="font-semibold text-[var(--text-primary)]">{part.slice(2, -2)}</strong>
     }
     return <span key={i}>{part}</span>
   })
@@ -70,12 +70,12 @@ function TaskCreatedCard({ data }: { data: Record<string, unknown> }) {
     urgent: '#F43F5E', high: '#F59E0B', medium: '#3B82F6', low: '#64748B',
   }
   return (
-    <div className="mt-2 flex items-start gap-2 p-2.5 rounded-lg bg-[#10B981]/08 border border-[#10B981]/20">
-      <CheckCircle2 size={13} className="text-[#10B981] mt-0.5 shrink-0" />
+    <div className="mt-2 flex items-start gap-2 p-2.5 rounded-lg bg-[var(--color-success)]/08 border border-[var(--color-success)]/20">
+      <CheckCircle2 size={13} className="text-[var(--color-success)] mt-0.5 shrink-0" />
       <div className="min-w-0">
-        <p className="text-[11px] font-semibold text-[#F1F5F9] truncate">{data.title as string}</p>
+        <p className="text-[11px] font-semibold text-[var(--text-primary)] truncate">{data.title as string}</p>
         {data.description ? (
-          <p className="text-[10px] text-[#94A3B8] mt-0.5 line-clamp-2">{data.description as string}</p>
+          <p className="text-[10px] text-[var(--text-secondary)] mt-0.5 line-clamp-2">{data.description as string}</p>
         ) : null}
         <span
           className="inline-block mt-1 text-[9px] font-semibold px-1.5 py-0.5 rounded"
@@ -92,13 +92,13 @@ function NavigateCard({ data, onNavigate }: { data: Record<string, unknown>; onN
   return (
     <button
       onClick={() => onNavigate(data.studio as string)}
-      className="mt-2 w-full flex items-center justify-between gap-2 p-2.5 rounded-lg bg-[#3B82F6]/08 border border-[#3B82F6]/20 hover:bg-[#3B82F6]/15 transition-colors text-left"
+      className="mt-2 w-full flex items-center justify-between gap-2 p-2.5 rounded-lg bg-[var(--accent)]/08 border border-[var(--accent)]/20 hover:bg-[var(--accent)]/15 transition-colors text-left"
     >
       <div className="flex items-center gap-2">
-        <ExternalLink size={11} className="text-[#3B82F6]" />
+        <ExternalLink size={11} className="text-[var(--accent)]" />
         <span className="text-[11px] text-[#93C5FD]">Open <strong className="text-[#BFDBFE]">{data.studio as string}</strong> studio</span>
       </div>
-      <ChevronDown size={11} className="text-[#3B82F6] rotate-[-90deg]" />
+      <ChevronDown size={11} className="text-[var(--accent)] rotate-[-90deg]" />
     </button>
   )
 }
@@ -110,14 +110,14 @@ function StatsCard({ data }: { data: Record<string, unknown> }) {
   return (
     <div className="mt-2 p-2.5 rounded-lg bg-white/[0.03] border border-white/[0.06]">
       <div className="flex items-center gap-1.5 mb-2">
-        <BarChart3 size={11} className="text-[#8B5CF6]" />
-        <span className="text-[10px] font-semibold text-[#94A3B8] uppercase tracking-wider">Graph Stats</span>
+        <BarChart3 size={11} className="text-[var(--accent)]" />
+        <span className="text-[10px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider">Graph Stats</span>
       </div>
       <div className="grid grid-cols-3 gap-1">
         {top.map(([kind, count]) => (
           <div key={kind} className="flex flex-col items-center p-1.5 rounded bg-white/[0.02]">
-            <span className="text-[13px] font-bold text-[#F1F5F9]">{count}</span>
-            <span className="text-[9px] text-[#64748B] capitalize">{kind}</span>
+            <span className="text-[13px] font-bold text-[var(--text-primary)]">{count}</span>
+            <span className="text-[9px] text-[var(--text-tertiary)] capitalize">{kind}</span>
           </div>
         ))}
       </div>
@@ -127,14 +127,14 @@ function StatsCard({ data }: { data: Record<string, unknown> }) {
 
 function NodesCreatedCard({ data }: { data: Record<string, unknown> }) {
   return (
-    <div className="mt-2 flex items-start gap-2 p-2.5 rounded-lg bg-[#8B5CF6]/08 border border-[#8B5CF6]/20">
-      <GitFork size={13} className="text-[#8B5CF6] mt-0.5 shrink-0" />
+    <div className="mt-2 flex items-start gap-2 p-2.5 rounded-lg bg-[var(--accent)]/08 border border-[var(--accent)]/20">
+      <GitFork size={13} className="text-[var(--accent)] mt-0.5 shrink-0" />
       <div>
-        <p className="text-[11px] font-semibold text-[#F1F5F9]">
+        <p className="text-[11px] font-semibold text-[var(--text-primary)]">
           {data.nodesCreated as number} nodes · {data.edgesCreated as number} edges added
         </p>
         {data.summary ? (
-          <p className="text-[10px] text-[#94A3B8] mt-0.5">{data.summary as string}</p>
+          <p className="text-[10px] text-[var(--text-secondary)] mt-0.5">{data.summary as string}</p>
         ) : null}
       </div>
     </div>
@@ -174,7 +174,7 @@ function SuggestedPrompts({
         <button
           key={s}
           onClick={() => onSelect(s)}
-          className="text-[10px] px-2.5 py-1 rounded-full bg-white/[0.05] border border-white/[0.08] text-[#94A3B8] hover:bg-[#8B5CF6]/20 hover:border-[#8B5CF6]/40 hover:text-[#C4B5FD] transition-all"
+          className="text-[10px] px-2.5 py-1 rounded-full bg-white/[0.05] border border-white/[0.08] text-[var(--text-secondary)] hover:bg-[var(--accent)]/20 hover:border-[var(--accent)]/40 hover:text-[var(--accent)] transition-all"
         >
           {s}
         </button>
@@ -204,11 +204,11 @@ function MessageBubble({
     >
       {/* Avatar */}
       <div className={`w-6 h-6 rounded-full shrink-0 flex items-center justify-center mt-0.5 ${
-        isUser ? 'bg-[#3B82F6]/20' : 'bg-[#8B5CF6]/20'
+        isUser ? 'bg-[var(--accent)]/20' : 'bg-[var(--accent)]/20'
       }`}>
         {isUser
-          ? <User size={12} className="text-[#60A5FA]" />
-          : <Sparkles size={12} className="text-[#A78BFA]" />
+          ? <User size={12} className="text-[var(--accent)]" />
+          : <Sparkles size={12} className="text-[var(--accent)]" />
         }
       </div>
 
@@ -216,11 +216,11 @@ function MessageBubble({
       <div className={`flex-1 min-w-0 ${isUser ? 'items-end' : 'items-start'} flex flex-col`}>
         <div className={`max-w-[85%] rounded-xl px-3 py-2 text-[12px] leading-relaxed ${
           isUser
-            ? 'bg-[#3B82F6]/20 border border-[#3B82F6]/30 text-[#BFDBFE] rounded-tr-none'
-            : 'bg-white/[0.04] border border-white/[0.06] text-[#CBD5E1] rounded-tl-none'
+            ? 'bg-[var(--accent)]/20 border border-[var(--accent)]/30 text-[#BFDBFE] rounded-tr-none'
+            : 'bg-white/[0.04] border border-white/[0.06] text-[var(--text-secondary)] rounded-tl-none'
         }`}>
           {message.isStreaming ? (
-            <span className="flex items-center gap-1.5 text-[#64748B]">
+            <span className="flex items-center gap-1.5 text-[var(--text-tertiary)]">
               <Loader2 size={11} className="animate-spin" />
               Thinking…
             </span>
@@ -237,7 +237,7 @@ function MessageBubble({
         )}
 
         {/* Timestamp */}
-        <span className="text-[9px] text-[#334155] mt-0.5">{formatTime(message.timestamp)}</span>
+        <span className="text-[9px] text-[var(--border-default)] mt-0.5">{formatTime(message.timestamp)}</span>
       </div>
     </motion.div>
   )
@@ -260,17 +260,17 @@ function WelcomeScreen({
     <div className="flex-1 flex flex-col items-center justify-center gap-4 px-4 py-6">
       {/* Icon */}
       <div className="relative">
-        <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#8B5CF6]/30 to-[#3B82F6]/20 border border-[#8B5CF6]/30 flex items-center justify-center">
-          <Sparkles size={24} className="text-[#A78BFA]" />
+        <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[var(--accent)]/30 to-[var(--accent)]/20 border border-[var(--accent)]/30 flex items-center justify-center">
+          <Sparkles size={24} className="text-[var(--accent)]" />
         </div>
-        <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-[#10B981]/20 border border-[#10B981]/40 flex items-center justify-center">
-          <Bot size={10} className="text-[#34D399]" />
+        <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-[var(--color-success)]/20 border border-[var(--color-success)]/40 flex items-center justify-center">
+          <Bot size={10} className="text-[var(--color-success)]" />
         </div>
       </div>
 
       <div className="text-center">
-        <p className="text-[14px] font-semibold text-[#F1F5F9]">Cortex</p>
-        <p className="text-[11px] text-[#64748B] mt-1 max-w-[200px]">
+        <p className="text-[14px] font-semibold text-[var(--text-primary)]">Cortex</p>
+        <p className="text-[11px] text-[var(--text-tertiary)] mt-1 max-w-[200px]">
           Your AI copilot across every studio. Ask anything, create tasks, navigate, or scaffold nodes.
         </p>
       </div>
@@ -285,7 +285,7 @@ function WelcomeScreen({
         ].map(({ icon: Icon, label, color }) => (
           <div key={label} className="flex items-center gap-2 p-2 rounded-lg bg-white/[0.03] border border-white/[0.05]">
             <Icon size={11} style={{ color }} />
-            <span className="text-[10px] text-[#64748B]">{label}</span>
+            <span className="text-[10px] text-[var(--text-tertiary)]">{label}</span>
           </div>
         ))}
       </div>
@@ -293,12 +293,12 @@ function WelcomeScreen({
       {/* Suggestions */}
       {suggestions.length > 0 && (
         <div className="w-full space-y-1.5">
-          <p className="text-[10px] text-[#475569] text-center uppercase tracking-wider">Try asking…</p>
+          <p className="text-[10px] text-[var(--text-tertiary)] text-center uppercase tracking-wider">Try asking…</p>
           {suggestions.slice(0, 4).map((s) => (
             <button
               key={s}
               onClick={() => onSelect(s)}
-              className="w-full text-left text-[11px] text-[#94A3B8] px-3 py-2 rounded-lg bg-white/[0.03] border border-white/[0.05] hover:bg-[#8B5CF6]/10 hover:border-[#8B5CF6]/30 hover:text-[#C4B5FD] transition-all"
+              className="w-full text-left text-[11px] text-[var(--text-secondary)] px-3 py-2 rounded-lg bg-white/[0.03] border border-white/[0.05] hover:bg-[var(--accent)]/10 hover:border-[var(--accent)]/30 hover:text-[var(--accent)] transition-all"
             >
               {s}
             </button>
@@ -440,11 +440,11 @@ export function OpsPilot({ productId, currentStudio, orgSlug, productSlug }: Ops
             exit={{ scale: 0, opacity: 0 }}
             onClick={() => setOpen(true)}
             title="Cortex (⌘⇧O)"
-            className="fixed bottom-6 right-6 z-[60] w-12 h-12 rounded-2xl bg-gradient-to-br from-[#7C3AED] to-[#2563EB] shadow-xl flex items-center justify-center hover:shadow-[0_0_24px_rgba(139,92,246,0.5)] transition-shadow group"
+            className="fixed bottom-6 right-6 z-[60] w-12 h-12 rounded-2xl bg-gradient-to-br from-[var(--accent)] to-[var(--accent)] shadow-xl flex items-center justify-center hover:shadow-[0_0_24px_rgba(139,92,246,0.5)] transition-shadow group"
           >
             <Sparkles size={20} className="text-white group-hover:scale-110 transition-transform" />
             {/* Pulse ring */}
-            <span className="absolute inset-0 rounded-2xl animate-ping bg-[#8B5CF6]/20 pointer-events-none" />
+            <span className="absolute inset-0 rounded-2xl animate-ping bg-[var(--accent)]/20 pointer-events-none" />
           </motion.button>
         )}
       </AnimatePresence>
@@ -464,14 +464,14 @@ export function OpsPilot({ productId, currentStudio, orgSlug, productSlug }: Ops
             {/* ── Header ── */}
             <div className="flex items-center justify-between px-3 py-2.5 border-b border-white/[0.07] bg-white/[0.02] flex-shrink-0">
               <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-xl bg-gradient-to-br from-[#7C3AED]/40 to-[#2563EB]/30 border border-[#8B5CF6]/30 flex items-center justify-center">
-                  <Sparkles size={13} className="text-[#A78BFA]" />
+                <div className="w-7 h-7 rounded-xl bg-gradient-to-br from-[var(--accent)]/40 to-[var(--accent)]/30 border border-[var(--accent)]/30 flex items-center justify-center">
+                  <Sparkles size={13} className="text-[var(--accent)]" />
                 </div>
                 <div>
-                  <p className="text-[12px] font-semibold text-[#F1F5F9] leading-none">Cortex</p>
-                  <p className="text-[9px] text-[#475569] mt-0.5">{currentStudio} · {productSlug}</p>
+                  <p className="text-[12px] font-semibold text-[var(--text-primary)] leading-none">Cortex</p>
+                  <p className="text-[9px] text-[var(--text-tertiary)] mt-0.5">{currentStudio} · {productSlug}</p>
                 </div>
-                <div className="ml-1 w-1.5 h-1.5 rounded-full bg-[#10B981] animate-pulse" />
+                <div className="ml-1 w-1.5 h-1.5 rounded-full bg-[var(--color-success)] animate-pulse" />
               </div>
 
               <div className="flex items-center gap-1">
@@ -479,7 +479,7 @@ export function OpsPilot({ productId, currentStudio, orgSlug, productSlug }: Ops
                   <button
                     onClick={clearChat}
                     title="Clear conversation"
-                    className="p-1 rounded hover:bg-white/[0.05] text-[#334155] hover:text-[#64748B] transition-colors"
+                    className="p-1 rounded hover:bg-white/[0.05] text-[var(--border-default)] hover:text-[var(--text-tertiary)] transition-colors"
                   >
                     <Trash2 size={11} />
                   </button>
@@ -487,14 +487,14 @@ export function OpsPilot({ productId, currentStudio, orgSlug, productSlug }: Ops
                 <button
                   onClick={() => setExpanded((v) => !v)}
                   title={expanded ? 'Collapse' : 'Expand'}
-                  className="p-1 rounded hover:bg-white/[0.05] text-[#334155] hover:text-[#64748B] transition-colors"
+                  className="p-1 rounded hover:bg-white/[0.05] text-[var(--border-default)] hover:text-[var(--text-tertiary)] transition-colors"
                 >
                   {expanded ? <Minimize2 size={11} /> : <Maximize2 size={11} />}
                 </button>
                 <button
                   onClick={() => setOpen(false)}
                   title="Close"
-                  className="p-1 rounded hover:bg-white/[0.05] text-[#334155] hover:text-[#64748B] transition-colors"
+                  className="p-1 rounded hover:bg-white/[0.05] text-[var(--border-default)] hover:text-[var(--text-tertiary)] transition-colors"
                 >
                   <X size={13} />
                 </button>
@@ -535,13 +535,13 @@ export function OpsPilot({ productId, currentStudio, orgSlug, productSlug }: Ops
                 placeholder="Ask anything about your product…"
                 rows={1}
                 disabled={chatMutation.isPending}
-                className="flex-1 resize-none bg-white/[0.04] border border-white/[0.08] rounded-xl px-3 py-2 text-[12px] text-[#E2E8F0] placeholder-[#334155] outline-none focus:border-[#8B5CF6]/50 focus:bg-white/[0.06] transition-all disabled:opacity-40 max-h-[100px] leading-relaxed"
+                className="flex-1 resize-none bg-white/[0.04] border border-white/[0.08] rounded-xl px-3 py-2 text-[12px] text-[var(--text-primary)] placeholder-[var(--border-default)] outline-none focus:border-[var(--accent)]/50 focus:bg-white/[0.06] transition-all disabled:opacity-40 max-h-[100px] leading-relaxed"
                 style={{ minHeight: 36 }}
               />
               <button
                 type="submit"
                 disabled={!input.trim() || chatMutation.isPending}
-                className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#7C3AED] to-[#2563EB] flex items-center justify-center disabled:opacity-40 hover:shadow-[0_0_12px_rgba(139,92,246,0.4)] transition-all shrink-0"
+                className="w-9 h-9 rounded-xl bg-gradient-to-br from-[var(--accent)] to-[var(--accent)] flex items-center justify-center disabled:opacity-40 hover:shadow-[0_0_12px_rgba(139,92,246,0.4)] transition-all shrink-0"
               >
                 {chatMutation.isPending
                   ? <Loader2 size={14} className="text-white animate-spin" />
@@ -552,8 +552,8 @@ export function OpsPilot({ productId, currentStudio, orgSlug, productSlug }: Ops
 
             {/* ── Keyboard hint ── */}
             <div className="px-3 pb-2 flex items-center justify-between">
-              <span className="text-[9px] text-[#1E293B]">⌘⇧O to toggle</span>
-              <span className="text-[9px] text-[#1E293B]">↵ send · ⇧↵ newline</span>
+              <span className="text-[9px] text-[var(--bg-surface)]">⌘⇧O to toggle</span>
+              <span className="text-[9px] text-[var(--bg-surface)]">↵ send · ⇧↵ newline</span>
             </div>
           </motion.div>
         )}

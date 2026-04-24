@@ -121,7 +121,7 @@ export function FirstRunBanner({ productId }: FirstRunBannerProps) {
         <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--border-default)]">
           <div className="flex items-center gap-2">
             {allDone ? (
-              <CheckCircle2 size={14} className="text-[#10B981]" />
+              <CheckCircle2 size={14} className="text-[var(--color-success)]" />
             ) : (
               <div className="w-3.5 h-3.5 rounded-full border-2 border-[var(--accent)] border-t-transparent animate-spin" />
             )}

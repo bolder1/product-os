@@ -56,7 +56,7 @@ export function AddNodeModal({ onClose, onSubmit }: AddNodeModalProps) {
       <ModalCard title="Add Node" onClose={onClose}>
         {/* Kind pills */}
         <div className="flex flex-col gap-1.5">
-          <label className="text-[10px] uppercase tracking-wider text-[#64748B]">Type</label>
+          <label className="text-[10px] uppercase tracking-wider text-[var(--text-tertiary)]">Type</label>
           <div className="flex flex-wrap gap-1.5">
             {NODE_KINDS.map((k) => {
               const active = k === kind
@@ -83,14 +83,14 @@ export function AddNodeModal({ onClose, onSubmit }: AddNodeModalProps) {
 
         {/* Label */}
         <div className="flex flex-col gap-1">
-          <label className="text-[10px] uppercase tracking-wider text-[#64748B]">Label</label>
+          <label className="text-[10px] uppercase tracking-wider text-[var(--text-tertiary)]">Label</label>
           <input
             autoFocus
             value={label}
             onChange={(e) => setLabel(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleSubmit()}
             placeholder={`e.g. ${kind === 'module' ? 'Auth Module' : kind === 'feature' ? 'User Profile' : kind === 'page' ? '/dashboard' : 'New ' + NODE_KIND_LABELS[kind]}`}
-            className="px-3 py-2 rounded-lg bg-white/[0.04] border border-white/[0.08] text-[13px] text-[#F1F5F9] placeholder:text-[#64748B] focus:outline-none focus:border-[#8B5CF6]/40 focus:ring-1 focus:ring-[#8B5CF6]/20"
+            className="px-3 py-2 rounded-lg bg-white/[0.04] border border-white/[0.08] text-[13px] text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:outline-none focus:border-[var(--accent)]/40 focus:ring-1 focus:ring-[var(--accent)]/20"
           />
           {error && <span className="text-[11px] text-red-400">{error}</span>}
         </div>
@@ -98,8 +98,8 @@ export function AddNodeModal({ onClose, onSubmit }: AddNodeModalProps) {
         {/* Properties */}
         <div className="flex flex-col gap-1.5">
           <div className="flex items-center justify-between">
-            <label className="text-[10px] uppercase tracking-wider text-[#64748B]">Properties <span className="normal-case text-[#64748B]/60">(optional)</span></label>
-            <button onClick={addRow} className="text-[10px] text-[#8B5CF6] hover:text-[#A78BFA] flex items-center gap-0.5 transition-colors">
+            <label className="text-[10px] uppercase tracking-wider text-[var(--text-tertiary)]">Properties <span className="normal-case text-[var(--text-tertiary)]/60">(optional)</span></label>
+            <button onClick={addRow} className="text-[10px] text-[var(--accent)] hover:text-[var(--accent)] flex items-center gap-0.5 transition-colors">
               <Plus size={10} /> Add field
             </button>
           </div>
@@ -109,21 +109,21 @@ export function AddNodeModal({ onClose, onSubmit }: AddNodeModalProps) {
                 value={row.key}
                 onChange={(e) => updateRow(i, 'key', e.target.value)}
                 placeholder="key"
-                className="flex-1 px-2 py-1.5 rounded-md bg-white/[0.04] border border-white/[0.06] text-[11px] text-[#94A3B8] placeholder:text-[#64748B]/50 focus:outline-none focus:border-[#8B5CF6]/30"
+                className="flex-1 px-2 py-1.5 rounded-md bg-white/[0.04] border border-white/[0.06] text-[11px] text-[var(--text-secondary)] placeholder:text-[var(--text-tertiary)]/50 focus:outline-none focus:border-[var(--accent)]/30"
               />
               <input
                 value={row.value}
                 onChange={(e) => updateRow(i, 'value', e.target.value)}
                 placeholder="value"
-                className="flex-1 px-2 py-1.5 rounded-md bg-white/[0.04] border border-white/[0.06] text-[11px] text-[#94A3B8] placeholder:text-[#64748B]/50 focus:outline-none focus:border-[#8B5CF6]/30"
+                className="flex-1 px-2 py-1.5 rounded-md bg-white/[0.04] border border-white/[0.06] text-[11px] text-[var(--text-secondary)] placeholder:text-[var(--text-tertiary)]/50 focus:outline-none focus:border-[var(--accent)]/30"
               />
-              <button onClick={() => removeRow(i)} className="text-[#64748B] hover:text-red-400 transition-colors">
+              <button onClick={() => removeRow(i)} className="text-[var(--text-tertiary)] hover:text-red-400 transition-colors">
                 <X size={12} />
               </button>
             </div>
           ))}
           {dataRows.length === 0 && (
-            <p className="text-[11px] text-[#64748B]/60 italic">No properties yet</p>
+            <p className="text-[11px] text-[var(--text-tertiary)]/60 italic">No properties yet</p>
           )}
         </div>
 
@@ -188,21 +188,21 @@ export function EditNodeModal({ node, onClose, onSubmit }: EditNodeModalProps) {
         onClose={onClose}
       >
         <div className="flex flex-col gap-1">
-          <label className="text-[10px] uppercase tracking-wider text-[#64748B]">Label</label>
+          <label className="text-[10px] uppercase tracking-wider text-[var(--text-tertiary)]">Label</label>
           <input
             autoFocus
             value={label}
             onChange={(e) => setLabel(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleSubmit()}
-            className="px-3 py-2 rounded-lg bg-white/[0.04] border border-white/[0.08] text-[13px] text-[#F1F5F9] focus:outline-none focus:border-[#8B5CF6]/40 focus:ring-1 focus:ring-[#8B5CF6]/20"
+            className="px-3 py-2 rounded-lg bg-white/[0.04] border border-white/[0.08] text-[13px] text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent)]/40 focus:ring-1 focus:ring-[var(--accent)]/20"
           />
           {error && <span className="text-[11px] text-red-400">{error}</span>}
         </div>
 
         <div className="flex flex-col gap-1.5">
           <div className="flex items-center justify-between">
-            <label className="text-[10px] uppercase tracking-wider text-[#64748B]">Properties</label>
-            <button onClick={addRow} className="text-[10px] text-[#8B5CF6] hover:text-[#A78BFA] flex items-center gap-0.5 transition-colors">
+            <label className="text-[10px] uppercase tracking-wider text-[var(--text-tertiary)]">Properties</label>
+            <button onClick={addRow} className="text-[10px] text-[var(--accent)] hover:text-[var(--accent)] flex items-center gap-0.5 transition-colors">
               <Plus size={10} /> Add field
             </button>
           </div>
@@ -212,21 +212,21 @@ export function EditNodeModal({ node, onClose, onSubmit }: EditNodeModalProps) {
                 value={row.key}
                 onChange={(e) => updateRow(i, 'key', e.target.value)}
                 placeholder="key"
-                className="flex-1 px-2 py-1.5 rounded-md bg-white/[0.04] border border-white/[0.06] text-[11px] text-[#94A3B8] placeholder:text-[#64748B]/50 focus:outline-none focus:border-[#8B5CF6]/30"
+                className="flex-1 px-2 py-1.5 rounded-md bg-white/[0.04] border border-white/[0.06] text-[11px] text-[var(--text-secondary)] placeholder:text-[var(--text-tertiary)]/50 focus:outline-none focus:border-[var(--accent)]/30"
               />
               <input
                 value={row.value}
                 onChange={(e) => updateRow(i, 'value', e.target.value)}
                 placeholder="value"
-                className="flex-1 px-2 py-1.5 rounded-md bg-white/[0.04] border border-white/[0.06] text-[11px] text-[#94A3B8] placeholder:text-[#64748B]/50 focus:outline-none focus:border-[#8B5CF6]/30"
+                className="flex-1 px-2 py-1.5 rounded-md bg-white/[0.04] border border-white/[0.06] text-[11px] text-[var(--text-secondary)] placeholder:text-[var(--text-tertiary)]/50 focus:outline-none focus:border-[var(--accent)]/30"
               />
-              <button onClick={() => removeRow(i)} className="text-[#64748B] hover:text-red-400 transition-colors">
+              <button onClick={() => removeRow(i)} className="text-[var(--text-tertiary)] hover:text-red-400 transition-colors">
                 <X size={12} />
               </button>
             </div>
           ))}
           {dataRows.length === 0 && (
-            <p className="text-[11px] text-[#64748B]/60 italic">No properties</p>
+            <p className="text-[11px] text-[var(--text-tertiary)]/60 italic">No properties</p>
           )}
         </div>
 
@@ -273,7 +273,7 @@ export function AddEdgeModal({ sourceNode, allNodes, onClose, onSubmit }: AddEdg
       <ModalCard title="Connect Nodes" onClose={onClose}>
         {/* Source display */}
         <div className="flex flex-col gap-1">
-          <label className="text-[10px] uppercase tracking-wider text-[#64748B]">From</label>
+          <label className="text-[10px] uppercase tracking-wider text-[var(--text-tertiary)]">From</label>
           <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white/[0.03] border border-white/[0.06]">
             <div
               className="w-5 h-5 rounded flex items-center justify-center text-[10px] font-bold shrink-0"
@@ -281,14 +281,14 @@ export function AddEdgeModal({ sourceNode, allNodes, onClose, onSubmit }: AddEdg
             >
               {sourceNode.label.charAt(0)}
             </div>
-            <span className="text-[12px] text-[#F1F5F9] truncate">{sourceNode.label}</span>
+            <span className="text-[12px] text-[var(--text-primary)] truncate">{sourceNode.label}</span>
             <span className="ml-auto text-[10px] shrink-0" style={{ color }}>{NODE_KIND_LABELS[sourceNode.kind]}</span>
           </div>
         </div>
 
         {/* Relationship kind */}
         <div className="flex flex-col gap-1.5">
-          <label className="text-[10px] uppercase tracking-wider text-[#64748B]">Relationship</label>
+          <label className="text-[10px] uppercase tracking-wider text-[var(--text-tertiary)]">Relationship</label>
           <div className="flex flex-wrap gap-1.5">
             {EDGE_KINDS.map((k) => (
               <button
@@ -296,8 +296,8 @@ export function AddEdgeModal({ sourceNode, allNodes, onClose, onSubmit }: AddEdg
                 onClick={() => setKind(k)}
                 className={`px-2.5 py-1 rounded-full text-[10px] font-medium transition-all ${
                   k === kind
-                    ? 'bg-[#8B5CF6]/20 text-[#A78BFA] ring-1 ring-[#8B5CF6]/40'
-                    : 'bg-white/[0.04] text-[#64748B] hover:text-[#94A3B8]'
+                    ? 'bg-[var(--accent)]/20 text-[var(--accent)] ring-1 ring-[var(--accent)]/40'
+                    : 'bg-white/[0.04] text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]'
                 }`}
               >
                 {EDGE_KIND_LABELS[k]}
@@ -308,15 +308,15 @@ export function AddEdgeModal({ sourceNode, allNodes, onClose, onSubmit }: AddEdg
 
         {/* Target select */}
         <div className="flex flex-col gap-1">
-          <label className="text-[10px] uppercase tracking-wider text-[#64748B]">To</label>
+          <label className="text-[10px] uppercase tracking-wider text-[var(--text-tertiary)]">To</label>
           <div className="relative">
             <select
               value={targetId}
               onChange={(e) => setTargetId(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg bg-white/[0.04] border border-white/[0.08] text-[12px] text-[#F1F5F9] focus:outline-none focus:border-[#8B5CF6]/40 appearance-none cursor-pointer"
+              className="w-full px-3 py-2 rounded-lg bg-white/[0.04] border border-white/[0.08] text-[12px] text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent)]/40 appearance-none cursor-pointer"
             >
               {otherNodes.map((n) => (
-                <option key={n.id} value={n.id} className="bg-[#0D1117] text-[#F1F5F9]">
+                <option key={n.id} value={n.id} className="bg-[#0D1117] text-[var(--text-primary)]">
                   {n.label}  ({NODE_KIND_LABELS[n.kind]})
                 </option>
               ))}
@@ -371,8 +371,8 @@ function ModalCard({
       className="w-[420px] rounded-xl border border-white/[0.1] bg-[#0D1117]/95 backdrop-blur shadow-2xl shadow-black/60 flex flex-col gap-4 p-5"
     >
       <div className="flex items-center justify-between">
-        <h2 className="text-[13px] font-semibold text-[#F1F5F9]">{title}</h2>
-        <button onClick={onClose} className="text-[#64748B] hover:text-[#94A3B8] transition-colors">
+        <h2 className="text-[13px] font-semibold text-[var(--text-primary)]">{title}</h2>
+        <button onClick={onClose} className="text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] transition-colors">
           <X size={14} />
         </button>
       </div>
@@ -396,14 +396,14 @@ function ModalFooter({
     <div className="flex justify-end gap-2 pt-1 border-t border-white/[0.06]">
       <button
         onClick={onCancel}
-        className="px-3 py-1.5 rounded-lg text-[11px] font-medium text-[#64748B] hover:text-[#94A3B8] hover:bg-white/[0.04] transition-all"
+        className="px-3 py-1.5 rounded-lg text-[11px] font-medium text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] hover:bg-white/[0.04] transition-all"
       >
         Cancel
       </button>
       <button
         onClick={onSubmit}
         disabled={loading}
-        className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-[11px] font-semibold bg-[#8B5CF6] text-white hover:bg-[#7C3AED] disabled:opacity-50 transition-all"
+        className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-[11px] font-semibold bg-[var(--accent)] text-white hover:bg-[var(--accent)] disabled:opacity-50 transition-all"
       >
         {loading && <Loader2 size={11} className="animate-spin" />}
         {submitLabel}

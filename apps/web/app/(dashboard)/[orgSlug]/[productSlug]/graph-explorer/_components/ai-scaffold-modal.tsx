@@ -94,19 +94,19 @@ function BuildingState({ prompt }: { prompt: string }) {
             />
             <defs>
               <linearGradient id="spin-grad" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stopColor="#8B5CF6" stopOpacity={0} />
-                <stop offset="100%" stopColor="#8B5CF6" />
+                <stop offset="0%" stopColor="var(--accent)" stopOpacity={0} />
+                <stop offset="100%" stopColor="var(--accent)" />
               </linearGradient>
             </defs>
           </svg>
         </motion.div>
         <div className="absolute inset-0 flex items-center justify-center">
-          <Sparkles size={22} className="text-[#8B5CF6]" />
+          <Sparkles size={22} className="text-[var(--accent)]" />
         </div>
       </div>
 
       <div className="flex flex-col gap-1">
-        <p className="text-[13px] font-semibold text-[#F1F5F9]">Building your graph…</p>
+        <p className="text-[13px] font-semibold text-[var(--text-primary)]">Building your graph…</p>
         <AnimatePresence mode="wait">
           <motion.p
             key={stepIdx}
@@ -114,7 +114,7 @@ function BuildingState({ prompt }: { prompt: string }) {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -4 }}
             transition={{ duration: 0.25 }}
-            className="text-[11px] text-[#64748B]"
+            className="text-[11px] text-[var(--text-tertiary)]"
           >
             {steps[stepIdx]}
           </motion.p>
@@ -137,7 +137,7 @@ function BuildingState({ prompt }: { prompt: string }) {
         ))}
       </div>
 
-      <p className="text-[10px] text-[#4A5568] max-w-[240px] leading-relaxed">
+      <p className="text-[10px] text-[var(--text-tertiary)] max-w-[240px] leading-relaxed">
         "{prompt.length > 80 ? prompt.slice(0, 80) + '…' : prompt}"
       </p>
     </div>
@@ -166,36 +166,36 @@ function DoneState({
         initial={{ scale: 0.5, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ type: 'spring', duration: 0.5, bounce: 0.4 }}
-        className="w-14 h-14 rounded-full bg-[#10B981]/15 flex items-center justify-center"
+        className="w-14 h-14 rounded-full bg-[var(--color-success)]/15 flex items-center justify-center"
       >
-        <CheckCircle2 size={28} className="text-[#10B981]" />
+        <CheckCircle2 size={28} className="text-[var(--color-success)]" />
       </motion.div>
 
       <div className="flex flex-col gap-1">
-        <p className="text-[14px] font-semibold text-[#F1F5F9]">Graph generated!</p>
-        <p className="text-[11px] text-[#64748B] max-w-[260px] leading-relaxed">{summary}</p>
+        <p className="text-[14px] font-semibold text-[var(--text-primary)]">Graph generated!</p>
+        <p className="text-[11px] text-[var(--text-tertiary)] max-w-[260px] leading-relaxed">{summary}</p>
       </div>
 
       {/* Stats tiles */}
       <div className="flex items-center gap-3">
         <div className="flex flex-col items-center gap-0.5 px-5 py-3 rounded-xl bg-white/[0.04] border border-white/[0.07]">
-          <span className="text-[24px] font-bold text-[#F1F5F9]">
+          <span className="text-[24px] font-bold text-[var(--text-primary)]">
             <Counter target={nodesCreated} />
           </span>
-          <span className="text-[10px] text-[#64748B] flex items-center gap-1">
+          <span className="text-[10px] text-[var(--text-tertiary)] flex items-center gap-1">
             <GitBranch size={10} /> nodes
           </span>
         </div>
         <div className="flex flex-col items-center gap-0.5 px-5 py-3 rounded-xl bg-white/[0.04] border border-white/[0.07]">
-          <span className="text-[24px] font-bold text-[#F1F5F9]">
+          <span className="text-[24px] font-bold text-[var(--text-primary)]">
             <Counter target={edgesCreated} />
           </span>
-          <span className="text-[10px] text-[#64748B]">edges</span>
+          <span className="text-[10px] text-[var(--text-tertiary)]">edges</span>
         </div>
       </div>
 
       {isFallback && (
-        <p className="text-[10px] text-[#F59E0B]/70 bg-[#F59E0B]/08 border border-[#F59E0B]/20 rounded-lg px-3 py-1.5 max-w-[280px]">
+        <p className="text-[10px] text-[var(--color-warning)]/70 bg-[var(--color-warning)]/08 border border-[var(--color-warning)]/20 rounded-lg px-3 py-1.5 max-w-[280px]">
           Demo mode — add ANTHROPIC_API_KEY for AI-generated graphs
         </p>
       )}
@@ -203,13 +203,13 @@ function DoneState({
       <div className="flex items-center gap-2">
         <button
           onClick={onViewGraph}
-          className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-[12px] font-semibold bg-[#8B5CF6] text-white hover:bg-[#7C3AED] transition-colors"
+          className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-[12px] font-semibold bg-[var(--accent)] text-white hover:bg-[var(--accent)] transition-colors"
         >
           View in Graph <ArrowRight size={13} />
         </button>
         <button
           onClick={onClose}
-          className="px-4 py-2 rounded-lg text-[12px] font-medium text-[#64748B] hover:text-[#94A3B8] hover:bg-white/[0.04] transition-colors"
+          className="px-4 py-2 rounded-lg text-[12px] font-medium text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] hover:bg-white/[0.04] transition-colors"
         >
           Close
         </button>
@@ -289,15 +289,15 @@ export function AIScaffoldModal({ productId, onClose, onSuccess }: AIScaffoldMod
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.07]">
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-[#8B5CF6]/15 flex items-center justify-center">
-              <Wand2 size={14} className="text-[#8B5CF6]" />
+            <div className="w-7 h-7 rounded-lg bg-[var(--accent)]/15 flex items-center justify-center">
+              <Wand2 size={14} className="text-[var(--accent)]" />
             </div>
             <div>
-              <h2 className="text-[13px] font-semibold text-[#F1F5F9] leading-tight">AI: Generate Graph</h2>
-              <p className="text-[10px] text-[#64748B] leading-tight">Describe your product — AI builds the graph</p>
+              <h2 className="text-[13px] font-semibold text-[var(--text-primary)] leading-tight">AI: Generate Graph</h2>
+              <p className="text-[10px] text-[var(--text-tertiary)] leading-tight">Describe your product — AI builds the graph</p>
             </div>
           </div>
-          <button onClick={onClose} className="text-[#64748B] hover:text-[#94A3B8] transition-colors">
+          <button onClick={onClose} className="text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] transition-colors">
             <X size={15} />
           </button>
         </div>
@@ -314,7 +314,7 @@ export function AIScaffoldModal({ productId, onClose, onSuccess }: AIScaffoldMod
             >
               {/* Structure selector */}
               <div className="flex flex-col gap-2">
-                <label className="text-[10px] uppercase tracking-wider text-[#64748B] font-semibold">Generate a…</label>
+                <label className="text-[10px] uppercase tracking-wider text-[var(--text-tertiary)] font-semibold">Generate a…</label>
                 <div className="grid grid-cols-4 gap-1.5">
                   {STRUCTURES.map((s) => (
                     <button
@@ -322,15 +322,15 @@ export function AIScaffoldModal({ productId, onClose, onSuccess }: AIScaffoldMod
                       onClick={() => { setStructure(s.key); setPrompt('') }}
                       className={`px-2 py-1.5 rounded-lg text-[10px] font-medium text-left transition-all leading-tight ${
                         s.key === structure
-                          ? 'bg-[#8B5CF6]/18 text-[#A78BFA] ring-1 ring-[#8B5CF6]/35'
-                          : 'bg-white/[0.03] text-[#64748B] hover:bg-white/[0.06] hover:text-[#94A3B8]'
+                          ? 'bg-[var(--accent)]/18 text-[var(--accent)] ring-1 ring-[var(--accent)]/35'
+                          : 'bg-white/[0.03] text-[var(--text-tertiary)] hover:bg-white/[0.06] hover:text-[var(--text-secondary)]'
                       }`}
                     >
                       {s.label}
                     </button>
                   ))}
                 </div>
-                <p className="text-[10px] text-[#4A5568] leading-tight">
+                <p className="text-[10px] text-[var(--text-tertiary)] leading-tight">
                   {STRUCTURES.find((s) => s.key === structure)?.hint}
                 </p>
               </div>
@@ -338,10 +338,10 @@ export function AIScaffoldModal({ productId, onClose, onSuccess }: AIScaffoldMod
               {/* Prompt textarea */}
               <div className="flex flex-col gap-1.5">
                 <div className="flex items-center justify-between">
-                  <label className="text-[10px] uppercase tracking-wider text-[#64748B] font-semibold">Description</label>
+                  <label className="text-[10px] uppercase tracking-wider text-[var(--text-tertiary)] font-semibold">Description</label>
                   <button
                     onClick={useExample}
-                    className="text-[10px] text-[#8B5CF6] hover:text-[#A78BFA] transition-colors"
+                    className="text-[10px] text-[var(--accent)] hover:text-[var(--accent)] transition-colors"
                   >
                     Use example
                   </button>
@@ -355,29 +355,29 @@ export function AIScaffoldModal({ productId, onClose, onSuccess }: AIScaffoldMod
                   }}
                   placeholder={`e.g. ${EXAMPLE_PROMPTS[structure]}`}
                   rows={4}
-                  className="w-full px-3 py-2.5 rounded-xl bg-white/[0.04] border border-white/[0.08] text-[12px] text-[#F1F5F9] placeholder:text-[#4A5568] resize-none focus:outline-none focus:border-[#8B5CF6]/40 focus:ring-1 focus:ring-[#8B5CF6]/20 leading-relaxed"
+                  className="w-full px-3 py-2.5 rounded-xl bg-white/[0.04] border border-white/[0.08] text-[12px] text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] resize-none focus:outline-none focus:border-[var(--accent)]/40 focus:ring-1 focus:ring-[var(--accent)]/20 leading-relaxed"
                 />
                 <div className="flex items-center justify-between">
                   {error ? (
                     <span className="text-[11px] text-red-400">{error}</span>
                   ) : (
-                    <span className="text-[10px] text-[#4A5568]">
+                    <span className="text-[10px] text-[var(--text-tertiary)]">
                       {prompt.length > 0 ? `${prompt.length} chars` : 'Be as specific as you like'}
                     </span>
                   )}
-                  <span className="text-[10px] text-[#4A5568]">⌘↵ to generate</span>
+                  <span className="text-[10px] text-[var(--text-tertiary)]">⌘↵ to generate</span>
                 </div>
               </div>
 
               {/* Footer */}
               <div className="flex items-center justify-between pt-1 border-t border-white/[0.06]">
-                <p className="text-[10px] text-[#4A5568] leading-relaxed max-w-[240px]">
+                <p className="text-[10px] text-[var(--text-tertiary)] leading-relaxed max-w-[240px]">
                   AI will generate nodes and edges and add them to your graph
                 </p>
                 <button
                   onClick={handleGenerate}
                   disabled={!prompt.trim()}
-                  className="flex items-center gap-2 px-4 py-2 rounded-lg text-[12px] font-semibold bg-[#8B5CF6] text-white hover:bg-[#7C3AED] disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg text-[12px] font-semibold bg-[var(--accent)] text-white hover:bg-[var(--accent)] disabled:opacity-40 disabled:cursor-not-allowed transition-all"
                 >
                   <Sparkles size={13} />
                   Generate

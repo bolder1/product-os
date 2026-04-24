@@ -13,18 +13,20 @@ export interface Task {
 export type TaskStatus = Task['status']
 export type TaskPriority = Task['priority']
 
-export const STATUS_CONFIG: Record<TaskStatus, { label: string; color: string; dotColor: string }> = {
-  todo: { label: 'Todo', color: '#64748B', dotColor: '#64748B' },
-  in_progress: { label: 'In Progress', color: '#3B82F6', dotColor: '#3B82F6' },
-  in_review: { label: 'In Review', color: '#F59E0B', dotColor: '#F59E0B' },
-  done: { label: 'Done', color: '#10B981', dotColor: '#10B981' },
+// R20.6 — status/priority map to semantic tokens (color) + pre-composed
+// Tailwind class pairs (pill) to avoid template-literal concatenation.
+export const STATUS_CONFIG: Record<TaskStatus, { label: string; color: string; dotColor: string; pill: string }> = {
+  todo:        { label: 'Todo',        color: 'var(--text-tertiary)', dotColor: 'var(--text-tertiary)', pill: 'bg-[var(--bg-inset)] text-[var(--text-tertiary)]' },
+  in_progress: { label: 'In Progress', color: 'var(--accent)',        dotColor: 'var(--accent)',        pill: 'bg-[var(--accent-subtle)] text-[var(--accent-text)]' },
+  in_review:   { label: 'In Review',   color: 'var(--color-warning)', dotColor: 'var(--color-warning)', pill: 'bg-[var(--color-warning-muted)] text-[var(--color-warning)]' },
+  done:        { label: 'Done',        color: 'var(--color-success)', dotColor: 'var(--color-success)', pill: 'bg-[var(--color-success-muted)] text-[var(--color-success)]' },
 }
 
-export const PRIORITY_CONFIG: Record<TaskPriority, { label: string; color: string }> = {
-  critical: { label: 'Critical', color: '#F43F5E' },
-  high: { label: 'High', color: '#F59E0B' },
-  medium: { label: 'Medium', color: '#3B82F6' },
-  low: { label: 'Low', color: '#64748B' },
+export const PRIORITY_CONFIG: Record<TaskPriority, { label: string; color: string; pill: string }> = {
+  critical: { label: 'Critical', color: 'var(--color-error)',   pill: 'bg-[var(--color-error-muted)] text-[var(--color-error)]' },
+  high:     { label: 'High',     color: 'var(--color-warning)', pill: 'bg-[var(--color-warning-muted)] text-[var(--color-warning)]' },
+  medium:   { label: 'Medium',   color: 'var(--accent)',        pill: 'bg-[var(--accent-subtle)] text-[var(--accent-text)]' },
+  low:      { label: 'Low',      color: 'var(--text-tertiary)', pill: 'bg-[var(--bg-inset)] text-[var(--text-tertiary)]' },
 }
 
 export const STATUSES: TaskStatus[] = ['todo', 'in_progress', 'in_review', 'done']
@@ -37,7 +39,7 @@ export const mockTasks: Task[] = [
     description: 'Build login/signup flow with OAuth2 and email/password support including session management.',
     status: 'in_progress',
     priority: 'critical',
-    assignee: { name: 'Alice Chen', initials: 'AC', color: '#8B5CF6' },
+    assignee: { name: 'Alice Chen', initials: 'AC', color: 'var(--accent)' },
     dueDate: '2026-04-02',
     linkedNode: { kind: 'Feature', label: 'Auth Module' },
     createdAt: '2026-03-20',
@@ -48,7 +50,7 @@ export const mockTasks: Task[] = [
     description: 'Create high-fidelity mockups for the main dashboard with widget grid and analytics overview.',
     status: 'in_review',
     priority: 'high',
-    assignee: { name: 'Bob Rivera', initials: 'BR', color: '#EC4899' },
+    assignee: { name: 'Bob Rivera', initials: 'BR', color: 'var(--accent)' },
     dueDate: '2026-03-30',
     linkedNode: { kind: 'Page', label: 'Dashboard' },
     createdAt: '2026-03-18',
@@ -59,7 +61,7 @@ export const mockTasks: Task[] = [
     description: 'Configure GitHub Actions for automated testing, linting, and deployment to staging.',
     status: 'todo',
     priority: 'medium',
-    assignee: { name: 'Charlie Kim', initials: 'CK', color: '#14B8A6' },
+    assignee: { name: 'Charlie Kim', initials: 'CK', color: 'var(--accent)' },
     dueDate: '2026-04-05',
     linkedNode: { kind: 'System', label: 'DevOps' },
     createdAt: '2026-03-22',
@@ -70,7 +72,7 @@ export const mockTasks: Task[] = [
     description: 'Document all REST endpoints with request/response schemas using OpenAPI spec.',
     status: 'todo',
     priority: 'low',
-    assignee: { name: 'Dana Patel', initials: 'DP', color: '#F97316' },
+    assignee: { name: 'Dana Patel', initials: 'DP', color: 'var(--accent)' },
     dueDate: '2026-04-10',
     linkedNode: { kind: 'Document', label: 'API Docs' },
     createdAt: '2026-03-21',
@@ -81,7 +83,7 @@ export const mockTasks: Task[] = [
     description: 'Sidebar collapses unexpectedly on route change in Firefox and Safari browsers.',
     status: 'in_progress',
     priority: 'high',
-    assignee: { name: 'Eve Santos', initials: 'ES', color: '#06B6D4' },
+    assignee: { name: 'Eve Santos', initials: 'ES', color: 'var(--accent)' },
     dueDate: '2026-03-29',
     linkedNode: { kind: 'Bug', label: 'NAV-142' },
     createdAt: '2026-03-25',
@@ -92,7 +94,7 @@ export const mockTasks: Task[] = [
     description: 'Build a 4-step onboarding wizard for new users including org setup and team invite.',
     status: 'todo',
     priority: 'medium',
-    assignee: { name: 'Alice Chen', initials: 'AC', color: '#8B5CF6' },
+    assignee: { name: 'Alice Chen', initials: 'AC', color: 'var(--accent)' },
     dueDate: '2026-04-08',
     linkedNode: { kind: 'Feature', label: 'Onboarding' },
     createdAt: '2026-03-23',
@@ -103,7 +105,7 @@ export const mockTasks: Task[] = [
     description: 'Add indexes and rewrite N+1 queries in the product listing and graph explorer modules.',
     status: 'in_review',
     priority: 'medium',
-    assignee: { name: 'Charlie Kim', initials: 'CK', color: '#14B8A6' },
+    assignee: { name: 'Charlie Kim', initials: 'CK', color: 'var(--accent)' },
     dueDate: '2026-04-01',
     linkedNode: { kind: 'System', label: 'Database' },
     createdAt: '2026-03-19',
@@ -114,7 +116,7 @@ export const mockTasks: Task[] = [
     description: 'Implement full-text search across tasks, documents, and graph nodes with fuzzy matching.',
     status: 'todo',
     priority: 'high',
-    assignee: { name: 'Bob Rivera', initials: 'BR', color: '#EC4899' },
+    assignee: { name: 'Bob Rivera', initials: 'BR', color: 'var(--accent)' },
     dueDate: '2026-04-04',
     linkedNode: { kind: 'Feature', label: 'Search' },
     createdAt: '2026-03-24',
@@ -125,7 +127,7 @@ export const mockTasks: Task[] = [
     description: 'Provision and deploy the full stack to the staging environment with seed data.',
     status: 'done',
     priority: 'critical',
-    assignee: { name: 'Charlie Kim', initials: 'CK', color: '#14B8A6' },
+    assignee: { name: 'Charlie Kim', initials: 'CK', color: 'var(--accent)' },
     dueDate: '2026-03-26',
     linkedNode: { kind: 'System', label: 'Infrastructure' },
     createdAt: '2026-03-15',
@@ -136,7 +138,7 @@ export const mockTasks: Task[] = [
     description: 'Conduct usability testing sessions with 5 participants on the core workflow.',
     status: 'done',
     priority: 'medium',
-    assignee: { name: 'Dana Patel', initials: 'DP', color: '#F97316' },
+    assignee: { name: 'Dana Patel', initials: 'DP', color: 'var(--accent)' },
     dueDate: '2026-03-27',
     linkedNode: { kind: 'Milestone', label: 'Beta Feedback' },
     createdAt: '2026-03-16',
@@ -147,7 +149,7 @@ export const mockTasks: Task[] = [
     description: 'Compile typography, color palette, logo usage, and tone of voice into a brand guide.',
     status: 'done',
     priority: 'low',
-    assignee: { name: 'Eve Santos', initials: 'ES', color: '#06B6D4' },
+    assignee: { name: 'Eve Santos', initials: 'ES', color: 'var(--accent)' },
     dueDate: '2026-03-25',
     linkedNode: { kind: 'Document', label: 'Brand Guide' },
     createdAt: '2026-03-14',
@@ -158,7 +160,7 @@ export const mockTasks: Task[] = [
     description: 'Fix layout breakpoints and touch targets for screens below 768px across all pages.',
     status: 'todo',
     priority: 'high',
-    assignee: { name: 'Eve Santos', initials: 'ES', color: '#06B6D4' },
+    assignee: { name: 'Eve Santos', initials: 'ES', color: 'var(--accent)' },
     dueDate: '2026-04-03',
     linkedNode: { kind: 'Bug', label: 'RES-087' },
     createdAt: '2026-03-26',

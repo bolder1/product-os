@@ -128,13 +128,13 @@ function ActionCard({ entry, onConfirm, onReject }: {
       animate={{ opacity: 1, y: 0 }}
       className={`rounded-lg border ${
         entry.status === 'pending'
-          ? 'border-[#F59E0B]/30 bg-[#F59E0B]/5'
+          ? 'border-[var(--color-warning)]/30 bg-[var(--color-warning)]/5'
           : entry.status === 'done'
-          ? 'border-[#10B981]/20 bg-[#10B981]/5'
+          ? 'border-[var(--color-success)]/20 bg-[var(--color-success)]/5'
           : entry.status === 'rejected'
           ? 'border-white/[0.04] bg-transparent opacity-50'
           : entry.status === 'failed'
-          ? 'border-[#EF4444]/20 bg-[#EF4444]/5'
+          ? 'border-[var(--color-error)]/20 bg-[var(--color-error)]/5'
           : 'border-white/[0.06] bg-white/[0.02]'
       } p-2.5`}
     >
@@ -201,7 +201,18 @@ export function ComputerModePanel({ studio, productId }: ComputerModePanelProps)
   const pendingActions = useComputerModeStore((s) => s.pendingActions)
   const activePlan = useComputerModeStore((s) => s.activePlan)
   const commandInput = useComputerModeStore((s) => s.commandInput)
-  const { setMode, open, close, setCommandInput, addAction, updateAction, confirmAction, rejectAction, clearLog, startPlan, advancePlan, abortPlan } = useComputerModeStore()
+  const setMode        = useComputerModeStore((s) => s.setMode)
+  const open           = useComputerModeStore((s) => s.open)
+  const close          = useComputerModeStore((s) => s.close)
+  const setCommandInput = useComputerModeStore((s) => s.setCommandInput)
+  const addAction      = useComputerModeStore((s) => s.addAction)
+  const updateAction   = useComputerModeStore((s) => s.updateAction)
+  const confirmAction  = useComputerModeStore((s) => s.confirmAction)
+  const rejectAction   = useComputerModeStore((s) => s.rejectAction)
+  const clearLog       = useComputerModeStore((s) => s.clearLog)
+  const startPlan      = useComputerModeStore((s) => s.startPlan)
+  const advancePlan    = useComputerModeStore((s) => s.advancePlan)
+  const abortPlan      = useComputerModeStore((s) => s.abortPlan)
 
   const [isExecuting, setIsExecuting] = useState(false)
   const [activeTab, setActiveTab] = useState<'run' | 'log'>('run')
@@ -322,19 +333,19 @@ export function ComputerModePanel({ studio, productId }: ComputerModePanelProps)
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
               transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-              className="fixed top-0 right-0 z-50 h-screen w-[400px] flex flex-col bg-[#0A0F1E] border-l border-white/[0.08]"
+              className="fixed top-0 right-0 z-50 h-screen w-[400px] flex flex-col bg-[var(--bg-base)] border-l border-white/[0.08]"
             >
               {/* Header */}
               <div className="h-[var(--topbar-h)] flex items-center justify-between px-4 border-b border-white/[0.06] shrink-0">
                 <div className="flex items-center gap-2">
                   <Cpu size={13} className="text-[var(--accent-text)]" />
-                  <span className="text-[13px] font-semibold text-[#F1F5F9]">Computer Mode</span>
+                  <span className="text-[13px] font-semibold text-[var(--text-primary)]">Computer Mode</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <button onClick={clearLog} className="p-1 rounded text-[#475569] hover:text-[#94A3B8] transition-colors" title="Clear log">
+                  <button onClick={clearLog} className="p-1 rounded text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] transition-colors" title="Clear log">
                     <Trash2 size={12} />
                   </button>
-                  <button onClick={close} className="p-1 rounded text-[#475569] hover:text-[#94A3B8] transition-colors">
+                  <button onClick={close} className="p-1 rounded text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] transition-colors">
                     <X size={14} />
                   </button>
                 </div>
@@ -359,15 +370,15 @@ export function ComputerModePanel({ studio, productId }: ComputerModePanelProps)
                     )
                   })}
                 </div>
-                <p className="text-[10px] text-[#64748B] mt-2 leading-relaxed">{currentMode.description}</p>
+                <p className="text-[10px] text-[var(--text-tertiary)] mt-2 leading-relaxed">{currentMode.description}</p>
               </div>
 
               {/* Pending confirmations (assist mode) */}
               {pendingActions.length > 0 && (
-                <div className="px-4 py-2 border-b border-[#F59E0B]/20 bg-[#F59E0B]/5 shrink-0">
+                <div className="px-4 py-2 border-b border-[var(--color-warning)]/20 bg-[var(--color-warning)]/5 shrink-0">
                   <div className="flex items-center gap-1.5 mb-2">
-                    <AlertTriangle size={11} className="text-[#F59E0B]" />
-                    <span className="text-[11px] font-medium text-[#F59E0B]">{pendingActions.length} action{pendingActions.length !== 1 ? 's' : ''} awaiting confirmation</span>
+                    <AlertTriangle size={11} className="text-[var(--color-warning)]" />
+                    <span className="text-[11px] font-medium text-[var(--color-warning)]">{pendingActions.length} action{pendingActions.length !== 1 ? 's' : ''} awaiting confirmation</span>
                   </div>
                   <div className="space-y-1.5">
                     {pendingActions.map((a) => (
@@ -385,7 +396,7 @@ export function ComputerModePanel({ studio, productId }: ComputerModePanelProps)
                       <Play size={10} className="text-[var(--accent-text)]" />
                       <span className="text-[11px] font-medium text-[var(--text-primary)] truncate">{activePlan.goal}</span>
                     </div>
-                    <button onClick={() => abortPlan(activePlan.id)} className="p-1 text-[#64748B] hover:text-red-400">
+                    <button onClick={() => abortPlan(activePlan.id)} className="p-1 text-[var(--text-tertiary)] hover:text-red-400">
                       <StopCircle size={11} />
                     </button>
                   </div>
@@ -393,11 +404,11 @@ export function ComputerModePanel({ studio, productId }: ComputerModePanelProps)
                     {activePlan.steps.map((step, i) => (
                       <div key={i} className="flex items-center gap-2">
                         <div className={`w-1.5 h-1.5 rounded-full shrink-0 ${
-                          step.status === 'done' ? 'bg-[#10B981]' :
+                          step.status === 'done' ? 'bg-[var(--color-success)]' :
                           step.status === 'running' ? 'bg-[var(--accent)] animate-pulse' :
                           'bg-white/[0.12]'
                         }`} />
-                        <span className={`text-[10px] truncate ${step.status === 'done' ? 'text-[#64748B] line-through' : step.status === 'running' ? 'text-[var(--text-primary)]' : 'text-[#475569]'}`}>
+                        <span className={`text-[10px] truncate ${step.status === 'done' ? 'text-[var(--text-tertiary)] line-through' : step.status === 'running' ? 'text-[var(--text-primary)]' : 'text-[var(--text-tertiary)]'}`}>
                           {step.label}
                         </span>
                       </div>
@@ -418,7 +429,7 @@ export function ComputerModePanel({ studio, productId }: ComputerModePanelProps)
                   <button
                     key={tab}
                     onClick={() => setActiveTab(tab)}
-                    className={`flex-1 py-2 text-[11px] font-medium transition-colors ${activeTab === tab ? 'text-[var(--accent-text)] border-b-2 border-[var(--accent)]' : 'text-[#64748B] hover:text-[#94A3B8]'}`}
+                    className={`flex-1 py-2 text-[11px] font-medium transition-colors ${activeTab === tab ? 'text-[var(--accent-text)] border-b-2 border-[var(--accent)]' : 'text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]'}`}
                   >
                     {tab === 'run' ? 'Command' : `Log${actionLog.length > 0 ? ` (${actionLog.length})` : ''}`}
                   </button>
@@ -440,7 +451,7 @@ export function ComputerModePanel({ studio, productId }: ComputerModePanelProps)
                         <button
                           key={chip}
                           onClick={() => setCommandInput(chip)}
-                          className="px-2.5 py-1 rounded-full bg-white/[0.04] border border-white/[0.06] text-[10px] text-[#94A3B8] hover:border-[var(--accent)]/30 hover:text-[var(--accent-text)] transition-colors"
+                          className="px-2.5 py-1 rounded-full bg-white/[0.04] border border-white/[0.06] text-[10px] text-[var(--text-secondary)] hover:border-[var(--accent)]/30 hover:text-[var(--accent-text)] transition-colors"
                         >
                           {chip}
                         </button>
@@ -457,7 +468,7 @@ export function ComputerModePanel({ studio, productId }: ComputerModePanelProps)
                             {mode === 'assist' && 'Assist mode — you approve each step'}
                             {mode === 'auto' && 'Auto mode — executes full plan autonomously'}
                           </p>
-                          <p className="text-[10px] text-[#64748B] leading-relaxed">
+                          <p className="text-[10px] text-[var(--text-tertiary)] leading-relaxed">
                             {mode === 'suggest' && 'AI will analyze and recommend. Nothing will be created or changed.'}
                             {mode === 'assist' && 'AI plans the steps, you confirm mutations (scaffold, create tasks) before they run.'}
                             {mode === 'auto' && 'AI executes the full plan. All actions are logged and revertible.'}
@@ -476,7 +487,7 @@ export function ComputerModePanel({ studio, productId }: ComputerModePanelProps)
                         <div key={label} className="rounded-lg bg-white/[0.03] border border-white/[0.06] p-2.5 text-center">
                           <Icon size={12} className="mx-auto mb-1 text-[var(--text-tertiary)]" />
                           <p className="text-[16px] font-bold text-[var(--text-primary)]">{value}</p>
-                          <p className="text-[9px] text-[#64748B]">{label}</p>
+                          <p className="text-[9px] text-[var(--text-tertiary)]">{label}</p>
                         </div>
                       ))}
                     </div>
@@ -485,9 +496,9 @@ export function ComputerModePanel({ studio, productId }: ComputerModePanelProps)
                   <div className="p-3 space-y-2">
                     {actionLog.length === 0 ? (
                       <div className="flex flex-col items-center justify-center py-12 text-center">
-                        <Cpu size={20} className="text-[#475569] mb-3" />
-                        <p className="text-[12px] text-[#64748B]">No actions yet</p>
-                        <p className="text-[10px] text-[#475569] mt-0.5">Run a command to see the log</p>
+                        <Cpu size={20} className="text-[var(--text-tertiary)] mb-3" />
+                        <p className="text-[12px] text-[var(--text-tertiary)]">No actions yet</p>
+                        <p className="text-[10px] text-[var(--text-tertiary)] mt-0.5">Run a command to see the log</p>
                       </div>
                     ) : (
                       [...actionLog].reverse().map((entry) => (
@@ -507,14 +518,14 @@ export function ComputerModePanel({ studio, productId }: ComputerModePanelProps)
               {/* Command input */}
               <div className="px-4 py-3 border-t border-white/[0.06] shrink-0">
                 <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/[0.04] border border-white/[0.08] focus-within:border-[var(--accent)]/40 transition-colors">
-                  <Cpu size={12} className="text-[#475569] shrink-0" />
+                  <Cpu size={12} className="text-[var(--text-tertiary)] shrink-0" />
                   <input
                     value={commandInput}
                     onChange={(e) => setCommandInput(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && handleExecute()}
                     placeholder={`Tell AI what to do in ${studio}…`}
                     disabled={isExecuting}
-                    className="flex-1 bg-transparent text-[12px] text-[#F1F5F9] placeholder-[#475569] outline-none"
+                    className="flex-1 bg-transparent text-[12px] text-[var(--text-primary)] placeholder-[var(--text-tertiary)] outline-none"
                   />
                   <button
                     onClick={handleExecute}
@@ -524,7 +535,7 @@ export function ComputerModePanel({ studio, productId }: ComputerModePanelProps)
                     {isExecuting ? <Loader2 size={12} className="animate-spin" /> : <Send size={12} />}
                   </button>
                 </div>
-                <p className="text-[9px] text-[#475569] mt-1.5 text-center">
+                <p className="text-[9px] text-[var(--text-tertiary)] mt-1.5 text-center">
                   {mode === 'auto' ? '⚡ Auto mode — actions will execute without confirmation' : 'Press ↵ to run'}
                 </p>
               </div>

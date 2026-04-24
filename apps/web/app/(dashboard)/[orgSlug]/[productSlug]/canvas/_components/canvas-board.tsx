@@ -148,7 +148,7 @@ export function CanvasBoard({
           />
         </pattern>
       </defs>
-      <rect width="100%" height="100%" fill="#060918" />
+      <rect width="100%" height="100%" fill="var(--bg-base)" />
       <rect width="100%" height="100%" fill="url(#dot-grid)" />
 
       {/* Transformed group */}

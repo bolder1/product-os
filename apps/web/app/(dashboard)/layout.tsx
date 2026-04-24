@@ -18,8 +18,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       router.replace('/login')
       return
     }
-    // If user has no valid orgId, they need to complete onboarding to create an org
-    if (!orgId || !UUID_RE.test(orgId)) {
+    // If user has no orgId at all, they need to complete onboarding to create an org
+    if (!orgId) {
       router.replace('/onboarding')
     }
   }, [hydrated, isAuthenticated, orgId, router])

@@ -53,7 +53,7 @@ import { Features } from '@/components/features'
 
 export default function HomePage() {
   return (
-    <main className="min-h-screen bg-[#060918]">
+    <main className="min-h-screen bg-[var(--bg-base)]">
       <Hero />
       <Features />
     </main>
@@ -151,7 +151,7 @@ export function Sidebar() {
   const [active, setActive] = useState('/')
 
   return (
-    <aside className="w-64 h-screen bg-[#0a0f1e] border-r border-white/[0.08]">
+    <aside className="w-64 h-screen bg-[var(--bg-base)] border-r border-white/[0.08]">
       <div className="p-4 border-b border-white/[0.08]">
         <h2 className="text-lg font-bold text-white">Product OS</h2>
       </div>
@@ -209,7 +209,7 @@ export function Modal({ open, onClose, title, children }: ModalProps) {
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.95, opacity: 0 }}
             onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-lg bg-[#0a0f1e] rounded-2xl border border-white/[0.08] p-6"
+            className="w-full max-w-lg bg-[var(--bg-base)] rounded-2xl border border-white/[0.08] p-6"
           >
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold text-white">{title}</h2>
@@ -267,17 +267,17 @@ export const THEME = {
   surface: 'rgba(255,255,255,0.03)',
   border: 'rgba(255,255,255,0.08)',
   text: {
-    primary: '#F1F5F9',
-    secondary: '#94A3B8',
-    muted: '#64748B',
+    primary: 'var(--text-primary)',
+    secondary: 'var(--text-secondary)',
+    muted: 'var(--text-tertiary)',
   },
   accent: {
-    cyan: '#06B6D4',
-    blue: '#3B82F6',
-    emerald: '#10B981',
-    amber: '#F59E0B',
-    violet: '#8B5CF6',
-    rose: '#F43F5E',
+    cyan: 'var(--accent)',
+    blue: 'var(--accent)',
+    emerald: 'var(--color-success)',
+    amber: 'var(--color-warning)',
+    violet: 'var(--accent)',
+    rose: 'var(--color-error)',
   },
 } as const
 
@@ -482,10 +482,10 @@ import { motion } from 'framer-motion'
 import { TrendingUp, Users, Package, Activity } from 'lucide-react'
 
 const stats = [
-  { label: 'Total Users', value: '12,847', change: '+12%', icon: Users, color: '#06B6D4' },
-  { label: 'Active Products', value: '24', change: '+3', icon: Package, color: '#10B981' },
-  { label: 'Tasks Complete', value: '89%', change: '+5%', icon: Activity, color: '#3B82F6' },
-  { label: 'Revenue', value: '$48.2K', change: '+18%', icon: TrendingUp, color: '#F59E0B' },
+  { label: 'Total Users', value: '12,847', change: '+12%', icon: Users, color: 'var(--accent)' },
+  { label: 'Active Products', value: '24', change: '+3', icon: Package, color: 'var(--color-success)' },
+  { label: 'Tasks Complete', value: '89%', change: '+5%', icon: Activity, color: 'var(--accent)' },
+  { label: 'Revenue', value: '$48.2K', change: '+18%', icon: TrendingUp, color: 'var(--color-warning)' },
 ]
 
 export function StatsGrid() {
@@ -554,9 +554,9 @@ export function getFileCount(node: FolderNode): number {
 }
 
 export const languageConfig: Record<string, { color: string; label: string }> = {
-  tsx: { color: '#3B82F6', label: 'TSX' },
-  ts: { color: '#06B6D4', label: 'TS' },
-  css: { color: '#EC4899', label: 'CSS' },
-  json: { color: '#F59E0B', label: 'JSON' },
-  md: { color: '#94A3B8', label: 'MD' },
+  tsx: { color: 'var(--accent)', label: 'TSX' },
+  ts: { color: 'var(--accent)', label: 'TS' },
+  css: { color: 'var(--accent)', label: 'CSS' },
+  json: { color: 'var(--color-warning)', label: 'JSON' },
+  md: { color: 'var(--text-secondary)', label: 'MD' },
 }

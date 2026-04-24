@@ -34,7 +34,8 @@ export interface ContextChip {
   label: string
   source: string
   version?: number
-  color: string
+  /** Deprecated: color is no longer used — chips render with accent tokens. Kept optional for callsite compatibility. */
+  color?: string
 }
 
 // ---------------------------------------------------------------------------
@@ -142,13 +143,13 @@ export function FullEmptyState({
         <span style={{ color: studioColor }}>{studioIcon}</span>
       </div>
 
-      <h2 className="text-xl font-semibold text-[#F1F5F9] mb-2">{headline}</h2>
-      <p className="text-sm text-[#64748B] max-w-md leading-relaxed mb-8">{subline}</p>
+      <h2 className="text-xl font-semibold text-[var(--text-primary)] mb-2">{headline}</h2>
+      <p className="text-sm text-[var(--text-tertiary)] max-w-md leading-relaxed mb-8">{subline}</p>
 
       {/* Upstream deps */}
       {deps.length > 0 && (
         <div className="w-full max-w-md mb-6">
-          <p className="text-xs text-[#475569] uppercase tracking-wide font-semibold mb-3">
+          <p className="text-xs text-[var(--text-tertiary)] uppercase tracking-wide font-semibold mb-3">
             {allSatisfied ? 'Context ready' : 'Set these up first'}
           </p>
           <div className="flex flex-col gap-2">
@@ -158,7 +159,7 @@ export function FullEmptyState({
                 href={dep.satisfied ? '#' : dep.href}
                 className={`flex items-center gap-3 px-4 py-3 rounded-xl border transition-all ${
                   dep.satisfied
-                    ? 'border-[#10B981]/20 bg-[#10B981]/05 cursor-default'
+                    ? 'border-[var(--color-success)]/20 bg-[var(--color-success)]/05 cursor-default'
                     : 'border-white/[0.08] bg-white/[0.02] hover:bg-white/[0.05] hover:border-white/[0.14]'
                 }`}
               >
@@ -166,17 +167,17 @@ export function FullEmptyState({
                   className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
                   style={{ backgroundColor: `${dep.color}18`, color: dep.color }}
                 >
-                  {dep.satisfied ? <CheckCircle2 size={16} className="text-[#10B981]" /> : dep.icon}
+                  {dep.satisfied ? <CheckCircle2 size={16} className="text-[var(--color-success)]" /> : dep.icon}
                 </div>
                 <div className="flex-1 text-left min-w-0">
-                  <p className={`text-sm font-medium ${dep.satisfied ? 'text-[#10B981]' : 'text-[#F1F5F9]'}`}>
+                  <p className={`text-sm font-medium ${dep.satisfied ? 'text-[var(--color-success)]' : 'text-[var(--text-primary)]'}`}>
                     {dep.label}
                   </p>
-                  <p className="text-xs text-[#64748B] truncate">{dep.description}</p>
+                  <p className="text-xs text-[var(--text-tertiary)] truncate">{dep.description}</p>
                 </div>
-                {!dep.satisfied && <ArrowRight size={14} className="text-[#64748B] shrink-0" />}
+                {!dep.satisfied && <ArrowRight size={14} className="text-[var(--text-tertiary)] shrink-0" />}
                 {dep.satisfied && (
-                  <span className="text-[10px] font-semibold text-[#10B981] uppercase tracking-wide shrink-0">Ready</span>
+                  <span className="text-[10px] font-semibold text-[var(--color-success)] uppercase tracking-wide shrink-0">Ready</span>
                 )}
               </Link>
             ))}
@@ -188,7 +189,7 @@ export function FullEmptyState({
       <div className="flex flex-col sm:flex-row gap-3">
         <Link
           href={planModeHref}
-          className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium bg-[#3B82F6] text-white hover:bg-[#2563EB] transition-colors"
+          className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium bg-[var(--accent)] text-white hover:bg-[var(--accent)] transition-colors"
         >
           <Zap size={14} />
           Run Plan Mode
@@ -196,7 +197,7 @@ export function FullEmptyState({
         {unsatisfied[0] && (
           <Link
             href={unsatisfied[0].href}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium border border-white/[0.08] text-[#94A3B8] hover:bg-white/[0.04] transition-colors"
+            className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium border border-white/[0.08] text-[var(--text-secondary)] hover:bg-white/[0.04] transition-colors"
             style={{ borderColor: `${unsatisfied[0].color}30`, color: unsatisfied[0].color }}
           >
             {unsatisfied[0].icon}
@@ -232,15 +233,14 @@ export function ContextBanner({ chips, missing = [], className = '' }: ContextBa
       {/* "Context used" label */}
       {chips.length > 0 && (
         <>
-          <div className="flex items-center gap-1.5 text-[10px] text-[#475569] font-semibold uppercase tracking-wide shrink-0">
+          <div className="flex items-center gap-1.5 text-[10px] text-[var(--text-tertiary)] font-semibold uppercase tracking-wide shrink-0">
             <Brain size={11} />
             Context
           </div>
           {chips.map((chip) => (
             <span
               key={chip.label}
-              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium"
-              style={{ backgroundColor: `${chip.color}18`, color: chip.color }}
+              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-[var(--accent-subtle)] text-[var(--accent-text)]"
             >
               <CheckCircle2 size={9} />
               {chip.label}
@@ -254,7 +254,7 @@ export function ContextBanner({ chips, missing = [], className = '' }: ContextBa
       {missing.length > 0 && (
         <>
           {chips.length > 0 && <div className="w-px h-3 bg-white/[0.08] mx-1" />}
-          <AlertCircle size={11} className="text-[#F59E0B]" />
+          <AlertCircle size={11} className="text-[var(--color-warning)]" />
           {missing.map((dep) => (
             <Link
               key={dep.key}
@@ -272,8 +272,8 @@ export function ContextBanner({ chips, missing = [], className = '' }: ContextBa
 
       {/* AI-powered badge */}
       {chips.length > 0 && (
-        <span className="ml-auto inline-flex items-center gap-1 text-[10px] text-[#475569]">
-          <Sparkles size={10} className="text-[#8B5CF6]" />
+        <span className="ml-auto inline-flex items-center gap-1 text-[10px] text-[var(--text-tertiary)]">
+          <Sparkles size={10} className="text-[var(--accent)]" />
           AI-powered suggestions enabled
         </span>
       )}

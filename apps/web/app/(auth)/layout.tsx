@@ -22,15 +22,15 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
   }, [hydrated, fullyAuthenticated, router])
 
   if (!hydrated) {
-    return <div style={{ minHeight: '100vh', backgroundColor: '#060918' }} />
+    return <div className="min-h-screen bg-[var(--bg-base)]" />
   }
 
   if (fullyAuthenticated) {
-    return <div style={{ minHeight: '100vh', backgroundColor: '#060918' }} />
+    return <div className="min-h-screen bg-[var(--bg-base)]" />
   }
 
   return (
-    <div className="mesh-bg min-h-screen flex items-center justify-center p-6 bg-[#060918]">
+    <div className="mesh-bg min-h-screen flex items-center justify-center p-6 bg-[var(--bg-base)]">
       {children}
     </div>
   )

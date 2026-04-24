@@ -170,7 +170,7 @@ export default function ComponentBuilderPage() {
     <div className="flex flex-col h-full bg-[var(--bg-workspace)]">
       {/* ---- context banner ---------------------------------------- */}
       <ContextBanner
-        chips={[{ label: 'Brand Tokens', source: 'brand', color: '#EC4899' }]}
+        chips={[{ label: 'Brand Tokens', source: 'brand' }]}
         missing={[]}
       />
 

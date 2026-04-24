@@ -56,10 +56,10 @@ export function MetricCards({ metrics }: MetricCardsProps) {
           >
             <div className="flex items-start justify-between">
               <div className="flex flex-col gap-1">
-                <span className="text-[11px] uppercase tracking-wider text-[#64748B]">
+                <span className="text-[11px] uppercase tracking-wider text-[var(--text-tertiary)]">
                   {metric.label}
                 </span>
-                <span className="text-2xl font-bold text-[#F1F5F9]">{metric.value}</span>
+                <span className="text-2xl font-bold text-[var(--text-primary)]">{metric.value}</span>
               </div>
               <Sparkline data={metric.sparkline} color={trendColor} />
             </div>
@@ -73,7 +73,7 @@ export function MetricCards({ metrics }: MetricCardsProps) {
                 {isPositive ? '+' : ''}
                 {metric.change}%
               </span>
-              <span className="text-xs text-[#64748B]">vs last period</span>
+              <span className="text-xs text-[var(--text-tertiary)]">vs last period</span>
             </div>
           </motion.div>
         )

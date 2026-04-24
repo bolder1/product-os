@@ -39,13 +39,13 @@ export default function WorkflowList({
             }`}
           >
             <div className="flex items-center justify-between mb-1">
-              <span className="text-sm font-medium text-[#F1F5F9]">{wf.name}</span>
-              <span className="flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded-full bg-white/[0.06] text-[#94A3B8] font-medium">
+              <span className="text-sm font-medium text-[var(--text-primary)]">{wf.name}</span>
+              <span className="flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded-full bg-white/[0.06] text-[var(--text-secondary)] font-medium">
                 <Circle className="w-2.5 h-2.5" />
                 {wf.states.length} states
               </span>
             </div>
-            <div className="flex items-center gap-1.5 text-xs text-[#64748B]">
+            <div className="flex items-center gap-1.5 text-xs text-[var(--text-tertiary)]">
               <GitBranch className="w-3 h-3" />
               {entityName(wf.entityId)}
             </div>
@@ -56,7 +56,7 @@ export default function WorkflowList({
       {/* Add Workflow card */}
       <button
         onClick={onAdd}
-        className="flex items-center justify-center gap-2 py-3 rounded-lg border border-dashed border-white/[0.1] text-[#64748B] text-sm hover:text-emerald-400 hover:border-emerald-500/30 transition-colors mt-1"
+        className="flex items-center justify-center gap-2 py-3 rounded-lg border border-dashed border-white/[0.1] text-[var(--text-tertiary)] text-sm hover:text-emerald-400 hover:border-emerald-500/30 transition-colors mt-1"
       >
         <Plus className="w-4 h-4" />
         Add Workflow

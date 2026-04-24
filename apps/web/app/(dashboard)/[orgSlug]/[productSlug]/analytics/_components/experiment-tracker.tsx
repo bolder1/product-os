@@ -20,11 +20,11 @@ interface ExperimentTrackerProps {
 }
 
 const statusConfig: Record<Experiment['status'], { label: string; color: string; bg: string }> = {
-  draft: { label: 'Draft', color: 'text-[#94A3B8]', bg: 'bg-white/[0.06]' },
+  draft: { label: 'Draft', color: 'text-[var(--text-secondary)]', bg: 'bg-white/[0.06]' },
   running: { label: 'Running', color: 'text-emerald-400', bg: 'bg-emerald-500/10' },
   paused: { label: 'Paused', color: 'text-amber-400', bg: 'bg-amber-500/10' },
   completed: { label: 'Completed', color: 'text-blue-400', bg: 'bg-blue-500/10' },
-  cancelled: { label: 'Cancelled', color: 'text-[#64748B]', bg: 'bg-white/[0.03]' },
+  cancelled: { label: 'Cancelled', color: 'text-[var(--text-tertiary)]', bg: 'bg-white/[0.03]' },
 }
 
 export function ExperimentTracker({ productId }: ExperimentTrackerProps) {
@@ -99,15 +99,15 @@ export function ExperimentTracker({ productId }: ExperimentTrackerProps) {
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.06]">
         <div className="flex items-center gap-2">
-          <FlaskConical className="w-4 h-4 text-[#8B5CF6]" />
-          <span className="text-sm font-medium text-[#F1F5F9]">Experiments</span>
-          <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-white/[0.06] text-[#94A3B8]">
+          <FlaskConical className="w-4 h-4 text-[var(--accent)]" />
+          <span className="text-sm font-medium text-[var(--text-primary)]">Experiments</span>
+          <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-white/[0.06] text-[var(--text-secondary)]">
             {experiments.length}
           </span>
         </div>
         <button
           onClick={() => setShowCreate(!showCreate)}
-          className="flex items-center gap-1 px-2.5 py-1 rounded-md text-xs text-[#8B5CF6] hover:bg-[#8B5CF6]/10 transition-colors"
+          className="flex items-center gap-1 px-2.5 py-1 rounded-md text-xs text-[var(--accent)] hover:bg-[var(--accent)]/10 transition-colors"
         >
           <Plus className="w-3.5 h-3.5" />
           New
@@ -128,45 +128,45 @@ export function ExperimentTracker({ productId }: ExperimentTrackerProps) {
                 value={newName}
                 onChange={(e) => setNewName(e.target.value)}
                 placeholder="Experiment name"
-                className="w-full px-3 py-1.5 rounded-md bg-white/[0.03] border border-white/[0.08] text-xs text-[#F1F5F9] placeholder-[#475569] focus:outline-none focus:border-[#8B5CF6]/40"
+                className="w-full px-3 py-1.5 rounded-md bg-white/[0.03] border border-white/[0.08] text-xs text-[var(--text-primary)] placeholder-[var(--text-tertiary)] focus:outline-none focus:border-[var(--accent)]/40"
               />
               <input
                 value={newHypothesis}
                 onChange={(e) => setNewHypothesis(e.target.value)}
                 placeholder="Hypothesis (e.g. Shorter form will increase signups by 15%)"
-                className="w-full px-3 py-1.5 rounded-md bg-white/[0.03] border border-white/[0.08] text-xs text-[#F1F5F9] placeholder-[#475569] focus:outline-none focus:border-[#8B5CF6]/40"
+                className="w-full px-3 py-1.5 rounded-md bg-white/[0.03] border border-white/[0.08] text-xs text-[var(--text-primary)] placeholder-[var(--text-tertiary)] focus:outline-none focus:border-[var(--accent)]/40"
               />
               <div className="grid grid-cols-2 gap-2">
                 <input
                   value={newVariantA}
                   onChange={(e) => setNewVariantA(e.target.value)}
                   placeholder="Variant A (Control)"
-                  className="px-3 py-1.5 rounded-md bg-white/[0.03] border border-white/[0.08] text-xs text-[#F1F5F9] placeholder-[#475569] focus:outline-none focus:border-[#8B5CF6]/40"
+                  className="px-3 py-1.5 rounded-md bg-white/[0.03] border border-white/[0.08] text-xs text-[var(--text-primary)] placeholder-[var(--text-tertiary)] focus:outline-none focus:border-[var(--accent)]/40"
                 />
                 <input
                   value={newVariantB}
                   onChange={(e) => setNewVariantB(e.target.value)}
                   placeholder="Variant B"
-                  className="px-3 py-1.5 rounded-md bg-white/[0.03] border border-white/[0.08] text-xs text-[#F1F5F9] placeholder-[#475569] focus:outline-none focus:border-[#8B5CF6]/40"
+                  className="px-3 py-1.5 rounded-md bg-white/[0.03] border border-white/[0.08] text-xs text-[var(--text-primary)] placeholder-[var(--text-tertiary)] focus:outline-none focus:border-[var(--accent)]/40"
                 />
               </div>
               <input
                 value={newMetric}
                 onChange={(e) => setNewMetric(e.target.value)}
                 placeholder="Success metric (e.g. Conversion Rate)"
-                className="w-full px-3 py-1.5 rounded-md bg-white/[0.03] border border-white/[0.08] text-xs text-[#F1F5F9] placeholder-[#475569] focus:outline-none focus:border-[#8B5CF6]/40"
+                className="w-full px-3 py-1.5 rounded-md bg-white/[0.03] border border-white/[0.08] text-xs text-[var(--text-primary)] placeholder-[var(--text-tertiary)] focus:outline-none focus:border-[var(--accent)]/40"
               />
               <div className="flex justify-end gap-2 pt-1">
                 <button
                   onClick={() => setShowCreate(false)}
-                  className="px-3 py-1 rounded text-xs text-[#94A3B8] hover:bg-white/[0.06] transition-colors"
+                  className="px-3 py-1 rounded text-xs text-[var(--text-secondary)] hover:bg-white/[0.06] transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleCreate}
                   disabled={!newName.trim()}
-                  className="px-3 py-1 rounded text-xs font-medium bg-[#8B5CF6] text-white hover:bg-[#7C3AED] transition-colors disabled:opacity-40"
+                  className="px-3 py-1 rounded text-xs font-medium bg-[var(--accent)] text-white hover:bg-[var(--accent)] transition-colors disabled:opacity-40"
                 >
                   Create Experiment
                 </button>
@@ -180,9 +180,9 @@ export function ExperimentTracker({ productId }: ExperimentTrackerProps) {
       <div className="divide-y divide-white/[0.04]">
         {experiments.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-8 text-center">
-            <FlaskConical className="w-8 h-8 text-[#475569] mb-2" />
-            <p className="text-xs text-[#64748B]">No experiments yet</p>
-            <p className="text-[0.625rem] text-[#475569] mt-0.5">Create one to start A/B testing</p>
+            <FlaskConical className="w-8 h-8 text-[var(--text-tertiary)] mb-2" />
+            <p className="text-xs text-[var(--text-tertiary)]">No experiments yet</p>
+            <p className="text-[0.625rem] text-[var(--text-tertiary)] mt-0.5">Create one to start A/B testing</p>
           </div>
         ) : (
           experiments.map((exp) => {
@@ -201,13 +201,13 @@ export function ExperimentTracker({ productId }: ExperimentTrackerProps) {
                 <div className="flex items-start justify-between gap-2 mb-2">
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
-                      <p className="text-xs font-medium text-[#F1F5F9] truncate">{exp.name}</p>
+                      <p className="text-xs font-medium text-[var(--text-primary)] truncate">{exp.name}</p>
                       <span className={`text-[0.625rem] px-1.5 py-0.5 rounded-full ${config.bg} ${config.color}`}>
                         {config.label}
                       </span>
                     </div>
                     {exp.hypothesis && (
-                      <p className="text-[0.625rem] text-[#64748B] mt-0.5 line-clamp-1">{exp.hypothesis}</p>
+                      <p className="text-[0.625rem] text-[var(--text-tertiary)] mt-0.5 line-clamp-1">{exp.hypothesis}</p>
                     )}
                   </div>
 
@@ -245,22 +245,22 @@ export function ExperimentTracker({ productId }: ExperimentTrackerProps) {
                 {/* Variants */}
                 <div className="flex items-center gap-2 text-[0.625rem] mb-2">
                   <span className="px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-400">A: {exp.variant_a}</span>
-                  <ArrowRight className="w-3 h-3 text-[#475569]" />
+                  <ArrowRight className="w-3 h-3 text-[var(--text-tertiary)]" />
                   <span className="px-1.5 py-0.5 rounded bg-purple-500/10 text-purple-400">B: {exp.variant_b}</span>
-                  <span className="text-[#475569]">·</span>
-                  <span className="text-[#64748B]">{exp.metric}</span>
+                  <span className="text-[var(--text-tertiary)]">·</span>
+                  <span className="text-[var(--text-tertiary)]">{exp.metric}</span>
                 </div>
 
                 {/* Progress bar */}
                 {(exp.status === 'running' || exp.status === 'paused') && (
                   <div className="mb-2">
                     <div className="flex items-center justify-between text-[0.625rem] mb-1">
-                      <span className="text-[#64748B]">Sample progress</span>
-                      <span className="text-[#94A3B8]">{exp.currentSampleSize}/{exp.targetSampleSize}</span>
+                      <span className="text-[var(--text-tertiary)]">Sample progress</span>
+                      <span className="text-[var(--text-secondary)]">{exp.currentSampleSize}/{exp.targetSampleSize}</span>
                     </div>
                     <div className="h-1 rounded-full bg-white/[0.06] overflow-hidden">
                       <div
-                        className="h-full rounded-full bg-[#8B5CF6] transition-all"
+                        className="h-full rounded-full bg-[var(--accent)] transition-all"
                         style={{ width: `${progress}%` }}
                       />
                     </div>
@@ -272,20 +272,20 @@ export function ExperimentTracker({ productId }: ExperimentTrackerProps) {
                   <div className="rounded-lg bg-white/[0.02] border border-white/[0.06] p-2 mt-2">
                     <div className="grid grid-cols-3 gap-2 text-center">
                       <div>
-                        <p className="text-[0.625rem] text-[#64748B]">Variant A</p>
-                        <p className={`text-sm font-bold ${exp.results.winner === 'a' ? 'text-emerald-400' : 'text-[#94A3B8]'}`}>
+                        <p className="text-[0.625rem] text-[var(--text-tertiary)]">Variant A</p>
+                        <p className={`text-sm font-bold ${exp.results.winner === 'a' ? 'text-emerald-400' : 'text-[var(--text-secondary)]'}`}>
                           {exp.results.variant_a_value}%
                         </p>
                       </div>
                       <div>
-                        <p className="text-[0.625rem] text-[#64748B]">Variant B</p>
-                        <p className={`text-sm font-bold ${exp.results.winner === 'b' ? 'text-emerald-400' : 'text-[#94A3B8]'}`}>
+                        <p className="text-[0.625rem] text-[var(--text-tertiary)]">Variant B</p>
+                        <p className={`text-sm font-bold ${exp.results.winner === 'b' ? 'text-emerald-400' : 'text-[var(--text-secondary)]'}`}>
                           {exp.results.variant_b_value}%
                         </p>
                       </div>
                       <div>
-                        <p className="text-[0.625rem] text-[#64748B]">Confidence</p>
-                        <p className="text-sm font-bold text-[#F1F5F9]">{exp.results.confidence}%</p>
+                        <p className="text-[0.625rem] text-[var(--text-tertiary)]">Confidence</p>
+                        <p className="text-sm font-bold text-[var(--text-primary)]">{exp.results.confidence}%</p>
                       </div>
                     </div>
                     {exp.results.winner && exp.results.winner !== 'none' && (

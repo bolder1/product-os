@@ -105,8 +105,8 @@ export function IntegrationsSettings() {
       className="space-y-6"
     >
       <div>
-        <h3 className="text-sm font-semibold text-[#E2E8F0]">Integrations</h3>
-        <p className="text-xs text-[#64748B] mt-0.5">
+        <h3 className="text-sm font-semibold text-[var(--text-primary)]">Integrations</h3>
+        <p className="text-xs text-[var(--text-tertiary)] mt-0.5">
           Connect external tools to sync data and automate workflows.
         </p>
       </div>
@@ -133,12 +133,12 @@ export function IntegrationsSettings() {
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
-                  <h4 className="text-sm font-medium text-[#E2E8F0]">
+                  <h4 className="text-sm font-medium text-[var(--text-primary)]">
                     {integration.name}
                   </h4>
                   {integration.connected && (
-                    <span className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-[#10B981]/15 text-[#10B981] text-[0.5625rem] font-medium">
-                      <span className="w-1.5 h-1.5 rounded-full bg-[#10B981]" />
+                    <span className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-[var(--color-success)]/15 text-[var(--color-success)] text-[0.5625rem] font-medium">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-success)]" />
                       Connected
                     </span>
                   )}
@@ -146,13 +146,13 @@ export function IntegrationsSettings() {
               </div>
             </div>
 
-            <p className="text-xs text-[#64748B] leading-relaxed mb-4 flex-1">
+            <p className="text-xs text-[var(--text-tertiary)] leading-relaxed mb-4 flex-1">
               {integration.description}
             </p>
 
             {/* Synced info */}
             {integration.connected && integration.lastSynced && (
-              <div className="flex items-center gap-1.5 mb-3 text-[0.625rem] text-[#475569]">
+              <div className="flex items-center gap-1.5 mb-3 text-[0.625rem] text-[var(--text-tertiary)]">
                 <Clock size={10} />
                 Last synced {formatLastSynced(integration.lastSynced)}
               </div>
@@ -163,8 +163,8 @@ export function IntegrationsSettings() {
               onClick={() => toggleConnection(integration.id)}
               className={`flex items-center justify-center gap-2 w-full px-4 py-2 rounded-lg text-xs font-medium transition-colors ${
                 integration.connected
-                  ? 'bg-[#F43F5E]/10 text-[#F43F5E] hover:bg-[#F43F5E]/20'
-                  : 'bg-[#3B82F6] text-white hover:bg-[#2563EB]'
+                  ? 'bg-[var(--color-error)]/10 text-[var(--color-error)] hover:bg-[var(--color-error)]/20'
+                  : 'bg-[var(--accent)] text-white hover:bg-[var(--accent)]'
               }`}
             >
               {integration.connected ? (

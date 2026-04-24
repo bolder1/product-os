@@ -307,9 +307,9 @@ export default function PageBuilderPage() {
     <div className="flex flex-col h-full" style={{ margin: 0 }}>
       <ContextBanner
         chips={[
-          { label: 'Design Screens', source: 'design', color: '#3B82F6' },
-          { label: 'Components', source: 'components', color: '#6366F1' },
-          { label: 'Brand Tokens', source: 'brand', color: '#EC4899' },
+          { label: 'Design Screens', source: 'design' },
+          { label: 'Components', source: 'components' },
+          { label: 'Brand Tokens', source: 'brand' },
         ]}
         missing={[]}
       />
@@ -420,8 +420,8 @@ export default function PageBuilderPage() {
                 onClick={() => setRightTab(tab.key)}
                 className={`flex items-center gap-1 px-2 py-1.5 text-[10px] font-medium transition-colors border-b-2 ${
                   rightTab === tab.key
-                    ? 'text-[#3B82F6] border-[#3B82F6]'
-                    : 'text-[#64748B] border-transparent hover:text-[#94A3B8]'
+                    ? 'text-[var(--accent)] border-[var(--accent)]'
+                    : 'text-[var(--text-tertiary)] border-transparent hover:text-[var(--text-secondary)]'
                 }`}
               >
                 {tab.icon}

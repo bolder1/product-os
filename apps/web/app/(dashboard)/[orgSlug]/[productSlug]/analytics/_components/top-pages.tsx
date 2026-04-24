@@ -74,7 +74,7 @@ export function TopPages({ pages }: TopPagesProps) {
       className="rounded-xl border border-white/[0.08] bg-white/[0.03] overflow-hidden"
     >
       <div className="px-4 py-3 border-b border-white/[0.06]">
-        <h3 className="text-sm font-medium text-[#F1F5F9]">Top Pages</h3>
+        <h3 className="text-sm font-medium text-[var(--text-primary)]">Top Pages</h3>
       </div>
 
       {/* Header row */}
@@ -84,13 +84,13 @@ export function TopPages({ pages }: TopPagesProps) {
             {col.key ? (
               <button
                 onClick={() => handleSort(col.key!)}
-                className="flex items-center gap-1 text-[10px] uppercase tracking-wider text-[#64748B] hover:text-[#94A3B8] transition-colors ml-auto"
+                className="flex items-center gap-1 text-[10px] uppercase tracking-wider text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] transition-colors ml-auto"
               >
                 {col.label}
                 <ArrowUpDown className="w-2.5 h-2.5" />
               </button>
             ) : (
-              <span className="text-[10px] uppercase tracking-wider text-[#64748B]">
+              <span className="text-[10px] uppercase tracking-wider text-[var(--text-tertiary)]">
                 {col.label}
               </span>
             )}
@@ -109,22 +109,22 @@ export function TopPages({ pages }: TopPagesProps) {
         >
           {/* Page name */}
           <div className="flex-1 min-w-[160px]">
-            <div className="text-sm text-[#F1F5F9]">{page.name}</div>
-            <div className="text-xs text-[#64748B]">{page.path}</div>
+            <div className="text-sm text-[var(--text-primary)]">{page.name}</div>
+            <div className="text-xs text-[var(--text-tertiary)]">{page.path}</div>
           </div>
 
           {/* Views */}
-          <div className="w-20 text-right text-sm text-[#94A3B8] tabular-nums">
+          <div className="w-20 text-right text-sm text-[var(--text-secondary)] tabular-nums">
             {page.views.toLocaleString()}
           </div>
 
           {/* Visitors */}
-          <div className="w-20 text-right text-sm text-[#94A3B8] tabular-nums">
+          <div className="w-20 text-right text-sm text-[var(--text-secondary)] tabular-nums">
             {page.uniqueVisitors.toLocaleString()}
           </div>
 
           {/* Avg time */}
-          <div className="w-20 text-right text-sm text-[#94A3B8]">{page.avgTime}</div>
+          <div className="w-20 text-right text-sm text-[var(--text-secondary)]">{page.avgTime}</div>
 
           {/* Bounce rate */}
           <div className="w-16 text-right">

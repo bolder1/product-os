@@ -73,11 +73,11 @@ export function TaskBoard({ tasks, onUpdateTask }: TaskBoardProps) {
                 style={{ backgroundColor: config.dotColor }}
                 aria-hidden="true"
               />
-              <h3 className="text-sm font-medium text-[#F1F5F9]" id={`col-${status}`}>
+              <h3 className="text-sm font-medium text-[var(--text-primary)]" id={`col-${status}`}>
                 {config.label}
               </h3>
               <span
-                className="text-xs text-[#64748B] bg-white/[0.05] px-2 py-0.5 rounded-full ml-auto"
+                className="text-xs text-[var(--text-tertiary)] bg-white/[0.05] px-2 py-0.5 rounded-full ml-auto"
                 aria-label={`${columnTasks.length} tasks`}
               >
                 {columnTasks.length}
@@ -88,7 +88,7 @@ export function TaskBoard({ tasks, onUpdateTask }: TaskBoardProps) {
             <div
               className={`flex-1 rounded-xl p-2 space-y-2 overflow-y-auto transition-all duration-200 ${
                 isOver
-                  ? 'border-2 border-dashed border-[#3B82F6]/50 bg-[#3B82F6]/[0.04]'
+                  ? 'border-2 border-dashed border-[var(--accent)]/50 bg-[var(--accent)]/[0.04]'
                   : 'border-2 border-transparent'
               }`}
               onDragEnd={handleDragEnd}
@@ -117,7 +117,7 @@ export function TaskBoard({ tasks, onUpdateTask }: TaskBoardProps) {
 
               {columnTasks.length === 0 && !isOver && (
                 <div
-                  className="flex items-center justify-center h-24 text-xs text-[#64748B] border border-dashed border-white/[0.06] rounded-lg"
+                  className="flex items-center justify-center h-24 text-xs text-[var(--text-tertiary)] border border-dashed border-white/[0.06] rounded-lg"
                   aria-label="No tasks in this column"
                 >
                   No tasks

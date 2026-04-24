@@ -43,14 +43,14 @@ const PRIORITY_COLORS: Record<PanelTask['priority'], string> = {
 }
 
 const STUDIO_COLORS: Record<string, string> = {
-  brand: '#b05ce6',
-  workflows: '#3faa6f',
-  components: '#c89530',
-  testing: '#c89530',
-  design: '#6398ff',
-  analytics: '#7e57c2',
-  approvals: '#3faa6f',
-  pages: '#6398ff',
+  brand: 'var(--accent)',
+  workflows: 'var(--accent)',
+  components: 'var(--accent)',
+  testing: 'var(--accent)',
+  design: 'var(--accent)',
+  analytics: 'var(--accent)',
+  approvals: 'var(--accent)',
+  pages: 'var(--accent)',
 }
 
 const STORAGE_KEY = 'tasks-panel-open'
@@ -292,13 +292,7 @@ export function TasksPanel() {
                                   <Clock size={9} />
                                   {formatDate(task.dueDate)}
                                 </span>
-                                <span
-                                  className="text-[9px] font-medium px-1.5 py-px rounded"
-                                  style={{
-                                    color: STUDIO_COLORS[task.studio] || 'var(--text-secondary)',
-                                    backgroundColor: `${STUDIO_COLORS[task.studio] || '#888'}12`,
-                                  }}
-                                >
+                                <span className="text-[9px] font-medium px-1.5 py-px rounded bg-[var(--accent-subtle)] text-[var(--accent-text)]">
                                   {task.studio}
                                 </span>
                               </div>

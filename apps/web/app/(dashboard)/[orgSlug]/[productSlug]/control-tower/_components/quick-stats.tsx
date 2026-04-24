@@ -64,9 +64,9 @@ export function QuickStats() {
               </div>
               <div className="flex items-center gap-1">
                 {isPositive ? (
-                  <TrendingUp className="w-3 h-3 text-[#10B981]" />
+                  <TrendingUp className="w-3 h-3 text-[var(--color-success)]" />
                 ) : (
-                  <TrendingDown className="w-3 h-3 text-[#F43F5E]" />
+                  <TrendingDown className="w-3 h-3 text-[var(--color-error)]" />
                 )}
                 <span
                   className="text-xs font-medium"
@@ -78,8 +78,8 @@ export function QuickStats() {
               </div>
             </div>
             <div className="mt-3">
-              <span className="text-2xl font-bold text-[#F1F5F9]">{stat.value}</span>
-              <p className="text-xs text-[#64748B] mt-1">{stat.label}</p>
+              <span className="text-2xl font-bold text-[var(--text-primary)]">{stat.value}</span>
+              <p className="text-xs text-[var(--text-tertiary)] mt-1">{stat.label}</p>
             </div>
           </motion.div>
         )

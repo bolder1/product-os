@@ -117,9 +117,9 @@ export default function CodeStudioPage() {
     <div className="flex flex-col h-full bg-[var(--bg-workspace)]">
       <ContextBanner
         chips={[
-          { label: 'Dev Handoff', source: 'handoff', color: '#F59E0B' },
-          { label: 'Components', source: 'components', color: '#6366F1' },
-          { label: 'Brand Tokens', source: 'brand', color: '#EC4899' },
+          { label: 'Dev Handoff', source: 'handoff' },
+          { label: 'Components', source: 'components' },
+          { label: 'Brand Tokens', source: 'brand' },
         ]}
         missing={[]}
       />

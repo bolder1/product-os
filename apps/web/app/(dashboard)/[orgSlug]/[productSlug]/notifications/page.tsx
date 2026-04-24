@@ -153,7 +153,7 @@ export default function NotificationsPage() {
                       e.stopPropagation()
                       deleteNotification(notif.id)
                     }}
-                    className="text-[var(--text-tertiary)] hover:text-[#F43F5E] transition-colors p-1"
+                    className="text-[var(--text-tertiary)] hover:text-[var(--color-error)] transition-colors p-1"
                   >
                     <Trash2 size={12} />
                   </button>

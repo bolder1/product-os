@@ -100,15 +100,15 @@ export default function StepVision({ problem, goals, onProblemChange, onGoalsCha
       {/* ── Problem Statement ── */}
       <div className="space-y-4">
         <div>
-          <h2 className="text-2xl font-bold text-[#F1F5F9] mb-2">Define your product vision</h2>
-          <p className="text-[#94A3B8] text-sm">
+          <h2 className="text-2xl font-bold text-[var(--text-primary)] mb-2">Define your product vision</h2>
+          <p className="text-[var(--text-secondary)] text-sm">
             Describe the core problem and set measurable goals to guide your product.
           </p>
         </div>
 
         {/* Quick prompt chips */}
         <div className="space-y-2">
-          <div className="flex items-center gap-2 text-xs text-[#64748B]">
+          <div className="flex items-center gap-2 text-xs text-[var(--text-tertiary)]">
             <Lightbulb className="w-3.5 h-3.5" />
             <span>Quick start — click a template:</span>
           </div>
@@ -119,7 +119,7 @@ export default function StepVision({ problem, goals, onProblemChange, onGoalsCha
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.97 }}
                 onClick={() => onProblemChange(prompt.template)}
-                className="px-3 py-1.5 text-xs rounded-full bg-white/[0.03] border border-white/[0.08] text-[#94A3B8] hover:border-[#8B5CF6]/30 hover:text-[#F1F5F9] transition-all"
+                className="px-3 py-1.5 text-xs rounded-full bg-white/[0.03] border border-white/[0.08] text-[var(--text-secondary)] hover:border-[var(--accent)]/30 hover:text-[var(--text-primary)] transition-all"
               >
                 {prompt.label}
               </motion.button>
@@ -134,9 +134,9 @@ export default function StepVision({ problem, goals, onProblemChange, onGoalsCha
             onChange={(e) => onProblemChange(e.target.value)}
             rows={6}
             placeholder="Describe the problem your product solves...&#10;&#10;Example: Teams waste hours every week switching between disconnected tools for project management, communication, and reporting."
-            className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-4 py-3 text-[#F1F5F9] text-sm leading-relaxed placeholder:text-[#64748B] focus:border-[#8B5CF6]/50 focus:outline-none focus:ring-1 focus:ring-[#8B5CF6]/20 resize-none transition-colors"
+            className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-4 py-3 text-[var(--text-primary)] text-sm leading-relaxed placeholder:text-[var(--text-tertiary)] focus:border-[var(--accent)]/50 focus:outline-none focus:ring-1 focus:ring-[var(--accent)]/20 resize-none transition-colors"
           />
-          <div className="absolute bottom-3 right-3 text-[10px] text-[#64748B]">
+          <div className="absolute bottom-3 right-3 text-[10px] text-[var(--text-tertiary)]">
             {problem.length} characters
           </div>
         </div>
@@ -145,7 +145,7 @@ export default function StepVision({ problem, goals, onProblemChange, onGoalsCha
       {/* ── Divider ── */}
       <div className="flex items-center gap-3">
         <div className="flex-1 h-px bg-white/[0.06]" />
-        <span className="text-[10px] font-medium text-[#64748B] uppercase tracking-wider">Goals</span>
+        <span className="text-[10px] font-medium text-[var(--text-tertiary)] uppercase tracking-wider">Goals</span>
         <div className="flex-1 h-px bg-white/[0.06]" />
       </div>
 
@@ -159,7 +159,7 @@ export default function StepVision({ problem, goals, onProblemChange, onGoalsCha
               value={newGoalText}
               onChange={(e) => setNewGoalText(e.target.value)}
               placeholder="Enter a goal..."
-              className="flex-1 bg-white/[0.03] border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-[#F1F5F9] placeholder:text-[#64748B] focus:border-[#8B5CF6]/50 focus:outline-none transition-colors"
+              className="flex-1 bg-white/[0.03] border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:border-[var(--accent)]/50 focus:outline-none transition-colors"
               onKeyDown={(e) => {
                 if (e.key === 'Enter') addGoal()
               }}
@@ -168,7 +168,7 @@ export default function StepVision({ problem, goals, onProblemChange, onGoalsCha
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={addGoal}
-              className="px-4 py-2 bg-[#8B5CF6] text-white text-sm font-medium rounded-lg hover:bg-[#8B5CF6]/90 transition-colors flex items-center gap-1.5"
+              className="px-4 py-2 bg-[var(--accent)] text-white text-sm font-medium rounded-lg hover:bg-[var(--accent)]/90 transition-colors flex items-center gap-1.5"
             >
               <Plus className="w-4 h-4" />
               Add
@@ -184,7 +184,7 @@ export default function StepVision({ problem, goals, onProblemChange, onGoalsCha
                 className={`flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-full border transition-all ${
                   selectedCategory === cat.name
                     ? 'border-transparent text-white'
-                    : 'border-white/[0.08] text-[#64748B] hover:text-[#94A3B8]'
+                    : 'border-white/[0.08] text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]'
                 }`}
                 style={
                   selectedCategory === cat.name
@@ -212,7 +212,7 @@ export default function StepVision({ problem, goals, onProblemChange, onGoalsCha
               >
                 <Target className="w-4 h-4 mt-0.5 flex-shrink-0" style={{ color: categoryColor(goal.category) }} />
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm text-[#F1F5F9]">{goal.text}</p>
+                  <p className="text-sm text-[var(--text-primary)]">{goal.text}</p>
                   <span
                     className="text-[10px] font-medium px-2 py-0.5 rounded-full mt-1 inline-block"
                     style={{
@@ -227,7 +227,7 @@ export default function StepVision({ problem, goals, onProblemChange, onGoalsCha
                   onClick={() => removeGoal(goal.id)}
                   className="p-1 rounded-md opacity-0 group-hover:opacity-100 hover:bg-white/[0.05] transition-all"
                 >
-                  <X className="w-3.5 h-3.5 text-[#64748B]" />
+                  <X className="w-3.5 h-3.5 text-[var(--text-tertiary)]" />
                 </button>
               </motion.div>
             ))}
@@ -237,7 +237,7 @@ export default function StepVision({ problem, goals, onProblemChange, onGoalsCha
         {/* Suggested Goals */}
         {suggestedGoals.filter((sg) => !goals.some((g) => g.text === sg.text)).length > 0 && (
           <div className="space-y-2">
-            <p className="text-xs text-[#64748B] font-medium">Suggested goals</p>
+            <p className="text-xs text-[var(--text-tertiary)] font-medium">Suggested goals</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {suggestedGoals
                 .filter((sg) => !goals.some((g) => g.text === sg.text))
@@ -247,10 +247,10 @@ export default function StepVision({ problem, goals, onProblemChange, onGoalsCha
                     whileHover={{ scale: 1.01 }}
                     whileTap={{ scale: 0.99 }}
                     onClick={() => addSuggestedGoal(sg)}
-                    className="text-left bg-white/[0.02] border border-dashed border-white/[0.06] rounded-xl px-3 py-2.5 hover:border-[#8B5CF6]/30 hover:bg-white/[0.03] transition-all group"
+                    className="text-left bg-white/[0.02] border border-dashed border-white/[0.06] rounded-xl px-3 py-2.5 hover:border-[var(--accent)]/30 hover:bg-white/[0.03] transition-all group"
                   >
-                    <p className="text-xs text-[#64748B] group-hover:text-[#94A3B8] transition-colors">{sg.text}</p>
-                    <span className="text-[10px] text-[#64748B]/60 mt-0.5 inline-block">{sg.category}</span>
+                    <p className="text-xs text-[var(--text-tertiary)] group-hover:text-[#94A3B8] transition-colors">{sg.text}</p>
+                    <span className="text-[10px] text-[var(--text-tertiary)]/60 mt-0.5 inline-block">{sg.category}</span>
                   </motion.button>
                 ))}
             </div>

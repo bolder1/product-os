@@ -8,10 +8,10 @@ const statusConfig: Record<
   Approval['status'],
   { color: string; bg: string; label: string }
 > = {
-  pending: { color: '#F59E0B', bg: 'bg-[#F59E0B]/10', label: 'Pending' },
-  approved: { color: '#10B981', bg: 'bg-[#10B981]/10', label: 'Approved' },
-  rejected: { color: '#F43F5E', bg: 'bg-[#F43F5E]/10', label: 'Rejected' },
-  changes_requested: { color: '#3B82F6', bg: 'bg-[#3B82F6]/10', label: 'Changes Requested' },
+  pending: { color: '#F59E0B', bg: 'bg-[var(--color-warning)]/10', label: 'Pending' },
+  approved: { color: '#10B981', bg: 'bg-[var(--color-success)]/10', label: 'Approved' },
+  rejected: { color: '#F43F5E', bg: 'bg-[var(--color-error)]/10', label: 'Rejected' },
+  changes_requested: { color: '#3B82F6', bg: 'bg-[var(--accent)]/10', label: 'Changes Requested' },
 }
 
 const typeLabels: Record<string, string> = {
@@ -26,13 +26,13 @@ const typeLabels: Record<string, string> = {
 function DecisionIcon({ decision }: { decision: ApprovalApprover['decision'] }) {
   switch (decision) {
     case 'approved':
-      return <Check className="w-2.5 h-2.5 text-[#10B981]" />
+      return <Check className="w-2.5 h-2.5 text-[var(--color-success)]" />
     case 'rejected':
-      return <X className="w-2.5 h-2.5 text-[#F43F5E]" />
+      return <X className="w-2.5 h-2.5 text-[var(--color-error)]" />
     case 'changes_requested':
-      return <GitBranch className="w-2.5 h-2.5 text-[#3B82F6]" />
+      return <GitBranch className="w-2.5 h-2.5 text-[var(--accent)]" />
     default:
-      return <Clock className="w-2.5 h-2.5 text-[#64748B]" />
+      return <Clock className="w-2.5 h-2.5 text-[var(--text-tertiary)]" />
   }
 }
 
@@ -62,14 +62,14 @@ export function ApprovalCard({ approval, onClick, index }: ApprovalCardProps) {
       transition={{ duration: 0.3, delay: index * 0.06 }}
       whileHover={{ y: -2 }}
       onClick={onClick}
-      className="w-full text-left bg-white/[0.03] border border-white/[0.08] rounded-xl p-5 hover:border-[#F59E0B]/30 hover:bg-white/[0.05] transition-colors cursor-pointer group"
+      className="w-full text-left bg-white/[0.03] border border-white/[0.08] rounded-xl p-5 hover:border-[var(--color-warning)]/30 hover:bg-white/[0.05] transition-colors cursor-pointer group"
     >
       {/* Top row: name + type badge */}
       <div className="flex items-start justify-between gap-3 mb-3">
-        <h3 className="text-sm font-semibold text-[#F1F5F9] leading-tight group-hover:text-[#F59E0B] transition-colors">
+        <h3 className="text-sm font-semibold text-[var(--text-primary)] leading-tight group-hover:text-[#F59E0B] transition-colors">
           {approval.objectName}
         </h3>
-        <span className="flex-shrink-0 text-[10px] font-medium uppercase tracking-wider px-2 py-0.5 rounded-full bg-white/[0.06] text-[#94A3B8]">
+        <span className="flex-shrink-0 text-[10px] font-medium uppercase tracking-wider px-2 py-0.5 rounded-full bg-white/[0.06] text-[var(--text-secondary)]">
           {typeLabels[approval.objectType] ?? approval.objectType}
         </span>
       </div>
@@ -82,10 +82,10 @@ export function ApprovalCard({ approval, onClick, index }: ApprovalCardProps) {
         >
           {approval.requester.initials}
         </div>
-        <span className="text-xs text-[#94A3B8]">
+        <span className="text-xs text-[var(--text-secondary)]">
           {approval.requester.name}
         </span>
-        <span className="text-[10px] text-[#64748B]">
+        <span className="text-[10px] text-[var(--text-tertiary)]">
           requested {timeAgo(approval.createdAt)}
         </span>
       </div>
@@ -102,7 +102,7 @@ export function ApprovalCard({ approval, onClick, index }: ApprovalCardProps) {
           />
           {status.label}
         </span>
-        <div className="flex items-center gap-1 text-[10px] text-[#64748B]">
+        <div className="flex items-center gap-1 text-[10px] text-[var(--text-tertiary)]">
           <Users className="w-3 h-3" />
           {approval.routing}
         </div>
@@ -113,17 +113,17 @@ export function ApprovalCard({ approval, onClick, index }: ApprovalCardProps) {
         {approval.approvers.map((a) => (
           <div key={a.name} className="relative">
             <div
-              className="w-6 h-6 rounded-full flex items-center justify-center text-[8px] font-bold text-white border border-[#060918]"
+              className="w-6 h-6 rounded-full flex items-center justify-center text-[8px] font-bold text-white border border-[var(--bg-base)]"
               style={{ backgroundColor: a.color }}
             >
               {a.initials}
             </div>
-            <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-[#060918] flex items-center justify-center">
+            <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-[var(--bg-base)] flex items-center justify-center">
               <DecisionIcon decision={a.decision} />
             </div>
           </div>
         ))}
-        <span className="text-[10px] text-[#64748B] ml-1">
+        <span className="text-[10px] text-[var(--text-tertiary)] ml-1">
           {approval.approvers.filter((a) => a.decision !== 'pending').length}/{approval.approvers.length} decided
         </span>
       </div>

@@ -77,11 +77,11 @@ function ScoreRing({ score }: { score: number }) {
           />
         </svg>
         <div className="absolute inset-0 flex items-center justify-center">
-          <span className="text-[15px] font-bold text-[#F1F5F9]">{score}</span>
+          <span className="text-[15px] font-bold text-[var(--text-primary)]">{score}</span>
         </div>
       </div>
       <div>
-        <div className="text-[13px] font-semibold text-[#F1F5F9]">Graph Score</div>
+        <div className="text-[13px] font-semibold text-[var(--text-primary)]">Graph Score</div>
         <div className="text-[11px] mt-0.5 font-medium" style={{ color }}>{label}</div>
       </div>
     </div>
@@ -118,20 +118,20 @@ function FindingCard({
         <Icon size={13} className="mt-0.5 shrink-0" style={{ color: cfg.color }} />
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-[11px] font-semibold text-[#F1F5F9] leading-tight">{finding.title}</span>
+            <span className="text-[11px] font-semibold text-[var(--text-primary)] leading-tight">{finding.title}</span>
             <span
               className="text-[9px] font-semibold px-1.5 py-0.5 rounded-full uppercase tracking-wide shrink-0"
               style={{ backgroundColor: `${cfg.color}20`, color: cfg.color }}
             >
               {cfg.label}
             </span>
-            <span className="text-[9px] text-[#64748B] shrink-0 capitalize">{finding.category}</span>
+            <span className="text-[9px] text-[var(--text-tertiary)] shrink-0 capitalize">{finding.category}</span>
           </div>
         </div>
         {expanded ? (
-          <ChevronUp size={11} className="text-[#64748B] shrink-0 mt-0.5" />
+          <ChevronUp size={11} className="text-[var(--text-tertiary)] shrink-0 mt-0.5" />
         ) : (
-          <ChevronDown size={11} className="text-[#64748B] shrink-0 mt-0.5" />
+          <ChevronDown size={11} className="text-[var(--text-tertiary)] shrink-0 mt-0.5" />
         )}
       </button>
 
@@ -146,7 +146,7 @@ function FindingCard({
             className="overflow-hidden"
           >
             <div className="px-3 pb-3 flex flex-col gap-2 border-t" style={{ borderColor: `${cfg.color}15` }}>
-              <p className="text-[10px] text-[#94A3B8] leading-relaxed pt-2">{finding.description}</p>
+              <p className="text-[10px] text-[var(--text-secondary)] leading-relaxed pt-2">{finding.description}</p>
 
               {finding.recommendation && (
                 <div
@@ -164,7 +164,7 @@ function FindingCard({
 
               {finding.affectedNodes.length > 0 && (
                 <div className="flex flex-col gap-1">
-                  <span className="text-[9px] uppercase tracking-wider text-[#64748B]">Affected nodes</span>
+                  <span className="text-[9px] uppercase tracking-wider text-[var(--text-tertiary)]">Affected nodes</span>
                   <div className="flex flex-wrap gap-1">
                     {finding.affectedNodes.map((nid) => {
                       const n = nodeMap.get(nid)
@@ -303,10 +303,10 @@ export function AIAnalysisPanel({
       {/* Header */}
       <div className="flex items-center justify-between px-3 h-[var(--toolbar-h)] border-b border-[var(--border-default)] shrink-0">
         <div className="flex items-center gap-2">
-          <Sparkles size={13} className="text-[#8B5CF6]" />
+          <Sparkles size={13} className="text-[var(--accent)]" />
           <span className="text-[11px] font-semibold text-[var(--text-primary)]">AI Analysis</span>
           {mutation.isPending && (
-            <RefreshCw size={10} className="text-[#8B5CF6] animate-spin" />
+            <RefreshCw size={10} className="text-[var(--accent)] animate-spin" />
           )}
         </div>
         <div className="flex items-center gap-1">
@@ -335,7 +335,7 @@ export function AIAnalysisPanel({
             onClick={() => setAnalysisType(t.key)}
             className={`px-2 py-1 rounded-md text-[10px] font-medium whitespace-nowrap transition-colors ${
               t.key === analysisType
-                ? 'bg-[#8B5CF6]/15 text-[#A78BFA]'
+                ? 'bg-[var(--accent)]/15 text-[var(--accent)]'
                 : 'text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] hover:bg-[var(--bg-inset)]'
             }`}
           >
@@ -350,7 +350,7 @@ export function AIAnalysisPanel({
 
         {!mutation.isPending && !result && !mutation.isError && (
           <div className="flex flex-col items-center justify-center h-full text-center px-4">
-            <Sparkles size={28} className="text-[#8B5CF6]/40 mb-3" />
+            <Sparkles size={28} className="text-[var(--accent)]/40 mb-3" />
             <p className="text-[11px] text-[var(--text-tertiary)]">Click Re-run to analyze your graph</p>
           </div>
         )}
@@ -362,7 +362,7 @@ export function AIAnalysisPanel({
             <p className="text-[10px] text-[var(--text-tertiary)]">{mutation.error.message}</p>
             <button
               onClick={runAnalysis}
-              className="mt-1 text-[10px] text-[#8B5CF6] hover:text-[#A78BFA] transition-colors"
+              className="mt-1 text-[10px] text-[var(--accent)] hover:text-[var(--accent)] transition-colors"
             >
               Try again
             </button>
@@ -373,9 +373,9 @@ export function AIAnalysisPanel({
           <div className="flex flex-col gap-3 p-3">
             {/* Fallback notice */}
             {isFallback && (
-              <div className="flex items-start gap-2 px-2.5 py-2 rounded-lg bg-[#F59E0B]/08 border border-[#F59E0B]/20">
-                <Info size={11} className="text-[#F59E0B] mt-0.5 shrink-0" />
-                <p className="text-[9px] text-[#F59E0B]/80 leading-relaxed">
+              <div className="flex items-start gap-2 px-2.5 py-2 rounded-lg bg-[var(--color-warning)]/08 border border-[var(--color-warning)]/20">
+                <Info size={11} className="text-[var(--color-warning)] mt-0.5 shrink-0" />
+                <p className="text-[9px] text-[var(--color-warning)]/80 leading-relaxed">
                   Demo mode — add ANTHROPIC_API_KEY for live AI analysis
                 </p>
               </div>
@@ -390,7 +390,7 @@ export function AIAnalysisPanel({
 
             {/* Summary */}
             <div className="px-2.5 py-2.5 rounded-lg bg-white/[0.03] border border-white/[0.06]">
-              <p className="text-[10px] text-[#94A3B8] leading-relaxed">{result.summary}</p>
+              <p className="text-[10px] text-[var(--text-secondary)] leading-relaxed">{result.summary}</p>
             </div>
 
             {/* Severity breakdown */}
@@ -411,7 +411,7 @@ export function AIAnalysisPanel({
                     )
                   })}
                 {result.findings.length === 0 && (
-                  <span className="flex items-center gap-1 text-[10px] text-[#10B981]">
+                  <span className="flex items-center gap-1 text-[10px] text-[var(--color-success)]">
                     <CheckCircle2 size={11} /> No issues found
                   </span>
                 )}
@@ -422,8 +422,8 @@ export function AIAnalysisPanel({
             <div className="flex flex-col gap-2">
               {result.findings.length === 0 && (
                 <div className="flex flex-col items-center justify-center py-6 text-center">
-                  <CheckCircle2 size={22} className="text-[#10B981] mb-2" />
-                  <p className="text-[11px] text-[#10B981] font-medium">No issues found</p>
+                  <CheckCircle2 size={22} className="text-[var(--color-success)] mb-2" />
+                  <p className="text-[11px] text-[var(--color-success)] font-medium">No issues found</p>
                   <p className="text-[10px] text-[var(--text-tertiary)] mt-0.5">Your graph looks healthy</p>
                 </div>
               )}

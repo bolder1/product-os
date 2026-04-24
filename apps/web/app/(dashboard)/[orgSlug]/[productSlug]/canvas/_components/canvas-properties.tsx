@@ -25,7 +25,7 @@ export function CanvasProperties({
       {/* Toggle button */}
       <button
         onClick={onToggle}
-        className="absolute top-3 right-3 z-10 p-2 rounded-lg border border-white/[0.08] bg-white/[0.03] text-[#94A3B8] hover:text-[#F1F5F9] hover:bg-white/[0.06] transition-colors"
+        className="absolute top-3 right-3 z-10 p-2 rounded-lg border border-white/[0.08] bg-white/[0.03] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-white/[0.06] transition-colors"
       >
         {collapsed ? (
           <PanelRightOpen className="w-4 h-4" />
@@ -46,10 +46,10 @@ export function CanvasProperties({
             <div className="w-[280px] h-full flex flex-col">
               {/* Header */}
               <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.06]">
-                <span className="text-sm font-medium text-[#F1F5F9]">Properties</span>
+                <span className="text-sm font-medium text-[var(--text-primary)]">Properties</span>
                 <button
                   onClick={onToggle}
-                  className="p-1 rounded text-[#64748B] hover:text-[#94A3B8] transition-colors"
+                  className="p-1 rounded text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] transition-colors"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -59,7 +59,7 @@ export function CanvasProperties({
                 <div className="flex-1 overflow-y-auto p-4 space-y-5">
                   {/* Type label */}
                   <div>
-                    <span className="text-[10px] uppercase tracking-wider text-[#64748B]">
+                    <span className="text-[10px] uppercase tracking-wider text-[var(--text-tertiary)]">
                       {item.type === 'sticky'
                         ? 'Sticky Note'
                         : item.type === 'text'
@@ -70,18 +70,18 @@ export function CanvasProperties({
 
                   {/* Text */}
                   <div className="space-y-1.5">
-                    <label className="text-xs text-[#94A3B8]">Text</label>
+                    <label className="text-xs text-[var(--text-secondary)]">Text</label>
                     <textarea
                       value={item.text}
                       onChange={(e) => onUpdate(item.id, { text: e.target.value })}
                       rows={3}
-                      className="w-full px-3 py-2 rounded-lg border border-white/[0.08] bg-white/[0.03] text-sm text-[#F1F5F9] placeholder-[#64748B] resize-none focus:outline-none focus:border-[#F59E0B]/40"
+                      className="w-full px-3 py-2 rounded-lg border border-white/[0.08] bg-white/[0.03] text-sm text-[var(--text-primary)] placeholder-[var(--text-tertiary)] resize-none focus:outline-none focus:border-[var(--color-warning)]/40"
                     />
                   </div>
 
                   {/* Color */}
                   <div className="space-y-1.5">
-                    <label className="text-xs text-[#94A3B8]">Color</label>
+                    <label className="text-xs text-[var(--text-secondary)]">Color</label>
                     <div className="flex items-center gap-2 flex-wrap">
                       {presetColors.map((color) => (
                         <button
@@ -89,7 +89,7 @@ export function CanvasProperties({
                           onClick={() => onUpdate(item.id, { color })}
                           className={`w-7 h-7 rounded-lg transition-all ${
                             item.color === color
-                              ? 'ring-2 ring-[#F59E0B] ring-offset-1 ring-offset-[#060918] scale-110'
+                              ? 'ring-2 ring-[var(--color-warning)] ring-offset-1 ring-offset-[var(--bg-base)] scale-110'
                               : 'hover:scale-105'
                           }`}
                           style={{ backgroundColor: color }}
@@ -101,25 +101,25 @@ export function CanvasProperties({
                   {/* Size */}
                   <div className="grid grid-cols-2 gap-3">
                     <div className="space-y-1.5">
-                      <label className="text-xs text-[#94A3B8]">Width</label>
+                      <label className="text-xs text-[var(--text-secondary)]">Width</label>
                       <input
                         type="number"
                         value={item.width}
                         onChange={(e) =>
                           onUpdate(item.id, { width: Math.max(40, Number(e.target.value)) })
                         }
-                        className="w-full px-3 py-1.5 rounded-lg border border-white/[0.08] bg-white/[0.03] text-sm text-[#F1F5F9] focus:outline-none focus:border-[#F59E0B]/40"
+                        className="w-full px-3 py-1.5 rounded-lg border border-white/[0.08] bg-white/[0.03] text-sm text-[var(--text-primary)] focus:outline-none focus:border-[var(--color-warning)]/40"
                       />
                     </div>
                     <div className="space-y-1.5">
-                      <label className="text-xs text-[#94A3B8]">Height</label>
+                      <label className="text-xs text-[var(--text-secondary)]">Height</label>
                       <input
                         type="number"
                         value={item.height}
                         onChange={(e) =>
                           onUpdate(item.id, { height: Math.max(30, Number(e.target.value)) })
                         }
-                        className="w-full px-3 py-1.5 rounded-lg border border-white/[0.08] bg-white/[0.03] text-sm text-[#F1F5F9] focus:outline-none focus:border-[#F59E0B]/40"
+                        className="w-full px-3 py-1.5 rounded-lg border border-white/[0.08] bg-white/[0.03] text-sm text-[var(--text-primary)] focus:outline-none focus:border-[var(--color-warning)]/40"
                       />
                     </div>
                   </div>
@@ -127,21 +127,21 @@ export function CanvasProperties({
                   {/* Position */}
                   <div className="grid grid-cols-2 gap-3">
                     <div className="space-y-1.5">
-                      <label className="text-xs text-[#94A3B8]">X</label>
+                      <label className="text-xs text-[var(--text-secondary)]">X</label>
                       <input
                         type="number"
                         value={Math.round(item.x)}
                         onChange={(e) => onUpdate(item.id, { x: Number(e.target.value) })}
-                        className="w-full px-3 py-1.5 rounded-lg border border-white/[0.08] bg-white/[0.03] text-sm text-[#F1F5F9] focus:outline-none focus:border-[#F59E0B]/40"
+                        className="w-full px-3 py-1.5 rounded-lg border border-white/[0.08] bg-white/[0.03] text-sm text-[var(--text-primary)] focus:outline-none focus:border-[var(--color-warning)]/40"
                       />
                     </div>
                     <div className="space-y-1.5">
-                      <label className="text-xs text-[#94A3B8]">Y</label>
+                      <label className="text-xs text-[var(--text-secondary)]">Y</label>
                       <input
                         type="number"
                         value={Math.round(item.y)}
                         onChange={(e) => onUpdate(item.id, { y: Number(e.target.value) })}
-                        className="w-full px-3 py-1.5 rounded-lg border border-white/[0.08] bg-white/[0.03] text-sm text-[#F1F5F9] focus:outline-none focus:border-[#F59E0B]/40"
+                        className="w-full px-3 py-1.5 rounded-lg border border-white/[0.08] bg-white/[0.03] text-sm text-[var(--text-primary)] focus:outline-none focus:border-[var(--color-warning)]/40"
                       />
                     </div>
                   </div>
@@ -157,7 +157,7 @@ export function CanvasProperties({
                 </div>
               ) : (
                 <div className="flex-1 flex items-center justify-center p-4">
-                  <p className="text-xs text-[#64748B] text-center">
+                  <p className="text-xs text-[var(--text-tertiary)] text-center">
                     Select an item on the canvas to edit its properties
                   </p>
                 </div>

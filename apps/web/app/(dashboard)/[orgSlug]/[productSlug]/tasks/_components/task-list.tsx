@@ -70,10 +70,10 @@ export function TaskList({ tasks, onUpdateTask }: TaskListProps) {
   const SortHeader = ({ field, label, className = '' }: { field: SortField; label: string; className?: string }) => (
     <button
       onClick={() => handleSort(field)}
-      className={`flex items-center gap-1 text-xs font-medium text-[#64748B] hover:text-[#94A3B8] transition-colors ${className}`}
+      className={`flex items-center gap-1 text-xs font-medium text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] transition-colors ${className}`}
     >
       {label}
-      <ArrowUpDown className={`w-3 h-3 ${sortField === field ? 'text-[#3B82F6]' : ''}`} />
+      <ArrowUpDown className={`w-3 h-3 ${sortField === field ? 'text-[var(--accent)]' : ''}`} />
     </button>
   )
 
@@ -97,7 +97,7 @@ export function TaskList({ tasks, onUpdateTask }: TaskListProps) {
             aria-pressed={allSelected}
             className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${
               allSelected
-                ? 'bg-[#3B82F6] border-[#3B82F6]'
+                ? 'bg-[var(--accent)] border-[var(--accent)]'
                 : 'border-white/[0.2] hover:border-white/[0.4]'
             }`}
           >
@@ -109,12 +109,12 @@ export function TaskList({ tasks, onUpdateTask }: TaskListProps) {
         <SortHeader field="priority" label="Priority" />
         <SortHeader field="assignee" label="Assignee" />
         <SortHeader field="dueDate" label="Due Date" />
-        <div className="text-xs font-medium text-[#64748B]">Linked</div>
+        <div className="text-xs font-medium text-[var(--text-tertiary)]">Linked</div>
       </div>
 
       {/* Virtualized rows */}
       {sorted.length === 0 ? (
-        <div className="flex items-center justify-center py-16 text-sm text-[#64748B]">
+        <div className="flex items-center justify-center py-16 text-sm text-[var(--text-tertiary)]">
           No tasks match the current filters
         </div>
       ) : (
@@ -138,7 +138,7 @@ export function TaskList({ tasks, onUpdateTask }: TaskListProps) {
                   role="listitem"
                   style={{ position: 'absolute', top: offsetTop, width: '100%', height: ROW_HEIGHT }}
                   className={`grid grid-cols-[40px_1fr_120px_100px_140px_100px_140px] gap-2 px-4 items-center transition-colors hover:bg-white/[0.03] border-b border-white/[0.04] ${
-                    isSelected ? 'bg-[#3B82F6]/[0.05]' : ''
+                    isSelected ? 'bg-[var(--accent)]/[0.05]' : ''
                   }`}
                 >
                   {/* Checkbox */}
@@ -149,7 +149,7 @@ export function TaskList({ tasks, onUpdateTask }: TaskListProps) {
                       aria-pressed={isSelected}
                       className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${
                         isSelected
-                          ? 'bg-[#3B82F6] border-[#3B82F6]'
+                          ? 'bg-[var(--accent)] border-[var(--accent)]'
                           : 'border-white/[0.2] hover:border-white/[0.4]'
                       }`}
                     >
@@ -159,25 +159,19 @@ export function TaskList({ tasks, onUpdateTask }: TaskListProps) {
 
                   {/* Title */}
                   <div className="flex items-center min-w-0">
-                    <span className="text-sm text-[#F1F5F9] truncate">{task.title}</span>
+                    <span className="text-sm text-[var(--text-primary)] truncate">{task.title}</span>
                   </div>
 
                   {/* Status badge */}
                   <div className="flex items-center">
-                    <span
-                      className="text-[11px] font-medium px-2.5 py-1 rounded-full whitespace-nowrap"
-                      style={{ color: status.color, backgroundColor: `${status.color}15` }}
-                    >
+                    <span className={`text-[11px] font-medium px-2.5 py-1 rounded-full whitespace-nowrap ${status.pill}`}>
                       {status.label}
                     </span>
                   </div>
 
                   {/* Priority badge */}
                   <div className="flex items-center">
-                    <span
-                      className="text-[11px] font-medium px-2.5 py-1 rounded-full whitespace-nowrap"
-                      style={{ color: priority.color, backgroundColor: `${priority.color}15` }}
-                    >
+                    <span className={`text-[11px] font-medium px-2.5 py-1 rounded-full whitespace-nowrap ${priority.pill}`}>
                       {priority.label}
                     </span>
                   </div>
@@ -191,11 +185,11 @@ export function TaskList({ tasks, onUpdateTask }: TaskListProps) {
                     >
                       {task.assignee.initials}
                     </div>
-                    <span className="text-xs text-[#94A3B8] truncate">{task.assignee.name}</span>
+                    <span className="text-xs text-[var(--text-secondary)] truncate">{task.assignee.name}</span>
                   </div>
 
                   {/* Due date */}
-                  <div className="flex items-center gap-1 text-xs text-[#64748B]">
+                  <div className="flex items-center gap-1 text-xs text-[var(--text-tertiary)]">
                     <Calendar className="w-3 h-3" aria-hidden="true" />
                     <span>
                       {new Date(task.dueDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
@@ -206,13 +200,13 @@ export function TaskList({ tasks, onUpdateTask }: TaskListProps) {
                   <div className="flex items-center">
                     {task.linkedNode ? (
                       <div className="flex items-center gap-1.5">
-                        <Link2 className="w-3 h-3 text-[#64748B]" aria-hidden="true" />
-                        <span className="text-[11px] text-[#64748B] bg-white/[0.05] px-1.5 py-0.5 rounded truncate">
+                        <Link2 className="w-3 h-3 text-[var(--text-tertiary)]" aria-hidden="true" />
+                        <span className="text-[11px] text-[var(--text-tertiary)] bg-white/[0.05] px-1.5 py-0.5 rounded truncate">
                           {task.linkedNode.kind}: {task.linkedNode.label}
                         </span>
                       </div>
                     ) : (
-                      <span className="text-[11px] text-[#64748B]/40" aria-hidden="true">--</span>
+                      <span className="text-[11px] text-[var(--text-tertiary)]/40" aria-hidden="true">--</span>
                     )}
                   </div>
                 </div>

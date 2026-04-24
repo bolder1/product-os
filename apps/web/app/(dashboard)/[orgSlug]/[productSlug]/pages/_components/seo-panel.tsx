@@ -34,19 +34,19 @@ function Field({ label, value, onChange, placeholder, multiline, charLimit }: {
   return (
     <div className="space-y-1">
       <div className="flex items-center justify-between">
-        <label className="text-[10px] font-semibold uppercase tracking-wider text-[#64748B]">{label}</label>
+        <label className="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-tertiary)]">{label}</label>
         {charLimit && (
-          <span className={`text-[10px] ${overLimit ? 'text-amber-400' : 'text-[#64748B]'}`}>
+          <span className={`text-[10px] ${overLimit ? 'text-amber-400' : 'text-[var(--text-tertiary)]'}`}>
             {value.length}/{charLimit}
           </span>
         )}
       </div>
       {multiline ? (
         <textarea value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} rows={3}
-          className="w-full px-3 py-2 rounded-lg bg-white/[0.04] border border-white/[0.08] text-xs text-[#F1F5F9] placeholder-[#64748B] focus:outline-none focus:border-[#3B82F6]/40 resize-none" />
+          className="w-full px-3 py-2 rounded-lg bg-white/[0.04] border border-white/[0.08] text-xs text-[var(--text-primary)] placeholder-[var(--text-tertiary)] focus:outline-none focus:border-[var(--accent)]/40 resize-none" />
       ) : (
         <input type="text" value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder}
-          className="w-full px-3 py-2 rounded-lg bg-white/[0.04] border border-white/[0.08] text-xs text-[#F1F5F9] placeholder-[#64748B] focus:outline-none focus:border-[#3B82F6]/40" />
+          className="w-full px-3 py-2 rounded-lg bg-white/[0.04] border border-white/[0.08] text-xs text-[var(--text-primary)] placeholder-[var(--text-tertiary)] focus:outline-none focus:border-[var(--accent)]/40" />
       )}
     </div>
   )
@@ -91,8 +91,8 @@ export function SeoPanel({ seo, slug, onUpdate }: SeoPanelProps) {
           </span>
         </div>
         <div className="flex-1 min-w-0">
-          <div className="text-[11px] font-medium text-[#F1F5F9]">SEO Score</div>
-          <div className="text-[10px] text-[#64748B]">{issues.length === 0 ? 'All checks passed' : `${issues.length} issue${issues.length > 1 ? 's' : ''} found`}</div>
+          <div className="text-[11px] font-medium text-[var(--text-primary)]">SEO Score</div>
+          <div className="text-[10px] text-[var(--text-tertiary)]">{issues.length === 0 ? 'All checks passed' : `${issues.length} issue${issues.length > 1 ? 's' : ''} found`}</div>
         </div>
       </div>
 
@@ -104,7 +104,7 @@ export function SeoPanel({ seo, slug, onUpdate }: SeoPanelProps) {
               {issue.severity === 'error' ? <AlertTriangle className="w-3 h-3 text-red-400 shrink-0 mt-0.5" /> :
                issue.severity === 'warning' ? <AlertTriangle className="w-3 h-3 text-amber-400 shrink-0 mt-0.5" /> :
                <Info className="w-3 h-3 text-blue-400 shrink-0 mt-0.5" />}
-              <span className="text-[#94A3B8]">{issue.message}</span>
+              <span className="text-[var(--text-secondary)]">{issue.message}</span>
             </div>
           ))}
         </div>
@@ -117,7 +117,7 @@ export function SeoPanel({ seo, slug, onUpdate }: SeoPanelProps) {
 
       {/* Search Preview */}
       <div className="p-2.5 rounded-lg bg-white/[0.02] border border-white/[0.06]">
-        <div className="text-[10px] font-semibold uppercase tracking-wider text-[#64748B] mb-2 flex items-center gap-1">
+        <div className="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-tertiary)] mb-2 flex items-center gap-1">
           <Eye className="w-3 h-3" /> Search Preview
         </div>
         <div className="space-y-0.5">
@@ -128,7 +128,7 @@ export function SeoPanel({ seo, slug, onUpdate }: SeoPanelProps) {
       </div>
 
       {/* Open Graph */}
-      <button onClick={() => setOgExpanded(!ogExpanded)} className="flex items-center justify-between w-full text-[10px] font-semibold uppercase tracking-wider text-[#64748B] hover:text-[#94A3B8] transition-colors">
+      <button onClick={() => setOgExpanded(!ogExpanded)} className="flex items-center justify-between w-full text-[10px] font-semibold uppercase tracking-wider text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] transition-colors">
         <span className="flex items-center gap-1"><Globe className="w-3 h-3" /> Open Graph</span>
         {ogExpanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
       </button>
@@ -142,22 +142,22 @@ export function SeoPanel({ seo, slug, onUpdate }: SeoPanelProps) {
           <div className="rounded-lg overflow-hidden border border-white/[0.06]">
             <div className="h-[100px] bg-white/[0.03] flex items-center justify-center">
               {seo.ogImage ? (
-                <span className="text-[10px] text-[#64748B] truncate px-2">{seo.ogImage}</span>
+                <span className="text-[10px] text-[var(--text-tertiary)] truncate px-2">{seo.ogImage}</span>
               ) : (
-                <Image className="w-6 h-6 text-[#64748B]/40" />
+                <Image className="w-6 h-6 text-[var(--text-tertiary)]/40" />
               )}
             </div>
             <div className="p-2 bg-white/[0.02]">
-              <div className="text-[10px] text-[#64748B] uppercase">example.com</div>
-              <div className="text-[11px] text-[#F1F5F9] truncate">{seo.ogTitle || seo.title || 'Page Title'}</div>
-              <div className="text-[10px] text-[#94A3B8] line-clamp-1">{seo.ogDescription || seo.description || ''}</div>
+              <div className="text-[10px] text-[var(--text-tertiary)] uppercase">example.com</div>
+              <div className="text-[11px] text-[var(--text-primary)] truncate">{seo.ogTitle || seo.title || 'Page Title'}</div>
+              <div className="text-[10px] text-[var(--text-secondary)] line-clamp-1">{seo.ogDescription || seo.description || ''}</div>
             </div>
           </div>
         </motion.div>
       )}
 
       {/* Advanced */}
-      <button onClick={() => setAdvancedExpanded(!advancedExpanded)} className="flex items-center justify-between w-full text-[10px] font-semibold uppercase tracking-wider text-[#64748B] hover:text-[#94A3B8] transition-colors">
+      <button onClick={() => setAdvancedExpanded(!advancedExpanded)} className="flex items-center justify-between w-full text-[10px] font-semibold uppercase tracking-wider text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] transition-colors">
         <span>Advanced</span>
         {advancedExpanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
       </button>
@@ -165,7 +165,7 @@ export function SeoPanel({ seo, slug, onUpdate }: SeoPanelProps) {
         <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} className="space-y-3 overflow-hidden">
           <Field label="Canonical URL" value={seo.canonical ?? ''} onChange={v => onUpdate({ canonical: v })} placeholder="https://..." />
           <div className="flex items-center justify-between">
-            <span className="text-[10px] font-semibold uppercase tracking-wider text-[#64748B]">No Index</span>
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-tertiary)]">No Index</span>
             <button onClick={() => onUpdate({ noIndex: !seo.noIndex })}
               className={`relative w-8 h-4.5 rounded-full transition-colors ${seo.noIndex ? 'bg-red-500' : 'bg-white/[0.1]'}`}>
               <span className={`absolute top-0.5 w-3.5 h-3.5 rounded-full bg-white transition-transform ${seo.noIndex ? 'left-4' : 'left-0.5'}`} />

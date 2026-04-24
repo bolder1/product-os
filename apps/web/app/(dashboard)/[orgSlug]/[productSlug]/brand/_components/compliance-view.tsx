@@ -37,13 +37,19 @@ interface DriftViolation {
 }
 
 function generateViolations(productId: string, seed: number): DriftViolation[] {
+  // NOTE: Hex literals below are INTENTIONAL content — they demonstrate brand-drift
+  // examples (raw hex that should have been tokens). Do not tokenize these strings.
   const violations: DriftViolation[] = [
+    // eslint-disable-next-line no-hardcoded-hex
     { id: `${productId}-v1`, severity: 'error', category: 'color', studio: 'components', objectName: 'PrimaryButton', objectId: 'comp-1', rule: 'Color must use brand token', detail: 'background-color: #2563eb — raw hex used instead of token --color-primary', suggestion: 'Replace #2563eb with var(--color-primary)', autoFixable: true, rawValue: '#2563eb', expectedToken: '--color-primary' },
+    // eslint-disable-next-line no-hardcoded-hex
     { id: `${productId}-v2`, severity: 'error', category: 'color', studio: 'design', objectName: 'Dashboard Screen', objectId: 'design-1', rule: 'Text color must use brand token', detail: 'color: #374151 — not mapped to a brand token', suggestion: 'Replace with var(--text-primary) or var(--text-secondary)', autoFixable: true, rawValue: '#374151', expectedToken: '--text-primary' },
     { id: `${productId}-v3`, severity: 'error', category: 'typography', studio: 'pages', objectName: 'Landing Page Hero', objectId: 'page-1', rule: 'Font family must match brand system', detail: "font-family: 'Arial' — not in approved brand typefaces", suggestion: "Replace with brand font: 'Inter', var(--font-sans)", autoFixable: false, rawValue: 'Arial', expectedToken: 'Inter' },
+    // eslint-disable-next-line no-hardcoded-hex
     { id: `${productId}-v4`, severity: 'warning', category: 'color', studio: 'components', objectName: 'InputField', objectId: 'comp-2', rule: 'Border color should use token', detail: 'border-color: #d1d5db — should use --border-subtle', suggestion: 'Replace #d1d5db with var(--border-subtle)', autoFixable: true, rawValue: '#d1d5db', expectedToken: '--border-subtle' },
     { id: `${productId}-v5`, severity: 'warning', category: 'spacing', studio: 'design', objectName: 'Settings Screen', objectId: 'design-2', rule: 'Spacing must use 4pt grid', detail: 'padding: 14px — not on 4pt grid (should be 12px or 16px)', suggestion: 'Change to padding: 16px (spacing-4)', autoFixable: true, rawValue: '14px', expectedToken: 'spacing-4 (16px)' },
     { id: `${productId}-v6`, severity: 'warning', category: 'typography', studio: 'components', objectName: 'CardTitle', objectId: 'comp-3', rule: 'Font size must use type scale token', detail: 'font-size: 17px — not in brand type scale', suggestion: 'Use 16px (text-base) or 18px (text-lg) from type scale', autoFixable: true, rawValue: '17px', expectedToken: 'text-base (16px)' },
+    // eslint-disable-next-line no-hardcoded-hex
     { id: `${productId}-v7`, severity: 'warning', category: 'color', studio: 'graphics', objectName: 'Social Banner', objectId: 'graphic-1', rule: 'Gradient must use brand colors', detail: 'Linear gradient using #0ea5e9 → #8b5cf6, not brand palette colors', suggestion: 'Use --color-primary → --color-secondary gradient instead', autoFixable: false },
     { id: `${productId}-v8`, severity: 'info', category: 'token', studio: 'components', objectName: 'Badge', objectId: 'comp-4', rule: 'Token is deprecated', detail: '--color-accent is deprecated; --accent-text is the current token', suggestion: 'Migrate to --accent-text across all usages', autoFixable: true, rawValue: '--color-accent', expectedToken: '--accent-text' },
     { id: `${productId}-v9`, severity: 'info', category: 'spacing', studio: 'pages', objectName: 'About Page', objectId: 'page-2', rule: 'Inconsistent section padding', detail: 'Section padding varies: 24px, 28px, 32px — not consistent', suggestion: 'Standardise to spacing-8 (32px) for section padding', autoFixable: false },
@@ -69,12 +75,12 @@ function scoreLabel(score: number): string {
   return 'Excellent'
 }
 
-const STUDIO_CONFIG: Record<Studio, { label: string; icon: typeof Palette; color: string }> = {
-  brand: { label: 'Brand', icon: Palette, color: '#ec4899' },
-  components: { label: 'Components', icon: Blocks, color: '#6398ff' },
-  design: { label: 'Design', icon: PenTool, color: '#8b5cf6' },
-  pages: { label: 'Pages', icon: FileText, color: '#10b981' },
-  graphics: { label: 'Graphics', icon: Image, color: '#f59e0b' },
+const STUDIO_CONFIG: Record<Studio, { label: string; icon: typeof Palette }> = {
+  brand: { label: 'Brand', icon: Palette },
+  components: { label: 'Components', icon: Blocks },
+  design: { label: 'Design', icon: PenTool },
+  pages: { label: 'Pages', icon: FileText },
+  graphics: { label: 'Graphics', icon: Image },
 }
 const SEVERITY_CONFIG: Record<Severity, { label: string; icon: typeof AlertCircle; color: string; bg: string }> = {
   error: { label: 'Error', icon: AlertCircle, color: 'var(--color-error)', bg: 'var(--color-error-muted)' },
@@ -106,8 +112,8 @@ function StudioBar({ studio, violations, total }: { studio: Studio; violations: 
   const warnings = violations.filter((v) => v.severity === 'warning').length
   return (
     <div className="flex items-center gap-3 py-2">
-      <div className="w-6 h-6 rounded flex items-center justify-center flex-shrink-0" style={{ background: `${cfg.color}20` }}>
-        <Icon className="w-3.5 h-3.5" style={{ color: cfg.color }} />
+      <div className="w-6 h-6 rounded flex items-center justify-center flex-shrink-0 bg-[var(--accent-subtle)]">
+        <Icon className="w-3.5 h-3.5 text-[var(--accent)]" />
       </div>
       <span className="text-xs font-medium text-[var(--text-primary)] w-24 flex-shrink-0">{cfg.label}</span>
       <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: 'var(--border-subtle)' }}>
@@ -260,9 +266,9 @@ export default function ComplianceView() {
     <div className="flex flex-col h-full overflow-hidden" style={{ background: 'var(--bg-base)' }}>
       <ContextBanner
         chips={[
-          { label: 'Brand Tokens', source: 'brand', color: '#EC4899' },
-          { label: 'Brand Voice', source: 'brand-voice', color: '#8B5CF6' },
-          { label: 'Components', source: 'components', color: '#6366F1' },
+          { label: 'Brand Tokens', source: 'brand' },
+          { label: 'Brand Voice', source: 'brand-voice' },
+          { label: 'Components', source: 'components' },
         ]}
         missing={[]}
       />
@@ -280,7 +286,7 @@ export default function ComplianceView() {
             )}
             <button onClick={handleScan} disabled={scanning}
               className="flex items-center gap-2 px-4 py-2 text-xs font-medium rounded-lg transition-all hover:opacity-80 disabled:opacity-50"
-              style={{ background: 'var(--accent-text)', color: '#fff' }}>
+              style={{ background: 'var(--accent)', color: 'var(--text-inverse)' }}>
               {scanning ? <><Loader2 className="w-3.5 h-3.5 animate-spin" />Scanning…</> : <><RefreshCw className="w-3.5 h-3.5" />Re-scan</>}
             </button>
           </div>

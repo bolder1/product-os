@@ -55,18 +55,18 @@ export function TrafficChart({ data }: TrafficChartProps) {
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: 0.2 }}
-      className="rounded-xl border border-white/[0.08] bg-[#0a0f1e] p-5"
+      className="rounded-xl border border-white/[0.08] bg-[var(--bg-base)] p-5"
     >
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-sm font-medium text-[#F1F5F9]">Traffic Overview</h3>
+        <h3 className="text-sm font-medium text-[var(--text-primary)]">Traffic Overview</h3>
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-1.5">
-            <div className="w-3 h-0.5 rounded-full bg-[#3B82F6]" />
-            <span className="text-xs text-[#94A3B8]">Page Views</span>
+            <div className="w-3 h-0.5 rounded-full bg-[var(--accent)]" />
+            <span className="text-xs text-[var(--text-secondary)]">Page Views</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <div className="w-3 h-0.5 rounded-full bg-[#8B5CF6]" />
-            <span className="text-xs text-[#94A3B8]">Unique Visitors</span>
+            <div className="w-3 h-0.5 rounded-full bg-[var(--accent)]" />
+            <span className="text-xs text-[var(--text-secondary)]">Unique Visitors</span>
           </div>
         </div>
       </div>
@@ -78,12 +78,12 @@ export function TrafficChart({ data }: TrafficChartProps) {
       >
         <defs>
           <linearGradient id="pvGrad" x1="0" x2="0" y1="0" y2="1">
-            <stop offset="0%" stopColor="#3B82F6" stopOpacity="0.25" />
-            <stop offset="100%" stopColor="#3B82F6" stopOpacity="0" />
+            <stop offset="0%" stopColor="var(--accent)" stopOpacity="0.25" />
+            <stop offset="100%" stopColor="var(--accent)" stopOpacity="0" />
           </linearGradient>
           <linearGradient id="uvGrad" x1="0" x2="0" y1="0" y2="1">
-            <stop offset="0%" stopColor="#8B5CF6" stopOpacity="0.15" />
-            <stop offset="100%" stopColor="#8B5CF6" stopOpacity="0" />
+            <stop offset="0%" stopColor="var(--accent)" stopOpacity="0.15" />
+            <stop offset="100%" stopColor="var(--accent)" stopOpacity="0" />
           </linearGradient>
         </defs>
 
@@ -100,7 +100,7 @@ export function TrafficChart({ data }: TrafficChartProps) {
                 stroke="rgba(255,255,255,0.04)"
                 strokeDasharray="4 4"
               />
-              <text x={padding.left - 8} y={y + 4} textAnchor="end" className="text-[10px]" fill="#64748B">
+              <text x={padding.left - 8} y={y + 4} textAnchor="end" className="text-[10px]" fill="var(--text-tertiary)">
                 {tick >= 1000 ? `${tick / 1000}k` : tick}
               </text>
             </g>
@@ -117,7 +117,7 @@ export function TrafficChart({ data }: TrafficChartProps) {
               y={height - 10}
               textAnchor="middle"
               className="text-[10px]"
-              fill="#64748B"
+              fill="var(--text-tertiary)"
             >
               {d.date}
             </text>
@@ -126,11 +126,11 @@ export function TrafficChart({ data }: TrafficChartProps) {
 
         {/* Page views area + line */}
         <path d={pvBuild.areaPath} fill="url(#pvGrad)" />
-        <path d={pvBuild.linePath} fill="none" stroke="#3B82F6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        <path d={pvBuild.linePath} fill="none" stroke="var(--accent)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
 
         {/* Unique visitors area + line */}
         <path d={uvBuild.areaPath} fill="url(#uvGrad)" />
-        <path d={uvBuild.linePath} fill="none" stroke="#8B5CF6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        <path d={uvBuild.linePath} fill="none" stroke="var(--accent)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
 
         {/* Data points */}
         {pvBuild.points.map((p, i) => (
@@ -139,8 +139,8 @@ export function TrafficChart({ data }: TrafficChartProps) {
             cx={p.x}
             cy={p.y}
             r={hoveredIndex === i ? 5 : 3}
-            fill="#3B82F6"
-            stroke="#0a0f1e"
+            fill="var(--accent)"
+            stroke="var(--bg-base)"
             strokeWidth="2"
             className="transition-all cursor-pointer"
             onMouseEnter={() => setHoveredIndex(i)}
@@ -152,8 +152,8 @@ export function TrafficChart({ data }: TrafficChartProps) {
             cx={p.x}
             cy={p.y}
             r={hoveredIndex === i ? 5 : 3}
-            fill="#8B5CF6"
-            stroke="#0a0f1e"
+            fill="var(--accent)"
+            stroke="var(--bg-base)"
             strokeWidth="2"
             className="transition-all cursor-pointer"
             onMouseEnter={() => setHoveredIndex(i)}
@@ -177,13 +177,13 @@ export function TrafficChart({ data }: TrafficChartProps) {
               width={110}
               height={42}
               rx={6}
-              fill="#1E293B"
+              fill="var(--bg-surface)"
               stroke="rgba(255,255,255,0.1)"
             />
-            <text x={pvBuild.points[hoveredIndex]!.x} y={padding.top + 14} textAnchor="middle" fill="#3B82F6" className="text-[10px]">
+            <text x={pvBuild.points[hoveredIndex]!.x} y={padding.top + 14} textAnchor="middle" fill="var(--accent)" className="text-[10px]">
               Views: {data[hoveredIndex]!.pageViews.toLocaleString()}
             </text>
-            <text x={pvBuild.points[hoveredIndex]!.x} y={padding.top + 30} textAnchor="middle" fill="#8B5CF6" className="text-[10px]">
+            <text x={pvBuild.points[hoveredIndex]!.x} y={padding.top + 30} textAnchor="middle" fill="var(--accent)" className="text-[10px]">
               Visitors: {data[hoveredIndex]!.uniqueVisitors.toLocaleString()}
             </text>
           </g>

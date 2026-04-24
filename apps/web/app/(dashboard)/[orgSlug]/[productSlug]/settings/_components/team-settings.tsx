@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Plus, X, Mail, Clock, UserMinus, Loader2 } from 'lucide-react'
+import { useShallow } from 'zustand/react/shallow'
 import { useMemberStore, type DbRole, type Member } from '../../../../../lib/member-store'
 
 const ROLES: DbRole[] = ['owner', 'admin', 'editor', 'viewer', 'guest']
@@ -69,7 +70,7 @@ function colorFor(name: string): string {
 }
 
 export function TeamSettings() {
-  const { members: dbMembers, hydrate, invite, updateRole, remove, isLoading, error } = useMemberStore()
+  const { members: dbMembers, hydrate, invite, updateRole, remove, isLoading, error } = useMemberStore(useShallow((s) => s))
 
   useEffect(() => {
     hydrate().catch(() => {})
@@ -129,8 +130,8 @@ export function TeamSettings() {
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-sm font-semibold text-[#E2E8F0]">Team Members</h3>
-            <p className="text-xs text-[#64748B] mt-0.5">
+            <h3 className="text-sm font-semibold text-[var(--text-primary)]">Team Members</h3>
+            <p className="text-xs text-[var(--text-tertiary)] mt-0.5">
               {members.length} member{members.length !== 1 ? 's' : ''}
               {usingFallback && ' (preview)'}
               {isLoading && ' · syncing…'}
@@ -138,7 +139,7 @@ export function TeamSettings() {
           </div>
           <button
             onClick={() => setShowInviteForm(!showInviteForm)}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium text-white bg-[#3B82F6] hover:bg-[#2563EB] transition-colors"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium text-white bg-[var(--accent)] hover:bg-[var(--accent)] transition-colors"
           >
             <Plus size={14} />
             Invite Member
@@ -162,21 +163,21 @@ export function TeamSettings() {
             >
               <div className="flex items-end gap-3 p-4 rounded-lg bg-white/[0.03] border border-white/[0.06]">
                 <div className="flex-1 space-y-1.5">
-                  <label className="text-xs text-[#64748B]">Email</label>
+                  <label className="text-xs text-[var(--text-tertiary)]">Email</label>
                   <input
                     type="email"
                     value={inviteEmail}
                     onChange={(e) => setInviteEmail(e.target.value)}
                     placeholder="name@company.com"
-                    className="w-full px-3 py-2 rounded-lg bg-white/[0.04] border border-white/[0.08] text-sm text-[#F1F5F9] placeholder-[#475569] focus:outline-none focus:border-[#3B82F6]/50 transition-colors"
+                    className="w-full px-3 py-2 rounded-lg bg-white/[0.04] border border-white/[0.08] text-sm text-[var(--text-primary)] placeholder-[var(--text-tertiary)] focus:outline-none focus:border-[var(--accent)]/50 transition-colors"
                   />
                 </div>
                 <div className="w-40 space-y-1.5">
-                  <label className="text-xs text-[#64748B]">Role</label>
+                  <label className="text-xs text-[var(--text-tertiary)]">Role</label>
                   <select
                     value={inviteRole}
                     onChange={(e) => setInviteRole(e.target.value as DbRole)}
-                    className="w-full px-3 py-2 rounded-lg bg-white/[0.04] border border-white/[0.08] text-sm text-[#F1F5F9] focus:outline-none focus:border-[#3B82F6]/50 transition-colors appearance-none cursor-pointer"
+                    className="w-full px-3 py-2 rounded-lg bg-white/[0.04] border border-white/[0.08] text-sm text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent)]/50 transition-colors appearance-none cursor-pointer"
                   >
                     {ROLES.filter((r) => r !== 'owner').map((r) => (
                       <option key={r} value={r} className="bg-[#0f1629]">
@@ -188,13 +189,13 @@ export function TeamSettings() {
                 <button
                   onClick={sendInvite}
                   disabled={submitting || !inviteEmail}
-                  className="px-4 py-2 rounded-lg text-sm font-medium text-white bg-[#10B981] hover:bg-[#059669] transition-colors disabled:opacity-50"
+                  className="px-4 py-2 rounded-lg text-sm font-medium text-white bg-[var(--color-success)] hover:bg-[var(--color-success)] transition-colors disabled:opacity-50"
                 >
                   {submitting ? <Loader2 size={14} className="animate-spin" /> : 'Send'}
                 </button>
                 <button
                   onClick={() => setShowInviteForm(false)}
-                  className="p-2 rounded-lg text-[#64748B] hover:bg-white/[0.06] transition-colors"
+                  className="p-2 rounded-lg text-[var(--text-tertiary)] hover:bg-white/[0.06] transition-colors"
                 >
                   <X size={16} />
                 </button>
@@ -220,14 +221,14 @@ export function TeamSettings() {
                 {initials(member.name)}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm text-[#E2E8F0] truncate">{member.name}</p>
-                <p className="text-xs text-[#64748B] truncate">{member.email}</p>
+                <p className="text-sm text-[var(--text-primary)] truncate">{member.name}</p>
+                <p className="text-xs text-[var(--text-tertiary)] truncate">{member.email}</p>
               </div>
               <select
                 value={member.role}
                 onChange={(e) => handleRoleChange(member, e.target.value as DbRole)}
                 disabled={usingFallback || member.role === 'owner'}
-                className="px-2 py-0.5 rounded-md text-[0.6875rem] font-medium shrink-0 bg-transparent border border-transparent hover:border-white/[0.08] focus:outline-none focus:border-[#3B82F6]/50 cursor-pointer disabled:cursor-default disabled:opacity-80"
+                className="px-2 py-0.5 rounded-md text-[0.6875rem] font-medium shrink-0 bg-transparent border border-transparent hover:border-white/[0.08] focus:outline-none focus:border-[var(--accent)]/50 cursor-pointer disabled:cursor-default disabled:opacity-80"
                 style={{
                   color: ROLE_COLORS[member.role],
                   backgroundColor: `${ROLE_COLORS[member.role]}15`,
@@ -243,7 +244,7 @@ export function TeamSettings() {
                 <button
                   onClick={() => handleRemove(member)}
                   disabled={usingFallback}
-                  className="p-1.5 rounded-md text-[#475569] hover:text-[#F43F5E] hover:bg-[#F43F5E]/10 transition-colors opacity-0 group-hover:opacity-100 disabled:cursor-not-allowed"
+                  className="p-1.5 rounded-md text-[var(--text-tertiary)] hover:text-[var(--color-error)] hover:bg-[var(--color-error)]/10 transition-colors opacity-0 group-hover:opacity-100 disabled:cursor-not-allowed"
                 >
                   <UserMinus size={14} />
                 </button>
@@ -256,18 +257,18 @@ export function TeamSettings() {
       {/* Pending invitations */}
       {pendingInvitations.length > 0 && (
         <div className="space-y-3">
-          <h3 className="text-sm font-semibold text-[#E2E8F0]">Pending Invitations</h3>
+          <h3 className="text-sm font-semibold text-[var(--text-primary)]">Pending Invitations</h3>
           <div className="space-y-1">
             {pendingInvitations.map((inv) => (
               <div
                 key={inv.id}
                 className="flex items-center gap-3 px-4 py-3 rounded-lg bg-white/[0.02] border border-white/[0.05]"
               >
-                <div className="w-8 h-8 rounded-full bg-white/[0.06] flex items-center justify-center text-[#64748B]">
+                <div className="w-8 h-8 rounded-full bg-white/[0.06] flex items-center justify-center text-[var(--text-tertiary)]">
                   <Mail size={14} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm text-[#CBD5E1] truncate">{inv.email}</p>
+                  <p className="text-sm text-[var(--text-secondary)] truncate">{inv.email}</p>
                   <div className="flex items-center gap-2 mt-0.5">
                     <span
                       className="text-[0.625rem] font-medium"
@@ -275,7 +276,7 @@ export function TeamSettings() {
                     >
                       {ROLE_LABELS[inv.role]}
                     </span>
-                    <span className="flex items-center gap-1 text-[0.625rem] text-[#475569]">
+                    <span className="flex items-center gap-1 text-[0.625rem] text-[var(--text-tertiary)]">
                       <Clock size={9} />
                       Sent {inv.invitedAt?.slice(0, 10)}
                     </span>
@@ -283,7 +284,7 @@ export function TeamSettings() {
                 </div>
                 <button
                   onClick={() => handleRemove(inv)}
-                  className="px-2.5 py-1 rounded-md text-xs text-[#F43F5E] hover:bg-[#F43F5E]/10 transition-colors"
+                  className="px-2.5 py-1 rounded-md text-xs text-[var(--color-error)] hover:bg-[var(--color-error)]/10 transition-colors"
                 >
                   Cancel
                 </button>

@@ -5,19 +5,10 @@ import { X, Sparkles, Play, Circle } from 'lucide-react'
 import { useMemo } from 'react'
 import type { Template, TemplateNode } from '../_data/templates'
 
-const kindColors: Record<string, string> = {
-  module: '#3B82F6',
-  feature: '#8B5CF6',
-  page: '#06B6D4',
-  entity: '#10B981',
-  component: '#F59E0B',
-  token: '#EC4899',
-  workflow: '#10B981',
-  screen: '#06B6D4',
-  variant: '#F43F5E',
-  journey: '#8B5CF6',
-  asset: '#64748B',
-}
+/**
+ * Node-kind differentiation is now carried by icon + label rather than by a
+ * per-kind hue. All nodes render with the single `--accent` tone.
+ */
 
 interface TemplatePreviewProps {
   template: Template | null
@@ -61,7 +52,7 @@ function MiniGraph({ nodes }: { nodes: TemplateNode[] }) {
   }, [nodes])
 
   const edges = useMemo(() => {
-    const lines: { x1: number; y1: number; x2: number; y2: number; color: string }[] = []
+    const lines: { x1: number; y1: number; x2: number; y2: number; kind: 'primary' | 'subtle' }[] = []
     const kindGroups: Record<string, typeof positioned> = {}
     positioned.forEach((p) => {
       if (!kindGroups[p.node.kind]) kindGroups[p.node.kind] = []
@@ -75,33 +66,21 @@ function MiniGraph({ nodes }: { nodes: TemplateNode[] }) {
       if (fromGroup.length > 0 && toGroup.length > 0) {
         const from = fromGroup[0]
         const to = toGroup[0]
-        lines.push({
-          x1: from.x,
-          y1: from.y,
-          x2: to.x,
-          y2: to.y,
-          color: kindColors[from.node.kind] || '#64748B',
-        })
+        lines.push({ x1: from.x, y1: from.y, x2: to.x, y2: to.y, kind: 'primary' })
       }
     }
     // Add a few more cross-connections for visual richness
     for (let i = 0; i < Math.min(positioned.length - 1, 5); i++) {
       const from = positioned[i]
       const to = positioned[Math.min(i + 3, positioned.length - 1)]
-      lines.push({
-        x1: from.x,
-        y1: from.y,
-        x2: to.x,
-        y2: to.y,
-        color: 'rgba(255,255,255,0.06)',
-      })
+      lines.push({ x1: from.x, y1: from.y, x2: to.x, y2: to.y, kind: 'subtle' })
     }
 
     return lines
   }, [positioned])
 
   return (
-    <svg viewBox="0 0 360 280" className="w-full h-full">
+    <svg viewBox="0 0 360 280" className="w-full h-full text-[var(--accent)]">
       {/* Edges */}
       {edges.map((edge, i) => (
         <motion.line
@@ -110,30 +89,27 @@ function MiniGraph({ nodes }: { nodes: TemplateNode[] }) {
           y1={edge.y1}
           x2={edge.x2}
           y2={edge.y2}
-          stroke={edge.color}
+          stroke={edge.kind === 'primary' ? 'currentColor' : 'var(--border-subtle)'}
           strokeWidth={1.2}
-          strokeOpacity={0.35}
+          strokeOpacity={edge.kind === 'primary' ? 0.35 : 0.6}
           initial={{ pathLength: 0 }}
           animate={{ pathLength: 1 }}
           transition={{ duration: 0.6, delay: 0.3 + i * 0.05 }}
         />
       ))}
       {/* Nodes */}
-      {positioned.map((p, i) => {
-        const color = kindColors[p.node.kind] || '#64748B'
-        return (
-          <motion.g
-            key={`n-${i}`}
-            initial={{ opacity: 0, scale: 0 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.3, delay: i * 0.04 }}
-          >
-            <circle cx={p.x} cy={p.y} r={10} fill={color} fillOpacity={0.15} stroke={color} strokeWidth={1.5} strokeOpacity={0.5} />
-            <circle cx={p.x} cy={p.y} r={3.5} fill={color} fillOpacity={0.8} />
-            <title>{p.node.label}</title>
-          </motion.g>
-        )
-      })}
+      {positioned.map((p, i) => (
+        <motion.g
+          key={`n-${i}`}
+          initial={{ opacity: 0, scale: 0 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.3, delay: i * 0.04 }}
+        >
+          <circle cx={p.x} cy={p.y} r={10} fill="currentColor" fillOpacity={0.15} stroke="currentColor" strokeWidth={1.5} strokeOpacity={0.5} />
+          <circle cx={p.x} cy={p.y} r={3.5} fill="currentColor" fillOpacity={0.8} />
+          <title>{p.node.label}</title>
+        </motion.g>
+      ))}
     </svg>
   )
 }
@@ -163,7 +139,7 @@ export function TemplatePreview({ template, onClose, onApply }: TemplatePreviewP
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="absolute inset-0 bg-[#060918]/80 backdrop-blur-sm"
+          className="absolute inset-0 bg-[var(--bg-base)]/80 backdrop-blur-sm"
           onClick={onClose}
         />
 
@@ -173,17 +149,17 @@ export function TemplatePreview({ template, onClose, onApply }: TemplatePreviewP
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
           transition={{ type: 'spring', stiffness: 300, damping: 28 }}
-          className="relative w-full max-w-5xl max-h-[85vh] rounded-2xl bg-[#0C1024] border border-white/[0.08] shadow-2xl overflow-hidden flex flex-col"
+          className="relative w-full max-w-5xl max-h-[85vh] rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-subtle)] shadow-2xl overflow-hidden flex flex-col"
         >
           {/* Header */}
-          <div className="flex items-center justify-between px-6 py-4 border-b border-white/[0.06]">
+          <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--border-subtle)]">
             <div>
-              <h2 className="text-lg font-semibold text-[#F1F5F9]">{template.name}</h2>
-              <p className="text-xs text-[#64748B] mt-0.5">{template.category} template</p>
+              <h2 className="text-lg font-semibold text-[var(--text-primary)]">{template.name}</h2>
+              <p className="text-xs text-[var(--text-tertiary)] mt-0.5">{template.category} template</p>
             </div>
             <button
               onClick={onClose}
-              className="p-2 rounded-lg hover:bg-white/[0.06] text-[#64748B] hover:text-[#94A3B8] transition-colors"
+              className="p-2 rounded-lg hover:bg-[var(--bg-hover)] text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] transition-colors"
             >
               <X className="w-5 h-5" />
             </button>
@@ -195,21 +171,21 @@ export function TemplatePreview({ template, onClose, onApply }: TemplatePreviewP
             <div className="flex-1 lg:w-3/5 p-6 overflow-auto space-y-6">
               {/* Description */}
               <div>
-                <h3 className="text-xs font-medium uppercase tracking-wider text-[#64748B] mb-2">Description</h3>
-                <p className="text-sm text-[#94A3B8] leading-relaxed">{template.description}</p>
+                <h3 className="text-xs font-medium uppercase tracking-wider text-[var(--text-tertiary)] mb-2">Description</h3>
+                <p className="text-sm text-[var(--text-secondary)] leading-relaxed">{template.description}</p>
               </div>
 
               {/* Variables */}
               <div>
-                <h3 className="text-xs font-medium uppercase tracking-wider text-[#64748B] mb-3">Variables</h3>
+                <h3 className="text-xs font-medium uppercase tracking-wider text-[var(--text-tertiary)] mb-3">Variables</h3>
                 <div className="space-y-2">
                   {template.variables.map((v) => (
                     <div
                       key={v.key}
-                      className="flex items-center justify-between px-3 py-2 rounded-lg bg-white/[0.03] border border-white/[0.06]"
+                      className="flex items-center justify-between px-3 py-2 rounded-lg bg-[var(--bg-subtle)] border border-[var(--border-subtle)]"
                     >
-                      <span className="text-sm text-[#F1F5F9]">{v.label}</span>
-                      <span className="text-xs text-[#64748B] font-mono">{v.default}</span>
+                      <span className="text-sm text-[var(--text-primary)]">{v.label}</span>
+                      <span className="text-xs text-[var(--text-tertiary)] font-mono">{v.default}</span>
                     </div>
                   ))}
                 </div>
@@ -217,29 +193,24 @@ export function TemplatePreview({ template, onClose, onApply }: TemplatePreviewP
 
               {/* Nodes grouped by kind */}
               <div>
-                <h3 className="text-xs font-medium uppercase tracking-wider text-[#64748B] mb-3">Nodes</h3>
+                <h3 className="text-xs font-medium uppercase tracking-wider text-[var(--text-tertiary)] mb-3">Nodes</h3>
                 <div className="space-y-4">
                   {Object.entries(groupedNodes).map(([kind, nodes]) => (
                     <div key={kind}>
                       <div className="flex items-center gap-2 mb-2">
                         <Circle
-                          className="w-2.5 h-2.5"
-                          fill={kindColors[kind] || '#64748B'}
+                          className="w-2.5 h-2.5 text-[var(--accent)]"
+                          fill="currentColor"
                           stroke="none"
                         />
-                        <span className="text-xs font-medium text-[#94A3B8] capitalize">{kind}s</span>
-                        <span className="text-[10px] text-[#64748B]">({nodes.length})</span>
+                        <span className="text-xs font-medium text-[var(--text-secondary)] capitalize">{kind}s</span>
+                        <span className="text-[10px] text-[var(--text-tertiary)]">({nodes.length})</span>
                       </div>
                       <div className="flex flex-wrap gap-1.5 pl-4">
                         {nodes.map((n) => (
                           <span
                             key={n.label}
-                            className="px-2.5 py-1 rounded-md text-xs border"
-                            style={{
-                              backgroundColor: `${kindColors[kind] || '#64748B'}10`,
-                              borderColor: `${kindColors[kind] || '#64748B'}20`,
-                              color: kindColors[kind] || '#64748B',
-                            }}
+                            className="px-2.5 py-1 rounded-md text-xs border bg-[var(--accent-subtle)] border-[var(--border-subtle)] text-[var(--accent-text)]"
                           >
                             {n.label}
                           </span>
@@ -252,8 +223,8 @@ export function TemplatePreview({ template, onClose, onApply }: TemplatePreviewP
 
               {/* Edge summary */}
               <div>
-                <h3 className="text-xs font-medium uppercase tracking-wider text-[#64748B] mb-2">Connections</h3>
-                <p className="text-sm text-[#94A3B8]">
+                <h3 className="text-xs font-medium uppercase tracking-wider text-[var(--text-tertiary)] mb-2">Connections</h3>
+                <p className="text-sm text-[var(--text-secondary)]">
                   {template.edgeCount} edges connecting {template.nodeCount} nodes across{' '}
                   {Object.keys(groupedNodes).length} kinds
                 </p>
@@ -261,7 +232,7 @@ export function TemplatePreview({ template, onClose, onApply }: TemplatePreviewP
             </div>
 
             {/* Right: Mini Graph (40%) */}
-            <div className="lg:w-2/5 border-t lg:border-t-0 lg:border-l border-white/[0.06] bg-white/[0.01] flex items-center justify-center p-6">
+            <div className="lg:w-2/5 border-t lg:border-t-0 lg:border-l border-[var(--border-subtle)] bg-[var(--bg-subtle)]/40 flex items-center justify-center p-6">
               <div className="w-full aspect-[4/3]">
                 <MiniGraph nodes={template.nodes} />
               </div>
@@ -269,20 +240,20 @@ export function TemplatePreview({ template, onClose, onApply }: TemplatePreviewP
           </div>
 
           {/* Bottom Bar */}
-          <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-white/[0.06] bg-white/[0.02]">
+          <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-[var(--border-subtle)] bg-[var(--bg-subtle)]/40">
             <button
               onClick={onClose}
-              className="px-4 py-2 rounded-lg text-sm font-medium text-[#94A3B8] hover:text-[#F1F5F9] hover:bg-white/[0.06] transition-colors"
+              className="px-4 py-2 rounded-lg text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition-colors"
             >
               Close
             </button>
-            <button className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-[#8B5CF6]/10 text-[#8B5CF6] hover:bg-[#8B5CF6]/20 border border-[#8B5CF6]/20 transition-colors">
+            <button className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-[var(--accent-subtle)] text-[var(--accent-text)] hover:bg-[var(--accent)]/20 border border-[var(--accent)]/20 transition-colors">
               <Sparkles className="w-3.5 h-3.5" />
               AI Remix
             </button>
             <button
               onClick={() => onApply(template)}
-              className="flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-medium bg-[#3B82F6] text-white hover:bg-[#2563EB] transition-colors shadow-[0_0_20px_rgba(59,130,246,0.2)]"
+              className="flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-medium bg-[var(--accent)] text-[var(--text-inverse)] hover:bg-[var(--accent-hover)] transition-colors shadow-[0_0_20px_var(--accent-subtle)]"
             >
               <Play className="w-3.5 h-3.5" />
               Customize & Apply

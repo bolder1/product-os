@@ -210,7 +210,7 @@ export default function HomeDashboardPage() {
           >
             <Bell className="w-3.5 h-3.5" />
             {unreadCount > 0 && (
-              <span className="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-[#F43F5E] text-white text-[8px] font-bold flex items-center justify-center leading-none">
+              <span className="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-[var(--color-error)] text-white text-[8px] font-bold flex items-center justify-center leading-none">
                 {unreadCount > 9 ? '9+' : unreadCount}
               </span>
             )}

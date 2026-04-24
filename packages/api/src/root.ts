@@ -28,6 +28,7 @@ import { opsPilotRouter } from './routers/ops-pilot'
 import { memoryRouter } from './routers/memory'
 import { planModeRouter } from './routers/plan-mode'
 import { graphSnapshotRouter } from './routers/graph-snapshot'
+import { decisionRouter } from './routers/decision'
 
 export const appRouter = router({
   auth: authRouter,
@@ -59,6 +60,7 @@ export const appRouter = router({
   memory: memoryRouter,
   planMode: planModeRouter,
   graphSnapshot: graphSnapshotRouter,
+  decision: decisionRouter,
 })
 
 export type AppRouter = typeof appRouter

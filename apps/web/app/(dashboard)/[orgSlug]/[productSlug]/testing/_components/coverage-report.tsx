@@ -33,7 +33,7 @@ function CoverageDonut({ percentage }: { percentage: number }) {
           cy={size / 2}
           r={radius}
           fill="none"
-          stroke="#F43F5E"
+          stroke="var(--color-error)"
           strokeWidth={strokeWidth}
           strokeLinecap="round"
           strokeDasharray={circumference}
@@ -45,14 +45,14 @@ function CoverageDonut({ percentage }: { percentage: number }) {
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         <motion.span
-          className="text-3xl font-bold text-[#F1F5F9]"
+          className="text-3xl font-bold text-[var(--text-primary)]"
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.5, duration: 0.4 }}
         >
           {percentage}%
         </motion.span>
-        <span className="text-xs text-[#64748B]">Coverage</span>
+        <span className="text-xs text-[var(--text-tertiary)]">Coverage</span>
       </div>
     </div>
   )
@@ -79,8 +79,8 @@ function CategoryBar({
   return (
     <div className="flex flex-col gap-1.5">
       <div className="flex items-center justify-between">
-        <span className="text-sm text-[#94A3B8]">{name}</span>
-        <span className="text-sm font-medium text-[#F1F5F9]">{percentage}%</span>
+        <span className="text-sm text-[var(--text-secondary)]">{name}</span>
+        <span className="text-sm font-medium text-[var(--text-primary)]">{percentage}%</span>
       </div>
       <div className="h-2 rounded-full bg-white/[0.06] overflow-hidden">
         <motion.div
@@ -111,7 +111,7 @@ export function CoverageReport({ coverage }: CoverageReportProps) {
 
         {/* Category breakdown */}
         <div className="flex flex-col gap-4 rounded-xl border border-white/[0.08] bg-white/[0.03] p-5">
-          <h3 className="text-sm font-medium text-[#F1F5F9]">Coverage by Category</h3>
+          <h3 className="text-sm font-medium text-[var(--text-primary)]">Coverage by Category</h3>
           <div className="flex flex-col gap-4">
             {coverage.categories.map((cat, i) => (
               <CategoryBar
@@ -130,7 +130,7 @@ export function CoverageReport({ coverage }: CoverageReportProps) {
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.6 }}
-        className="self-start flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium text-[#8B5CF6] bg-[#8B5CF6]/10 hover:bg-[#8B5CF6]/20 transition-colors"
+        className="self-start flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium text-[var(--accent)] bg-[var(--accent)]/10 hover:bg-[var(--accent)]/20 transition-colors"
       >
         <Sparkles className="w-4 h-4" />
         AI: Improve coverage

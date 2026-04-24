@@ -328,7 +328,7 @@ export function CommandPaletteGlobal() {
                     }
                   }}
                 >
-                  <Icon size={14} className="shrink-0 text-[#F59E0B]" />
+                  <Icon size={14} className="shrink-0 text-[var(--color-warning)]" />
                   <div className="flex flex-col min-w-0">
                     <span className="truncate">{action.label}</span>
                     <span className="text-[11px] text-[var(--text-tertiary)] truncate">{action.description}</span>

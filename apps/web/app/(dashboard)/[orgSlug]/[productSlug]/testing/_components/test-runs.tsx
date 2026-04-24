@@ -17,7 +17,7 @@ interface TestRunsProps {
 }
 
 const triggerConfig: Record<TestRun['trigger'], { label: string; icon: React.ReactNode; color: string }> = {
-  manual: { label: 'Manual', icon: <User className="w-3 h-3" />, color: 'text-[#94A3B8]' },
+  manual: { label: 'Manual', icon: <User className="w-3 h-3" />, color: 'text-[var(--text-secondary)]' },
   ci: { label: 'CI', icon: <GitBranch className="w-3 h-3" />, color: 'text-blue-400' },
   scheduled: { label: 'Scheduled', icon: <Timer className="w-3 h-3" />, color: 'text-amber-400' },
 }
@@ -40,7 +40,7 @@ export function TestRuns({ runs }: TestRunsProps) {
   return (
     <div className="flex flex-col gap-2">
       {/* Header */}
-      <div className="grid grid-cols-[60px_1fr_120px_200px_100px_80px_40px] gap-3 px-4 py-2 text-xs text-[#64748B] font-medium">
+      <div className="grid grid-cols-[60px_1fr_120px_200px_100px_80px_40px] gap-3 px-4 py-2 text-xs text-[var(--text-tertiary)] font-medium">
         <span>Run</span>
         <span>Date</span>
         <span>Duration</span>
@@ -71,27 +71,27 @@ export function TestRuns({ runs }: TestRunsProps) {
               className="w-full grid grid-cols-[60px_1fr_120px_200px_100px_80px_40px] gap-3 items-center px-4 py-3 hover:bg-white/[0.02] transition-colors"
             >
               {/* Run number */}
-              <span className="text-sm font-mono font-medium text-[#F1F5F9]">
+              <span className="text-sm font-mono font-medium text-[var(--text-primary)]">
                 #{run.runNumber}
               </span>
 
               {/* Date */}
-              <div className="flex items-center gap-1.5 text-xs text-[#94A3B8]">
-                <Clock className="w-3 h-3 text-[#64748B]" />
+              <div className="flex items-center gap-1.5 text-xs text-[var(--text-secondary)]">
+                <Clock className="w-3 h-3 text-[var(--text-tertiary)]" />
                 {run.date}
               </div>
 
               {/* Duration */}
-              <span className="text-xs text-[#94A3B8]">{run.duration}s</span>
+              <span className="text-xs text-[var(--text-secondary)]">{run.duration}s</span>
 
               {/* Results bar */}
               <div className="flex items-center gap-2">
                 <div className="flex-1 h-2 rounded-full bg-white/[0.06] overflow-hidden flex">
                   <div className="h-full bg-emerald-500" style={{ width: `${passPercent}%` }} />
                   <div className="h-full bg-rose-500" style={{ width: `${failPercent}%` }} />
-                  <div className="h-full bg-[#64748B]" style={{ width: `${skipPercent}%` }} />
+                  <div className="h-full bg-[var(--text-tertiary)]" style={{ width: `${skipPercent}%` }} />
                 </div>
-                <span className="text-[10px] text-[#64748B] whitespace-nowrap">
+                <span className="text-[10px] text-[var(--text-tertiary)] whitespace-nowrap">
                   {run.passed}/{run.failed}/{run.skipped}
                 </span>
               </div>
@@ -110,7 +110,7 @@ export function TestRuns({ runs }: TestRunsProps) {
               </span>
 
               {/* Expand */}
-              <div className="text-[#64748B]">
+              <div className="text-[var(--text-tertiary)]">
                 {isOpen ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
               </div>
             </button>
@@ -126,24 +126,24 @@ export function TestRuns({ runs }: TestRunsProps) {
                 >
                   <div className="border-t border-white/[0.06] px-4 py-3 grid grid-cols-3 gap-4">
                     <div className="flex flex-col gap-1">
-                      <span className="text-[10px] uppercase tracking-wider text-[#64748B]">Passed</span>
+                      <span className="text-[10px] uppercase tracking-wider text-[var(--text-tertiary)]">Passed</span>
                       <div className="flex items-center gap-2">
                         <div className={`w-2 h-2 rounded-full ${statusBarColor.passed}`} />
                         <span className="text-sm font-medium text-emerald-400">{run.passed} tests</span>
                       </div>
                     </div>
                     <div className="flex flex-col gap-1">
-                      <span className="text-[10px] uppercase tracking-wider text-[#64748B]">Failed</span>
+                      <span className="text-[10px] uppercase tracking-wider text-[var(--text-tertiary)]">Failed</span>
                       <div className="flex items-center gap-2">
                         <div className={`w-2 h-2 rounded-full ${statusBarColor.failed}`} />
                         <span className="text-sm font-medium text-rose-400">{run.failed} tests</span>
                       </div>
                     </div>
                     <div className="flex flex-col gap-1">
-                      <span className="text-[10px] uppercase tracking-wider text-[#64748B]">Skipped</span>
+                      <span className="text-[10px] uppercase tracking-wider text-[var(--text-tertiary)]">Skipped</span>
                       <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-[#64748B]" />
-                        <span className="text-sm font-medium text-[#94A3B8]">{run.skipped} tests</span>
+                        <div className="w-2 h-2 rounded-full bg-[var(--text-tertiary)]" />
+                        <span className="text-sm font-medium text-[var(--text-secondary)]">{run.skipped} tests</span>
                       </div>
                     </div>
                   </div>

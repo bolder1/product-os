@@ -54,10 +54,13 @@ export default function ProductPlannerPage() {
   const params = useParams()
   const router = useRouter()
   const currentProduct = useProduct()
-  const { bulkAddTasks } = useTaskStore()
-  const { scaffoldProduct, bulkAddNodes, addEdge, addNode } = useGraphStore()
-  const { addActivity } = useActivityStore()
-  const { addNotification } = useNotificationStore()
+  const bulkAddTasks = useTaskStore((s) => s.bulkAddTasks)
+  const scaffoldProduct = useGraphStore((s) => s.scaffoldProduct)
+  const bulkAddNodes = useGraphStore((s) => s.bulkAddNodes)
+  const addEdge = useGraphStore((s) => s.addEdge)
+  const addNode = useGraphStore((s) => s.addNode)
+  const addActivity = useActivityStore((s) => s.addActivity)
+  const addNotification = useNotificationStore((s) => s.addNotification)
   const userId = useAuthStore((s) => s.user?.id ?? 'anon')
   const userName = useAuthStore((s) => s.user?.name ?? 'Unknown')
   const productId = currentProduct?.id ?? `${params.orgSlug}-${params.productSlug}`
@@ -479,21 +482,21 @@ export default function ProductPlannerPage() {
               {/* Animated orbit rings */}
               <div className="relative w-20 h-20">
                 <svg className="absolute inset-0 animate-spin" style={{ animationDuration: '2s' }} viewBox="0 0 80 80">
-                  <circle cx="40" cy="40" r="35" stroke="#8B5CF6" strokeWidth="2" strokeOpacity="0.15" fill="none" />
-                  <path d="M40 5 A35 35 0 0 1 75 40" stroke="#8B5CF6" strokeWidth="2.5" strokeLinecap="round" fill="none" />
+                  <circle cx="40" cy="40" r="35" stroke="var(--accent)" strokeWidth="2" strokeOpacity="0.15" fill="none" />
+                  <path d="M40 5 A35 35 0 0 1 75 40" stroke="var(--accent)" strokeWidth="2.5" strokeLinecap="round" fill="none" />
                 </svg>
                 <svg className="absolute inset-0 animate-spin" style={{ animationDuration: '3s', animationDirection: 'reverse' }} viewBox="0 0 80 80">
-                  <circle cx="40" cy="40" r="26" stroke="#6366f1" strokeWidth="1.5" strokeOpacity="0.12" fill="none" />
-                  <path d="M40 14 A26 26 0 0 0 14 40" stroke="#6366f1" strokeWidth="2" strokeLinecap="round" fill="none" />
+                  <circle cx="40" cy="40" r="26" stroke="var(--accent)" strokeWidth="1.5" strokeOpacity="0.12" fill="none" />
+                  <path d="M40 14 A26 26 0 0 0 14 40" stroke="var(--accent)" strokeWidth="2" strokeLinecap="round" fill="none" />
                 </svg>
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <Network size={22} className="text-[#8B5CF6]" />
+                  <Network size={22} className="text-[var(--accent)]" />
                 </div>
               </div>
 
               <div className="space-y-1.5">
                 <p className="text-base font-semibold text-white">Launching Product</p>
-                <p className="text-[13px] text-[#94A3B8] min-h-[20px] transition-all duration-300">
+                <p className="text-[13px] text-[var(--text-secondary)] min-h-[20px] transition-all duration-300">
                   {launchPhase || 'Preparing…'}
                 </p>
               </div>
@@ -506,13 +509,13 @@ export default function ProductPlannerPage() {
                   { icon: CheckSquare, label: 'Task generation', done: launchPhase.includes('task') },
                 ].map(({ icon: Icon, label, done }) => (
                   <div key={label} className="flex items-center gap-2.5 px-3 py-1.5 rounded-lg bg-white/[0.04] border border-white/[0.06]">
-                    <div className={`w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0 transition-colors duration-500 ${done ? 'bg-[#8B5CF6]/30' : 'bg-white/10'}`}>
+                    <div className={`w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0 transition-colors duration-500 ${done ? 'bg-[var(--accent)]/30' : 'bg-white/10'}`}>
                       {done
-                        ? <Check size={9} className="text-[#8B5CF6]" />
+                        ? <Check size={9} className="text-[var(--accent)]" />
                         : <Icon size={9} className="text-white/30" />
                       }
                     </div>
-                    <span className={`text-[11px] transition-colors duration-500 ${done ? 'text-[#C4B5FD]' : 'text-white/30'}`}>{label}</span>
+                    <span className={`text-[11px] transition-colors duration-500 ${done ? 'text-[var(--accent)]' : 'text-white/30'}`}>{label}</span>
                   </div>
                 ))}
               </div>

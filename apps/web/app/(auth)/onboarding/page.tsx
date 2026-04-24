@@ -35,12 +35,12 @@ interface RoleOption {
 }
 
 const roleOptions: RoleOption[] = [
-  { role: 'manager', label: 'Manager', description: 'Oversee planning, tasks, approvals, and releases', icon: <Briefcase size={22} />, color: '#3B82F6' },
-  { role: 'business_analyst', label: 'Business Analyst', description: 'Analyze requirements and build canvases', icon: <BarChart3 size={22} />, color: '#8B5CF6' },
-  { role: 'qa', label: 'QA Engineer', description: 'Manage testing, track bugs, and verify releases', icon: <Bug size={22} />, color: '#F59E0B' },
-  { role: 'product_designer', label: 'Product Designer', description: 'Design brand, components, and pages', icon: <Palette size={22} />, color: '#EC4899' },
-  { role: 'frontend_dev', label: 'Frontend Dev', description: 'Build components, pages, and code', icon: <Code2 size={22} />, color: '#06B6D4' },
-  { role: 'backend_dev', label: 'Backend Dev', description: 'Build workflows, APIs, and integrations', icon: <Server size={22} />, color: '#10B981' },
+  { role: 'manager', label: 'Manager', description: 'Oversee planning, tasks, approvals, and releases', icon: <Briefcase size={22} />, color: 'var(--accent)' },
+  { role: 'business_analyst', label: 'Business Analyst', description: 'Analyze requirements and build canvases', icon: <BarChart3 size={22} />, color: 'var(--accent)' },
+  { role: 'qa', label: 'QA Engineer', description: 'Manage testing, track bugs, and verify releases', icon: <Bug size={22} />, color: 'var(--accent)' },
+  { role: 'product_designer', label: 'Product Designer', description: 'Design brand, components, and pages', icon: <Palette size={22} />, color: 'var(--accent)' },
+  { role: 'frontend_dev', label: 'Frontend Dev', description: 'Build components, pages, and code', icon: <Code2 size={22} />, color: 'var(--accent)' },
+  { role: 'backend_dev', label: 'Backend Dev', description: 'Build workflows, APIs, and integrations', icon: <Server size={22} />, color: 'var(--accent)' },
 ]
 
 /* ------------------------------------------------------------------ */
@@ -62,12 +62,12 @@ function StepRing({ index, current }: { index: number; current: number }) {
     <div className="relative flex items-center justify-center" style={{ width: size, height: size }}>
       <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} style={{ transform: 'rotate(-90deg)' }}>
         {/* Track */}
-        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="rgba(255,255,255,0.07)" strokeWidth="2" />
+        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="var(--border-default)" strokeWidth="2" />
         {/* Progress arc */}
         <motion.circle
           cx={size / 2} cy={size / 2} r={r}
           fill="none"
-          stroke={isDone ? '#3B82F6' : isActive ? '#6398ff' : 'transparent'}
+          stroke={isDone || isActive ? 'var(--accent)' : 'transparent'}
           strokeWidth="2"
           strokeLinecap="round"
           strokeDasharray={`${dash} ${gap}`}
@@ -78,7 +78,7 @@ function StepRing({ index, current }: { index: number; current: number }) {
       </svg>
       {/* Centre label */}
       <div className={`absolute inset-0 flex items-center justify-center text-[12px] font-semibold transition-colors
-        ${isDone ? 'text-[#3B82F6]' : isActive ? 'text-[#6398ff]' : 'text-[#64748B]'}`}
+        ${isDone || isActive ? 'text-[var(--accent-text)]' : 'text-[var(--text-tertiary)]'}`}
       >
         {isDone ? (
           <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
@@ -99,8 +99,8 @@ function StepIndicator({ current, total }: { current: number; total: number }) {
           {i < total - 1 && (
             <motion.div
               className="h-px w-10"
-              style={{ background: i < current ? '#3B82F6' : 'rgba(255,255,255,0.08)' }}
-              animate={{ background: i < current ? '#3B82F6' : 'rgba(255,255,255,0.08)' }}
+              style={{ background: i < current ? 'var(--accent)' : 'var(--border-default)' }}
+              animate={{ background: i < current ? 'var(--accent)' : 'var(--border-default)' }}
               transition={{ duration: 0.3 }}
             />
           )}
@@ -345,19 +345,18 @@ export default function OnboardingPage() {
       className="w-full max-w-2xl"
     >
       <div
-        className="rounded-2xl border border-white/[0.09] bg-white/[0.03] backdrop-blur-2xl p-8"
-        style={{ boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.06), 0 24px 64px rgba(0,0,0,0.5)' }}
+        className="rounded-2xl border border-[var(--border-default)] bg-[var(--bg-surface-raised)] backdrop-blur-2xl p-8 shadow-[var(--shadow-panel)]"
       >
         {/* Header */}
         <div className="flex flex-col items-center gap-4 mb-8">
           <div
-            className="w-14 h-14 rounded-xl border border-white/10 bg-white/[0.03] flex items-center justify-center"
+            className="w-14 h-14 rounded-xl border border-[var(--border-default)] bg-[var(--bg-inset)] flex items-center justify-center"
             style={{ animation: 'glow-pulse 3s ease-in-out infinite' }}
           >
             <svg width="28" height="28" viewBox="0 0 32 32" fill="none">
-              <circle cx="16" cy="8" r="3" fill="#3B82F6" />
-              <circle cx="8" cy="22" r="3" fill="#8B5CF6" />
-              <circle cx="24" cy="22" r="3" fill="#06B6D4" />
+              <circle cx="16" cy="8" r="3" fill="var(--accent)" />
+              <circle cx="8" cy="22" r="3" fill="var(--accent)" />
+              <circle cx="24" cy="22" r="3" fill="var(--accent)" />
               <line x1="16" y1="11" x2="8" y2="19" stroke="rgba(59,130,246,0.4)" strokeWidth="1.5" />
               <line x1="16" y1="11" x2="24" y2="19" stroke="rgba(139,92,246,0.4)" strokeWidth="1.5" />
               <line x1="11" y1="22" x2="21" y2="22" stroke="rgba(6,182,212,0.4)" strokeWidth="1.5" />
@@ -367,8 +366,8 @@ export default function OnboardingPage() {
           <StepIndicator current={step} total={3} />
 
           <div className="text-center">
-            <h1 className="text-xl font-semibold text-[#F1F5F9]">{stepLabels[step]}</h1>
-            <p className="text-sm text-[#94A3B8] mt-1">
+            <h1 className="text-xl font-semibold text-[var(--text-primary)]">{stepLabels[step]}</h1>
+            <p className="text-sm text-[var(--text-secondary)] mt-1">
               {step === 0 && 'Tell us about yourself'}
               {step === 1 && 'Set up your workspace'}
               {step === 2 && 'Tell us about your product — AI scaffolds the rest'}
@@ -393,36 +392,36 @@ export default function OnboardingPage() {
               >
                 {/* Avatar + display name row */}
                 <div className="flex items-center gap-4">
-                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#3B82F6] to-[#8B5CF6] flex items-center justify-center text-white text-lg font-semibold shrink-0">
+                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[var(--accent)] to-[var(--accent)] flex items-center justify-center text-white text-lg font-semibold shrink-0">
                     {initials}
                   </div>
                   <div className="flex-1">
-                    <label className="text-xs text-[#64748B] mb-1 block">Display Name</label>
+                    <label className="text-xs text-[var(--text-tertiary)] mb-1 block">Display Name</label>
                     <input
                       type="text"
                       value={displayName}
                       onChange={(e) => setDisplayName(e.target.value)}
                       placeholder="Your name"
-                      className="w-full px-4 py-2.5 rounded-lg bg-white/[0.03] border border-white/[0.08] text-[#F1F5F9] placeholder:text-[#64748B] focus:border-[#3B82F6]/50 focus:outline-none focus:ring-1 focus:ring-[#3B82F6]/30 transition"
+                      className="w-full px-4 py-2.5 rounded-lg bg-[var(--bg-inset)] border border-[var(--border-default)] text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:border-[var(--border-focus)] focus:outline-none focus:ring-1 focus:ring-[var(--accent)]/30 transition"
                     />
                   </div>
                 </div>
 
                 {/* Job title */}
                 <div>
-                  <label className="text-xs text-[#64748B] mb-1 block">Job Title</label>
+                  <label className="text-xs text-[var(--text-tertiary)] mb-1 block">Job Title</label>
                   <input
                     type="text"
                     value={jobTitle}
                     onChange={(e) => setJobTitle(e.target.value)}
                     placeholder="e.g. Senior Product Manager"
-                    className="w-full px-4 py-2.5 rounded-lg bg-white/[0.03] border border-white/[0.08] text-[#F1F5F9] placeholder:text-[#64748B] focus:border-[#3B82F6]/50 focus:outline-none focus:ring-1 focus:ring-[#3B82F6]/30 transition"
+                    className="w-full px-4 py-2.5 rounded-lg bg-[var(--bg-inset)] border border-[var(--border-default)] text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:border-[var(--border-focus)] focus:outline-none focus:ring-1 focus:ring-[var(--accent)]/30 transition"
                   />
                 </div>
 
                 {/* Role selection */}
                 <div>
-                  <label className="text-xs text-[#64748B] mb-2 block">Your Role</label>
+                  <label className="text-xs text-[var(--text-tertiary)] mb-2 block">Your Role</label>
                   <div className="grid grid-cols-2 gap-2.5">
                     {roleOptions.map((opt) => {
                       const isSelected = selectedRole === opt.role
@@ -431,28 +430,20 @@ export default function OnboardingPage() {
                           key={opt.role}
                           type="button"
                           onClick={() => setSelectedRole(opt.role)}
-                          whileHover={{
-                            scale: 1.02,
-                            borderColor: `${opt.color}55`,
-                            boxShadow: `0 0 16px ${opt.color}18`,
-                          }}
+                          whileHover={{ scale: 1.02 }}
                           whileTap={{ scale: 0.99 }}
                           className={`flex items-start gap-3 p-3 rounded-xl border text-left transition-colors ${
                             isSelected
-                              ? 'border-[#8B5CF6]/60 bg-[#8B5CF6]/10'
-                              : 'border-white/[0.08] bg-white/[0.02]'
+                              ? 'border-[var(--accent)] bg-[var(--accent-subtle)]'
+                              : 'border-[var(--border-default)] bg-[var(--bg-inset)]'
                           }`}
-                          style={isSelected ? { borderColor: `${opt.color}60`, backgroundColor: `${opt.color}12` } : {}}
                         >
-                          <div
-                            className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
-                            style={{ backgroundColor: `${opt.color}20`, color: opt.color }}
-                          >
+                          <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 bg-[var(--accent-subtle)] text-[var(--accent-text)]">
                             {opt.icon}
                           </div>
                           <div className="min-w-0">
-                            <p className="text-sm font-medium text-[#F1F5F9]">{opt.label}</p>
-                            <p className="text-xs text-[#64748B] mt-0.5 line-clamp-2">{opt.description}</p>
+                            <p className="text-sm font-medium text-[var(--text-primary)]">{opt.label}</p>
+                            <p className="text-xs text-[var(--text-tertiary)] mt-0.5 line-clamp-2">{opt.description}</p>
                           </div>
                         </motion.button>
                       )
@@ -475,12 +466,12 @@ export default function OnboardingPage() {
                 className="flex flex-col gap-5"
               >
                 {/* Create / Join toggle */}
-                <div className="flex gap-2 p-1 rounded-lg bg-white/[0.03] border border-white/[0.08]">
+                <div className="flex gap-2 p-1 rounded-lg bg-[var(--bg-inset)] border border-[var(--border-default)]">
                   <button
                     type="button"
                     onClick={() => setOrgMode('create')}
                     className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-md text-sm font-medium transition-colors ${
-                      orgMode === 'create' ? 'bg-[#3B82F6] text-white' : 'text-[#94A3B8] hover:text-[#F1F5F9]'
+                      orgMode === 'create' ? 'bg-[var(--accent)] text-[var(--color-white)]' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
                     }`}
                   >
                     <Plus size={14} />
@@ -490,7 +481,7 @@ export default function OnboardingPage() {
                     type="button"
                     onClick={() => setOrgMode('join')}
                     className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-md text-sm font-medium transition-colors ${
-                      orgMode === 'join' ? 'bg-[#3B82F6] text-white' : 'text-[#94A3B8] hover:text-[#F1F5F9]'
+                      orgMode === 'join' ? 'bg-[var(--accent)] text-[var(--color-white)]' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
                     }`}
                   >
                     <UserPlus size={14} />
@@ -509,27 +500,27 @@ export default function OnboardingPage() {
                       className="flex flex-col gap-4"
                     >
                       <div>
-                        <label className="text-xs text-[#64748B] mb-1 block">Organization Name</label>
+                        <label className="text-xs text-[var(--text-tertiary)] mb-1 block">Organization Name</label>
                         <div className="relative">
-                          <Building2 size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#64748B]" />
+                          <Building2 size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-tertiary)]" />
                           <input
                             type="text"
                             value={orgName}
                             onChange={(e) => setOrgName(e.target.value)}
                             placeholder="Acme Inc"
-                            className="w-full pl-10 pr-4 py-2.5 rounded-lg bg-white/[0.03] border border-white/[0.08] text-[#F1F5F9] placeholder:text-[#64748B] focus:border-[#3B82F6]/50 focus:outline-none focus:ring-1 focus:ring-[#3B82F6]/30 transition"
+                            className="w-full pl-10 pr-4 py-2.5 rounded-lg bg-[var(--bg-inset)] border border-[var(--border-default)] text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:border-[var(--border-focus)] focus:outline-none focus:ring-1 focus:ring-[var(--accent)]/30 transition"
                           />
                         </div>
                         {orgSlug && (
-                          <p className="text-xs text-[#64748B] mt-1.5 ml-1">
-                            Slug: <span className="text-[#94A3B8] font-mono">{orgSlug}</span>
+                          <p className="text-xs text-[var(--text-tertiary)] mt-1.5 ml-1">
+                            Slug: <span className="text-[var(--text-secondary)] font-mono">{orgSlug}</span>
                           </p>
                         )}
                       </div>
 
                       {/* Team size */}
                       <div>
-                        <label className="text-xs text-[#64748B] mb-2 block">Team Size</label>
+                        <label className="text-xs text-[var(--text-tertiary)] mb-2 block">Team Size</label>
                         <div className="flex gap-2">
                           {['Just me', '2-5', '6-20', '20+'].map((size) => (
                             <button
@@ -538,8 +529,8 @@ export default function OnboardingPage() {
                               onClick={() => setTeamSize(size)}
                               className={`flex-1 py-2 rounded-lg text-sm font-medium border transition-colors ${
                                 teamSize === size
-                                  ? 'border-[#3B82F6]/50 bg-[#3B82F6]/10 text-[#3B82F6]'
-                                  : 'border-white/[0.08] bg-white/[0.02] text-[#94A3B8] hover:bg-white/[0.04]'
+                                  ? 'border-[var(--accent)] bg-[var(--accent-subtle)] text-[var(--accent-text)]'
+                                  : 'border-[var(--border-default)] bg-[var(--bg-inset)] text-[var(--text-secondary)] hover:bg-[var(--surface-hover)]'
                               }`}
                             >
                               {size}
@@ -558,15 +549,15 @@ export default function OnboardingPage() {
                       className="flex flex-col gap-4"
                     >
                       <div>
-                        <label className="text-xs text-[#64748B] mb-1 block">Invite Code</label>
+                        <label className="text-xs text-[var(--text-tertiary)] mb-1 block">Invite Code</label>
                         <input
                           type="text"
                           value={inviteCode}
                           onChange={(e) => setInviteCode(e.target.value)}
                           placeholder="Enter your invite code"
-                          className="w-full px-4 py-2.5 rounded-lg bg-white/[0.03] border border-white/[0.08] text-[#F1F5F9] placeholder:text-[#64748B] focus:border-[#3B82F6]/50 focus:outline-none focus:ring-1 focus:ring-[#3B82F6]/30 transition font-mono tracking-wider"
+                          className="w-full px-4 py-2.5 rounded-lg bg-[var(--bg-inset)] border border-[var(--border-default)] text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:border-[var(--border-focus)] focus:outline-none focus:ring-1 focus:ring-[var(--accent)]/30 transition font-mono tracking-wider"
                         />
-                        <p className="text-xs text-[#64748B] mt-1.5 ml-1">Ask your team admin for the invite code</p>
+                        <p className="text-xs text-[var(--text-tertiary)] mt-1.5 ml-1">Ask your team admin for the invite code</p>
                       </div>
                     </motion.div>
                   )}
@@ -597,15 +588,15 @@ export default function OnboardingPage() {
         </div>
 
         {/* Navigation */}
-        <div className="flex items-center justify-between mt-8 pt-6 border-t border-white/[0.08]">
+        <div className="flex items-center justify-between mt-8 pt-6 border-t border-[var(--border-default)]">
           <button
             type="button"
             onClick={goBack}
             disabled={step === 0}
             className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
               step === 0
-                ? 'text-[#64748B]/40 cursor-not-allowed'
-                : 'text-[#94A3B8] hover:bg-white/[0.06] hover:text-[#F1F5F9]'
+                ? 'text-[var(--text-tertiary)] opacity-50 cursor-not-allowed'
+                : 'text-[var(--text-secondary)] hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)]'
             }`}
           >
             <ChevronLeft size={16} />
@@ -621,15 +612,15 @@ export default function OnboardingPage() {
               whileTap={canProceed ? { scale: 0.98 } : {}}
               className={`flex items-center gap-1.5 px-6 py-2.5 rounded-lg text-sm font-medium transition-colors ${
                 canProceed
-                  ? 'bg-[#3B82F6] text-white hover:bg-[#2563EB]'
-                  : 'bg-white/[0.06] text-[#64748B] cursor-not-allowed'
+                  ? 'bg-[var(--accent)] text-[var(--color-white)] hover:bg-[var(--accent-hover)]'
+                  : 'bg-[var(--bg-inset)] text-[var(--text-tertiary)] cursor-not-allowed'
               }`}
             >
               Next
               <ChevronRight size={16} />
             </motion.button>
           ) : (
-            <span className="text-xs text-[#64748B]">Plan Mode controls completion</span>
+            <span className="text-xs text-[var(--text-tertiary)]">Plan Mode controls completion</span>
           )}
         </div>
       </div>

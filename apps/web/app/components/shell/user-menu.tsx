@@ -31,8 +31,13 @@ function initials(name: string): string {
     : (parts[0]?.[0] ?? '?').toUpperCase()
 }
 
-/** Deterministic color from a string so each account has its own hue */
+/**
+ * Deterministic color from a string so each account has its own hue.
+ * Allowlisted exception to R20 palette consolidation — user identity distinction
+ * across team members needs multi-hue. All other color should use tokens.
+ */
 function avatarColor(seed: string): string {
+  // eslint-disable-next-line no-hardcoded-hex
   const palette = [
     '#6398ff', '#3dd68c', '#f59e0b', '#ec4899',
     '#8b5cf6', '#06b6d4', '#ef5350', '#a78bfa',

@@ -74,9 +74,9 @@ export default function AdminOverview() {
                   <Icon className="w-5 h-5" style={{ color: stat.color }} />
                 </div>
               </div>
-              <div className="text-2xl font-semibold text-[#F1F5F9]">{stat.value}</div>
-              <div className="text-xs text-[#64748B] mt-1">{stat.label}</div>
-              <div className="text-[10px] mt-2 px-2 py-0.5 rounded-full bg-white/[0.04] text-[#94A3B8] inline-block">
+              <div className="text-2xl font-semibold text-[var(--text-primary)]">{stat.value}</div>
+              <div className="text-xs text-[var(--text-tertiary)] mt-1">{stat.label}</div>
+              <div className="text-[10px] mt-2 px-2 py-0.5 rounded-full bg-white/[0.04] text-[var(--text-secondary)] inline-block">
                 {stat.change}
               </div>
             </motion.div>
@@ -93,16 +93,16 @@ export default function AdminOverview() {
         >
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h3 className="text-sm font-medium text-[#F1F5F9]">Activity</h3>
-              <p className="text-xs text-[#64748B] mt-0.5">Last 30 days</p>
+              <h3 className="text-sm font-medium text-[var(--text-primary)]">Activity</h3>
+              <p className="text-xs text-[var(--text-tertiary)] mt-0.5">Last 30 days</p>
             </div>
-            <div className="flex items-center gap-3 text-xs text-[#64748B]">
+            <div className="flex items-center gap-3 text-xs text-[var(--text-tertiary)]">
               <span className="flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-[#3B82F6]" />
+                <span className="w-2 h-2 rounded-full bg-[var(--accent)]" />
                 Logins
               </span>
               <span className="flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-[#3B82F6]/30" />
+                <span className="w-2 h-2 rounded-full bg-[var(--accent)]/30" />
                 Actions
               </span>
             </div>
@@ -111,7 +111,7 @@ export default function AdminOverview() {
             {activityBars.map((bar, i) => (
               <motion.div
                 key={i}
-                className="flex-1 rounded-t-sm bg-gradient-to-t from-[#3B82F6]/60 to-[#3B82F6]/20"
+                className="flex-1 rounded-t-sm bg-gradient-to-t from-[var(--accent)]/60 to-[var(--accent)]/20"
                 initial={{ height: 0 }}
                 animate={{ height: `${bar.height}%` }}
                 transition={{ delay: 0.3 + i * 0.05, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
@@ -120,7 +120,7 @@ export default function AdminOverview() {
           </div>
           <div className="flex items-center gap-2 mt-2">
             {activityBars.map((bar, i) => (
-              <div key={i} className="flex-1 text-center text-[9px] text-[#4A5568]">
+              <div key={i} className="flex-1 text-center text-[9px] text-[var(--text-tertiary)]">
                 {i % 3 === 0 ? bar.day : ''}
               </div>
             ))}
@@ -133,7 +133,7 @@ export default function AdminOverview() {
           variants={fadeUp}
           custom={5}
         >
-          <h3 className="text-sm font-medium text-[#F1F5F9] mb-4">Recent Admin Actions</h3>
+          <h3 className="text-sm font-medium text-[var(--text-primary)] mb-4">Recent Admin Actions</h3>
           <div className="flex flex-col gap-3">
             {recentActions.map((action, i) => {
               const Icon = action.icon
@@ -152,8 +152,8 @@ export default function AdminOverview() {
                     <Icon className="w-4 h-4" style={{ color: action.color }} />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm text-[#94A3B8] truncate">{action.text}</p>
-                    <p className="text-xs text-[#4A5568] mt-0.5">{action.time}</p>
+                    <p className="text-sm text-[var(--text-secondary)] truncate">{action.text}</p>
+                    <p className="text-xs text-[var(--text-tertiary)] mt-0.5">{action.time}</p>
                   </div>
                 </motion.div>
               )

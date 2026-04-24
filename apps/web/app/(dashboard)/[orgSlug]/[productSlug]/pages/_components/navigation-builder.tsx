@@ -48,10 +48,10 @@ function NavItemRow({
   return (
     <div style={{ marginLeft: depth * 16 }}>
       <div className="group flex items-center gap-1 py-1 px-1.5 rounded-md hover:bg-white/[0.03] transition-colors">
-        <GripVertical className="w-3 h-3 text-[#64748B]/40 opacity-0 group-hover:opacity-100 cursor-grab shrink-0" />
+        <GripVertical className="w-3 h-3 text-[var(--text-tertiary)]/40 opacity-0 group-hover:opacity-100 cursor-grab shrink-0" />
 
         {hasChildren && (
-          <button onClick={() => setExpanded(!expanded)} className="p-0.5 text-[#64748B] hover:text-[#94A3B8]">
+          <button onClick={() => setExpanded(!expanded)} className="p-0.5 text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]">
             <ChevronRight className={`w-3 h-3 transition-transform ${expanded ? 'rotate-90' : ''}`} />
           </button>
         )}
@@ -64,20 +64,20 @@ function NavItemRow({
             onChange={(e) => onUpdate(item.id, { label: e.target.value })}
             onBlur={() => setEditing(false)}
             onKeyDown={(e) => e.key === 'Enter' && setEditing(false)}
-            className="flex-1 px-1.5 py-0.5 rounded bg-white/[0.06] border border-[#3B82F6]/30 text-[11px] text-[#F1F5F9] outline-none"
+            className="flex-1 px-1.5 py-0.5 rounded bg-white/[0.06] border border-[var(--accent)]/30 text-[11px] text-[var(--text-primary)] outline-none"
           />
         ) : (
-          <span className="flex-1 text-[11px] text-[#F1F5F9] cursor-pointer truncate" onClick={() => setEditing(true)}>
+          <span className="flex-1 text-[11px] text-[var(--text-primary)] cursor-pointer truncate" onClick={() => setEditing(true)}>
             {item.label}
           </span>
         )}
 
         {/* Link indicator */}
         {linkedPage && (
-          <span className="text-[9px] text-[#64748B] truncate max-w-[60px]">{linkedPage.slug}</span>
+          <span className="text-[9px] text-[var(--text-tertiary)] truncate max-w-[60px]">{linkedPage.slug}</span>
         )}
         {item.href && !item.pageId && (
-          <ExternalLink className="w-3 h-3 text-[#64748B] shrink-0" />
+          <ExternalLink className="w-3 h-3 text-[var(--text-tertiary)] shrink-0" />
         )}
 
         {/* Actions */}
@@ -88,17 +88,17 @@ function NavItemRow({
               if (e.target.value === '__href__') onUpdate(item.id, { pageId: undefined })
               else onUpdate(item.id, { pageId: e.target.value, href: undefined })
             }}
-            className="w-16 px-1 py-0.5 rounded bg-white/[0.04] border border-white/[0.08] text-[9px] text-[#94A3B8] outline-none"
+            className="w-16 px-1 py-0.5 rounded bg-white/[0.04] border border-white/[0.08] text-[9px] text-[var(--text-secondary)] outline-none"
           >
             <option value="__href__">Custom</option>
             {pages.map((p) => (
               <option key={p.id} value={p.id}>{p.name}</option>
             ))}
           </select>
-          <button onClick={() => onAddChild(item.id)} className="p-0.5 text-[#64748B] hover:text-[#3B82F6]" title="Add child">
+          <button onClick={() => onAddChild(item.id)} className="p-0.5 text-[var(--text-tertiary)] hover:text-[var(--accent)]" title="Add child">
             <Plus className="w-3 h-3" />
           </button>
-          <button onClick={() => onDelete(item.id)} className="p-0.5 text-[#64748B] hover:text-red-400" title="Remove">
+          <button onClick={() => onDelete(item.id)} className="p-0.5 text-[var(--text-tertiary)] hover:text-red-400" title="Remove">
             <Trash2 className="w-3 h-3" />
           </button>
         </div>
@@ -112,7 +112,7 @@ function NavItemRow({
             value={item.href ?? ''}
             onChange={(e) => onUpdate(item.id, { href: e.target.value })}
             placeholder="https://... or /path"
-            className="w-full px-2 py-1 rounded bg-white/[0.03] border border-white/[0.06] text-[10px] text-[#94A3B8] placeholder-[#64748B]/60 outline-none focus:border-[#3B82F6]/30"
+            className="w-full px-2 py-1 rounded bg-white/[0.03] border border-white/[0.06] text-[10px] text-[var(--text-secondary)] placeholder-[var(--text-tertiary)]/60 outline-none focus:border-[var(--accent)]/30"
           />
         </div>
       )}
@@ -193,14 +193,14 @@ export function NavigationBuilder({ items, pages, navType, onChange }: Navigatio
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between">
-        <span className="text-[10px] font-semibold uppercase tracking-wider text-[#64748B] flex items-center gap-1">
+        <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-tertiary)] flex items-center gap-1">
           <Menu className="w-3 h-3" /> {typeLabels[navType]}
         </span>
-        <span className="text-[10px] text-[#64748B]">{items.length} items</span>
+        <span className="text-[10px] text-[var(--text-tertiary)]">{items.length} items</span>
       </div>
 
       {items.length === 0 ? (
-        <div className="py-4 text-center text-[10px] text-[#64748B]/60">
+        <div className="py-4 text-center text-[10px] text-[var(--text-tertiary)]/60">
           No navigation items yet
         </div>
       ) : (
@@ -223,7 +223,7 @@ export function NavigationBuilder({ items, pages, navType, onChange }: Navigatio
 
       <button
         onClick={addRoot}
-        className="flex items-center gap-1 w-full py-1.5 rounded-md text-[10px] text-[#3B82F6] hover:bg-[#3B82F6]/5 justify-center transition-colors"
+        className="flex items-center gap-1 w-full py-1.5 rounded-md text-[10px] text-[var(--accent)] hover:bg-[var(--accent)]/5 justify-center transition-colors"
       >
         <Plus className="w-3 h-3" /> Add Item
       </button>

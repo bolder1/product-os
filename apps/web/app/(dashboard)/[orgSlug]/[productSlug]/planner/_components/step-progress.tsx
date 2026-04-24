@@ -31,7 +31,7 @@ export default function StepProgress({ currentStep, completedSteps, onStepClick 
         <div className="absolute top-5 left-[2.5rem] right-[2.5rem] h-px bg-white/[0.08]" />
         {/* Connecting line (progress) */}
         <div
-          className="absolute top-5 left-[2.5rem] h-px bg-[#8B5CF6]/40 transition-all duration-500"
+          className="absolute top-5 left-[2.5rem] h-px bg-[var(--accent)]/40 transition-all duration-500"
           style={{ width: `${((Math.min(currentStep, 4) - 1) / 3) * 100}%` }}
         />
 
@@ -53,10 +53,10 @@ export default function StepProgress({ currentStep, completedSteps, onStepClick 
                   transition-colors duration-300 border
                   ${
                     isActive
-                      ? 'bg-[#8B5CF6]/20 border-[#8B5CF6] text-[#8B5CF6]'
+                      ? 'bg-[var(--accent)]/20 border-[var(--accent)] text-[var(--accent)]'
                       : isCompleted || isPast
-                        ? 'bg-[#10B981]/20 border-[#10B981] text-[#10B981]'
-                        : 'bg-white/[0.03] border-white/[0.08] text-[#64748B]'
+                        ? 'bg-[var(--color-success)]/20 border-[var(--color-success)] text-[var(--color-success)]'
+                        : 'bg-white/[0.03] border-white/[0.08] text-[var(--text-tertiary)]'
                   }
                 `}
                 animate={
@@ -71,7 +71,7 @@ export default function StepProgress({ currentStep, completedSteps, onStepClick 
               {/* Title */}
               <span
                 className={`text-xs font-medium transition-colors ${
-                  isActive ? 'text-[#F1F5F9]' : isPast || isCompleted ? 'text-[#94A3B8]' : 'text-[#64748B]'
+                  isActive ? 'text-[var(--text-primary)]' : isPast || isCompleted ? 'text-[var(--text-secondary)]' : 'text-[var(--text-tertiary)]'
                 }`}
               >
                 {step.title}
@@ -79,7 +79,7 @@ export default function StepProgress({ currentStep, completedSteps, onStepClick 
 
               {/* Description tooltip on hover */}
               <div className="absolute top-full mt-1 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-                <div className="bg-[#181E3A] border border-white/[0.08] rounded-lg px-3 py-1.5 text-xs text-[#94A3B8] whitespace-nowrap shadow-lg">
+                <div className="bg-[#181E3A] border border-white/[0.08] rounded-lg px-3 py-1.5 text-xs text-[var(--text-secondary)] whitespace-nowrap shadow-lg">
                   {step.description}
                 </div>
               </div>

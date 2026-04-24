@@ -20,7 +20,7 @@ function AnimatedScore({ target }: { target: number }) {
     const ctrl = animate(mv, target, { duration: 1.4, ease: 'easeOut', onUpdate: (v) => setDisplay(Math.round(v)) })
     return ctrl.stop
   }, [mv, target])
-  return <span className="text-4xl font-bold text-[#F1F5F9]">{display}</span>
+  return <span className="text-4xl font-bold text-[var(--text-primary)]">{display}</span>
 }
 
 const FALLBACK_STUDIOS = [
@@ -68,9 +68,9 @@ export function HealthScore() {
     >
       {/* Title */}
       <div className="flex items-center gap-2 self-start">
-        <Heart className="w-4 h-4 text-[#3B82F6]" />
-        <span className="text-sm font-medium text-[#94A3B8] uppercase tracking-wider">Product Health</span>
-        {isLoading && <Loader2 size={11} className="animate-spin text-[#475569]" />}
+        <Heart className="w-4 h-4 text-[var(--accent)]" />
+        <span className="text-sm font-medium text-[var(--text-secondary)] uppercase tracking-wider">Product Health</span>
+        {isLoading && <Loader2 size={11} className="animate-spin text-[var(--text-tertiary)]" />}
       </div>
 
       {/* Gauge */}
@@ -87,12 +87,12 @@ export function HealthScore() {
         </svg>
         <div className="absolute flex flex-col items-center">
           {isLoading ? (
-            <Loader2 size={24} className="animate-spin text-[#475569]" />
+            <Loader2 size={24} className="animate-spin text-[var(--text-tertiary)]" />
           ) : (
             <>
               <AnimatedScore target={overall} />
-              <span className="text-xs text-[#64748B]">/ 100</span>
-              {isEmpty && <span className="text-[9px] text-[#475569] mt-0.5">no data yet</span>}
+              <span className="text-xs text-[var(--text-tertiary)]">/ 100</span>
+              {isEmpty && <span className="text-[9px] text-[var(--text-tertiary)] mt-0.5">no data yet</span>}
             </>
           )}
         </div>
@@ -112,7 +112,7 @@ export function HealthScore() {
               className="flex flex-col gap-1 text-left group hover:bg-white/[0.03] rounded-lg p-1 -mx-1 transition-colors"
             >
               <div className="flex items-center justify-between">
-                <span className="text-[10px] text-[#94A3B8] group-hover:text-[#F1F5F9] transition-colors flex items-center gap-0.5">
+                <span className="text-[10px] text-[var(--text-secondary)] group-hover:text-[#F1F5F9] transition-colors flex items-center gap-0.5">
                   {s.label}
                   <ArrowRight size={8} className="opacity-0 group-hover:opacity-100 transition-opacity" />
                 </span>

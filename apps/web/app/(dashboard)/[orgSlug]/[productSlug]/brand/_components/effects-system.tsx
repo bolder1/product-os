@@ -50,7 +50,7 @@ function EditableNumber({
         step={step ?? 1}
         min={min}
         max={max}
-        className="w-16 px-2 py-0.5 rounded bg-white/[0.06] border border-[#EC4899]/40 text-[#F1F5F9] text-xs font-mono focus:outline-none text-center"
+        className="w-16 px-2 py-0.5 rounded bg-white/[0.06] border border-[var(--accent)]/40 text-[var(--text-primary)] text-xs font-mono focus:outline-none text-center"
       />
     )
   }
@@ -61,7 +61,7 @@ function EditableNumber({
         setDraft(String(value))
         setEditing(true)
       }}
-      className="px-2 py-0.5 rounded bg-white/[0.03] border border-white/[0.08] text-[#94A3B8] text-xs font-mono hover:border-white/[0.15] transition-colors cursor-pointer"
+      className="px-2 py-0.5 rounded bg-white/[0.03] border border-white/[0.08] text-[var(--text-secondary)] text-xs font-mono hover:border-white/[0.15] transition-colors cursor-pointer"
     >
       {value}{unit}
     </button>
@@ -82,7 +82,7 @@ function ShadowEditor({
   return (
     <div className="p-4 rounded-xl border border-white/[0.08] bg-white/[0.02]">
       <div className="flex items-center justify-between mb-3">
-        <h4 className="text-sm font-semibold text-[#F1F5F9]">{shadow.label}</h4>
+        <h4 className="text-sm font-semibold text-[var(--text-primary)]">{shadow.label}</h4>
         <div
           className="w-14 h-14 rounded-xl bg-white/[0.06] border border-white/[0.08]"
           style={{ boxShadow: cssValue }}
@@ -91,7 +91,7 @@ function ShadowEditor({
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <div className="flex flex-col items-center gap-1">
-          <span className="text-[9px] text-[#64748B]">Offset X</span>
+          <span className="text-[9px] text-[var(--text-tertiary)]">Offset X</span>
           <EditableNumber
             value={shadow.offsetX}
             onChange={(v) => onUpdate({ offsetX: v })}
@@ -101,7 +101,7 @@ function ShadowEditor({
           />
         </div>
         <div className="flex flex-col items-center gap-1">
-          <span className="text-[9px] text-[#64748B]">Offset Y</span>
+          <span className="text-[9px] text-[var(--text-tertiary)]">Offset Y</span>
           <EditableNumber
             value={shadow.offsetY}
             onChange={(v) => onUpdate({ offsetY: v })}
@@ -111,7 +111,7 @@ function ShadowEditor({
           />
         </div>
         <div className="flex flex-col items-center gap-1">
-          <span className="text-[9px] text-[#64748B]">Blur</span>
+          <span className="text-[9px] text-[var(--text-tertiary)]">Blur</span>
           <EditableNumber
             value={shadow.blur}
             onChange={(v) => onUpdate({ blur: v })}
@@ -121,7 +121,7 @@ function ShadowEditor({
           />
         </div>
         <div className="flex flex-col items-center gap-1">
-          <span className="text-[9px] text-[#64748B]">Spread</span>
+          <span className="text-[9px] text-[var(--text-tertiary)]">Spread</span>
           <EditableNumber
             value={shadow.spread}
             onChange={(v) => onUpdate({ spread: v })}
@@ -133,12 +133,12 @@ function ShadowEditor({
       </div>
 
       <div className="mt-3 flex items-center gap-2">
-        <span className="text-[9px] text-[#64748B]">Color</span>
+        <span className="text-[9px] text-[var(--text-tertiary)]">Color</span>
         <input
           type="text"
           value={shadow.color}
           onChange={(e) => onUpdate({ color: e.target.value })}
-          className="flex-1 px-2 py-1 rounded bg-white/[0.03] border border-white/[0.08] text-[#94A3B8] text-xs font-mono focus:outline-none focus:border-[#EC4899]/50"
+          className="flex-1 px-2 py-1 rounded bg-white/[0.03] border border-white/[0.08] text-[var(--text-secondary)] text-xs font-mono focus:outline-none focus:border-[var(--accent)]/50"
         />
       </div>
     </div>
@@ -159,8 +159,8 @@ function GlassMorphismEditor({
   return (
     <div className="p-4 rounded-xl border border-white/[0.08] bg-white/[0.03]">
       <div className="flex items-center gap-2 mb-4">
-        <Droplets className="w-4 h-4 text-[#EC4899]" />
-        <h3 className="text-sm font-semibold text-[#F1F5F9]">Glass Morphism</h3>
+        <Droplets className="w-4 h-4 text-[var(--accent)]" />
+        <h3 className="text-sm font-semibold text-[var(--text-primary)]">Glass Morphism</h3>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -168,8 +168,8 @@ function GlassMorphismEditor({
         <div className="space-y-4">
           <div>
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs text-[#94A3B8]">Backdrop Blur</span>
-              <span className="text-xs font-mono text-[#64748B]">{backdropBlur}px</span>
+              <span className="text-xs text-[var(--text-secondary)]">Backdrop Blur</span>
+              <span className="text-xs font-mono text-[var(--text-tertiary)]">{backdropBlur}px</span>
             </div>
             <input
               type="range"
@@ -177,14 +177,14 @@ function GlassMorphismEditor({
               max={40}
               value={backdropBlur}
               onChange={(e) => onBlurChange(Number(e.target.value))}
-              className="w-full h-1.5 rounded-full appearance-none bg-white/[0.08] accent-[#EC4899] cursor-pointer"
+              className="w-full h-1.5 rounded-full appearance-none bg-white/[0.08] accent-[var(--accent)] cursor-pointer"
             />
           </div>
 
           <div>
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs text-[#94A3B8]">Surface Opacity</span>
-              <span className="text-xs font-mono text-[#64748B]">{opacity}%</span>
+              <span className="text-xs text-[var(--text-secondary)]">Surface Opacity</span>
+              <span className="text-xs font-mono text-[var(--text-tertiary)]">{opacity}%</span>
             </div>
             <input
               type="range"
@@ -192,7 +192,7 @@ function GlassMorphismEditor({
               max={30}
               value={opacity}
               onChange={(e) => setOpacity(Number(e.target.value))}
-              className="w-full h-1.5 rounded-full appearance-none bg-white/[0.08] accent-[#EC4899] cursor-pointer"
+              className="w-full h-1.5 rounded-full appearance-none bg-white/[0.08] accent-[var(--accent)] cursor-pointer"
             />
           </div>
         </div>
@@ -200,7 +200,7 @@ function GlassMorphismEditor({
         {/* Preview */}
         <div className="relative h-40 rounded-xl overflow-hidden">
           {/* Background pattern */}
-          <div className="absolute inset-0 bg-gradient-to-br from-[#EC4899]/30 via-[#8B5CF6]/30 to-[#3B82F6]/30" />
+          <div className="absolute inset-0 bg-gradient-to-br from-[var(--accent)]/30 via-[var(--accent)]/30 to-[var(--accent)]/30" />
           <div className="absolute inset-0 grid grid-cols-4 grid-rows-4 gap-1 p-2 opacity-40">
             {Array.from({ length: 16 }).map((_, i) => (
               <div
@@ -246,7 +246,7 @@ function GradientEditor({
   return (
     <div className="p-4 rounded-xl border border-white/[0.08] bg-white/[0.02]">
       <div className="flex items-center justify-between mb-3">
-        <h4 className="text-sm font-semibold text-[#F1F5F9]">{gradient.label}</h4>
+        <h4 className="text-sm font-semibold text-[var(--text-primary)]">{gradient.label}</h4>
       </div>
 
       <div
@@ -256,7 +256,7 @@ function GradientEditor({
 
       <div className="flex items-center gap-4 flex-wrap">
         <div className="flex flex-col items-center gap-1">
-          <span className="text-[9px] text-[#64748B]">Angle</span>
+          <span className="text-[9px] text-[var(--text-tertiary)]">Angle</span>
           <EditableNumber
             value={gradient.direction}
             onChange={(v) => onUpdate({ ...gradient, direction: v })}
@@ -269,7 +269,7 @@ function GradientEditor({
         {gradient.stops.map((stop, idx) => (
           <div key={idx} className="flex items-center gap-2">
             <div className="flex flex-col items-center gap-1">
-              <span className="text-[9px] text-[#64748B]">Stop {idx + 1}</span>
+              <span className="text-[9px] text-[var(--text-tertiary)]">Stop {idx + 1}</span>
               <div className="flex items-center gap-1">
                 <input
                   type="color"
@@ -289,7 +289,7 @@ function GradientEditor({
                     newStops[idx] = { ...newStops[idx], color: e.target.value }
                     onUpdate({ ...gradient, stops: newStops })
                   }}
-                  className="w-20 px-2 py-0.5 rounded bg-white/[0.03] border border-white/[0.08] text-[#94A3B8] text-[10px] font-mono focus:outline-none focus:border-[#EC4899]/50"
+                  className="w-20 px-2 py-0.5 rounded bg-white/[0.03] border border-white/[0.08] text-[var(--text-secondary)] text-[10px] font-mono focus:outline-none focus:border-[var(--accent)]/50"
                 />
               </div>
             </div>
@@ -297,7 +297,7 @@ function GradientEditor({
         ))}
       </div>
 
-      <p className="mt-2 text-[10px] font-mono text-[#64748B] truncate">{cssGradient}</p>
+      <p className="mt-2 text-[10px] font-mono text-[var(--text-tertiary)] truncate">{cssGradient}</p>
     </div>
   )
 }
@@ -322,12 +322,12 @@ function GlowEditor({
   return (
     <div className="p-4 rounded-xl border border-white/[0.08] bg-white/[0.03]">
       <div className="flex items-center gap-2 mb-4">
-        <Sun className="w-4 h-4 text-[#EC4899]" />
-        <h3 className="text-sm font-semibold text-[#F1F5F9]">Glow Effects</h3>
+        <Sun className="w-4 h-4 text-[var(--accent)]" />
+        <h3 className="text-sm font-semibold text-[var(--text-primary)]">Glow Effects</h3>
         <button
           onClick={onToggle}
           className={`ml-auto w-10 h-5 rounded-full transition-colors relative ${
-            glowEnabled ? 'bg-[#EC4899]' : 'bg-white/[0.1]'
+            glowEnabled ? 'bg-[var(--accent)]' : 'bg-white/[0.1]'
           }`}
         >
           <motion.div
@@ -346,7 +346,7 @@ function GlowEditor({
           className="space-y-4"
         >
           <div className="flex items-center gap-3">
-            <span className="text-xs text-[#94A3B8]">Color</span>
+            <span className="text-xs text-[var(--text-secondary)]">Color</span>
             <input
               type="color"
               value={glowColor}
@@ -357,14 +357,14 @@ function GlowEditor({
               type="text"
               value={glowColor}
               onChange={(e) => onColorChange(e.target.value)}
-              className="w-24 px-2 py-1 rounded bg-white/[0.03] border border-white/[0.08] text-[#94A3B8] text-xs font-mono focus:outline-none focus:border-[#EC4899]/50"
+              className="w-24 px-2 py-1 rounded bg-white/[0.03] border border-white/[0.08] text-[var(--text-secondary)] text-xs font-mono focus:outline-none focus:border-[var(--accent)]/50"
             />
           </div>
 
           <div>
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs text-[#94A3B8]">Intensity</span>
-              <span className="text-xs font-mono text-[#64748B]">{glowIntensity}px</span>
+              <span className="text-xs text-[var(--text-secondary)]">Intensity</span>
+              <span className="text-xs font-mono text-[var(--text-tertiary)]">{glowIntensity}px</span>
             </div>
             <input
               type="range"
@@ -372,7 +372,7 @@ function GlowEditor({
               max={60}
               value={glowIntensity}
               onChange={(e) => onIntensityChange(Number(e.target.value))}
-              className="w-full h-1.5 rounded-full appearance-none bg-white/[0.08] accent-[#EC4899] cursor-pointer"
+              className="w-full h-1.5 rounded-full appearance-none bg-white/[0.08] accent-[var(--accent)] cursor-pointer"
             />
           </div>
 
@@ -424,8 +424,8 @@ export default function EffectsSystem({ effects, onChange }: EffectsSystemProps)
       {/* Shadow Editor */}
       <div>
         <div className="flex items-center gap-2 mb-3">
-          <Sparkles className="w-4 h-4 text-[#EC4899]" />
-          <h3 className="text-sm font-semibold text-[#F1F5F9]">Shadows</h3>
+          <Sparkles className="w-4 h-4 text-[var(--accent)]" />
+          <h3 className="text-sm font-semibold text-[var(--text-primary)]">Shadows</h3>
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {effects.shadows.map((shadow) => (
@@ -447,8 +447,8 @@ export default function EffectsSystem({ effects, onChange }: EffectsSystemProps)
       {/* Gradients */}
       <div>
         <div className="flex items-center gap-2 mb-3">
-          <Palette className="w-4 h-4 text-[#EC4899]" />
-          <h3 className="text-sm font-semibold text-[#F1F5F9]">Gradients</h3>
+          <Palette className="w-4 h-4 text-[var(--accent)]" />
+          <h3 className="text-sm font-semibold text-[var(--text-primary)]">Gradients</h3>
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {effects.gradients.map((gradient) => (

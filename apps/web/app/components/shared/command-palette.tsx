@@ -25,7 +25,8 @@ import { useTaskStore } from '../../lib/task-store'
 import { useComputerModeStore } from '../../lib/computer-mode-store'
 import { useGraphStore } from '../../lib/graph-store'
 import type { NodeKind } from '../../lib/graph-store'
-import { submitPromptThroughGate } from '../../lib/prompt-gate-store'
+import { useInspectorStore } from '../../lib/inspector-store'
+import { useCopilotStore } from '../../lib/copilot-store'
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -64,11 +65,13 @@ const STUDIOS = [
   { key: 'testing',    label: 'Test Center',          icon: FlaskConical, section: 'ship'    },
   { key: 'analytics',  label: 'Analytics Builder',    icon: BarChart3,    section: 'operate' },
   { key: 'control-tower', label: 'Control Tower',     icon: Compass,      section: 'operate' },
-  { key: 'tasks',      label: 'Tasks',                icon: CheckSquare,  section: 'operate' },
-  { key: 'approvals',  label: 'Approvals',            icon: CheckSquare,  section: 'operate' },
+  { key: 'work',        label: 'Work',                 icon: CheckSquare,  section: 'operate' },
   { key: 'notifications', label: 'Notifications',     icon: Bell,         section: 'operate' },
   { key: 'decisions',  label: 'Decision Log',         icon: MessageSquare,section: 'operate' },
-  { key: 'graph-explorer', label: 'Graph Explorer',   icon: Hash,         section: 'operate' },
+  { key: 'graph',      label: 'Living Graph',         icon: Hash,         section: 'intelligence' },
+  { key: 'computer-log', label: 'Computer Log',       icon: Cpu,          section: 'intelligence' },
+  { key: 'cortex',     label: 'Cortex',               icon: Sparkles,     section: 'intelligence' },
+  { key: 'extensions', label: 'Extensions',           icon: Hash,         section: 'intelligence' },
   { key: 'settings',   label: 'Settings',             icon: Settings,     section: 'operate' },
 ]
 
@@ -119,8 +122,75 @@ const CATEGORY_STYLES: Record<CommandCategory, { label: string; bg: string; colo
   task:      { label: 'Task',      bg: 'bg-amber-500/10',   color: 'text-amber-400'   },
   ai_skill:  { label: 'AI',        bg: 'bg-purple-500/10',  color: 'text-purple-400'  },
   action:    { label: 'Action',    bg: 'bg-emerald-500/10', color: 'text-emerald-400' },
-  recent:    { label: 'Recent',    bg: 'bg-white/[0.06]',   color: 'text-[#94A3B8]'   },
+  recent:    { label: 'Recent',    bg: 'bg-white/[0.06]',   color: 'text-[var(--text-secondary)]'   },
   graph:     { label: 'Graph',     bg: 'bg-cyan-500/10',    color: 'text-cyan-400'    },
+}
+
+/* ------------------------------------------------------------------ */
+/*  Graph query parser                                                 */
+/* ------------------------------------------------------------------ */
+
+interface GraphQuery {
+  kind?: NodeKind
+  status?: string
+  label?: string
+  /** Human description of what we searched for */
+  description: string
+}
+
+function parseGraphQuery(query: string): GraphQuery | null {
+  const q = query.toLowerCase().trim()
+
+  // Must start with a recognizable verb or filter word
+  const QUERY_PREFIXES = /^(show|list|find|search|get|who|what|open|count|unpublished|published|blocked|open)\b/
+  if (!QUERY_PREFIXES.test(q)) return null
+
+  const kindPatterns: Array<[RegExp, NodeKind]> = [
+    [/\bpages?\b/, 'page'],
+    [/\bcomponents?\b/, 'component'],
+    [/\bworkflows?\b/, 'workflow'],
+    [/\bfeatures?\b/, 'feature'],
+    [/\btasks?\b/, 'task'],
+    [/\bapprovals?\b/, 'approval'],
+    [/\breleases?\b/, 'release'],
+    [/\binsights?\b/, 'insight'],
+    [/\bmodules?\b/, 'module'],
+    [/\bjourneys?\b/, 'journey'],
+    [/\btests?\b/, 'test_suite'],
+    [/\bscreens?\b/, 'screen'],
+    [/\bentit(y|ies)\b/, 'entity'],
+    [/\btokens?\b/, 'token'],
+    [/\bassets?\b/, 'asset'],
+  ]
+
+  let kind: NodeKind | undefined
+  for (const [re, k] of kindPatterns) {
+    if (re.test(q)) { kind = k; break }
+  }
+
+  const statusPatterns: Array<[RegExp, string]> = [
+    [/\bunpublished\b/, 'draft'],
+    [/\bpublished\b/, 'published'],
+    [/\bblocked?\b/, 'blocked'],
+    [/\bdraft\b/, 'draft'],
+    [/\bactive\b/, 'active'],
+    [/\barchived?\b/, 'archived'],
+    [/\bopen\b/, 'open'],
+    [/\bclosed\b/, 'closed'],
+    [/\bdone\b/, 'done'],
+  ]
+
+  let status: string | undefined
+  for (const [re, s] of statusPatterns) {
+    if (re.test(q)) { status = s; break }
+  }
+
+  const description = [
+    status ? status : null,
+    kind ?? 'nodes',
+  ].filter(Boolean).join(' ')
+
+  return { kind, status, description }
 }
 
 /** Map a graph node kind to the product studio route that owns it */
@@ -192,6 +262,9 @@ export function CommandPalette({ isOpen, onClose, orgSlug, productSlug, currentS
 
   const openComputerMode = useComputerModeStore((s) => s.open)
   const setCommandInput = useComputerModeStore((s) => s.setCommandInput)
+  const inspectNode = useInspectorStore((s) => s.inspect)
+  const openCopilot = useCopilotStore((s) => s.openPanel)
+  const setCopilotInput = useCopilotStore((s) => s.setInput)
 
   const tasks = useTaskStore((s) => s.tasks)
 
@@ -273,7 +346,9 @@ export function CommandPalette({ isOpen, onClose, orgSlug, productSlug, currentS
         })
       })
 
-    // Graph nodes — only shown when there is a search query
+    // Graph nodes — only shown when there is a search query.
+    // When a graph-query pattern is detected (show/list/find …), nodes are
+    // pre-filtered by kind/status and surfaced as Inspector openers.
     graphNodes.forEach((node) => {
       const studio = kindToStudio(node.kind)
       const color = kindColor(node.kind)
@@ -284,7 +359,10 @@ export function CommandPalette({ isOpen, onClose, orgSlug, productSlug, currentS
         category: 'graph',
         icon: Hash,
         color,
-        action: () => navigate(studio),
+        action: () => {
+          inspectNode(node.id)
+          onClose()
+        },
       })
     })
 
@@ -296,7 +374,7 @@ export function CommandPalette({ isOpen, onClose, orgSlug, productSlug, currentS
       category: 'action',
       icon: CheckSquare,
       shortcut: '⌘T',
-      action: () => navigate('tasks'),
+      action: () => navigate('work?tab=tasks'),
     })
     base.push({
       id: 'action-new-release',
@@ -315,29 +393,69 @@ export function CommandPalette({ isOpen, onClose, orgSlug, productSlug, currentS
       shortcut: '⌘,',
       action: () => navigate('settings'),
     })
+    // Always-present: ask Copilot
+    base.push({
+      id: 'action-ask-copilot',
+      label: 'Ask Copilot…',
+      description: 'Open Copilot with the current query pre-filled',
+      category: 'ai_skill',
+      icon: Sparkles,
+      color: 'var(--accent-text)',
+      action: () => {
+        openCopilot()
+        onClose()
+      },
+    })
 
     return base
-  }, [currentStudio, tasks, graphNodes, navigate, openComputerMode, setCommandInput, onClose])
+  }, [currentStudio, tasks, graphNodes, navigate, openComputerMode, setCommandInput, inspectNode, openCopilot, onClose])
+
+  /* ── Graph query detection ──────────────────────────────────────── */
+  const activeGraphQuery = useMemo(() => {
+    if (!query.trim()) return null
+    return parseGraphQuery(query)
+  }, [query])
 
   /* ── Filter + rank ──────────────────────────────────────────────── */
   const filteredCommands = useMemo(() => {
     if (!query.trim()) {
-      // Default: show AI skills first, then studios, then actions — no graph nodes
+      // Default view: AI skills + current studio + quick actions — no graph nodes
       return allCommands
         .filter((c) => c.category !== 'graph' && (['ai_skill', 'action'].includes(c.category) || c.id === `studio-${currentStudio}`))
         .slice(0, 12)
     }
 
+    if (activeGraphQuery) {
+      // Graph-query mode: filter graph nodes by kind + status, sorted by label
+      const { kind, status } = activeGraphQuery
+      const graphHits = allCommands
+        .filter((c) => {
+          if (c.category !== 'graph') return false
+          const node = graphNodes.find((n) => `graph-${n.id}` === c.id)
+          if (!node) return false
+          if (kind && node.kind !== kind) return false
+          if (status && node.status && node.status !== status) return false
+          return true
+        })
+        .slice(0, 10)
+
+      // Always include the Copilot action and any fuzzy-matching studio hits
+      const extras = allCommands
+        .filter((c) => c.category !== 'graph' && (c.id === 'action-ask-copilot' || fuzzyMatch(query, c.label)))
+        .slice(0, 3)
+
+      return [...graphHits, ...extras].slice(0, 14)
+    }
+
     return allCommands
       .filter((c) => fuzzyMatch(query, c.label) || fuzzyMatch(query, c.description ?? ''))
       .sort((a, b) => {
-        // Exact graph node match should surface high
         const aScore = score(query, a.label) + (a.category === 'graph' && a.label.toLowerCase().includes(query.toLowerCase()) ? 5 : 0)
         const bScore = score(query, b.label) + (b.category === 'graph' && b.label.toLowerCase().includes(query.toLowerCase()) ? 5 : 0)
         return bScore - aScore
       })
       .slice(0, 14)
-  }, [query, allCommands, currentStudio])
+  }, [query, allCommands, currentStudio, activeGraphQuery, graphNodes])
 
   /* ── Keyboard navigation ────────────────────────────────────────── */
   useEffect(() => {
@@ -349,15 +467,10 @@ export function CommandPalette({ isOpen, onClose, orgSlug, productSlug, currentS
   const handleAskAI = async () => {
     const q = query.trim()
     if (!q) return
+    // Send to Copilot first — it can route graph queries, recall memory, and draft actions.
+    setCopilotInput(q)
+    openCopilot()
     onClose()
-    const submission = await submitPromptThroughGate(q, {
-      entryPoint: 'palette',
-      studio: currentStudio,
-      productId,
-    })
-    if (!submission) return
-    openComputerMode()
-    setCommandInput(submission.prompt)
   }
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -405,22 +518,22 @@ export function CommandPalette({ isOpen, onClose, orgSlug, productSlug, currentS
           >
             {/* Search input */}
             <div className="flex items-center gap-3 px-4 py-3.5 border-b border-white/[0.06]">
-              <Search size={15} className="text-[#64748B] shrink-0" />
+              <Search size={15} className="text-[var(--text-tertiary)] shrink-0" />
               <input
                 ref={inputRef}
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder="Search studios, graph nodes, tasks, AI skills…"
-                className="flex-1 bg-transparent text-[14px] text-[#F1F5F9] placeholder-[#475569] outline-none"
+                className="flex-1 bg-transparent text-[14px] text-[var(--text-primary)] placeholder-[var(--text-tertiary)] outline-none"
               />
               <div className="hidden sm:flex items-center gap-2 shrink-0">
                 {graphNodes.length > 0 && !query && (
-                  <span className="text-[9px] text-[#475569] px-1.5 py-0.5 rounded bg-cyan-500/10 text-cyan-500">
+                  <span className="text-[9px] text-[var(--text-tertiary)] px-1.5 py-0.5 rounded bg-cyan-500/10 text-cyan-500">
                     {graphNodes.length} nodes
                   </span>
                 )}
-                <kbd className="flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-white/[0.06] text-[10px] text-[#64748B] font-mono">
+                <kbd className="flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-white/[0.06] text-[10px] text-[var(--text-tertiary)] font-mono">
                   ESC
                 </kbd>
               </div>
@@ -428,6 +541,18 @@ export function CommandPalette({ isOpen, onClose, orgSlug, productSlug, currentS
 
             {/* Results */}
             <div className="max-h-[360px] overflow-y-auto py-1.5">
+              {/* Graph-query banner */}
+              {activeGraphQuery && (
+                <div className="flex items-center gap-2 px-4 py-2 border-b border-white/[0.06] bg-cyan-500/[0.05]">
+                  <Hash size={11} className="text-cyan-400 shrink-0" />
+                  <span className="text-[11px] text-cyan-400 font-medium">
+                    Graph query: {activeGraphQuery.description}
+                  </span>
+                  <span className="ml-auto text-[10px] text-[var(--text-tertiary)]">
+                    {filteredCommands.filter(c => c.category === 'graph').length} match{filteredCommands.filter(c => c.category === 'graph').length !== 1 ? 'es' : ''}
+                  </span>
+                </div>
+              )}
               {/* Ask AI row — shown when query looks like a natural-language instruction */}
               {showAskAI && (
                 <button
@@ -439,18 +564,18 @@ export function CommandPalette({ isOpen, onClose, orgSlug, productSlug, currentS
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <span className="text-[13px] font-medium text-[#F1F5F9] truncate">Ask AI: &ldquo;{query}&rdquo;</span>
+                      <span className="text-[13px] font-medium text-[var(--text-primary)] truncate">Ask AI: &ldquo;{query}&rdquo;</span>
                       <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-[var(--accent)]/20 text-[var(--accent-text)] shrink-0">AI</span>
                     </div>
-                    <p className="text-[11px] text-[#64748B] mt-0.5">Gate → enhance → run in Computer Mode</p>
+                    <p className="text-[11px] text-[var(--text-tertiary)] mt-0.5">Gate → enhance → run in Computer Mode</p>
                   </div>
-                  <ArrowRight size={12} className="text-[#475569] shrink-0" />
+                  <ArrowRight size={12} className="text-[var(--text-tertiary)] shrink-0" />
                 </button>
               )}
               {filteredCommands.length === 0 && !showAskAI ? (
                 <div className="flex flex-col items-center justify-center py-10 text-center">
-                  <Search size={18} className="text-[#475569] mb-2" />
-                  <p className="text-[12px] text-[#64748B]">No results for &ldquo;{query}&rdquo;</p>
+                  <Search size={18} className="text-[var(--text-tertiary)] mb-2" />
+                  <p className="text-[12px] text-[var(--text-tertiary)]">No results for &ldquo;{query}&rdquo;</p>
                 </div>
               ) : filteredCommands.length === 0 ? null : (
                 filteredCommands.map((cmd, i) => {
@@ -474,23 +599,23 @@ export function CommandPalette({ isOpen, onClose, orgSlug, productSlug, currentS
 
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
-                          <span className="text-[13px] font-medium text-[#F1F5F9] truncate">{cmd.label}</span>
+                          <span className="text-[13px] font-medium text-[var(--text-primary)] truncate">{cmd.label}</span>
                           <span className={`text-[9px] px-1.5 py-0.5 rounded-full ${catStyle.bg} ${catStyle.color} shrink-0`}>
                             {catStyle.label}
                           </span>
                         </div>
                         {cmd.description && (
-                          <p className="text-[11px] text-[#64748B] truncate mt-0.5">{cmd.description}</p>
+                          <p className="text-[11px] text-[var(--text-tertiary)] truncate mt-0.5">{cmd.description}</p>
                         )}
                       </div>
 
                       <div className="flex items-center gap-2 shrink-0">
                         {cmd.shortcut && (
-                          <kbd className="px-1.5 py-0.5 rounded bg-white/[0.06] text-[10px] text-[#64748B] font-mono">
+                          <kbd className="px-1.5 py-0.5 rounded bg-white/[0.06] text-[10px] text-[var(--text-tertiary)] font-mono">
                             {cmd.shortcut}
                           </kbd>
                         )}
-                        {isSelected && <ArrowRight size={12} className="text-[#475569]" />}
+                        {isSelected && <ArrowRight size={12} className="text-[var(--text-tertiary)]" />}
                       </div>
                     </button>
                   )
@@ -500,12 +625,12 @@ export function CommandPalette({ isOpen, onClose, orgSlug, productSlug, currentS
 
             {/* Footer */}
             <div className="flex items-center justify-between px-4 py-2 border-t border-white/[0.06] bg-white/[0.01]">
-              <div className="flex items-center gap-3 text-[10px] text-[#475569]">
+              <div className="flex items-center gap-3 text-[10px] text-[var(--text-tertiary)]">
                 <span><kbd className="font-mono">↑↓</kbd> navigate</span>
                 <span><kbd className="font-mono">↵</kbd> select</span>
                 <span><kbd className="font-mono">esc</kbd> close</span>
               </div>
-              <span className="text-[10px] text-[#475569]">
+              <span className="text-[10px] text-[var(--text-tertiary)]">
                 {filteredCommands.length} result{filteredCommands.length !== 1 ? 's' : ''}
               </span>
             </div>

@@ -1,0 +1,7 @@
+# R20.7 — Explicit per-site allowlist for the no-hardcoded-hex guardrail.
+# Format: one "filepath:line" marker per line. Comments start with #.
+#
+# Whole-file exemptions live inside the script (FILE_ALLOWLIST) — use this file
+# for targeted per-line exemptions (SVG brand marks, gradient stops, etc.).
+#
+# Every entry should be justified. If it is not justified, migrate to a token.

@@ -208,17 +208,17 @@ export default function CreateProductModal({
 
           {/* Panel */}
           <motion.div
-            className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl border border-white/[0.08] bg-[#0A0F1E] shadow-2xl"
+            className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl border border-white/[0.08] bg-[var(--bg-base)] shadow-2xl"
             variants={panelVariants}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
-            <div className="sticky top-0 z-10 flex items-center justify-between px-6 py-4 border-b border-white/[0.08] bg-[#0A0F1E]/95 backdrop-blur-sm">
+            <div className="sticky top-0 z-10 flex items-center justify-between px-6 py-4 border-b border-white/[0.08] bg-[var(--bg-base)]/95 backdrop-blur-sm">
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-[#6366F1]/10 flex items-center justify-center">
-                  <Package className="w-4 h-4 text-[#6366F1]" />
+                <div className="w-8 h-8 rounded-lg bg-[var(--accent)]/10 flex items-center justify-center">
+                  <Package className="w-4 h-4 text-[var(--accent)]" />
                 </div>
-                <h2 className="text-lg font-semibold text-[#F1F5F9]">
+                <h2 className="text-lg font-semibold text-[var(--text-primary)]">
                   {mode === 'choose'
                     ? 'Create New Product'
                     : mode === 'scratch'
@@ -228,7 +228,7 @@ export default function CreateProductModal({
               </div>
               <button
                 onClick={onClose}
-                className="p-1.5 rounded-lg text-[#64748B] hover:text-[#94A3B8] hover:bg-white/[0.06] transition"
+                className="p-1.5 rounded-lg text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] hover:bg-white/[0.06] transition"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -246,46 +246,46 @@ export default function CreateProductModal({
                     exit={{ opacity: 0, y: -10 }}
                     transition={{ duration: 0.2 }}
                   >
-                    <p className="text-sm text-[#94A3B8] mb-6">
+                    <p className="text-sm text-[var(--text-secondary)] mb-6">
                       How would you like to begin?
                     </p>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       {/* Start from Scratch */}
                       <button
                         onClick={() => setMode('scratch')}
-                        className="group relative p-6 rounded-xl border border-white/[0.08] bg-white/[0.02] hover:bg-white/[0.05] hover:border-[#6366F1]/30 transition-all text-left"
+                        className="group relative p-6 rounded-xl border border-white/[0.08] bg-white/[0.02] hover:bg-white/[0.05] hover:border-[var(--accent)]/30 transition-all text-left"
                       >
-                        <div className="absolute top-0 right-0 w-20 h-20 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-2xl bg-[#6366F1]/10" />
-                        <div className="w-12 h-12 rounded-xl bg-[#6366F1]/10 flex items-center justify-center mb-4">
-                          <FileText className="w-6 h-6 text-[#6366F1]" />
+                        <div className="absolute top-0 right-0 w-20 h-20 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-2xl bg-[var(--accent)]/10" />
+                        <div className="w-12 h-12 rounded-xl bg-[var(--accent)]/10 flex items-center justify-center mb-4">
+                          <FileText className="w-6 h-6 text-[var(--accent)]" />
                         </div>
-                        <h3 className="font-medium text-[#F1F5F9] mb-1">
+                        <h3 className="font-medium text-[var(--text-primary)] mb-1">
                           Start from Scratch
                         </h3>
-                        <p className="text-sm text-[#64748B]">
+                        <p className="text-sm text-[var(--text-tertiary)]">
                           Create a blank product and define everything yourself
                         </p>
-                        <ArrowRight className="w-4 h-4 text-[#64748B] mt-3 group-hover:text-[#6366F1] group-hover:translate-x-1 transition-all" />
+                        <ArrowRight className="w-4 h-4 text-[var(--text-tertiary)] mt-3 group-hover:text-[#6366F1] group-hover:translate-x-1 transition-all" />
                       </button>
 
                       {/* Use Template */}
                       <button
                         onClick={() => setMode('template')}
-                        className="group relative p-6 rounded-xl border border-white/[0.08] bg-white/[0.02] hover:bg-white/[0.05] hover:border-[#6366F1]/30 transition-all text-left"
+                        className="group relative p-6 rounded-xl border border-white/[0.08] bg-white/[0.02] hover:bg-white/[0.05] hover:border-[var(--accent)]/30 transition-all text-left"
                       >
-                        <div className="absolute top-0 right-0 w-20 h-20 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-2xl bg-[#6366F1]/10" />
-                        <div className="w-12 h-12 rounded-xl bg-[#6366F1]/10 flex items-center justify-center mb-4">
-                          <Layout className="w-6 h-6 text-[#6366F1]" />
+                        <div className="absolute top-0 right-0 w-20 h-20 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-2xl bg-[var(--accent)]/10" />
+                        <div className="w-12 h-12 rounded-xl bg-[var(--accent)]/10 flex items-center justify-center mb-4">
+                          <Layout className="w-6 h-6 text-[var(--accent)]" />
                         </div>
-                        <h3 className="font-medium text-[#F1F5F9] mb-1">
+                        <h3 className="font-medium text-[var(--text-primary)] mb-1">
                           Use a Template
                         </h3>
-                        <p className="text-sm text-[#64748B]">
+                        <p className="text-sm text-[var(--text-tertiary)]">
                           Start with pre-built structure, pages, and workflows
                         </p>
                         <div className="flex items-center gap-1.5 mt-3">
-                          <Sparkles className="w-3.5 h-3.5 text-[#F59E0B]" />
-                          <span className="text-xs text-[#F59E0B]">
+                          <Sparkles className="w-3.5 h-3.5 text-[var(--color-warning)]" />
+                          <span className="text-xs text-[var(--color-warning)]">
                             AI-powered templates
                           </span>
                         </div>
@@ -307,8 +307,8 @@ export default function CreateProductModal({
                     <div className="space-y-5">
                       {/* Product Name */}
                       <div>
-                        <label className="block text-sm font-medium text-[#94A3B8] mb-2">
-                          Product Name <span className="text-[#F43F5E]">*</span>
+                        <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">
+                          Product Name <span className="text-[var(--color-error)]">*</span>
                         </label>
                         <input
                           type="text"
@@ -316,13 +316,13 @@ export default function CreateProductModal({
                           onChange={(e) => setName(e.target.value)}
                           placeholder="e.g. Mobile Banking App"
                           autoFocus
-                          className="w-full px-4 py-3 text-sm bg-white/[0.03] border border-white/[0.08] rounded-xl text-[#F1F5F9] placeholder:text-[#4A5568] focus:border-[#6366F1]/40 focus:outline-none focus:ring-1 focus:ring-[#6366F1]/20 transition"
+                          className="w-full px-4 py-3 text-sm bg-white/[0.03] border border-white/[0.08] rounded-xl text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:border-[var(--accent)]/40 focus:outline-none focus:ring-1 focus:ring-[var(--accent)]/20 transition"
                         />
                       </div>
 
                       {/* Description */}
                       <div>
-                        <label className="block text-sm font-medium text-[#94A3B8] mb-2">
+                        <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">
                           Description
                         </label>
                         <textarea
@@ -330,17 +330,17 @@ export default function CreateProductModal({
                           onChange={(e) => setDescription(e.target.value)}
                           placeholder="Brief description of what this product does..."
                           rows={3}
-                          className="w-full px-4 py-3 text-sm bg-white/[0.03] border border-white/[0.08] rounded-xl text-[#F1F5F9] placeholder:text-[#4A5568] focus:border-[#6366F1]/40 focus:outline-none focus:ring-1 focus:ring-[#6366F1]/20 transition resize-none"
+                          className="w-full px-4 py-3 text-sm bg-white/[0.03] border border-white/[0.08] rounded-xl text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:border-[var(--accent)]/40 focus:outline-none focus:ring-1 focus:ring-[var(--accent)]/20 transition resize-none"
                         />
                       </div>
 
                       {/* Slug */}
                       <div>
-                        <label className="block text-sm font-medium text-[#94A3B8] mb-2">
+                        <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">
                           URL Slug
                         </label>
                         <div className="relative">
-                          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm text-[#4A5568]">
+                          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm text-[var(--text-tertiary)]">
                             /{orgSlug}/
                           </span>
                           <input
@@ -350,7 +350,7 @@ export default function CreateProductModal({
                               setSlugEdited(true)
                               setSlug(slugify(e.target.value))
                             }}
-                            className="w-full pl-[calc(theme(spacing.4)+var(--slug-offset,5ch))] pr-4 py-3 text-sm bg-white/[0.03] border border-white/[0.08] rounded-xl text-[#F1F5F9] placeholder:text-[#4A5568] focus:border-[#6366F1]/40 focus:outline-none focus:ring-1 focus:ring-[#6366F1]/20 transition"
+                            className="w-full pl-[calc(theme(spacing.4)+var(--slug-offset,5ch))] pr-4 py-3 text-sm bg-white/[0.03] border border-white/[0.08] rounded-xl text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:border-[var(--accent)]/40 focus:outline-none focus:ring-1 focus:ring-[var(--accent)]/20 transition"
                             style={{
                               paddingLeft: `${1 + (orgSlug.length + 2) * 0.55}rem`,
                             }}
@@ -360,7 +360,7 @@ export default function CreateProductModal({
 
                       {/* Error */}
                       {error && (
-                        <p className="text-sm text-[#F43F5E]">{error}</p>
+                        <p className="text-sm text-[var(--color-error)]">{error}</p>
                       )}
                     </div>
 
@@ -369,14 +369,14 @@ export default function CreateProductModal({
                       <button
                         type="button"
                         onClick={() => setMode('choose')}
-                        className="text-sm text-[#64748B] hover:text-[#94A3B8] transition"
+                        className="text-sm text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] transition"
                       >
                         Back
                       </button>
                       <button
                         type="submit"
                         disabled={isSubmitting || !name.trim()}
-                        className="flex items-center gap-2 px-6 py-2.5 bg-[#6366F1] hover:bg-[#6366F1]/90 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium rounded-xl transition-all hover:shadow-[0_0_20px_rgba(99,102,241,0.3)]"
+                        className="flex items-center gap-2 px-6 py-2.5 bg-[var(--accent)] hover:bg-[var(--accent)]/90 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium rounded-xl transition-all hover:shadow-[0_0_20px_rgba(99,102,241,0.3)]"
                       >
                         {isSubmitting ? (
                           <>
@@ -404,7 +404,7 @@ export default function CreateProductModal({
                     transition={{ duration: 0.2 }}
                   >
                     {/* Template grid */}
-                    <p className="text-sm text-[#94A3B8] mb-4">
+                    <p className="text-sm text-[var(--text-secondary)] mb-4">
                       Choose a template to start with pre-built structure
                     </p>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
@@ -414,7 +414,7 @@ export default function CreateProductModal({
                           onClick={() => handleTemplateSelect(tmpl.id)}
                           className={`group p-4 rounded-xl border text-left transition-all ${
                             selectedTemplate === tmpl.id
-                              ? 'border-[#6366F1]/50 bg-[#6366F1]/10'
+                              ? 'border-[var(--accent)]/50 bg-[var(--accent)]/10'
                               : 'border-white/[0.08] bg-white/[0.02] hover:bg-white/[0.05] hover:border-white/[0.15]'
                           }`}
                         >
@@ -426,10 +426,10 @@ export default function CreateProductModal({
                               {tmpl.icon}
                             </div>
                             <div className="min-w-0">
-                              <h4 className="font-medium text-[#F1F5F9] text-sm">
+                              <h4 className="font-medium text-[var(--text-primary)] text-sm">
                                 {tmpl.name}
                               </h4>
-                              <p className="text-xs text-[#64748B] mt-0.5 leading-relaxed">
+                              <p className="text-xs text-[var(--text-tertiary)] mt-0.5 leading-relaxed">
                                 {tmpl.description}
                               </p>
                             </div>
@@ -442,21 +442,21 @@ export default function CreateProductModal({
                     <form onSubmit={handleSubmit}>
                       <div className="space-y-4 pt-4 border-t border-white/[0.08]">
                         <div>
-                          <label className="block text-sm font-medium text-[#94A3B8] mb-2">
+                          <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">
                             Product Name{' '}
-                            <span className="text-[#F43F5E]">*</span>
+                            <span className="text-[var(--color-error)]">*</span>
                           </label>
                           <input
                             type="text"
                             value={name}
                             onChange={(e) => setName(e.target.value)}
                             placeholder="e.g. My SaaS Product"
-                            className="w-full px-4 py-3 text-sm bg-white/[0.03] border border-white/[0.08] rounded-xl text-[#F1F5F9] placeholder:text-[#4A5568] focus:border-[#6366F1]/40 focus:outline-none focus:ring-1 focus:ring-[#6366F1]/20 transition"
+                            className="w-full px-4 py-3 text-sm bg-white/[0.03] border border-white/[0.08] rounded-xl text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:border-[var(--accent)]/40 focus:outline-none focus:ring-1 focus:ring-[var(--accent)]/20 transition"
                           />
                         </div>
 
                         <div>
-                          <label className="block text-sm font-medium text-[#94A3B8] mb-2">
+                          <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">
                             Description
                           </label>
                           <textarea
@@ -464,16 +464,16 @@ export default function CreateProductModal({
                             onChange={(e) => setDescription(e.target.value)}
                             placeholder="Brief description..."
                             rows={2}
-                            className="w-full px-4 py-3 text-sm bg-white/[0.03] border border-white/[0.08] rounded-xl text-[#F1F5F9] placeholder:text-[#4A5568] focus:border-[#6366F1]/40 focus:outline-none focus:ring-1 focus:ring-[#6366F1]/20 transition resize-none"
+                            className="w-full px-4 py-3 text-sm bg-white/[0.03] border border-white/[0.08] rounded-xl text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:border-[var(--accent)]/40 focus:outline-none focus:ring-1 focus:ring-[var(--accent)]/20 transition resize-none"
                           />
                         </div>
 
                         <div>
-                          <label className="block text-sm font-medium text-[#94A3B8] mb-2">
+                          <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">
                             URL Slug
                           </label>
                           <div className="relative">
-                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm text-[#4A5568]">
+                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm text-[var(--text-tertiary)]">
                               /{orgSlug}/
                             </span>
                             <input
@@ -483,7 +483,7 @@ export default function CreateProductModal({
                                 setSlugEdited(true)
                                 setSlug(slugify(e.target.value))
                               }}
-                              className="w-full pr-4 py-3 text-sm bg-white/[0.03] border border-white/[0.08] rounded-xl text-[#F1F5F9] placeholder:text-[#4A5568] focus:border-[#6366F1]/40 focus:outline-none focus:ring-1 focus:ring-[#6366F1]/20 transition"
+                              className="w-full pr-4 py-3 text-sm bg-white/[0.03] border border-white/[0.08] rounded-xl text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)] focus:border-[var(--accent)]/40 focus:outline-none focus:ring-1 focus:ring-[var(--accent)]/20 transition"
                               style={{
                                 paddingLeft: `${1 + (orgSlug.length + 2) * 0.55}rem`,
                               }}
@@ -492,7 +492,7 @@ export default function CreateProductModal({
                         </div>
 
                         {error && (
-                          <p className="text-sm text-[#F43F5E]">{error}</p>
+                          <p className="text-sm text-[var(--color-error)]">{error}</p>
                         )}
                       </div>
 
@@ -503,14 +503,14 @@ export default function CreateProductModal({
                             setSelectedTemplate(null)
                             setMode('choose')
                           }}
-                          className="text-sm text-[#64748B] hover:text-[#94A3B8] transition"
+                          className="text-sm text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] transition"
                         >
                           Back
                         </button>
                         <button
                           type="submit"
                           disabled={isSubmitting || !name.trim()}
-                          className="flex items-center gap-2 px-6 py-2.5 bg-[#6366F1] hover:bg-[#6366F1]/90 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium rounded-xl transition-all hover:shadow-[0_0_20px_rgba(99,102,241,0.3)]"
+                          className="flex items-center gap-2 px-6 py-2.5 bg-[var(--accent)] hover:bg-[var(--accent)]/90 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium rounded-xl transition-all hover:shadow-[0_0_20px_rgba(99,102,241,0.3)]"
                         >
                           {isSubmitting ? (
                             <>

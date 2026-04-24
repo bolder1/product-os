@@ -52,13 +52,13 @@ export function ModuleReadiness({ productId }: Props) {
       {/* Header */}
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
-          <Layers className="w-3.5 h-3.5 text-[#3B82F6]" />
-          <span className="text-[12px] font-semibold text-[#94A3B8] uppercase tracking-wider">Module Readiness</span>
+          <Layers className="w-3.5 h-3.5 text-[var(--accent)]" />
+          <span className="text-[12px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider">Module Readiness</span>
         </div>
         <button
           onClick={() => refetch()}
           disabled={isLoading}
-          className="text-[#475569] hover:text-[#94A3B8] transition-colors disabled:opacity-40"
+          className="text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] transition-colors disabled:opacity-40"
         >
           <RefreshCw size={11} className={isLoading ? 'animate-spin' : ''} />
         </button>
@@ -66,17 +66,17 @@ export function ModuleReadiness({ productId }: Props) {
 
       {/* Content */}
       {isLoading ? (
-        <div className="flex-1 flex items-center justify-center gap-2 text-[#475569]">
+        <div className="flex-1 flex items-center justify-center gap-2 text-[var(--text-tertiary)]">
           <Loader2 size={14} className="animate-spin" />
           <span className="text-[11px]">Computing readiness…</span>
         </div>
       ) : isEmpty || modules.length === 0 ? (
         <div className="flex-1 flex flex-col items-center justify-center gap-2 text-center py-4">
-          <Layers size={22} className="text-[#334155]" />
-          <p className="text-[11px] text-[#475569]">No modules yet. Apply a template or use the Planner to scaffold modules.</p>
+          <Layers size={22} className="text-[var(--border-default)]" />
+          <p className="text-[11px] text-[var(--text-tertiary)]">No modules yet. Apply a template or use the Planner to scaffold modules.</p>
           <button
             onClick={() => router.push(`/${params.orgSlug}/${params.productSlug}/planner`)}
-            className="text-[10px] text-[#3B82F6] hover:text-[#60A5FA] flex items-center gap-1 transition-colors"
+            className="text-[10px] text-[var(--accent)] hover:text-[var(--accent)] flex items-center gap-1 transition-colors"
           >
             Open Planner <ArrowRight size={10} />
           </button>
@@ -98,7 +98,7 @@ export function ModuleReadiness({ productId }: Props) {
               >
                 {/* Module name + status */}
                 <div className="flex items-center justify-between gap-2 mb-2">
-                  <span className="text-[11px] font-medium text-[#F1F5F9] truncate flex-1">{mod.label}</span>
+                  <span className="text-[11px] font-medium text-[var(--text-primary)] truncate flex-1">{mod.label}</span>
                   <span
                     className="text-[9px] font-semibold px-1.5 py-0.5 rounded-full shrink-0"
                     style={{ background: `${color}18`, color }}
@@ -111,11 +111,11 @@ export function ModuleReadiness({ productId }: Props) {
                 <ReadinessBar value={mod.readiness} />
 
                 {/* Node kind counts */}
-                <div className="flex items-center gap-3 mt-2 text-[9px] text-[#64748B]">
+                <div className="flex items-center gap-3 mt-2 text-[9px] text-[var(--text-tertiary)]">
                   <span>{mod.featureCount} features</span>
                   <span>{mod.pageCount} pages</span>
                   <span>{mod.entityCount} entities</span>
-                  <span className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity text-[#3B82F6] flex items-center gap-0.5">
+                  <span className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity text-[var(--accent)] flex items-center gap-0.5">
                     Graph <ArrowRight size={8} />
                   </span>
                 </div>
@@ -142,12 +142,12 @@ export function ModuleReadiness({ productId }: Props) {
 
       {/* Footer — overall score summary */}
       {data && !isEmpty && (
-        <div className="mt-3 pt-3 border-t border-white/[0.06] flex items-center justify-between text-[10px] text-[#64748B]">
+        <div className="mt-3 pt-3 border-t border-white/[0.06] flex items-center justify-between text-[10px] text-[var(--text-tertiary)]">
           <span>{modules.length} module{modules.length !== 1 ? 's' : ''}</span>
           <span className="flex items-center gap-1">
             {modules.filter((m) => m.readiness >= 70).length > 0 && (
               <>
-                <CheckCircle2 size={10} className="text-[#10B981]" />
+                <CheckCircle2 size={10} className="text-[var(--color-success)]" />
                 {modules.filter((m) => m.readiness >= 70).length} ready
               </>
             )}

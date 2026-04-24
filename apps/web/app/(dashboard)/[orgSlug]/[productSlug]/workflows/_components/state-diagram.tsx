@@ -118,7 +118,7 @@ export default function StateDiagram({
   });
 
   return (
-    <div className="bg-[#0a0f1e] rounded-xl border border-white/[0.06] p-4 overflow-x-auto">
+    <div className="bg-[var(--bg-base)] rounded-xl border border-white/[0.06] p-4 overflow-x-auto">
       <svg
         ref={svgRef}
         viewBox={`0 0 ${svgW} ${svgH}`}
@@ -134,7 +134,7 @@ export default function StateDiagram({
             refY="3"
             orient="auto"
           >
-            <path d="M0,0 L8,3 L0,6 Z" fill="#64748B" />
+            <path d="M0,0 L8,3 L0,6 Z" fill="var(--text-tertiary)" />
           </marker>
           <marker
             id="arrowhead-accent"
@@ -144,7 +144,7 @@ export default function StateDiagram({
             refY="3"
             orient="auto"
           >
-            <path d="M0,0 L8,3 L0,6 Z" fill="#10B981" />
+            <path d="M0,0 L8,3 L0,6 Z" fill="var(--color-success)" />
           </marker>
         </defs>
 
@@ -163,7 +163,7 @@ export default function StateDiagram({
               <motion.path
                 d={d}
                 fill="none"
-                stroke="#64748B"
+                stroke="var(--text-tertiary)"
                 strokeWidth={1.5}
                 strokeOpacity={0.5}
                 markerEnd="url(#arrowhead)"
@@ -177,9 +177,9 @@ export default function StateDiagram({
                 width={60}
                 height={18}
                 rx={4}
-                fill="#0a0f1e"
+                fill="var(--bg-base)"
                 fillOpacity={0.95}
-                stroke="#64748B"
+                stroke="var(--text-tertiary)"
                 strokeOpacity={0.2}
                 strokeWidth={0.5}
               />
@@ -188,7 +188,7 @@ export default function StateDiagram({
                 y={label.y + 4}
                 textAnchor="middle"
                 fontSize={9}
-                fill="#94A3B8"
+                fill="var(--text-secondary)"
               >
                 {tr.trigger}
               </text>
@@ -230,7 +230,7 @@ export default function StateDiagram({
                 textAnchor="middle"
                 fontSize={11}
                 fontWeight={600}
-                fill="#F1F5F9"
+                fill="var(--text-primary)"
               >
                 {s.name}
               </text>

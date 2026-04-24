@@ -64,6 +64,22 @@ export const useProductStore = create<ProductStore>()(
         }
         set((state) => ({ products: [...state.products, tempProduct] }))
 
+        // If this is the org's first product, pre-dismiss the first-run banner
+        // so the onboarding UX doesn't repeat on the product page.
+        try {
+          const orgProducts = get().products.filter((p) => p.orgSlug === input.orgSlug)
+          if (orgProducts.length === 1 && typeof window !== 'undefined') {
+            const raw = localStorage.getItem('product-os-first-run-dismissed')
+            const existing = raw ? (JSON.parse(raw) as string[]) : []
+            if (!existing.includes(tempProduct.id)) {
+              localStorage.setItem(
+                'product-os-first-run-dismissed',
+                JSON.stringify([...existing, tempProduct.id]),
+              )
+            }
+          }
+        } catch {}
+
         try {
           // Persist to DB
           const dbProduct = await trpcMutate<any>('product.create', {
@@ -91,6 +107,19 @@ export const useProductStore = create<ProductStore>()(
               p.id === tempProduct.id ? realProduct : p
             ),
           }))
+
+          // Carry the first-run dismissal over to the real product id
+          try {
+            if (typeof window !== 'undefined') {
+              const raw = localStorage.getItem('product-os-first-run-dismissed')
+              const existing = raw ? (JSON.parse(raw) as string[]) : []
+              if (existing.includes(tempProduct.id) && !existing.includes(realProduct.id)) {
+                const next = existing.filter((id) => id !== tempProduct.id).concat(realProduct.id)
+                localStorage.setItem('product-os-first-run-dismissed', JSON.stringify(next))
+              }
+            }
+          } catch {}
+
           return realProduct
         } catch (err) {
           // Rollback on failure

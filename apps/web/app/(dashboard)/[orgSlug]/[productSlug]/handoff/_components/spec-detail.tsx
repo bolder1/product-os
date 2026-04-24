@@ -51,7 +51,7 @@ function CopyRow({ label, value }: { label: string; value: string }) {
     <div className="group flex items-center justify-between py-1.5 px-2 rounded hover:bg-white/[0.04] transition-colors">
       <span className="font-mono text-[11px] text-[var(--text-secondary)]">{label}</span>
       <div className="flex items-center gap-1.5">
-        <span className="font-mono text-[11px] text-[#06B6D4]">{value}</span>
+        <span className="font-mono text-[11px] text-[var(--accent)]">{value}</span>
         <button
           onClick={handleCopy}
           className="opacity-0 group-hover:opacity-100 transition-opacity p-0.5 rounded hover:bg-white/[0.08]"
@@ -118,7 +118,7 @@ function CSSTab({ item }: { item: HandoffItem }) {
                     className="w-3 h-3 rounded-sm border border-white/[0.15]"
                     style={{ backgroundColor: s.value.startsWith('#') || s.value.startsWith('rgb') ? s.value : undefined }}
                   />
-                  <span className="font-mono text-[11px] text-[#06B6D4]">{s.value}</span>
+                  <span className="font-mono text-[11px] text-[var(--accent)]">{s.value}</span>
                 </div>
               </div>
             ))}
@@ -163,7 +163,7 @@ function TokensTab({ item }: { item: HandoffItem }) {
                   </div>
                 )}
                 <span className="font-mono text-[11px] text-[var(--text-primary)] flex-1 truncate">{t.name}</span>
-                <span className="font-mono text-[10px] text-[#06B6D4]">{t.value}</span>
+                <span className="font-mono text-[10px] text-[var(--accent)]">{t.value}</span>
               </div>
             ))}
           </div>
@@ -211,7 +211,7 @@ function PropsTab({ item }: { item: HandoffItem }) {
                   className={`border-b border-[var(--border-subtle)] last:border-0 ${i % 2 === 0 ? '' : 'bg-white/[0.01]'}`}
                 >
                   <td className="px-2.5 py-2 font-mono text-[var(--text-primary)]">{p.name}</td>
-                  <td className="px-2.5 py-2 font-mono text-[#8B5CF6] text-[10px]">{p.type}</td>
+                  <td className="px-2.5 py-2 font-mono text-[var(--accent)] text-[10px]">{p.type}</td>
                   <td className="px-2.5 py-2 font-mono text-[var(--text-secondary)]">{p.defaultVal}</td>
                   <td className="px-2.5 py-2 text-[var(--text-tertiary)]">{p.required ? '✓' : '—'}</td>
                 </tr>
@@ -422,7 +422,7 @@ export function SpecDetail({ item }: SpecDetailProps) {
             {t.label}
           </button>
         ))}
-        <button className="ml-auto flex items-center gap-1 px-2 py-1 rounded text-[10px] text-[#8B5CF6] hover:bg-[#8B5CF6]/10 transition-colors">
+        <button className="ml-auto flex items-center gap-1 px-2 py-1 rounded text-[10px] text-[var(--accent)] hover:bg-[var(--accent)]/10 transition-colors">
           <Sparkles className="w-3 h-3" />
           AI
         </button>
