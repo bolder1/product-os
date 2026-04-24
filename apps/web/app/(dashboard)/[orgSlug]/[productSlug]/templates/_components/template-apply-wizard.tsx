@@ -10,18 +10,51 @@ import { useGraphStore, type NodeKind } from '../../../../../lib/graph-store'
 import { useActivityStore } from '../../../../../lib/activity-store'
 import { useNotificationStore } from '../../../../../lib/notification-store'
 
-const kindColors: Record<string, string> = {
-  module: '#3B82F6',
-  feature: '#8B5CF6',
-  page: '#06B6D4',
-  entity: '#10B981',
-  component: '#F59E0B',
-  token: '#EC4899',
-  workflow: '#10B981',
-  screen: '#06B6D4',
-  variant: '#F43F5E',
-  journey: '#8B5CF6',
-  asset: '#64748B',
+/**
+ * Per R20 palette consolidation, node-kind identity rides the semantic tone
+ * ramp. Label carries the meaning; color now only signals tone (structural vs
+ * content vs transient vs config).
+ */
+type Tone = 'info' | 'accent' | 'success' | 'warning' | 'error' | 'neutral'
+
+const kindTones: Record<string, Tone> = {
+  module: 'info',
+  feature: 'accent',
+  page: 'info',
+  entity: 'success',
+  component: 'warning',
+  token: 'accent',
+  workflow: 'success',
+  screen: 'info',
+  variant: 'error',
+  journey: 'accent',
+  asset: 'neutral',
+}
+
+/** Pre-composed tone → className pairs — no template-literal concat needed. */
+const toneText: Record<Tone, string> = {
+  info:    'text-[var(--accent)]',
+  accent:  'text-[var(--accent-text)]',
+  success: 'text-[var(--color-success)]',
+  warning: 'text-[var(--color-warning)]',
+  error:   'text-[var(--color-error)]',
+  neutral: 'text-[var(--text-tertiary)]',
+}
+const toneBgSoft: Record<Tone, string> = {
+  info:    'bg-[var(--accent-subtle)]',
+  accent:  'bg-[var(--accent-muted)]',
+  success: 'bg-[var(--color-success-muted)]',
+  warning: 'bg-[var(--color-warning-muted)]',
+  error:   'bg-[var(--color-error-muted)]',
+  neutral: 'bg-[var(--bg-inset)]',
+}
+const toneBorder: Record<Tone, string> = {
+  info:    'border-[var(--accent)]/25',
+  accent:  'border-[var(--accent-text)]/25',
+  success: 'border-[var(--color-success)]/25',
+  warning: 'border-[var(--color-warning)]/25',
+  error:   'border-[var(--color-error)]/25',
+  neutral: 'border-[var(--border-default)]',
 }
 
 const steps = [
@@ -156,7 +189,7 @@ export function TemplateApplyWizard({ template, onClose }: TemplateApplyWizardPr
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
           transition={{ type: 'spring', stiffness: 300, damping: 28 }}
-          className="relative w-full max-w-2xl max-h-[85vh] rounded-2xl bg-[#0C1024] border border-white/[0.08] shadow-2xl overflow-hidden flex flex-col"
+          className="relative w-full max-w-2xl max-h-[85vh] rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-default)] shadow-2xl overflow-hidden flex flex-col"
         >
           {/* Header */}
           <div className="flex items-center justify-between px-6 py-4 border-b border-white/[0.06]">
@@ -270,34 +303,30 @@ export function TemplateApplyWizard({ template, onClose }: TemplateApplyWizardPr
                   </div>
 
                   {/* Nodes to create */}
-                  {Object.entries(groupedNodes).map(([kind, nodes]) => (
-                    <div key={kind}>
-                      <div className="flex items-center gap-2 mb-2">
-                        <Circle
-                          className="w-2.5 h-2.5"
-                          fill={kindColors[kind] || '#64748B'}
-                          stroke="none"
-                        />
-                        <span className="text-xs font-medium text-[var(--text-secondary)] capitalize">{kind}s</span>
-                        <span className="text-[10px] text-[var(--text-tertiary)]">({nodes.length})</span>
-                      </div>
-                      <div className="flex flex-wrap gap-1.5 pl-4 mb-2">
-                        {nodes.map((n) => (
-                          <span
-                            key={n.label}
-                            className="px-2.5 py-1 rounded-md text-xs border"
-                            style={{
-                              backgroundColor: `${kindColors[kind] || '#64748B'}10`,
-                              borderColor: `${kindColors[kind] || '#64748B'}20`,
-                              color: kindColors[kind] || '#64748B',
-                            }}
-                          >
-                            {n.label}
+                  {Object.entries(groupedNodes).map(([kind, nodes]) => {
+                    const tone = kindTones[kind] ?? 'neutral'
+                    return (
+                      <div key={kind}>
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className={toneText[tone]}>
+                            <Circle className="w-2.5 h-2.5" fill="currentColor" stroke="none" />
                           </span>
-                        ))}
+                          <span className="text-xs font-medium text-[var(--text-secondary)] capitalize">{kind}s</span>
+                          <span className="text-[10px] text-[var(--text-tertiary)]">({nodes.length})</span>
+                        </div>
+                        <div className="flex flex-wrap gap-1.5 pl-4 mb-2">
+                          {nodes.map((n) => (
+                            <span
+                              key={n.label}
+                              className={`px-2.5 py-1 rounded-md text-xs border ${toneBgSoft[tone]} ${toneBorder[tone]} ${toneText[tone]}`}
+                            >
+                              {n.label}
+                            </span>
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    )
+                  })}
 
                   <div className="p-3 rounded-lg bg-white/[0.03] border border-white/[0.06] text-xs text-[var(--text-secondary)]">
                     Total: {template.nodeCount} nodes, {template.edgeCount} edges
