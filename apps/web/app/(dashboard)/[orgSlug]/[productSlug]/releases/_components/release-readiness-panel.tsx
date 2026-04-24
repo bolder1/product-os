@@ -25,10 +25,10 @@ function CircleProgress({ score }: { score: number }) {
   const offset = circ - (score / 100) * circ
   const color =
     score >= 80
-      ? 'var(--color-success, #10B981)'
+      ? 'var(--color-success)'
       : score >= 50
-      ? 'var(--color-warning, #F59E0B)'
-      : 'var(--color-error, #F43F5E)'
+      ? 'var(--color-warning)'
+      : 'var(--color-error)'
 
   return (
     <div className="relative flex items-center justify-center" style={{ width: 112, height: 112 }}>
@@ -143,20 +143,25 @@ export function ReleaseReadinessPanel({ productId, onDeploy }: ReleaseReadinessP
 
   const scoreColor =
     score >= 80
-      ? 'var(--color-success, #10B981)'
+      ? 'var(--color-success)'
       : score >= 50
-      ? 'var(--color-warning, #F59E0B)'
-      : 'var(--color-error, #F43F5E)'
+      ? 'var(--color-warning)'
+      : 'var(--color-error)'
 
+  /**
+   * Per R20, sub-score identity rides the semantic tone ramp. Task
+   * completion → accent (neutral progress), approvals → accent-text
+   * (distinct but related), validation → success (pass/fail), blockers
+   * → warning (friction).
+   */
   const subScores: SubScore[] = [
-    { label: 'Tasks', score: taskScore, max: 30, color: '#60A5FA' },
-    { label: 'Approvals', score: approvalScore, max: 25, color: '#A78BFA' },
-    { label: 'Validation', score: validationScore, max: 25, color: '#34D399' },
-    {
-      label: 'Blockers (deduction)',
+    { label: 'Tasks',               score: taskScore,       max: 30, color: 'var(--accent)' },
+    { label: 'Approvals',           score: approvalScore,   max: 25, color: 'var(--accent-text)' },
+    { label: 'Validation',          score: validationScore, max: 25, color: 'var(--color-success)' },
+    { label: 'Blockers (deduction)',
       score: Math.max(0, 20 - blockerDeduction),
       max: 20,
-      color: '#FB923C',
+      color: 'var(--color-warning)',
     },
   ]
 
@@ -215,7 +220,7 @@ export function ReleaseReadinessPanel({ productId, onDeploy }: ReleaseReadinessP
                 color: 'var(--text-secondary)',
               }}
             >
-              <AlertTriangle size={11} style={{ color: 'var(--color-warning, #F59E0B)', flexShrink: 0 }} />
+              <AlertTriangle size={11} style={{ color: 'var(--color-warning)', flexShrink: 0 }} />
               <span className="truncate">{issue}</span>
             </div>
           ))}
@@ -241,8 +246,8 @@ export function ReleaseReadinessPanel({ productId, onDeploy }: ReleaseReadinessP
                         cursor: 'not-allowed',
                       }
                     : {
-                        background: 'var(--color-success, #10B981)',
-                        color: '#fff',
+                        background: 'var(--color-success)',
+                        color: '#ffffff',
                         cursor: 'pointer',
                       }
                 }
