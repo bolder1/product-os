@@ -59,6 +59,13 @@ const targetIcons: Record<RemixTarget, React.ReactNode> = {
   page: <Layout className="w-3.5 h-3.5" />,
 }
 
+/**
+ * Mock LLM remix output. The hex literals in the `preview` payloads are the
+ * user-facing *content* of each variation — distinct color swatches the user
+ * is selecting between, not chrome applied to Product OS surfaces. They
+ * represent what a real LLM would return and must stay literal. Wrapping
+ * chrome (surrounding panel, buttons, labels) uses tokens everywhere else.
+ */
 function generateRemixVariations(req: RemixRequest): RemixVariation[] {
   const { target, sourceLabel, sourceProps } = req
 
@@ -77,7 +84,8 @@ function generateRemixVariations(req: RemixRequest): RemixVariation[] {
           id: 'remix-c2',
           label: `${sourceLabel} — Bold`,
           description: 'High-contrast variant with stronger colors and larger font weight.',
-          preview: { ...sourceProps, fontWeight: '700', background: '#4c8dff', color: '#fff', shadow: '0 4px 16px rgba(76,141,255,0.3)' },
+          // eslint-disable-next-line no-hardcoded-hex -- mock LLM variation payload
+          preview: { ...sourceProps, fontWeight: '700', background: '#4c8dff', color: '#ffffff', shadow: '0 4px 16px rgba(76,141,255,0.3)' },
           confidence: 88,
           tags: ['bold', 'high-contrast'],
         },
@@ -93,6 +101,7 @@ function generateRemixVariations(req: RemixRequest): RemixVariation[] {
           id: 'remix-c4',
           label: `${sourceLabel} — Outlined`,
           description: 'Transparent background with prominent border and icon emphasis.',
+          // eslint-disable-next-line no-hardcoded-hex -- mock LLM variation payload
           preview: { ...sourceProps, background: 'transparent', border: '2px solid #4c8dff', color: '#4c8dff' },
           confidence: 90,
           tags: ['outline', 'lightweight'],
@@ -105,6 +114,7 @@ function generateRemixVariations(req: RemixRequest): RemixVariation[] {
           id: 'remix-cl1',
           label: 'Cooler Palette',
           description: 'Shift hues 20deg cooler for a more professional feel.',
+          // eslint-disable-next-line no-hardcoded-hex -- mock LLM palette payload
           preview: { primary: '#4F46E5', secondary: '#3B82F6', accent: '#06B6D4', surface: 'rgba(255,255,255,0.03)' },
           confidence: 91,
           tags: ['cool', 'professional'],
@@ -113,6 +123,7 @@ function generateRemixVariations(req: RemixRequest): RemixVariation[] {
           id: 'remix-cl2',
           label: 'Warmer Palette',
           description: 'Add warm undertones for approachability.',
+          // eslint-disable-next-line no-hardcoded-hex -- mock LLM palette payload
           preview: { primary: '#8B5CF6', secondary: '#EC4899', accent: '#F59E0B', surface: 'rgba(255,255,255,0.04)' },
           confidence: 86,
           tags: ['warm', 'friendly'],
@@ -121,6 +132,7 @@ function generateRemixVariations(req: RemixRequest): RemixVariation[] {
           id: 'remix-cl3',
           label: 'Monochrome',
           description: 'Single-hue palette with varying saturation and lightness.',
+          // eslint-disable-next-line no-hardcoded-hex -- mock LLM palette payload
           preview: { primary: '#4c8dff', secondary: '#6da3ff', accent: '#a0c4ff', surface: 'rgba(76,141,255,0.05)' },
           confidence: 94,
           tags: ['mono', 'cohesive'],
