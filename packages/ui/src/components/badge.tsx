@@ -1,36 +1,23 @@
 'use client'
 
-import * as React from 'react'
-import { cva, type VariantProps } from 'class-variance-authority'
 import { cn } from '../lib/utils'
 
-const badgeVariants = cva(
-  'inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium transition-colors',
-  {
-    variants: {
-      variant: {
-        default: 'bg-indigo-500/15 text-indigo-400 border border-indigo-500/20',
-        success: 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/20',
-        warning: 'bg-amber-500/15 text-amber-400 border border-amber-500/20',
-        error: 'bg-rose-500/15 text-rose-400 border border-rose-500/20',
-        info: 'bg-cyan-500/15 text-cyan-400 border border-cyan-500/20',
-        outline: 'border border-white/[0.12] text-[#94A3B8]',
-      },
-    },
-    defaultVariants: {
-      variant: 'default',
-    },
-  }
-)
+type Tone = 'neutral' | 'grounded' | 'drift' | 'danger' | 'info'
 
-export interface BadgeProps
-  extends React.HTMLAttributes<HTMLSpanElement>,
-    VariantProps<typeof badgeVariants> {}
-
-function Badge({ className, variant, ...props }: BadgeProps) {
-  return (
-    <span className={cn(badgeVariants({ variant }), className)} {...props} />
-  )
+export interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
+  tone?: Tone
+  /**
+   * Status badges carry a dot as well as a label — colour is never the only
+   * carrier of meaning.
+   */
+  dot?: boolean
 }
 
-export { Badge, badgeVariants }
+export function Badge({ tone = 'neutral', dot, className, children, ...props }: BadgeProps) {
+  return (
+    <span data-tone={tone} className={cn('g-badge', className)} {...props}>
+      {dot ? <span aria-hidden="true" className="g-badge-dot" /> : null}
+      {children}
+    </span>
+  )
+}
