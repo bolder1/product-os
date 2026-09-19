@@ -1,19 +1,9 @@
 import type { Metadata } from 'next'
 import { Archivo, JetBrains_Mono } from 'next/font/google'
 import './globals.css'
-import { Providers } from './providers'
 
-const sans = Archivo({
-  subsets: ['latin'],
-  variable: '--font-archivo',
-  display: 'swap',
-})
-
-const mono = JetBrains_Mono({
-  subsets: ['latin'],
-  variable: '--font-mono',
-  display: 'swap',
-})
+const sans = Archivo({ subsets: ['latin'], variable: '--font-archivo', display: 'swap' })
+const mono = JetBrains_Mono({ subsets: ['latin'], variable: '--font-mono', display: 'swap' })
 
 export const metadata: Metadata = {
   title: 'Ground — product memory for AI agents',
@@ -24,9 +14,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${sans.variable} ${mono.variable}`}>
-      <body>
-        <Providers>{children}</Providers>
-      </body>
+      <body>{children}</body>
     </html>
   )
 }

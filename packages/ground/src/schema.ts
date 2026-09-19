@@ -1,0 +1,104 @@
+import {
+  pgTable,
+  uuid,
+  text,
+  timestamp,
+  integer,
+  jsonb,
+  pgEnum,
+  index,
+} from 'drizzle-orm/pg-core'
+
+export const entryKind = pgEnum('entry_kind', [
+  'decision',
+  'constraint',
+  'convention',
+  'glossary',
+  'nongoal',
+])
+
+export type EntryKind = (typeof entryKind.enumValues)[number]
+
+export const users = pgTable('users', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  email: text('email').notNull().unique(),
+  name: text('name'),
+  passwordHash: text('password_hash').notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+})
+
+export const sessions = pgTable(
+  'sessions',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    token: text('token').notNull().unique(),
+    expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index('sessions_token_idx').on(t.token)],
+)
+
+export const workspaces = pgTable(
+  'workspaces',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    ownerId: uuid('owner_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    name: text('name').notNull(),
+    slug: text('slug').notNull().unique(),
+    /** Bearer token the MCP server authenticates with. One per workspace. */
+    mcpToken: text('mcp_token').notNull().unique(),
+    /** An entry not confirmed within this many days counts as drifted. */
+    staleAfterDays: integer('stale_after_days').notNull().default(90),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index('workspaces_owner_idx').on(t.ownerId)],
+)
+
+export const entries = pgTable(
+  'entries',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    workspaceId: uuid('workspace_id')
+      .notNull()
+      .references(() => workspaces.id, { onDelete: 'cascade' }),
+    kind: entryKind('kind').notNull(),
+    title: text('title').notNull(),
+    body: text('body').notNull().default(''),
+    /** Kind-specific required fields, e.g. { rejected, because }. */
+    fields: jsonb('fields').notNull().default({}),
+    /** Visible ageing is the feature — this is what makes drift detectable. */
+    lastConfirmedAt: timestamp('last_confirmed_at', { withTimezone: true }).notNull().defaultNow(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    index('entries_workspace_idx').on(t.workspaceId),
+    index('entries_confirmed_idx').on(t.workspaceId, t.lastConfirmedAt),
+  ],
+)
+
+/** Every MCP read is logged, so the app can show an agent actually used it. */
+export const agentQueries = pgTable(
+  'agent_queries',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    workspaceId: uuid('workspace_id')
+      .notNull()
+      .references(() => workspaces.id, { onDelete: 'cascade' }),
+    tool: text('tool').notNull(),
+    query: text('query'),
+    resultCount: integer('result_count').notNull().default(0),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index('agent_queries_workspace_idx').on(t.workspaceId, t.createdAt)],
+)
+
+export type User = typeof users.$inferSelect
+export type Workspace = typeof workspaces.$inferSelect
+export type Entry = typeof entries.$inferSelect
+export type AgentQuery = typeof agentQueries.$inferSelect
