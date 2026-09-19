@@ -6,3 +6,11 @@ export { Badge, type BadgeProps } from './badge'
 export { Empty, type EmptyProps } from './empty'
 export { Spinner } from './spinner'
 export { Logo, Wordmark } from './logo'
+export {
+  ContextEntryRow,
+  FieldRow,
+  StrataRule,
+  type ContextEntryRowProps,
+  type FieldRowProps,
+  type EntryState,
+} from './context-entry'

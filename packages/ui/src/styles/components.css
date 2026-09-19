@@ -247,3 +247,125 @@
   .g-spinner-mark { animation-duration: 2s; }
   .g-button, .g-input, .g-card[data-interactive] { transition-duration: 1ms; }
 }
+
+/* ── Context entry row ────────────────────────────────────────── */
+.g-entry {
+  display: flex;
+  align-items: center;
+  gap: var(--g-space-3);
+  width: 100%;
+  height: 44px;
+  padding-inline: var(--g-space-4);
+  background: var(--g-raised);
+  border: 0;
+  border-bottom: 1px solid var(--g-line-subtle);
+  text-align: left;
+  cursor: pointer;
+  font-family: var(--g-font-sans);
+  transition: background-color var(--g-duration) var(--g-ease);
+}
+
+.g-entry:hover { background: var(--g-sunken); }
+.g-entry:focus-visible { outline: none; box-shadow: var(--g-focus-ring); }
+.g-entry[data-selected] { background: var(--g-sunken); }
+
+.g-entry-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: var(--g-radius-full);
+  flex-shrink: 0;
+}
+.g-entry[data-state='grounded'] .g-entry-dot { background: var(--g-grounded); }
+.g-entry[data-state='drifted']  .g-entry-dot { background: var(--g-drift); }
+.g-entry[data-state='draft']    .g-entry-dot { background: var(--g-ink-muted); }
+
+.g-entry-title {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--g-text-sm);
+  font-weight: var(--g-weight-medium);
+  letter-spacing: var(--g-tracking-snug);
+  color: var(--g-ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* The type pill — a supertag, at its quietest. */
+.g-entry-kind {
+  flex-shrink: 0;
+  height: 20px;
+  display: inline-flex;
+  align-items: center;
+  padding-inline: var(--g-space-2);
+  border: 1px solid var(--g-line);
+  border-radius: var(--g-radius-sm);
+  background: var(--g-sunken);
+  font-family: var(--g-font-mono);
+  font-size: var(--g-text-xs);
+  color: var(--g-ink-secondary);
+}
+
+.g-entry-age {
+  flex-shrink: 0;
+  width: 112px;
+  text-align: right;
+  font-family: var(--g-font-mono);
+  font-size: var(--g-text-xs);
+  font-variant-numeric: tabular-nums;
+  color: var(--g-ink-muted);
+}
+.g-entry[data-state='drifted'] .g-entry-age { color: var(--g-drift); }
+
+/* ── Field row ────────────────────────────────────────────────── */
+.g-fieldrow {
+  display: grid;
+  grid-template-columns: 104px minmax(0, 1fr);
+  gap: var(--g-space-4);
+  align-items: baseline;
+  padding-block: var(--g-space-2);
+}
+
+.g-fieldrow-label {
+  font-family: var(--g-font-mono);
+  font-size: var(--g-text-xs);
+  letter-spacing: var(--g-tracking-wide);
+  color: var(--g-ink-muted);
+}
+
+.g-fieldrow-value {
+  font-size: var(--g-text-sm);
+  color: var(--g-ink);
+  line-height: var(--g-leading-snug);
+}
+.g-fieldrow[data-empty] .g-fieldrow-value { color: var(--g-ink-muted); }
+
+@media (max-width: 560px) {
+  .g-fieldrow { grid-template-columns: 1fr; gap: 2px; }
+}
+
+/* ── Strata rule ──────────────────────────────────────────────── */
+.g-strata {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  width: min(var(--g-strata-w, 320px), 100%);
+}
+.g-strata i { display: block; height: 1px; background: var(--g-line-strong); }
+.g-strata i:nth-child(1) { width: 100%; }
+.g-strata i:nth-child(2) { width: 62%; opacity: 0.7; }
+.g-strata i:nth-child(3) { width: 28%; opacity: 0.45; }
+
+/* ── Visually hidden, still announced ─────────────────────────── */
+.g-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
