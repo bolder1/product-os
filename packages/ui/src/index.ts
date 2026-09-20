@@ -1,3 +1,2 @@
-export * from './lib/utils'
-export * from './tokens/index'
-export * from './components/index'
+export * from './components'
+export { cn } from './lib/utils'

@@ -1,0 +1,198 @@
+/* ────────────────────────────────────────────────────────────────
+   Ground — design tokens
+   Earth-dark ink on warm bone. Signal green for grounded state,
+   amber for drift. Light is the default; dark is a first-class peer.
+   ──────────────────────────────────────────────────────────────── */
+
+:root {
+  /* ── Surfaces ─────────────────────────────────────────────── */
+  --g-canvas:        #f7f4ef;  /* page */
+  --g-raised:        #ffffff;  /* cards, panels */
+  --g-sunken:        #efeae2;  /* wells, inset areas */
+  --g-overlay:       #ffffff;  /* dialogs, popovers */
+  --g-scrim:         rgba(26, 23, 20, 0.44);
+
+  /* ── Ink ──────────────────────────────────────────────────── */
+  --g-ink:           #1a1714;  /* primary text */
+  --g-ink-secondary: #5c544b;  /* supporting text */
+  --g-ink-muted:     #8a8077;  /* labels, meta, placeholder */
+  --g-ink-inverse:   #f7f4ef;  /* text on dark fills */
+
+  /* ── Lines ────────────────────────────────────────────────── */
+  --g-line:          #e2dad0;  /* default border */
+  --g-line-strong:   #c9bfb0;  /* emphasised border */
+  --g-line-subtle:   #ece6dd;  /* dividers inside surfaces */
+
+  /* ── Brand ────────────────────────────────────────────────── */
+  --g-brand:         #2d5f4c;  /* deep moss — the grounded colour */
+  --g-brand-hover:   #24503f;
+  --g-brand-active:  #1c4032;
+  --g-brand-wash:    #e7efea;  /* tinted background */
+  --g-brand-line:    #b9cfc4;
+
+  /* ── Signals ──────────────────────────────────────────────── */
+  --g-grounded:      #2d5f4c;  /* context is present and fresh */
+  --g-grounded-wash: #e7efea;
+  --g-drift:         #9a6412;  /* context is stale or contradicted */
+  --g-drift-wash:    #f7eed9;
+  --g-drift-line:    #e0c894;
+  --g-danger:        #a33a2a;  /* destructive */
+  --g-danger-wash:   #f8e8e5;
+  --g-danger-line:   #e3bdb6;
+  --g-info:          #2c5578;
+  --g-info-wash:     #e6edf3;
+
+  /* ── Accent ───────────────────────────────────────────────── */
+  --g-clay:          #b4602f;  /* sparing warm accent */
+  --g-clay-wash:     #f7e9e0;
+
+  /* ── Type ─────────────────────────────────────────────────── */
+  --g-font-sans: var(--font-archivo), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --g-font-mono: var(--font-mono), ui-monospace, "SF Mono", Menlo, monospace;
+
+  --g-text-xs:   0.75rem;   /* 12 — meta, badges */
+  --g-text-sm:   0.8125rem; /* 13 — labels, dense UI */
+  --g-text-base: 0.9375rem; /* 15 — body */
+  --g-text-lg:   1.0625rem; /* 17 — lead */
+  --g-text-xl:   1.375rem;  /* 22 — section heading */
+  --g-text-2xl:  1.75rem;   /* 28 — page title */
+  --g-text-3xl:  2.375rem;  /* 38 — display */
+  --g-text-4xl:  3.25rem;   /* 52 — hero */
+
+  --g-leading-tight: 1.18;
+  --g-leading-snug:  1.35;
+  --g-leading-body:  1.6;
+
+  --g-tracking-tight: -0.018em;
+  --g-tracking-snug:  -0.008em;
+  --g-tracking-wide:   0.04em;
+
+  --g-weight-regular:  400;
+  --g-weight-medium:   500;
+  --g-weight-semibold: 600;
+
+  /* ── Space (4px base) ─────────────────────────────────────── */
+  --g-space-1:  0.25rem;
+  --g-space-2:  0.5rem;
+  --g-space-3:  0.75rem;
+  --g-space-4:  1rem;
+  --g-space-5:  1.25rem;
+  --g-space-6:  1.5rem;
+  --g-space-8:  2rem;
+  --g-space-10: 2.5rem;
+  --g-space-12: 3rem;
+  --g-space-16: 4rem;
+  --g-space-24: 6rem;
+
+  /* ── Radius ───────────────────────────────────────────────── */
+  --g-radius-sm:   4px;
+  --g-radius:      7px;
+  --g-radius-md:   10px;
+  --g-radius-lg:   14px;
+  --g-radius-full: 999px;
+
+  /* ── Elevation — low and warm, never grey-blue ────────────── */
+  --g-shadow-sm: 0 1px 2px rgba(26, 23, 20, 0.05);
+  --g-shadow:    0 1px 3px rgba(26, 23, 20, 0.07), 0 4px 12px rgba(26, 23, 20, 0.04);
+  --g-shadow-lg: 0 8px 28px rgba(26, 23, 20, 0.11), 0 2px 6px rgba(26, 23, 20, 0.05);
+
+  /* ── Controls ─────────────────────────────────────────────── */
+  --g-control-sm: 28px;
+  --g-control:    34px;
+  --g-control-lg: 42px;
+
+  /* ── Focus — ink, never brand-on-brand ────────────────────── */
+  --g-focus-ring: 0 0 0 2px var(--g-canvas), 0 0 0 4px var(--g-ink);
+
+  /* ── Motion ───────────────────────────────────────────────── */
+  --g-ease:      cubic-bezier(0.2, 0, 0, 1);
+  --g-duration:  160ms;
+  --g-duration-slow: 260ms;
+}
+
+/* ── Dark ───────────────────────────────────────────────────── */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --g-canvas:        #14120e;
+    --g-raised:        #1d1a15;
+    --g-sunken:        #0e0c09;
+    --g-overlay:       #211d18;
+    --g-scrim:         rgba(0, 0, 0, 0.62);
+
+    --g-ink:           #f2ede4;
+    --g-ink-secondary: #b3a99b;
+    --g-ink-muted:     #857b6e;
+    --g-ink-inverse:   #14120e;
+
+    --g-line:          #322c24;
+    --g-line-strong:   #4a4237;
+    --g-line-subtle:   #262019;
+
+    --g-brand:         #6fae90;
+    --g-brand-hover:   #82bda0;
+    --g-brand-active:  #94c9ae;
+    --g-brand-wash:    #1b2a23;
+    --g-brand-line:    #2f4a3d;
+
+    --g-grounded:      #6fae90;
+    --g-grounded-wash: #1b2a23;
+    --g-drift:         #d8a44e;
+    --g-drift-wash:    #2b2315;
+    --g-drift-line:    #4b3c1e;
+    --g-danger:        #e08573;
+    --g-danger-wash:   #2d1a16;
+    --g-danger-line:   #4d2c25;
+    --g-info:          #7aa6cc;
+    --g-info-wash:     #17222b;
+
+    --g-clay:          #d98a5c;
+    --g-clay-wash:     #2c1d14;
+
+    --g-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+    --g-shadow:    0 1px 3px rgba(0, 0, 0, 0.5), 0 4px 12px rgba(0, 0, 0, 0.3);
+    --g-shadow-lg: 0 8px 28px rgba(0, 0, 0, 0.6), 0 2px 6px rgba(0, 0, 0, 0.4);
+
+    --g-focus-ring: 0 0 0 2px var(--g-canvas), 0 0 0 4px var(--g-ink);
+  }
+}
+
+:root[data-theme="dark"] {
+  --g-canvas:        #14120e;
+  --g-raised:        #1d1a15;
+  --g-sunken:        #0e0c09;
+  --g-overlay:       #211d18;
+  --g-scrim:         rgba(0, 0, 0, 0.62);
+
+  --g-ink:           #f2ede4;
+  --g-ink-secondary: #b3a99b;
+  --g-ink-muted:     #857b6e;
+  --g-ink-inverse:   #14120e;
+
+  --g-line:          #322c24;
+  --g-line-strong:   #4a4237;
+  --g-line-subtle:   #262019;
+
+  --g-brand:         #6fae90;
+  --g-brand-hover:   #82bda0;
+  --g-brand-active:  #94c9ae;
+  --g-brand-wash:    #1b2a23;
+  --g-brand-line:    #2f4a3d;
+
+  --g-grounded:      #6fae90;
+  --g-grounded-wash: #1b2a23;
+  --g-drift:         #d8a44e;
+  --g-drift-wash:    #2b2315;
+  --g-drift-line:    #4b3c1e;
+  --g-danger:        #e08573;
+  --g-danger-wash:   #2d1a16;
+  --g-danger-line:   #4d2c25;
+  --g-info:          #7aa6cc;
+  --g-info-wash:     #17222b;
+
+  --g-clay:          #d98a5c;
+  --g-clay-wash:     #2c1d14;
+
+  --g-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --g-shadow:    0 1px 3px rgba(0, 0, 0, 0.5), 0 4px 12px rgba(0, 0, 0, 0.3);
+  --g-shadow-lg: 0 8px 28px rgba(0, 0, 0, 0.6), 0 2px 6px rgba(0, 0, 0, 0.4);
+}

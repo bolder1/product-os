@@ -1,0 +1,22 @@
+{
+  "name": "@ground/core",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "dependencies": {
+    "drizzle-orm": "^0.39.0",
+    "postgres": "^3.4.0",
+    "server-only": "^0.0.1"
+  },
+  "devDependencies": {
+    "@product-os/config": "workspace:*",
+    "@types/node": "^22.0.0",
+    "typescript": "^5.7.0"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./server": "./src/server.ts"
+  }
+}

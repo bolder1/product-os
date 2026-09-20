@@ -1,28 +1,20 @@
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
+import { Archivo, JetBrains_Mono } from 'next/font/google'
 import './globals.css'
-import { Providers } from './providers'
 
-const inter = Inter({
-  subsets: ['latin'],
-  variable: '--font-inter',
-})
+const sans = Archivo({ subsets: ['latin'], variable: '--font-archivo', display: 'swap' })
+const mono = JetBrains_Mono({ subsets: ['latin'], variable: '--font-mono', display: 'swap' })
 
 export const metadata: Metadata = {
-  title: 'Product OS',
-  description: 'Unified Product Intelligence and Execution System',
+  title: 'Ground — product memory for AI agents',
+  description:
+    'Your coding agents know the file in front of them and nothing about your product. Ground gives them the rest.',
 }
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={inter.variable}>
-      <body className="bg-[var(--bg-base)] text-[var(--text-primary)] antialiased">
-        <Providers>{children}</Providers>
-      </body>
+    <html lang="en" className={`${sans.variable} ${mono.variable}`}>
+      <body>{children}</body>
     </html>
   )
 }
