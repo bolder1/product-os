@@ -17,8 +17,14 @@ import { ConnectPanel } from './_components/connect-panel'
 
 export const dynamic = 'force-dynamic'
 
+// The agent keeps this URL in its own config, so it has to outlive the
+// deployment that printed it. VERCEL_URL is per-deployment and would freeze the
+// command to one build; VERCEL_PROJECT_PRODUCTION_URL is the stable domain.
 function baseUrl() {
   if (process.env.NEXT_PUBLIC_APP_URL) return process.env.NEXT_PUBLIC_APP_URL
+  if (process.env.VERCEL_PROJECT_PRODUCTION_URL) {
+    return `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+  }
   if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`
   return 'http://localhost:3005'
 }
