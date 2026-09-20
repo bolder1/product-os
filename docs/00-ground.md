@@ -2,6 +2,11 @@
 
 > Structured product memory for AI coding agents.
 
+> **Paused — 20 Sep 2026.** Ground is deployed and working, and development has
+> stopped. The active workstream is [Brand Kit](./01-brandkit.md). Ground is kept
+> rather than retired because it is already the Plan section that a later product
+> would need, and because its Figma, token, auth and CI work is reusable.
+
 **Status: pre-MVP.** This document is the plan of record. It describes what Ground
 is, what exists today, and what gets built next — in that order, honestly. Where
 something is not built, it says so.
