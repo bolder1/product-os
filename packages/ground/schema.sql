@@ -96,6 +96,19 @@ create table if not exists agent_queries (
 create index if not exists agent_queries_workspace_idx
   on agent_queries (workspace_id, created_at desc);
 
+-- Which entries a query actually returned. agent_queries records the question;
+-- this records the answer, so the app can say when an entry was last relied on
+-- and which entries nothing has ever asked for.
+create table if not exists agent_reads (
+  id         uuid primary key default gen_random_uuid(),
+  query_id   uuid not null references agent_queries(id) on delete cascade,
+  entry_id   uuid not null references entries(id) on delete cascade,
+  created_at timestamptz not null default now()
+);
+
+create index if not exists agent_reads_entry_idx on agent_reads (entry_id, created_at desc);
+create index if not exists agent_reads_query_idx on agent_reads (query_id);
+
 -- ── Row-level security ────────────────────────────────────────────
 -- Ground connects as the table owner over a direct Postgres connection, which
 -- bypasses RLS. Enabling it with no policies therefore changes nothing for the
@@ -106,3 +119,4 @@ alter table sessions      enable row level security;
 alter table workspaces    enable row level security;
 alter table entries       enable row level security;
 alter table agent_queries enable row level security;
+alter table agent_reads   enable row level security;
