@@ -2,7 +2,7 @@
   "name": "product-os",
   "private": true,
   "version": "0.1.0",
-  "description": "Product OS — Unified Product Intelligence and Execution System",
+  "description": "Ground — structured product memory for AI coding agents",
   "engines": {
     "node": ">=22.0.0",
     "pnpm": ">=10.0.0"
@@ -10,19 +10,12 @@
   "packageManager": "pnpm@10.33.0",
   "scripts": {
     "dev": "pnpm --filter @product-os/web dev",
-    "dev:all": "turbo dev",
     "dev:web": "pnpm --filter @product-os/web dev",
     "build": "turbo build",
-    "lint": "biome check .",
-    "lint:fix": "biome check --write .",
-    "format": "biome format --write .",
     "clean": "turbo clean && rm -rf node_modules",
-    "db:migrate": "turbo db:migrate --filter=@product-os/db",
-    "db:push": "turbo db:push --filter=@product-os/db",
-    "db:studio": "turbo db:studio --filter=@product-os/db",
-    "test": "turbo test",
-    "test:e2e": "turbo test:e2e",
-    "typecheck": "turbo typecheck"
+    "typecheck": "turbo typecheck",
+    "db:setup": "psql \"$DATABASE_URL\" -f packages/ground/schema.sql",
+    "db:seed": "node packages/ground/seed.mjs"
   },
   "devDependencies": {
     "turbo": "^2.8.20"

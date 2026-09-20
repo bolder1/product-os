@@ -104,12 +104,12 @@ async function callTool(workspace: Workspace, name: string, args: Json) {
       // Stemmed full-text match OR substring match. Without stemming, an agent
       // asking about "retry" would be told nothing is recorded about "retries"
       // — a confident false negative, which is worse than having no tool.
+      // search_vector is a stored generated column with a GIN index, so this
+      // is an index scan rather than a per-row computation.
       const needle = `%${query}%`
-      const haystack = sql`to_tsvector('english',
-        ${entries.title} || ' ' || ${entries.body} || ' ' || ${entries.fields}::text)`
       conditions.push(
         or(
-          sql`${haystack} @@ plainto_tsquery('english', ${query})`,
+          sql`${entries.searchVector} @@ plainto_tsquery('english', ${query})`,
           ilike(entries.title, needle),
           ilike(entries.body, needle),
           sql`${entries.fields}::text ilike ${needle}`,
