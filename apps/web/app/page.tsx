@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { Badge, Button, Card, CardBody, Wordmark } from '@product-os/ui'
+import { Badge, ButtonLink, Card, CardBody, Wordmark } from '@product-os/ui'
 
 const SIGNALS = [
   {
@@ -22,9 +22,9 @@ export default function HomePage() {
           <Wordmark />
           <nav className="g-site-nav">
             <Link href="/login">Sign in</Link>
-            <Button variant="primary" size="sm">
+            <ButtonLink href="/signup" variant="primary" size="sm">
               Get started
-            </Button>
+            </ButtonLink>
           </nav>
         </div>
       </header>
@@ -44,12 +44,16 @@ export default function HomePage() {
             lives — structured, queryable, and one MCP call away.
           </p>
           <div className="g-hero-actions">
-            <Button variant="primary" size="lg">
+            <ButtonLink href="/signup" variant="primary" size="lg">
               Start grounding
-            </Button>
-            <Button variant="secondary" size="lg">
+            </ButtonLink>
+            <ButtonLink
+              href="https://github.com/bolder1/product-os/blob/main/docs/00-ground.md"
+              variant="secondary"
+              size="lg"
+            >
               Read the thinking
-            </Button>
+            </ButtonLink>
           </div>
         </section>
 

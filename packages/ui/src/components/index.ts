@@ -1,4 +1,4 @@
-export { Button, type ButtonProps } from './button'
+export { Button, ButtonLink, type ButtonProps, type ButtonLinkProps } from './button'
 export { Input, Textarea, type InputProps, type TextareaProps } from './input'
 export { Field, type FieldProps } from './field'
 export { Card, CardHeader, CardBody, CardFooter, type CardProps } from './card'

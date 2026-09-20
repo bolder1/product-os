@@ -1,6 +1,20 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "globalDependencies": ["**/.env.*local", "**/.env"],
+  "globalPassThroughEnv": [
+    "DATABASE_URL",
+    "GROUND_INVITE_CODE",
+    "NEXT_PUBLIC_APP_URL",
+    "VERCEL_URL",
+    "NODE_ENV",
+    "HTTP_PROXY",
+    "HTTPS_PROXY",
+    "NO_PROXY",
+    "http_proxy",
+    "https_proxy",
+    "no_proxy",
+    "NODE_EXTRA_CA_CERTS"
+  ],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
@@ -10,30 +24,11 @@
       "cache": false,
       "persistent": true
     },
-    "lint": {
-      "dependsOn": ["^build"]
-    },
     "typecheck": {
-      "dependsOn": ["^build"]
-    },
-    "test": {
-      "dependsOn": ["^build"]
-    },
-    "test:e2e": {
       "dependsOn": ["^build"]
     },
     "clean": {
       "cache": false
-    },
-    "db:migrate": {
-      "cache": false
-    },
-    "db:push": {
-      "cache": false
-    },
-    "db:studio": {
-      "cache": false,
-      "persistent": true
     }
   }
 }

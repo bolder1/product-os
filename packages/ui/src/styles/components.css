@@ -369,3 +369,6 @@
   white-space: nowrap;
   border: 0;
 }
+
+/* A link styled as a button — no underline, and it never shrinks its label. */
+.g-button-link { text-decoration: none; }

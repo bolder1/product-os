@@ -13,6 +13,8 @@ import {
   newToken,
   newMcpToken,
   slugify,
+  signupMode,
+  inviteCodeMatches,
 } from '@ground/core/server'
 import { setSessionCookie, clearSessionCookie, SESSION_COOKIE } from '../_lib/session'
 import { cookies } from 'next/headers'
@@ -39,6 +41,18 @@ async function startSession(userId: string) {
 }
 
 export async function signUp(_prev: FormState, formData: FormData): Promise<FormState> {
+  // Checked server-side on every attempt. The form hides the field when no
+  // code is configured, but the form is not the gate — this is.
+  const mode = signupMode()
+  if (mode.kind === 'closed') {
+    return { error: 'Signups are closed right now.' }
+  }
+  if (mode.kind === 'invite-required') {
+    const submitted = String(formData.get('invite') ?? '')
+    if (!submitted.trim()) return { error: 'An invite code is required.' }
+    if (!inviteCodeMatches(submitted)) return { error: 'That invite code is not valid.' }
+  }
+
   const parsed = credentials.safeParse({
     email: String(formData.get('email') ?? '').trim().toLowerCase(),
     password: String(formData.get('password') ?? ''),

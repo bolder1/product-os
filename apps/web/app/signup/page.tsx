@@ -1,48 +1,39 @@
-'use client'
-
-import { useActionState } from 'react'
 import Link from 'next/link'
-import { Button, Field, Input, Wordmark } from '@product-os/ui'
-import { signUp, type FormState } from '../actions/auth'
+import { Wordmark } from '@product-os/ui'
+import { signupMode } from '@ground/core/server'
+import { SignupForm } from './signup-form'
+
+// The gate depends on runtime config, so this page cannot be prerendered.
+export const dynamic = 'force-dynamic'
 
 export default function SignupPage() {
-  const [state, action, pending] = useActionState<FormState, FormData>(signUp, {})
+  const mode = signupMode()
 
   return (
     <main className="g-auth">
       <div className="g-auth-card">
         <Wordmark />
-        <h1 className="g-auth-title">Start grounding</h1>
-        <p className="g-auth-lede">
-          One account, one product. You can add context the moment you are in.
-        </p>
 
-        <form action={action} className="g-auth-form">
-          <Field label="What are you building?" hint="The product your agents keep getting wrong.">
-            {(props) => <Input {...props} name="product" placeholder="Acme Billing" required />}
-          </Field>
-          <Field label="Email">
-            {(props) => <Input {...props} name="email" type="email" autoComplete="email" required />}
-          </Field>
-          <Field label="Password" hint="At least 8 characters.">
-            {(props) => (
-              <Input {...props} name="password" type="password" autoComplete="new-password" required />
-            )}
-          </Field>
-
-          {state.error ? (
-            <p role="alert" className="g-auth-error">
-              {state.error}
+        {mode.kind === 'closed' ? (
+          <>
+            <h1 className="g-auth-title">Signups are closed</h1>
+            <p className="g-auth-lede">
+              Ground is not accepting new accounts at the moment. If you were expecting an invite,
+              ask whoever sent you here.
             </p>
-          ) : null}
-
-          <Button type="submit" variant="primary" size="lg" loading={pending}>
-            {pending ? 'Creating…' : 'Create account'}
-          </Button>
-        </form>
+          </>
+        ) : (
+          <>
+            <h1 className="g-auth-title">Start grounding</h1>
+            <p className="g-auth-lede">
+              One account, one product. You can add context the moment you are in.
+            </p>
+            <SignupForm inviteRequired={mode.kind === 'invite-required'} />
+          </>
+        )}
 
         <p className="g-auth-alt">
-          Already have one? <Link href="/login">Sign in</Link>
+          Already have an account? <Link href="/login">Sign in</Link>
         </p>
       </div>
     </main>

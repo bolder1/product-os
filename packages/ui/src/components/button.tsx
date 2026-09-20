@@ -36,3 +36,31 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
     </button>
   )
 })
+
+export interface ButtonLinkProps extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
+  variant?: Variant
+  size?: Size
+}
+
+/**
+ * A link that looks like a button.
+ *
+ * Navigation is an anchor, not a button — it should be middle-clickable,
+ * openable in a new tab, and announced as a link.
+ */
+export const ButtonLink = forwardRef<HTMLAnchorElement, ButtonLinkProps>(function ButtonLink(
+  { variant = 'secondary', size = 'md', className, children, ...props },
+  ref,
+) {
+  return (
+    <a
+      ref={ref}
+      data-variant={variant}
+      data-size={size}
+      className={cn(base, 'g-button-link', className)}
+      {...props}
+    >
+      {children}
+    </a>
+  )
+})
