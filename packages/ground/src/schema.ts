@@ -109,7 +109,37 @@ export const agentQueries = pgTable(
   (t) => [index('agent_queries_workspace_idx').on(t.workspaceId, t.createdAt)],
 )
 
+/**
+ * Which entries a query actually returned.
+ *
+ * agent_queries records that a question was asked; this records what was handed
+ * over in reply. Kept apart from the entry row rather than denormalised onto it,
+ * because the useful questions are about the history — when was this last
+ * relied on, and what has never been relied on at all — and a single
+ * last_read_at column answers neither.
+ */
+export const agentReads = pgTable(
+  'agent_reads',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    queryId: uuid('query_id')
+      .notNull()
+      .references(() => agentQueries.id, { onDelete: 'cascade' }),
+    entryId: uuid('entry_id')
+      .notNull()
+      .references(() => entries.id, { onDelete: 'cascade' }),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    // Drives the per-entry "last read" lookup on the context page: one index
+    // scan per entry rather than a scan of every read ever recorded.
+    index('agent_reads_entry_idx').on(t.entryId, t.createdAt),
+    index('agent_reads_query_idx').on(t.queryId),
+  ],
+)
+
 export type User = typeof users.$inferSelect
 export type Workspace = typeof workspaces.$inferSelect
 export type Entry = typeof entries.$inferSelect
 export type AgentQuery = typeof agentQueries.$inferSelect
+export type AgentRead = typeof agentReads.$inferSelect

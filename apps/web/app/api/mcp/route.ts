@@ -4,6 +4,7 @@ import {
   entries,
   workspaces,
   agentQueries,
+  agentReads,
   KINDS,
   stateOf,
   ageLabel,
@@ -64,6 +65,31 @@ function renderEntry(entry: Entry, staleAfterDays: number) {
         : '.'),
   ]
   return parts.filter(Boolean).join('\n')
+}
+
+/**
+ * Log the question and what was handed back for it.
+ *
+ * Both rows are written after the reply has been assembled, so a logging
+ * failure can never cost the agent its answer — the read is a record of what
+ * happened, not part of making it happen.
+ */
+async function logRead(
+  workspace: Workspace,
+  tool: string,
+  query: string | null,
+  rows: Entry[],
+) {
+  const [logged] = await db
+    .insert(agentQueries)
+    .values({ workspaceId: workspace.id, tool, query, resultCount: rows.length })
+    .returning({ id: agentQueries.id })
+
+  if (!logged || rows.length === 0) return
+
+  await db
+    .insert(agentReads)
+    .values(rows.map((r) => ({ queryId: logged.id, entryId: r.id })))
 }
 
 const TOOLS = [
@@ -127,12 +153,7 @@ async function callTool(workspace: Workspace, name: string, args: Json) {
       .orderBy(desc(entries.lastConfirmedAt))
       .limit(25)
 
-    await db.insert(agentQueries).values({
-      workspaceId: workspace.id,
-      tool: name,
-      query: query || null,
-      resultCount: rows.length,
-    })
+    await logRead(workspace, name, query || null, rows)
 
     if (rows.length === 0) {
       return `No recorded context matches “${query || 'that'}” in ${workspace.name}. Nothing has been written down about this yet — do not assume; ask.`
@@ -152,12 +173,7 @@ async function callTool(workspace: Workspace, name: string, args: Json) {
       .where(eq(entries.workspaceId, workspace.id))
       .orderBy(entries.kind, desc(entries.lastConfirmedAt))
 
-    await db.insert(agentQueries).values({
-      workspaceId: workspace.id,
-      tool: name,
-      query: null,
-      resultCount: rows.length,
-    })
+    await logRead(workspace, name, null, rows)
 
     if (rows.length === 0) {
       return `${workspace.name} has no recorded context yet.`

@@ -1,11 +1,13 @@
-import { desc, eq, sql } from 'drizzle-orm'
+import { and, desc, eq, isNotNull, sql } from 'drizzle-orm'
 import {
   db,
   entries,
   agentQueries,
+  agentReads,
   KINDS,
   stateOf,
   ageLabel,
+  timeAgo,
   type Entry,
 } from '@ground/core/server'
 import { Badge, Button, Empty, StrataRule, Wordmark, FieldRow } from '@product-os/ui'
@@ -29,7 +31,22 @@ function baseUrl() {
   return 'http://localhost:3005'
 }
 
-function EntryCard({ entry, staleAfterDays }: { entry: Entry; staleAfterDays: number }) {
+interface ReadStat {
+  count: number
+  lastAt: Date
+}
+
+function EntryCard({
+  entry,
+  staleAfterDays,
+  read,
+  anyAgentActivity,
+}: {
+  entry: Entry
+  staleAfterDays: number
+  read?: ReadStat
+  anyAgentActivity: boolean
+}) {
   const spec = KINDS[entry.kind]
   const state = stateOf(entry, staleAfterDays)
   const fields = (entry.fields ?? {}) as Record<string, string>
@@ -58,6 +75,17 @@ function EntryCard({ entry, staleAfterDays }: { entry: Entry; staleAfterDays: nu
           <p className="g-entrycard-drift">
             Not confirmed in over {staleAfterDays} days. Your agents are told to treat it as possibly
             out of date.
+          </p>
+        ) : read ? (
+          <p className="g-entrycard-read">
+            Read by an agent {timeAgo(read.lastAt)}
+            {read.count > 1 ? ` · ${read.count} times` : ''}
+          </p>
+        ) : anyAgentActivity ? (
+          // Only meaningful once something has asked at least once. Before that,
+          // every entry is unread and saying so would be noise.
+          <p className="g-entrycard-read" data-unread="true">
+            No agent has read this yet
           </p>
         ) : (
           <span />
@@ -95,7 +123,48 @@ export default async function ContextPage() {
     .from(agentQueries)
     .where(eq(agentQueries.workspaceId, workspace.id))
 
-  const agentReads = queryStat?.count ?? 0
+  // How often each entry has actually been handed to an agent, and when last.
+  const readRows = await db
+    .select({
+      entryId: agentReads.entryId,
+      count: sql<number>`count(*)::int`,
+      lastAt: sql<Date>`max(${agentReads.createdAt})`,
+    })
+    .from(agentReads)
+    .innerJoin(entries, eq(entries.id, agentReads.entryId))
+    .where(eq(entries.workspaceId, workspace.id))
+    .groupBy(agentReads.entryId)
+
+  const reads = new Map<string, ReadStat>(
+    readRows.map((r) => [r.entryId, { count: r.count, lastAt: new Date(r.lastAt) }]),
+  )
+
+  // Questions Ground could not answer. This is the most directly actionable
+  // thing in the product: a to-do list written by the agents themselves.
+  const unanswered = await db
+    .select({ query: agentQueries.query, at: agentQueries.createdAt })
+    .from(agentQueries)
+    .where(
+      and(
+        eq(agentQueries.workspaceId, workspace.id),
+        eq(agentQueries.resultCount, 0),
+        isNotNull(agentQueries.query),
+      ),
+    )
+    .orderBy(desc(agentQueries.createdAt))
+    .limit(30)
+
+  // The same question asked five times is one gap, not five.
+  const gaps: { query: string; at: Date; times: number }[] = []
+  for (const row of unanswered) {
+    const q = (row.query ?? '').trim()
+    if (!q) continue
+    const seen = gaps.find((g) => g.query.toLowerCase() === q.toLowerCase())
+    if (seen) seen.times += 1
+    else gaps.push({ query: q, at: new Date(row.at), times: 1 })
+  }
+
+  const agentReadCount = queryStat?.count ?? 0
   const drifted = rows.filter((r) => stateOf(r, workspace.staleAfterDays) === 'drifted')
   const current = rows.filter((r) => stateOf(r, workspace.staleAfterDays) !== 'drifted')
 
@@ -118,7 +187,35 @@ export default async function ContextPage() {
       </header>
 
       <main className="g-container g-app-main">
-        <ConnectPanel command={command} connected={agentReads > 0} />
+        <ConnectPanel command={command} connected={agentReadCount > 0} />
+
+        {gaps.length > 0 ? (
+          <section className="g-gaps" aria-labelledby="gaps-heading">
+            <div className="g-gaps-head">
+              <h2 id="gaps-heading" className="g-gaps-title">
+                Your agents asked, Ground could not answer
+              </h2>
+              <Badge tone="drift" dot>
+                {gaps.length}
+              </Badge>
+            </div>
+            <p className="g-gaps-lede">
+              Searches that returned nothing. Each one is a question your agents needed answered and
+              had to guess at instead.
+            </p>
+            <ul className="g-gaps-list">
+              {gaps.map((gap) => (
+                <li key={gap.query} className="g-gap">
+                  <span className="g-gap-query">{gap.query}</span>
+                  <span className="g-gap-meta">
+                    {gap.times > 1 ? `asked ${gap.times}× · ` : ''}
+                    {timeAgo(gap.at)}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ) : null}
 
         <section className="g-context" aria-labelledby="context-heading">
           <div className="g-context-head">
@@ -134,9 +231,9 @@ export default async function ContextPage() {
                   {drifted.length} drifted
                 </Badge>
               ) : null}
-              {agentReads > 0 ? (
+              {agentReadCount > 0 ? (
                 <Badge tone="grounded" dot>
-                  {agentReads} agent {agentReads === 1 ? 'read' : 'reads'}
+                  {agentReadCount} agent {agentReadCount === 1 ? 'read' : 'reads'}
                 </Badge>
               ) : null}
             </div>
@@ -158,7 +255,13 @@ export default async function ContextPage() {
                   </h2>
                   <div className="g-group-body">
                     {drifted.map((entry) => (
-                      <EntryCard key={entry.id} entry={entry} staleAfterDays={workspace.staleAfterDays} />
+                      <EntryCard
+                        key={entry.id}
+                        entry={entry}
+                        staleAfterDays={workspace.staleAfterDays}
+                        read={reads.get(entry.id)}
+                        anyAgentActivity={agentReadCount > 0}
+                      />
                     ))}
                   </div>
                 </div>
@@ -171,7 +274,13 @@ export default async function ContextPage() {
                   </h2>
                   <div className="g-group-body">
                     {current.map((entry) => (
-                      <EntryCard key={entry.id} entry={entry} staleAfterDays={workspace.staleAfterDays} />
+                      <EntryCard
+                        key={entry.id}
+                        entry={entry}
+                        staleAfterDays={workspace.staleAfterDays}
+                        read={reads.get(entry.id)}
+                        anyAgentActivity={agentReadCount > 0}
+                      />
                     ))}
                   </div>
                 </div>
